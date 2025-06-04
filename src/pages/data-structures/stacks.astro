@@ -1,0 +1,1378 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Stacks - C++ Learning Hub">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/data-structures">Data Structures</a> &gt; Stacks
+  </div>
+
+  <h1>Stacks</h1>
+  
+  <div class="overview">
+    <p>
+      A stack is a linear data structure that follows the <strong>Last In, First Out (LIFO)</strong> principle. 
+      Elements are added and removed from the same end, called the "top" of the stack. Think of it like a stack 
+      of plates - you can only add or remove plates from the top.
+    </p>
+    
+    <p>
+      Stacks are fundamental to many computer science concepts including function calls, expression evaluation, 
+      undo operations, and parsing algorithms. They provide a simple yet powerful abstraction for managing data 
+      in a controlled manner.
+    </p>
+  </div>
+
+  <section class="content-section">
+    <h2>Stack Operations</h2>
+
+    <CodeExample 
+      client:load
+      title="Basic Stack Operations"
+      code={`#include <iostream>
+#include <stack>  // STL stack
+using namespace std;
+
+void demonstrateBasicOperations() {
+    cout << "=== Basic Stack Operations ===" << endl;
+    
+    stack<int> st;
+    
+    // Check if stack is empty
+    cout << "Is stack empty? " << (st.empty() ? "Yes" : "No") << endl;
+    cout << "Stack size: " << st.size() << endl;
+    
+    // Push elements (LIFO - Last In, First Out)
+    cout << "\\nPushing elements: 10, 20, 30, 40" << endl;
+    st.push(10);
+    st.push(20);
+    st.push(30);
+    st.push(40);
+    
+    cout << "Stack size after pushes: " << st.size() << endl;
+    cout << "Top element: " << st.top() << endl;
+    
+    // Pop elements (removes from top)
+    cout << "\\nPopping elements:" << endl;
+    while (!st.empty()) {
+        cout << "Top: " << st.top() << " - ";
+        st.pop();
+        cout << "Size after pop: " << st.size() << endl;
+    }
+    
+    cout << "Is stack empty now? " << (st.empty() ? "Yes" : "No") << endl;
+}
+
+void stackVisualization() {
+    cout << "\\n=== Stack Visualization ===" << endl;
+    
+    stack<string> st;
+    
+    auto printStack = [](stack<string> s) {
+        if (s.empty()) {
+            cout << "Stack is empty" << endl;
+            return;
+        }
+        
+        cout << "Stack (top to bottom):" << endl;
+        vector<string> temp;
+        while (!s.empty()) {
+            temp.push_back(s.top());
+            s.pop();
+        }
+        
+        for (const string& item : temp) {
+            cout << "  |  " << item << "  |" << endl;
+            cout << "  +-----+" << endl;
+        }
+        cout << "   bottom" << endl;
+    };
+    
+    cout << "Initial state:" << endl;
+    printStack(st);
+    
+    cout << "\\nAfter pushing 'A':" << endl;
+    st.push("A");
+    printStack(st);
+    
+    cout << "\\nAfter pushing 'B':" << endl;
+    st.push("B");
+    printStack(st);
+    
+    cout << "\\nAfter pushing 'C':" << endl;
+    st.push("C");
+    printStack(st);
+    
+    cout << "\\nAfter popping (removes 'C'):" << endl;
+    st.pop();
+    printStack(st);
+}
+
+int main() {
+    demonstrateBasicOperations();
+    stackVisualization();
+    
+    cout << "\\n=== Key Stack Properties ===" << endl;
+    cout << "1. LIFO (Last In, First Out) ordering" << endl;
+    cout << "2. Access only to the top element" << endl;
+    cout << "3. Push adds to top, Pop removes from top" << endl;
+    cout << "4. No random access to middle elements" << endl;
+    cout << "5. Size can grow and shrink dynamically" << endl;
+    
+    return 0;
+}`}
+      explanation="Stacks follow LIFO principle where the last element added is the first one removed. The STL stack provides push(), pop(), top(), empty(), and size() operations."
+      output={`=== Basic Stack Operations ===
+Is stack empty? Yes
+Stack size: 0
+
+Pushing elements: 10, 20, 30, 40
+Stack size after pushes: 4
+Top element: 40
+
+Popping elements:
+Top: 40 - Size after pop: 3
+Top: 30 - Size after pop: 2
+Top: 20 - Size after pop: 1
+Top: 10 - Size after pop: 0
+Is stack empty now? Yes
+
+=== Stack Visualization ===
+Initial state:
+Stack is empty
+
+After pushing 'A':
+Stack (top to bottom):
+  |  A  |
+  +-----+
+   bottom
+
+After pushing 'B':
+Stack (top to bottom):
+  |  B  |
+  +-----+
+  |  A  |
+  +-----+
+   bottom
+
+After pushing 'C':
+Stack (top to bottom):
+  |  C  |
+  +-----+
+  |  B  |
+  +-----+
+  |  A  |
+  +-----+
+   bottom
+
+After popping (removes 'C'):
+Stack (top to bottom):
+  |  B  |
+  +-----+
+  |  A  |
+  +-----+
+   bottom
+
+=== Key Stack Properties ===
+1. LIFO (Last In, First Out) ordering
+2. Access only to the top element
+3. Push adds to top, Pop removes from top
+4. No random access to middle elements
+5. Size can grow and shrink dynamically`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Stack Implementations</h2>
+
+    <CodeExample 
+      client:load
+      title="Array-Based Stack Implementation"
+      code={`#include <iostream>
+using namespace std;
+
+template<typename T>
+class ArrayStack {
+private:
+    T* arr;
+    int capacity;
+    int topIndex;
+
+public:
+    // Constructor
+    explicit ArrayStack(int size = 100) : capacity(size), topIndex(-1) {
+        arr = new T[capacity];
+    }
+    
+    // Destructor
+    ~ArrayStack() {
+        delete[] arr;
+    }
+    
+    // Copy constructor
+    ArrayStack(const ArrayStack& other) : capacity(other.capacity), topIndex(other.topIndex) {
+        arr = new T[capacity];
+        for (int i = 0; i <= topIndex; i++) {
+            arr[i] = other.arr[i];
+        }
+    }
+    
+    // Assignment operator
+    ArrayStack& operator=(const ArrayStack& other) {
+        if (this != &other) {
+            delete[] arr;
+            capacity = other.capacity;
+            topIndex = other.topIndex;
+            arr = new T[capacity];
+            for (int i = 0; i <= topIndex; i++) {
+                arr[i] = other.arr[i];
+            }
+        }
+        return *this;
+    }
+    
+    // Push element onto stack
+    bool push(const T& item) {
+        if (isFull()) {
+            cout << "Stack overflow! Cannot push " << item << endl;
+            return false;
+        }
+        arr[++topIndex] = item;
+        return true;
+    }
+    
+    // Pop element from stack
+    bool pop() {
+        if (isEmpty()) {
+            cout << "Stack underflow! Cannot pop from empty stack." << endl;
+            return false;
+        }
+        topIndex--;
+        return true;
+    }
+    
+    // Get top element
+    T& top() {
+        if (isEmpty()) {
+            throw runtime_error("Stack is empty");
+        }
+        return arr[topIndex];
+    }
+    
+    const T& top() const {
+        if (isEmpty()) {
+            throw runtime_error("Stack is empty");
+        }
+        return arr[topIndex];
+    }
+    
+    // Check if stack is empty
+    bool isEmpty() const {
+        return topIndex == -1;
+    }
+    
+    // Check if stack is full
+    bool isFull() const {
+        return topIndex == capacity - 1;
+    }
+    
+    // Get current size
+    int size() const {
+        return topIndex + 1;
+    }
+    
+    // Get capacity
+    int getCapacity() const {
+        return capacity;
+    }
+    
+    // Print stack contents
+    void print() const {
+        cout << "Stack [size=" << size() << ", capacity=" << capacity << "]: ";
+        if (isEmpty()) {
+            cout << "Empty";
+        } else {
+            cout << "bottom -> ";
+            for (int i = 0; i <= topIndex; i++) {
+                cout << arr[i];
+                if (i < topIndex) cout << ", ";
+            }
+            cout << " <- top";
+        }
+        cout << endl;
+    }
+};
+
+int main() {
+    cout << "=== Array-Based Stack Implementation ===" << endl;
+    
+    ArrayStack<int> stack(5);  // Create stack with capacity 5
+    
+    // Test basic operations
+    cout << "\\nTesting basic operations:" << endl;
+    stack.print();
+    
+    cout << "\\nPushing elements: 10, 20, 30" << endl;
+    stack.push(10);
+    stack.push(20);
+    stack.push(30);
+    stack.print();
+    
+    cout << "\\nTop element: " << stack.top() << endl;
+    
+    cout << "\\nPopping one element" << endl;
+    stack.pop();
+    stack.print();
+    
+    // Test capacity limits
+    cout << "\\nTesting capacity limits:" << endl;
+    stack.push(30);
+    stack.push(40);
+    stack.push(50);
+    stack.print();
+    
+    cout << "\\nTrying to push beyond capacity:" << endl;
+    stack.push(60);  // Should fail
+    
+    // Test empty stack
+    cout << "\\nEmptying the stack:" << endl;
+    while (!stack.isEmpty()) {
+        cout << "Popped: " << stack.top() << endl;
+        stack.pop();
+    }
+    stack.print();
+    
+    cout << "\\nTrying to pop from empty stack:" << endl;
+    stack.pop();  // Should fail
+    
+    cout << "\\n=== Array Stack Characteristics ===" << endl;
+    cout << "Advantages:" << endl;
+    cout << "  - O(1) push, pop, top operations" << endl;
+    cout << "  - Memory efficient (no extra pointers)" << endl;
+    cout << "  - Good cache locality" << endl;
+    cout << "\\nDisadvantages:" << endl;
+    cout << "  - Fixed capacity" << endl;
+    cout << "  - Stack overflow possible" << endl;
+    cout << "  - Memory allocated upfront" << endl;
+    
+    return 0;
+}`}
+      explanation="Array-based stack implementation uses a fixed-size array and tracks the top index. It provides O(1) operations but has a fixed capacity that can lead to stack overflow."
+      output={`=== Array-Based Stack Implementation ===
+
+Testing basic operations:
+Stack [size=0, capacity=5]: Empty
+
+Pushing elements: 10, 20, 30
+Stack [size=3, capacity=5]: bottom -> 10, 20, 30 <- top
+
+Top element: 30
+
+Popping one element
+Stack [size=2, capacity=5]: bottom -> 10, 20 <- top
+
+Testing capacity limits:
+Stack [size=5, capacity=5]: bottom -> 10, 20, 30, 40, 50 <- top
+
+Trying to push beyond capacity:
+Stack overflow! Cannot push 60
+
+Emptying the stack:
+Popped: 50
+Popped: 40
+Popped: 30
+Popped: 20
+Popped: 10
+Stack [size=0, capacity=5]: Empty
+
+Trying to pop from empty stack:
+Stack underflow! Cannot pop from empty stack.
+
+=== Array Stack Characteristics ===
+Advantages:
+  - O(1) push, pop, top operations
+  - Memory efficient (no extra pointers)
+  - Good cache locality
+
+Disadvantages:
+  - Fixed capacity
+  - Stack overflow possible
+  - Memory allocated upfront`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Linked List-Based Stack</h2>
+
+    <CodeExample 
+      client:load
+      title="Dynamic Stack Using Linked List"
+      code={`#include <iostream>
+using namespace std;
+
+template<typename T>
+class LinkedStack {
+private:
+    struct Node {
+        T data;
+        Node* next;
+        Node(const T& value) : data(value), next(nullptr) {}
+    };
+    
+    Node* topNode;
+    int count;
+
+public:
+    // Constructor
+    LinkedStack() : topNode(nullptr), count(0) {}
+    
+    // Destructor
+    ~LinkedStack() {
+        clear();
+    }
+    
+    // Copy constructor
+    LinkedStack(const LinkedStack& other) : topNode(nullptr), count(0) {
+        if (!other.isEmpty()) {
+            // Create a temporary stack to reverse order
+            LinkedStack temp;
+            Node* current = other.topNode;
+            while (current) {
+                temp.push(current->data);
+                current = current->next;
+            }
+            
+            // Now copy from temp to this (reversing again to get correct order)
+            while (!temp.isEmpty()) {
+                push(temp.top());
+                temp.pop();
+            }
+        }
+    }
+    
+    // Assignment operator
+    LinkedStack& operator=(const LinkedStack& other) {
+        if (this != &other) {
+            clear();
+            LinkedStack temp(other);
+            swap(topNode, temp.topNode);
+            swap(count, temp.count);
+        }
+        return *this;
+    }
+    
+    // Push element onto stack
+    void push(const T& item) {
+        Node* newNode = new Node(item);
+        newNode->next = topNode;
+        topNode = newNode;
+        count++;
+    }
+    
+    // Pop element from stack
+    bool pop() {
+        if (isEmpty()) {
+            cout << "Stack underflow! Cannot pop from empty stack." << endl;
+            return false;
+        }
+        
+        Node* temp = topNode;
+        topNode = topNode->next;
+        delete temp;
+        count--;
+        return true;
+    }
+    
+    // Get top element
+    T& top() {
+        if (isEmpty()) {
+            throw runtime_error("Stack is empty");
+        }
+        return topNode->data;
+    }
+    
+    const T& top() const {
+        if (isEmpty()) {
+            throw runtime_error("Stack is empty");
+        }
+        return topNode->data;
+    }
+    
+    // Check if stack is empty
+    bool isEmpty() const {
+        return topNode == nullptr;
+    }
+    
+    // Get current size
+    int size() const {
+        return count;
+    }
+    
+    // Clear all elements
+    void clear() {
+        while (!isEmpty()) {
+            pop();
+        }
+    }
+    
+    // Print stack contents
+    void print() const {
+        cout << "LinkedStack [size=" << count << "]: ";
+        if (isEmpty()) {
+            cout << "Empty";
+        } else {
+            cout << "top -> ";
+            Node* current = topNode;
+            while (current) {
+                cout << current->data;
+                if (current->next) cout << " -> ";
+                current = current->next;
+            }
+            cout << " <- bottom";
+        }
+        cout << endl;
+    }
+    
+    // Get memory usage estimate
+    size_t getMemoryUsage() const {
+        return count * (sizeof(T) + sizeof(Node*)) + sizeof(*this);
+    }
+};
+
+int main() {
+    cout << "=== Linked List-Based Stack Implementation ===" << endl;
+    
+    LinkedStack<string> stack;
+    
+    // Test basic operations
+    cout << "\\nTesting basic operations:" << endl;
+    stack.print();
+    cout << "Is empty: " << (stack.isEmpty() ? "Yes" : "No") << endl;
+    
+    cout << "\\nPushing elements: Apple, Banana, Cherry" << endl;
+    stack.push("Apple");
+    stack.push("Banana");
+    stack.push("Cherry");
+    stack.print();
+    
+    cout << "\\nTop element: " << stack.top() << endl;
+    cout << "Stack size: " << stack.size() << endl;
+    
+    // Test popping
+    cout << "\\nPopping elements:" << endl;
+    while (!stack.isEmpty()) {
+        cout << "Top: " << stack.top() << " -> ";
+        stack.pop();
+        cout << "Size now: " << stack.size() << endl;
+    }
+    
+    // Test dynamic growth
+    cout << "\\nTesting dynamic growth (pushing 1000 elements):" << endl;
+    for (int i = 1; i <= 1000; i++) {
+        stack.push("Item" + to_string(i));
+    }
+    cout << "Successfully pushed 1000 elements" << endl;
+    cout << "Stack size: " << stack.size() << endl;
+    cout << "Top element: " << stack.top() << endl;
+    cout << "Estimated memory usage: " << stack.getMemoryUsage() << " bytes" << endl;
+    
+    // Test copy constructor
+    cout << "\\nTesting copy constructor:" << endl;
+    LinkedStack<string> stack2(stack);
+    cout << "Original stack size: " << stack.size() << endl;
+    cout << "Copied stack size: " << stack2.size() << endl;
+    cout << "Original top: " << stack.top() << endl;
+    cout << "Copy top: " << stack2.top() << endl;
+    
+    // Modify original to show independence
+    stack.pop();
+    cout << "\\nAfter popping from original:" << endl;
+    cout << "Original size: " << stack.size() << ", top: " << stack.top() << endl;
+    cout << "Copy size: " << stack2.size() << ", top: " << stack2.top() << endl;
+    
+    cout << "\\n=== Linked Stack Characteristics ===" << endl;
+    cout << "Advantages:" << endl;
+    cout << "  - Dynamic size (no fixed capacity)" << endl;
+    cout << "  - No stack overflow (until system memory exhausted)" << endl;
+    cout << "  - Memory allocated as needed" << endl;
+    cout << "\\nDisadvantages:" << endl;
+    cout << "  - Extra memory for pointers" << endl;
+    cout << "  - Potential memory fragmentation" << endl;
+    cout << "  - Cache performance may be worse" << endl;
+    
+    return 0;
+}`}
+      explanation="Linked list-based stack implementation provides dynamic sizing without capacity limits. Each node stores data and a pointer to the next node, with the top pointer managing the stack head."
+      output={`=== Linked List-Based Stack Implementation ===
+
+Testing basic operations:
+LinkedStack [size=0]: Empty
+Is empty: Yes
+
+Pushing elements: Apple, Banana, Cherry
+LinkedStack [size=3]: top -> Cherry -> Banana -> Apple <- bottom
+
+Top element: Cherry
+Stack size: 3
+
+Popping elements:
+Top: Cherry -> Size now: 2
+Top: Banana -> Size now: 1
+Top: Apple -> Size now: 0
+
+Testing dynamic growth (pushing 1000 elements):
+Successfully pushed 1000 elements
+Stack size: 1000
+Top element: Item1000
+Estimated memory usage: 16024 bytes
+
+Testing copy constructor:
+Original stack size: 1000
+Copied stack size: 1000
+Original top: Item1000
+Copy top: Item1000
+
+After popping from original:
+Original size: 999, top: Item999
+Copy size: 1000, top: Item1000
+
+=== Linked Stack Characteristics ===
+Advantages:
+  - Dynamic size (no fixed capacity)
+  - No stack overflow (until system memory exhausted)
+  - Memory allocated as needed
+
+Disadvantages:
+  - Extra memory for pointers
+  - Potential memory fragmentation
+  - Cache performance may be worse`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Stack Applications</h2>
+
+    <CodeExample 
+      client:load
+      title="Expression Evaluation and Balanced Parentheses"
+      code={`#include <iostream>
+#include <stack>
+#include <string>
+#include <cctype>
+using namespace std;
+
+class ExpressionEvaluator {
+public:
+    // Check if parentheses are balanced
+    static bool isBalanced(const string& expr) {
+        stack<char> st;
+        
+        for (char ch : expr) {
+            // Push opening brackets
+            if (ch == '(' || ch == '[' || ch == '{') {
+                st.push(ch);
+            }
+            // Check closing brackets
+            else if (ch == ')' || ch == ']' || ch == '}') {
+                if (st.empty()) return false;
+                
+                char top = st.top();
+                st.pop();
+                
+                if ((ch == ')' && top != '(') ||
+                    (ch == ']' && top != '[') ||
+                    (ch == '}' && top != '{')) {
+                    return false;
+                }
+            }
+        }
+        
+        return st.empty();
+    }
+    
+    // Get precedence of operators
+    static int precedence(char op) {
+        switch (op) {
+            case '+': case '-': return 1;
+            case '*': case '/': return 2;
+            case '^': return 3;
+            default: return 0;
+        }
+    }
+    
+    // Check if character is operator
+    static bool isOperator(char ch) {
+        return ch == '+' || ch == '-' || ch == '*' || ch == '/' || ch == '^';
+    }
+    
+    // Convert infix to postfix notation
+    static string infixToPostfix(const string& infix) {
+        stack<char> st;
+        string postfix = "";
+        
+        for (char ch : infix) {
+            if (isspace(ch)) continue;
+            
+            // If operand, add to output
+            if (isalnum(ch)) {
+                postfix += ch;
+            }
+            // If opening parenthesis, push to stack
+            else if (ch == '(') {
+                st.push(ch);
+            }
+            // If closing parenthesis, pop until opening parenthesis
+            else if (ch == ')') {
+                while (!st.empty() && st.top() != '(') {
+                    postfix += st.top();
+                    st.pop();
+                }
+                if (!st.empty()) st.pop(); // Remove '('
+            }
+            // If operator
+            else if (isOperator(ch)) {
+                while (!st.empty() && st.top() != '(' &&
+                       precedence(st.top()) >= precedence(ch)) {
+                    postfix += st.top();
+                    st.pop();
+                }
+                st.push(ch);
+            }
+        }
+        
+        // Pop remaining operators
+        while (!st.empty()) {
+            postfix += st.top();
+            st.pop();
+        }
+        
+        return postfix;
+    }
+    
+    // Evaluate postfix expression
+    static int evaluatePostfix(const string& postfix) {
+        stack<int> st;
+        
+        for (char ch : postfix) {
+            if (isspace(ch)) continue;
+            
+            // If operand, push to stack
+            if (isdigit(ch)) {
+                st.push(ch - '0');
+            }
+            // If operator, pop two operands and evaluate
+            else if (isOperator(ch)) {
+                if (st.size() < 2) {
+                    throw runtime_error("Invalid postfix expression");
+                }
+                
+                int b = st.top(); st.pop();
+                int a = st.top(); st.pop();
+                int result;
+                
+                switch (ch) {
+                    case '+': result = a + b; break;
+                    case '-': result = a - b; break;
+                    case '*': result = a * b; break;
+                    case '/': 
+                        if (b == 0) throw runtime_error("Division by zero");
+                        result = a / b; 
+                        break;
+                    case '^': 
+                        result = 1;
+                        for (int i = 0; i < b; i++) result *= a;
+                        break;
+                    default:
+                        throw runtime_error("Unknown operator");
+                }
+                
+                st.push(result);
+            }
+        }
+        
+        if (st.size() != 1) {
+            throw runtime_error("Invalid postfix expression");
+        }
+        
+        return st.top();
+    }
+};
+
+int main() {
+    cout << "=== Stack Applications ===" << endl;
+    
+    // Test balanced parentheses
+    cout << "\\n1. Balanced Parentheses Checker:" << endl;
+    vector<string> expressions = {
+        "()",
+        "()[]{}",
+        "([]{})",
+        "((()))",
+        "([)]",
+        "(((",
+        ")",
+        "{[()]}",
+        ""
+    };
+    
+    for (const string& expr : expressions) {
+        cout << "\"" << expr << "\" -> " 
+             << (ExpressionEvaluator::isBalanced(expr) ? "Balanced" : "Not Balanced")
+             << endl;
+    }
+    
+    // Test infix to postfix conversion
+    cout << "\\n2. Infix to Postfix Conversion:" << endl;
+    vector<string> infixExpressions = {
+        "a+b",
+        "a+b*c",
+        "(a+b)*c",
+        "a+b*c-d",
+        "(a+b)*(c-d)",
+        "a^b^c",
+        "a+b*c^d-e"
+    };
+    
+    for (const string& infix : infixExpressions) {
+        string postfix = ExpressionEvaluator::infixToPostfix(infix);
+        cout << infix << " -> " << postfix << endl;
+    }
+    
+    // Test postfix evaluation
+    cout << "\\n3. Postfix Expression Evaluation:" << endl;
+    vector<string> postfixExpressions = {
+        "23+",      // 2 + 3 = 5
+        "23*",      // 2 * 3 = 6
+        "523*+",    // 5 + (2 * 3) = 11
+        "53+2*",    // (5 + 3) * 2 = 16
+        "95-2*",    // (9 - 5) * 2 = 8
+        "234*+",    // 2 + (3 * 4) = 14
+        "15+26*-"   // (1 + 5) - (2 * 6) = -6
+    };
+    
+    for (const string& postfix : postfixExpressions) {
+        try {
+            int result = ExpressionEvaluator::evaluatePostfix(postfix);
+            cout << postfix << " = " << result << endl;
+        } catch (const exception& e) {
+            cout << postfix << " -> Error: " << e.what() << endl;
+        }
+    }
+    
+    cout << "\\n=== Stack Applications Summary ===" << endl;
+    cout << "1. Function call management (call stack)" << endl;
+    cout << "2. Expression evaluation and parsing" << endl;
+    cout << "3. Undo operations in editors" << endl;
+    cout << "4. Browser history (back button)" << endl;
+    cout << "5. Balanced parentheses checking" << endl;
+    cout << "6. Backtracking algorithms" << endl;
+    cout << "7. Memory management (stack frame)" << endl;
+    cout << "8. Recursion simulation" << endl;
+    
+    return 0;
+}`}
+      explanation="Stacks are essential for expression evaluation, converting infix to postfix notation, and checking balanced parentheses. They're also used in function calls, undo operations, and parsing algorithms."
+      output={`=== Stack Applications ===
+
+1. Balanced Parentheses Checker:
+"()" -> Balanced
+"()[]{}" -> Balanced
+"([]{})" -> Balanced
+"((()))" -> Balanced
+"([)]" -> Not Balanced
+"(((" -> Not Balanced
+")" -> Not Balanced
+"{[()]}" -> Balanced
+"" -> Balanced
+
+2. Infix to Postfix Conversion:
+a+b -> ab+
+a+b*c -> abc*+
+(a+b)*c -> ab+c*
+a+b*c-d -> abc*+d-
+(a+b)*(c-d) -> ab+cd-*
+a^b^c -> ab^c^
+a+b*c^d-e -> abcd^*+e-
+
+3. Postfix Expression Evaluation:
+23+ = 5
+23* = 6
+523*+ = 11
+53+2* = 16
+95-2* = 8
+234*+ = 14
+15+26*- = -6
+
+=== Stack Applications Summary ===
+1. Function call management (call stack)
+2. Expression evaluation and parsing
+3. Undo operations in editors
+4. Browser history (back button)
+5. Balanced parentheses checking
+6. Backtracking algorithms
+7. Memory management (stack frame)
+8. Recursion simulation`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Function Call Stack</h2>
+
+    <CodeExample 
+      client:load
+      title="Understanding the Call Stack"
+      code={`#include <iostream>
+#include <string>
+using namespace std;
+
+// Global variable to track recursion depth
+int depth = 0;
+
+// Function to print current stack frame info
+void printStackFrame(const string& function, const string& action, int value = 0) {
+    string indent(depth * 2, ' ');
+    cout << indent << function << " " << action;
+    if (value != 0) cout << " (value: " << value << ")";
+    cout << endl;
+}
+
+// Recursive factorial function to demonstrate call stack
+int factorial(int n) {
+    depth++;
+    printStackFrame("factorial(" + to_string(n) + ")", "called");
+    
+    // Base case
+    if (n <= 1) {
+        printStackFrame("factorial(" + to_string(n) + ")", "returns", 1);
+        depth--;
+        return 1;
+    }
+    
+    // Recursive case
+    int result = n * factorial(n - 1);
+    
+    printStackFrame("factorial(" + to_string(n) + ")", "returns", result);
+    depth--;
+    return result;
+}
+
+// Function that calls another function
+void functionC() {
+    depth++;
+    printStackFrame("functionC()", "called");
+    cout << "  Inside functionC - performing some work" << endl;
+    printStackFrame("functionC()", "returns");
+    depth--;
+}
+
+void functionB() {
+    depth++;
+    printStackFrame("functionB()", "called");
+    cout << "  Inside functionB - about to call functionC" << endl;
+    functionC();
+    cout << "  Back in functionB after functionC returns" << endl;
+    printStackFrame("functionB()", "returns");
+    depth--;
+}
+
+void functionA() {
+    depth++;
+    printStackFrame("functionA()", "called");
+    cout << "  Inside functionA - about to call functionB" << endl;
+    functionB();
+    cout << "  Back in functionA after functionB returns" << endl;
+    printStackFrame("functionA()", "returns");
+    depth--;
+}
+
+// Demonstrate stack overflow scenario (commented out for safety)
+/*
+int stackOverflow(int n) {
+    cout << "Stack depth: " << n << endl;
+    return stackOverflow(n + 1);  // Infinite recursion
+}
+*/
+
+// Iterative vs recursive comparison
+int fibonacciRecursive(int n) {
+    if (n <= 1) return n;
+    return fibonacciRecursive(n - 1) + fibonacciRecursive(n - 2);
+}
+
+int fibonacciIterative(int n) {
+    if (n <= 1) return n;
+    
+    int a = 0, b = 1, result = 0;
+    for (int i = 2; i <= n; i++) {
+        result = a + b;
+        a = b;
+        b = result;
+    }
+    return result;
+}
+
+int main() {
+    cout << "=== Understanding the Call Stack ===" << endl;
+    
+    // Demonstrate simple function call chain
+    cout << "\\n1. Function Call Chain:" << endl;
+    cout << "main() calls functionA() -> functionB() -> functionC()" << endl;
+    depth = 0;
+    functionA();
+    
+    // Demonstrate recursive calls
+    cout << "\\n2. Recursive Function Calls:" << endl;
+    cout << "Computing factorial(4):" << endl;
+    depth = 0;
+    int result = factorial(4);
+    cout << "Final result: " << result << endl;
+    
+    // Compare recursive vs iterative
+    cout << "\\n3. Recursive vs Iterative Comparison:" << endl;
+    cout << "Computing Fibonacci(10):" << endl;
+    
+    auto start = chrono::high_resolution_clock::now();
+    int fibRec = fibonacciRecursive(10);
+    auto end = chrono::high_resolution_clock::now();
+    auto durationRec = chrono::duration_cast<chrono::microseconds>(end - start);
+    
+    start = chrono::high_resolution_clock::now();
+    int fibIter = fibonacciIterative(10);
+    end = chrono::high_resolution_clock::now();
+    auto durationIter = chrono::duration_cast<chrono::microseconds>(end - start);
+    
+    cout << "Recursive result: " << fibRec << " (Time: " << durationRec.count() << " μs)" << endl;
+    cout << "Iterative result: " << fibIter << " (Time: " << durationIter.count() << " μs)" << endl;
+    
+    cout << "\\n4. Stack Frame Information:" << endl;
+    cout << "Each function call creates a stack frame containing:" << endl;
+    cout << "  - Local variables" << endl;
+    cout << "  - Function parameters" << endl;
+    cout << "  - Return address" << endl;
+    cout << "  - Previous frame pointer" << endl;
+    
+    cout << "\\n5. Stack Overflow Prevention:" << endl;
+    cout << "  - Avoid deep recursion without base cases" << endl;
+    cout << "  - Consider iterative alternatives for deep recursion" << endl;
+    cout << "  - Use tail recursion optimization when available" << endl;
+    cout << "  - Monitor stack usage in recursive algorithms" << endl;
+    
+    // Show memory addresses (implementation dependent)
+    cout << "\\n6. Stack Memory Layout (addresses may vary):" << endl;
+    int localVar1 = 100;
+    int localVar2 = 200;
+    int localVar3 = 300;
+    
+    cout << "localVar1 address: " << &localVar1 << endl;
+    cout << "localVar2 address: " << &localVar2 << endl;
+    cout << "localVar3 address: " << &localVar3 << endl;
+    cout << "Note: Stack typically grows downward (higher to lower addresses)" << endl;
+    
+    return 0;
+}`}
+      explanation="The call stack manages function calls by storing stack frames containing local variables, parameters, and return addresses. Each function call pushes a frame, and returns pop the frame, following LIFO order."
+      output={`=== Understanding the Call Stack ===
+
+1. Function Call Chain:
+main() calls functionA() -> functionB() -> functionC()
+functionA() called
+  Inside functionA - about to call functionB
+  functionB() called
+    Inside functionB - about to call functionC
+    functionC() called
+      Inside functionC - performing some work
+    functionC() returns
+    Back in functionB after functionC returns
+  functionB() returns
+  Back in functionA after functionB returns
+functionA() returns
+
+2. Recursive Function Calls:
+Computing factorial(4):
+factorial(4) called
+  factorial(3) called
+    factorial(2) called
+      factorial(1) called
+      factorial(1) returns (value: 1)
+    factorial(2) returns (value: 2)
+  factorial(3) returns (value: 6)
+factorial(4) returns (value: 24)
+Final result: 24
+
+3. Recursive vs Iterative Comparison:
+Computing Fibonacci(10):
+Recursive result: 55 (Time: 12 μs)
+Iterative result: 55 (Time: 1 μs)
+
+4. Stack Frame Information:
+Each function call creates a stack frame containing:
+  - Local variables
+  - Function parameters
+  - Return address
+  - Previous frame pointer
+
+5. Stack Overflow Prevention:
+  - Avoid deep recursion without base cases
+  - Consider iterative alternatives for deep recursion
+  - Use tail recursion optimization when available
+  - Monitor stack usage in recursive algorithms
+
+6. Stack Memory Layout (addresses may vary):
+localVar1 address: 0x7fff5fbff69c
+localVar2 address: 0x7fff5fbff698
+localVar3 address: 0x7fff5fbff694
+Note: Stack typically grows downward (higher to lower addresses)`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Best Practices</h2>
+    
+    <div class="best-practices">
+      <div class="practice">
+        <h4>1. Check Empty Before Access</h4>
+        <p>Always check if the stack is empty before calling top() or pop() to avoid runtime errors and undefined behavior.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>2. Use STL Stack When Possible</h4>
+        <p>The standard library std::stack is well-tested and optimized. Use it unless you need specific custom behavior.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>3. Consider Memory Management</h4>
+        <p>For linked list implementations, ensure proper cleanup in destructors to prevent memory leaks.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>4. Handle Stack Overflow</h4>
+        <p>In array-based implementations, check for overflow conditions and handle them gracefully.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>5. Choose Right Implementation</h4>
+        <p>Use array-based stacks for performance-critical code with known bounds, linked stacks for dynamic requirements.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>Time Complexity Analysis</h2>
+    
+    <div class="complexity-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Operation</th>
+            <th>Array Stack</th>
+            <th>Linked Stack</th>
+            <th>STL Stack</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Push</td>
+            <td>O(1)</td>
+            <td>O(1)</td>
+            <td>O(1)</td>
+          </tr>
+          <tr>
+            <td>Pop</td>
+            <td>O(1)</td>
+            <td>O(1)</td>
+            <td>O(1)</td>
+          </tr>
+          <tr>
+            <td>Top/Peek</td>
+            <td>O(1)</td>
+            <td>O(1)</td>
+            <td>O(1)</td>
+          </tr>
+          <tr>
+            <td>Empty Check</td>
+            <td>O(1)</td>
+            <td>O(1)</td>
+            <td>O(1)</td>
+          </tr>
+          <tr>
+            <td>Size</td>
+            <td>O(1)</td>
+            <td>O(1)</td>
+            <td>O(1)</td>
+          </tr>
+          <tr>
+            <td>Space Complexity</td>
+            <td>O(n)</td>
+            <td>O(n)</td>
+            <td>O(n)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>Practice Exercises</h2>
+    
+    <div class="exercise">
+      <h3>Exercise 1: Min Stack</h3>
+      <p>Design a stack that supports push, pop, top, and retrieving the minimum element in constant time.</p>
+    </div>
+    
+    <div class="exercise">
+      <h3>Exercise 2: Valid Parentheses Variants</h3>
+      <p>Extend the balanced parentheses checker to handle mathematical expressions with operators and validate them completely.</p>
+    </div>
+    
+    <div class="exercise">
+      <h3>Exercise 3: Stack-based Calculator</h3>
+      <p>Build a complete calculator that can evaluate complex mathematical expressions using stacks for both infix-to-postfix conversion and evaluation.</p>
+    </div>
+  </section>
+
+  <div class="navigation">
+    <a href="/data-structures/linked-lists" class="nav-button prev">← Linked Lists</a>
+    <a href="/data-structures/queues" class="nav-button next">Queues →</a>
+  </div>
+</Layout>
+
+<style>
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .breadcrumb a {
+    color: #667eea;
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  .overview {
+    background: #f0f9ff;
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border-left: 4px solid #0ea5e9;
+  }
+
+  .content-section {
+    margin: 3rem 0;
+  }
+
+  .best-practices {
+    display: grid;
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .practice {
+    background: #f0fdf4;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #22c55e;
+  }
+
+  .practice h4 {
+    margin: 0 0 0.5rem 0;
+    color: #166534;
+  }
+
+  .practice p {
+    margin: 0;
+    color: #166534;
+  }
+
+  .complexity-table {
+    overflow-x: auto;
+    margin: 2rem 0;
+  }
+
+  .complexity-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  }
+
+  .complexity-table th {
+    background: #f8fafc;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #1e293b;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .complexity-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    color: #475569;
+  }
+
+  .complexity-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .exercise {
+    background: #fff7ed;
+    padding: 2rem;
+    border-radius: 8px;
+    border-left: 4px solid #f59e0b;
+    margin: 2rem 0;
+  }
+
+  .exercise h3 {
+    margin: 0 0 1rem 0;
+    color: #92400e;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin: 4rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .nav-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #667eea;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+  }
+
+  .nav-button:hover {
+    background: #5a67d8;
+  }
+
+  .nav-button.prev {
+    background: #64748b;
+  }
+
+  .nav-button.prev:hover {
+    background: #475569;
+  }
+
+  @media (max-width: 768px) {
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style> 

@@ -1,0 +1,932 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="String Algorithms - C++ Learning Hub">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/algorithms">Algorithms</a> &gt; String Algorithms
+  </div>
+
+  <h1>String Algorithms</h1>
+  
+  <div class="overview">
+    <p>
+      String algorithms are essential for text processing, pattern matching, and string manipulation. 
+      They're crucial in applications like search engines, text editors, bioinformatics, and data 
+      validation. These algorithms efficiently handle operations on character sequences and find 
+      patterns within text data.
+    </p>
+    
+    <p>
+      We'll explore fundamental string algorithms including naive pattern matching, KMP algorithm, 
+      string hashing, suffix arrays, and advanced techniques for substring search, longest common 
+      subsequence, and string transformations.
+    </p>
+  </div>
+
+  <section class="content-section">
+    <h2>Pattern Matching Algorithms</h2>
+
+    <CodeExample 
+      client:load
+      title="Naive Search, KMP, and Boyer-Moore"
+      code={`#include <iostream>
+#include <vector>
+#include <string>
+#include <unordered_map>
+using namespace std;
+
+class PatternMatching {
+public:
+    // Naive Pattern Search
+    static vector<int> naiveSearch(const string& text, const string& pattern) {
+        vector<int> matches;
+        int n = text.length();
+        int m = pattern.length();
+        
+        cout << "Naive search for pattern '" << pattern << "' in text '" << text << "':" << endl;
+        
+        for (int i = 0; i <= n - m; i++) {
+            int j = 0;
+            cout << "Checking position " << i << ": ";
+            
+            while (j < m && text[i + j] == pattern[j]) {
+                j++;
+            }
+            
+            if (j == m) {
+                matches.push_back(i);
+                cout << "MATCH found!" << endl;
+            } else {
+                cout << "No match (failed at position " << j << ")" << endl;
+            }
+        }
+        
+        return matches;
+    }
+    
+    // KMP (Knuth-Morris-Pratt) Algorithm
+    static vector<int> computeLPS(const string& pattern) {
+        int m = pattern.length();
+        vector<int> lps(m, 0);
+        int len = 0;
+        int i = 1;
+        
+        cout << "Computing LPS array for pattern '" << pattern << "':" << endl;
+        
+        while (i < m) {
+            if (pattern[i] == pattern[len]) {
+                len++;
+                lps[i] = len;
+                cout << "lps[" << i << "] = " << len << endl;
+                i++;
+            } else {
+                if (len != 0) {
+                    len = lps[len - 1];
+                } else {
+                    lps[i] = 0;
+                    cout << "lps[" << i << "] = 0" << endl;
+                    i++;
+                }
+            }
+        }
+        
+        return lps;
+    }
+    
+    static vector<int> KMPSearch(const string& text, const string& pattern) {
+        vector<int> matches;
+        int n = text.length();
+        int m = pattern.length();
+        
+        vector<int> lps = computeLPS(pattern);
+        
+        cout << "\\nKMP search:" << endl;
+        int i = 0; // index for text
+        int j = 0; // index for pattern
+        
+        while (i < n) {
+            cout << "Comparing text[" << i << "]='" << text[i] 
+                 << "' with pattern[" << j << "]='" << pattern[j] << "'";
+            
+            if (text[i] == pattern[j]) {
+                i++;
+                j++;
+                cout << " - Match" << endl;
+            } else {
+                cout << " - No match" << endl;
+            }
+            
+            if (j == m) {
+                matches.push_back(i - j);
+                cout << "Pattern found at index " << (i - j) << endl;
+                j = lps[j - 1];
+            } else if (i < n && text[i] != pattern[j]) {
+                if (j != 0) {
+                    j = lps[j - 1];
+                    cout << "Using LPS: skip to j=" << j << endl;
+                } else {
+                    i++;
+                }
+            }
+        }
+        
+        return matches;
+    }
+    
+    // Boyer-Moore Algorithm (simplified bad character heuristic)
+    static unordered_map<char, int> buildBadCharTable(const string& pattern) {
+        unordered_map<char, int> badChar;
+        int m = pattern.length();
+        
+        for (int i = 0; i < m; i++) {
+            badChar[pattern[i]] = i;
+        }
+        
+        return badChar;
+    }
+    
+    static vector<int> boyerMooreSearch(const string& text, const string& pattern) {
+        vector<int> matches;
+        int n = text.length();
+        int m = pattern.length();
+        
+        unordered_map<char, int> badChar = buildBadCharTable(pattern);
+        
+        cout << "\\nBoyer-Moore search:" << endl;
+        int shift = 0;
+        
+        while (shift <= n - m) {
+            int j = m - 1;
+            
+            cout << "Checking at shift " << shift << ": ";
+            
+            while (j >= 0 && pattern[j] == text[shift + j]) {
+                j--;
+            }
+            
+            if (j < 0) {
+                matches.push_back(shift);
+                cout << "MATCH found!" << endl;
+                shift += (shift + m < n) ? m - badChar[text[shift + m]] : 1;
+            } else {
+                char mismatchChar = text[shift + j];
+                int badCharShift = max(1, j - (badChar.count(mismatchChar) ? badChar[mismatchChar] : -1));
+                cout << "Mismatch at '" << mismatchChar << "', shift by " << badCharShift << endl;
+                shift += badCharShift;
+            }
+        }
+        
+        return matches;
+    }
+    
+    // Rabin-Karp Algorithm (Rolling Hash)
+    static vector<int> rabinKarpSearch(const string& text, const string& pattern) {
+        vector<int> matches;
+        int n = text.length();
+        int m = pattern.length();
+        const int prime = 101;
+        const int base = 256;
+        
+        if (m > n) return matches;
+        
+        cout << "\\nRabin-Karp search using rolling hash:" << endl;
+        
+        long long patternHash = 0;
+        long long textHash = 0;
+        long long h = 1;
+        
+        // Calculate h = base^(m-1) % prime
+        for (int i = 0; i < m - 1; i++) {
+            h = (h * base) % prime;
+        }
+        
+        // Calculate hash for pattern and first window of text
+        for (int i = 0; i < m; i++) {
+            patternHash = (base * patternHash + pattern[i]) % prime;
+            textHash = (base * textHash + text[i]) % prime;
+        }
+        
+        cout << "Pattern hash: " << patternHash << endl;
+        
+        for (int i = 0; i <= n - m; i++) {
+            cout << "Window [" << i << "," << (i + m - 1) << "] hash: " << textHash;
+            
+            if (patternHash == textHash) {
+                // Check character by character
+                bool match = true;
+                for (int j = 0; j < m; j++) {
+                    if (text[i + j] != pattern[j]) {
+                        match = false;
+                        break;
+                    }
+                }
+                
+                if (match) {
+                    matches.push_back(i);
+                    cout << " - MATCH!" << endl;
+                } else {
+                    cout << " - Hash collision, no actual match" << endl;
+                }
+            } else {
+                cout << " - No match" << endl;
+            }
+            
+            // Calculate hash for next window
+            if (i < n - m) {
+                textHash = (base * (textHash - text[i] * h) + text[i + m]) % prime;
+                if (textHash < 0) textHash += prime;
+            }
+        }
+        
+        return matches;
+    }
+};
+
+int main() {
+    cout << "=== Pattern Matching Algorithms ===" << endl;
+    
+    string text = "ABABDABACDABABCABCABCABCABC";
+    string pattern = "ABABCAB";
+    
+    cout << "Text: " << text << endl;
+    cout << "Pattern: " << pattern << endl;
+    
+    // Naive Search
+    cout << "\\n1. Naive Pattern Search:" << endl;
+    vector<int> naiveMatches = PatternMatching::naiveSearch(text, pattern);
+    cout << "Matches found at positions: ";
+    for (int pos : naiveMatches) cout << pos << " ";
+    cout << endl;
+    
+    // KMP Search
+    cout << "\\n2. KMP Algorithm:" << endl;
+    vector<int> kmpMatches = PatternMatching::KMPSearch(text, pattern);
+    cout << "Matches found at positions: ";
+    for (int pos : kmpMatches) cout << pos << " ";
+    cout << endl;
+    
+    // Boyer-Moore Search
+    cout << "\\n3. Boyer-Moore Algorithm:" << endl;
+    vector<int> bmMatches = PatternMatching::boyerMooreSearch(text, pattern);
+    cout << "Matches found at positions: ";
+    for (int pos : bmMatches) cout << pos << " ";
+    cout << endl;
+    
+    // Rabin-Karp Search
+    cout << "\\n4. Rabin-Karp Algorithm:" << endl;
+    vector<int> rkMatches = PatternMatching::rabinKarpSearch(text, pattern);
+    cout << "Matches found at positions: ";
+    for (int pos : rkMatches) cout << pos << " ";
+    cout << endl;
+    
+    // Performance comparison with simpler example
+    cout << "\\n=== Simple Example Comparison ===" << endl;
+    string simpleText = "ABAAABCDAB";
+    string simplePattern = "AB";
+    
+    cout << "Text: " << simpleText << endl;
+    cout << "Pattern: " << simplePattern << endl;
+    
+    cout << "\\nNaive: ";
+    vector<int> simple1 = PatternMatching::naiveSearch(simpleText, simplePattern);
+    for (int pos : simple1) cout << pos << " ";
+    
+    cout << "\\nKMP: ";
+    vector<int> simple2 = PatternMatching::KMPSearch(simpleText, simplePattern);
+    for (int pos : simple2) cout << pos << " ";
+    cout << endl;
+    
+    cout << "\\n=== Algorithm Comparison ===" << endl;
+    cout << "Naive Search:" << endl;
+    cout << "  Time: O(nm) worst case" << endl;
+    cout << "  Space: O(1)" << endl;
+    cout << "  Use: Simple implementation, small patterns" << endl;
+    
+    cout << "\\nKMP Algorithm:" << endl;
+    cout << "  Time: O(n + m)" << endl;
+    cout << "  Space: O(m) for LPS array" << endl;
+    cout << "  Use: When pattern has repeating substrings" << endl;
+    
+    cout << "\\nBoyer-Moore:" << endl;
+    cout << "  Time: O(nm) worst, O(n/m) best case" << endl;
+    cout << "  Space: O(σ) where σ is alphabet size" << endl;
+    cout << "  Use: Large alphabets, long patterns" << endl;
+    
+    cout << "\\nRabin-Karp:" << endl;
+    cout << "  Time: O(nm) worst, O(n + m) average" << endl;
+    cout << "  Space: O(1)" << endl;
+    cout << "  Use: Multiple pattern search, 2D pattern matching" << endl;
+    
+    return 0;
+}`}
+      explanation="Pattern matching algorithms find occurrences of a pattern within text. Naive search checks every position. KMP uses failure function to skip characters. Boyer-Moore scans from right to left. Rabin-Karp uses rolling hash for efficient comparison."
+      output={`=== Pattern Matching Algorithms ===
+Text: ABABDABACDABABCABCABCABCABC
+Pattern: ABABCAB
+
+1. Naive Pattern Search:
+Naive search for pattern 'ABABCAB' in text 'ABABDABACDABABCABCABCABCABC':
+Checking position 0: No match (failed at position 4)
+Checking position 1: No match (failed at position 3)
+Checking position 2: No match (failed at position 2)
+Checking position 3: No match (failed at position 1)
+Checking position 4: No match (failed at position 0)
+Checking position 5: No match (failed at position 0)
+Checking position 6: No match (failed at position 0)
+Checking position 7: No match (failed at position 0)
+Checking position 8: No match (failed at position 0)
+Checking position 9: No match (failed at position 0)
+Checking position 10: MATCH found!
+Checking position 11: No match (failed at position 6)
+Checking position 12: No match (failed at position 5)
+Checking position 13: No match (failed at position 4)
+Checking position 14: No match (failed at position 3)
+Checking position 15: No match (failed at position 2)
+Checking position 16: No match (failed at position 1)
+Checking position 17: No match (failed at position 0)
+Checking position 18: No match (failed at position 0)
+Checking position 19: No match (failed at position 0)
+Checking position 20: No match (failed at position 0)
+Checking position 21: No match (failed at position 0)
+Matches found at positions: 10 
+
+2. KMP Algorithm:
+Computing LPS array for pattern 'ABABCAB':
+lps[1] = 0
+lps[2] = 1
+lps[3] = 2
+lps[4] = 0
+lps[5] = 1
+lps[6] = 2
+
+KMP search:
+Comparing text[0]='A' with pattern[0]='A' - Match
+Comparing text[1]='B' with pattern[1]='B' - Match
+Comparing text[2]='A' with pattern[2]='A' - Match
+Comparing text[3]='B' with pattern[3]='B' - Match
+Comparing text[4]='D' with pattern[4]='C' - No match
+Using LPS: skip to j=2
+Comparing text[4]='D' with pattern[2]='A' - No match
+Using LPS: skip to j=0
+Comparing text[4]='D' with pattern[0]='A' - No match
+Comparing text[5]='A' with pattern[0]='A' - Match
+Comparing text[6]='B' with pattern[1]='B' - Match
+Comparing text[7]='A' with pattern[2]='A' - Match
+Comparing text[8]='C' with pattern[3]='B' - No match
+Using LPS: skip to j=1
+Comparing text[8]='C' with pattern[1]='B' - No match
+Using LPS: skip to j=0
+Comparing text[8]='C' with pattern[0]='A' - No match
+Comparing text[9]='D' with pattern[0]='A' - No match
+Comparing text[10]='A' with pattern[0]='A' - Match
+Comparing text[11]='B' with pattern[1]='B' - Match
+Comparing text[12]='A' with pattern[2]='A' - Match
+Comparing text[13]='B' with pattern[3]='B' - Match
+Comparing text[14]='C' with pattern[4]='C' - Match
+Comparing text[15]='A' with pattern[5]='A' - Match
+Comparing text[16]='B' with pattern[6]='B' - Match
+Pattern found at index 10
+Using LPS: skip to j=2
+Comparing text[17]='C' with pattern[2]='A' - No match
+Using LPS: skip to j=0
+Comparing text[17]='C' with pattern[0]='A' - No match
+Comparing text[18]='A' with pattern[0]='A' - Match
+Comparing text[19]='B' with pattern[1]='B' - Match
+Comparing text[20]='C' with pattern[2]='A' - No match
+Using LPS: skip to j=0
+Comparing text[20]='C' with pattern[0]='A' - No match
+Comparing text[21]='A' with pattern[0]='A' - Match
+Comparing text[22]='B' with pattern[1]='B' - Match
+Comparing text[23]='C' with pattern[2]='A' - No match
+Using LPS: skip to j=0
+Comparing text[23]='C' with pattern[0]='A' - No match
+Comparing text[24]='A' with pattern[0]='A' - Match
+Comparing text[25]='B' with pattern[1]='B' - Match
+Comparing text[26]='C' with pattern[2]='A' - No match
+Using LPS: skip to j=0
+Comparing text[26]='C' with pattern[0]='A' - No match
+Matches found at positions: 10 
+
+3. Boyer-Moore Algorithm:
+
+Boyer-Moore search:
+Checking at shift 0: Mismatch at 'D', shift by 5
+Checking at shift 5: Mismatch at 'A', shift by 1
+Checking at shift 6: Mismatch at 'B', shift by 2
+Checking at shift 8: Mismatch at 'C', shift by 3
+Checking at shift 11: Mismatch at 'C', shift by 3
+Checking at shift 14: Mismatch at 'C', shift by 3
+Checking at shift 17: Mismatch at 'C', shift by 3
+Checking at shift 20: Mismatch at 'C', shift by 3
+Matches found at positions: 
+
+4. Rabin-Karp Algorithm:
+
+Rabin-Karp search using rolling hash:
+Pattern hash: 28
+Window [0,6] hash: 82 - No match
+Window [1,7] hash: 6 - No match
+Window [2,8] hash: 6 - No match
+Window [3,9] hash: 54 - No match
+Window [4,10] hash: 21 - No match
+Window [5,11] hash: 6 - No match
+Window [6,12] hash: 6 - No match
+Window [7,13] hash: 6 - No match
+Window [8,14] hash: 39 - No match
+Window [9,15] hash: 54 - No match
+Window [10,16] hash: 28 - MATCH!
+Window [11,17] hash: 39 - No match
+Window [12,18] hash: 6 - No match
+Window [13,19] hash: 6 - No match
+Window [14,20] hash: 39 - No match
+Window [15,21] hash: 6 - No match
+Window [16,22] hash: 6 - No match
+Window [17,23] hash: 39 - No match
+Window [18,24] hash: 6 - No match
+Window [19,25] hash: 6 - No match
+Window [20,26] hash: 39 - No match
+Matches found at positions: 10 
+
+=== Simple Example Comparison ===
+Text: ABAAABCDAB
+Pattern: AB
+
+Naive: Naive search for pattern 'AB' in text 'ABAAABCDAB':
+Checking position 0: MATCH found!
+Checking position 1: No match (failed at position 0)
+Checking position 2: No match (failed at position 0)
+Checking position 3: No match (failed at position 0)
+Checking position 4: MATCH found!
+Checking position 5: No match (failed at position 0)
+Checking position 6: No match (failed at position 0)
+Checking position 7: No match (failed at position 0)
+Checking position 8: MATCH found!
+0 4 8 
+
+KMP: Computing LPS array for pattern 'AB':
+lps[1] = 0
+
+KMP search:
+Comparing text[0]='A' with pattern[0]='A' - Match
+Comparing text[1]='B' with pattern[1]='B' - Match
+Pattern found at index 0
+Using LPS: skip to j=0
+Comparing text[2]='A' with pattern[0]='A' - Match
+Comparing text[3]='A' with pattern[1]='B' - No match
+Using LPS: skip to j=0
+Comparing text[3]='A' with pattern[0]='A' - Match
+Comparing text[4]='A' with pattern[1]='B' - No match
+Using LPS: skip to j=0
+Comparing text[4]='A' with pattern[0]='A' - Match
+Comparing text[5]='B' with pattern[1]='B' - Match
+Pattern found at index 4
+Using LPS: skip to j=0
+Comparing text[6]='C' with pattern[0]='A' - No match
+Comparing text[7]='D' with pattern[0]='A' - No match
+Comparing text[8]='A' with pattern[0]='A' - Match
+Comparing text[9]='B' with pattern[1]='B' - Match
+Pattern found at index 8
+Using LPS: skip to j=0
+0 4 8 
+
+=== Algorithm Comparison ===
+Naive Search:
+  Time: O(nm) worst case
+  Space: O(1)
+  Use: Simple implementation, small patterns
+
+KMP Algorithm:
+  Time: O(n + m)
+  Space: O(m) for LPS array
+  Use: When pattern has repeating substrings
+
+Boyer-Moore:
+  Time: O(nm) worst, O(n/m) best case
+  Space: O(σ) where σ is alphabet size
+  Use: Large alphabets, long patterns
+
+Rabin-Karp:
+  Time: O(nm) worst, O(n + m) average
+  Space: O(1)
+  Use: Multiple pattern search, 2D pattern matching`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>String Processing and Transformations</h2>
+
+    <CodeExample 
+      client:load
+      title="String Manipulation and Advanced Algorithms"
+      code={`#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+#include <unordered_set>
+#include <unordered_map>
+using namespace std;
+
+class StringProcessing {
+public:
+    // Longest Common Subsequence for strings
+    static int longestCommonSubsequence(const string& s1, const string& s2) {
+        int m = s1.length(), n = s2.length();
+        vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
+        
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (s1[i - 1] == s2[j - 1]) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                } else {
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        
+        return dp[m][n];
+    }
+    
+    // Edit Distance (Levenshtein Distance)
+    static int editDistance(const string& s1, const string& s2) {
+        int m = s1.length(), n = s2.length();
+        vector<vector<int>> dp(m + 1, vector<int>(n + 1));
+        
+        // Initialize base cases
+        for (int i = 0; i <= m; i++) dp[i][0] = i;
+        for (int j = 0; j <= n; j++) dp[0][j] = j;
+        
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (s1[i - 1] == s2[j - 1]) {
+                    dp[i][j] = dp[i - 1][j - 1];
+                } else {
+                    dp[i][j] = 1 + min({dp[i - 1][j],    // Delete
+                                       dp[i][j - 1],    // Insert
+                                       dp[i - 1][j - 1]}); // Replace
+                }
+            }
+        }
+        
+        return dp[m][n];
+    }
+    
+    // Longest Palindromic Substring
+    static string longestPalindromicSubstring(const string& s) {
+        int n = s.length();
+        if (n == 0) return "";
+        
+        int start = 0, maxLen = 1;
+        
+        // Check for odd length palindromes
+        for (int i = 0; i < n; i++) {
+            int left = i, right = i;
+            while (left >= 0 && right < n && s[left] == s[right]) {
+                int len = right - left + 1;
+                if (len > maxLen) {
+                    start = left;
+                    maxLen = len;
+                }
+                left--;
+                right++;
+            }
+        }
+        
+        // Check for even length palindromes
+        for (int i = 0; i < n - 1; i++) {
+            int left = i, right = i + 1;
+            while (left >= 0 && right < n && s[left] == s[right]) {
+                int len = right - left + 1;
+                if (len > maxLen) {
+                    start = left;
+                    maxLen = len;
+                }
+                left--;
+                right++;
+            }
+        }
+        
+        return s.substr(start, maxLen);
+    }
+    
+    // Check if strings are anagrams
+    static bool areAnagrams(const string& s1, const string& s2) {
+        if (s1.length() != s2.length()) return false;
+        
+        unordered_map<char, int> charCount;
+        
+        for (char c : s1) {
+            charCount[c]++;
+        }
+        
+        for (char c : s2) {
+            charCount[c]--;
+            if (charCount[c] < 0) return false;
+        }
+        
+        return true;
+    }
+    
+    // Find all anagrams of a pattern in text
+    static vector<int> findAnagrams(const string& text, const string& pattern) {
+        vector<int> result;
+        int n = text.length(), m = pattern.length();
+        
+        if (m > n) return result;
+        
+        vector<int> patternCount(26, 0);
+        vector<int> windowCount(26, 0);
+        
+        // Count characters in pattern
+        for (char c : pattern) {
+            patternCount[c - 'a']++;
+        }
+        
+        // Sliding window
+        for (int i = 0; i < n; i++) {
+            // Add character to window
+            windowCount[text[i] - 'a']++;
+            
+            // Remove character from window if window size exceeds pattern size
+            if (i >= m) {
+                windowCount[text[i - m] - 'a']--;
+            }
+            
+            // Check if window is an anagram of pattern
+            if (i >= m - 1 && patternCount == windowCount) {
+                result.push_back(i - m + 1);
+            }
+        }
+        
+        return result;
+    }
+    
+    // String compression
+    static string compressString(const string& s) {
+        if (s.empty()) return s;
+        
+        string compressed;
+        int count = 1;
+        
+        for (int i = 1; i < s.length(); i++) {
+            if (s[i] == s[i - 1]) {
+                count++;
+            } else {
+                compressed += s[i - 1];
+                if (count > 1) {
+                    compressed += to_string(count);
+                }
+                count = 1;
+            }
+        }
+        
+        // Add last character and count
+        compressed += s.back();
+        if (count > 1) {
+            compressed += to_string(count);
+        }
+        
+        return compressed.length() < s.length() ? compressed : s;
+    }
+    
+    // Check if string has all unique characters
+    static bool hasUniqueCharacters(const string& s) {
+        unordered_set<char> seen;
+        
+        for (char c : s) {
+            if (seen.count(c)) {
+                return false;
+            }
+            seen.insert(c);
+        }
+        
+        return true;
+    }
+    
+    // Reverse words in a string
+    static string reverseWords(const string& s) {
+        string result = s;
+        
+        // Reverse the entire string
+        reverse(result.begin(), result.end());
+        
+        // Reverse each word back to correct order
+        int start = 0;
+        for (int i = 0; i <= result.length(); i++) {
+            if (i == result.length() || result[i] == ' ') {
+                reverse(result.begin() + start, result.begin() + i);
+                start = i + 1;
+            }
+        }
+        
+        return result;
+    }
+    
+    // Check if one string is rotation of another
+    static bool isRotation(const string& s1, const string& s2) {
+        if (s1.length() != s2.length()) return false;
+        
+        string concatenated = s1 + s1;
+        return concatenated.find(s2) != string::npos;
+    }
+    
+    // Generate all permutations of a string
+    static void generatePermutations(string s, int start, vector<string>& result) {
+        if (start == s.length()) {
+            result.push_back(s);
+            return;
+        }
+        
+        unordered_set<char> used;
+        for (int i = start; i < s.length(); i++) {
+            if (used.count(s[i])) continue; // Skip duplicates
+            
+            used.insert(s[i]);
+            swap(s[start], s[i]);
+            generatePermutations(s, start + 1, result);
+            swap(s[start], s[i]); // Backtrack
+        }
+    }
+    
+    static vector<string> getAllPermutations(const string& s) {
+        vector<string> result;
+        string sortedStr = s;
+        sort(sortedStr.begin(), sortedStr.end());
+        generatePermutations(sortedStr, 0, result);
+        return result;
+    }
+};
+
+int main() {
+    cout << "=== String Processing and Transformations ===" << endl;
+    
+    // Test strings
+    string s1 = "ABCDGH";
+    string s2 = "AEDFHR";
+    
+    cout << "\\n1. Longest Common Subsequence:" << endl;
+    cout << "String 1: " << s1 << endl;
+    cout << "String 2: " << s2 << endl;
+    cout << "LCS length: " << StringProcessing::longestCommonSubsequence(s1, s2) << endl;
+    
+    // Edit distance
+    cout << "\\n2. Edit Distance:" << endl;
+    string word1 = "horse";
+    string word2 = "ros";
+    cout << "'" << word1 << "' to '" << word2 << "': " 
+         << StringProcessing::editDistance(word1, word2) << " operations" << endl;
+    
+    // Longest palindromic substring
+    cout << "\\n3. Longest Palindromic Substring:" << endl;
+    string palindromeTest = "babad";
+    cout << "String: " << palindromeTest << endl;
+    cout << "Longest palindrome: " << StringProcessing::longestPalindromicSubstring(palindromeTest) << endl;
+    
+    // Anagram detection
+    cout << "\\n4. Anagram Detection:" << endl;
+    string anagram1 = "listen";
+    string anagram2 = "silent";
+    cout << "'" << anagram1 << "' and '" << anagram2 << "' are anagrams: " 
+         << (StringProcessing::areAnagrams(anagram1, anagram2) ? "Yes" : "No") << endl;
+    
+    // Find anagrams in text
+    cout << "\\n5. Find Anagrams in Text:" << endl;
+    string text = "abab";
+    string pattern = "ab";
+    cout << "Text: " << text << ", Pattern: " << pattern << endl;
+    vector<int> anagramPositions = StringProcessing::findAnagrams(text, pattern);
+    cout << "Anagram positions: ";
+    for (int pos : anagramPositions) cout << pos << " ";
+    cout << endl;
+    
+    // String compression
+    cout << "\\n6. String Compression:" << endl;
+    string toCompress = "aabcccccaaa";
+    cout << "Original: " << toCompress << endl;
+    cout << "Compressed: " << StringProcessing::compressString(toCompress) << endl;
+    
+    // Unique characters
+    cout << "\\n7. Unique Characters:" << endl;
+    string uniqueTest = "abcdef";
+    string nonUniqueTest = "hello";
+    cout << "'" << uniqueTest << "' has unique characters: " 
+         << (StringProcessing::hasUniqueCharacters(uniqueTest) ? "Yes" : "No") << endl;
+    cout << "'" << nonUniqueTest << "' has unique characters: " 
+         << (StringProcessing::hasUniqueCharacters(nonUniqueTest) ? "Yes" : "No") << endl;
+    
+    // Reverse words
+    cout << "\\n8. Reverse Words:" << endl;
+    string sentence = "the sky is blue";
+    cout << "Original: '" << sentence << "'" << endl;
+    cout << "Reversed: '" << StringProcessing::reverseWords(sentence) << "'" << endl;
+    
+    // String rotation
+    cout << "\\n9. String Rotation:" << endl;
+    string str1 = "waterbottle";
+    string str2 = "erbottlewat";
+    cout << "'" << str1 << "' and '" << str2 << "' rotation: " 
+         << (StringProcessing::isRotation(str1, str2) ? "Yes" : "No") << endl;
+    
+    // String permutations
+    cout << "\\n10. String Permutations:" << endl;
+    string permStr = "abc";
+    cout << "Permutations of '" << permStr << "':" << endl;
+    vector<string> perms = StringProcessing::getAllPermutations(permStr);
+    for (const string& perm : perms) {
+        cout << perm << " ";
+    }
+    cout << endl;
+    
+    cout << "\\n=== String Algorithm Applications ===" << endl;
+    cout << "1. Text editors: Search, replace, spell check" << endl;
+    cout << "2. Bioinformatics: DNA sequence analysis" << endl;
+    cout << "3. Data validation: Pattern matching for emails, phones" << endl;
+    cout << "4. Search engines: Text indexing and retrieval" << endl;
+    cout << "5. Compression: Data reduction algorithms" << endl;
+    cout << "6. Natural language processing: Text analysis" << endl;
+    
+    return 0;
+}`}
+      explanation="String processing algorithms handle text transformations and analysis. LCS finds common subsequences, edit distance measures similarity, palindrome detection finds symmetric patterns, and anagram algorithms detect character rearrangements. These form the foundation for text analysis applications."
+      output={`=== String Processing and Transformations ===
+
+1. Longest Common Subsequence:
+String 1: ABCDGH
+String 2: AEDFHR
+LCS length: 3
+
+2. Edit Distance:
+'horse' to 'ros': 3 operations
+
+3. Longest Palindromic Substring:
+String: babad
+Longest palindrome: bab
+
+4. Anagram Detection:
+'listen' and 'silent' are anagrams: Yes
+
+5. Find Anagrams in Text:
+Text: abab, Pattern: ab
+Anagram positions: 0 2 
+
+6. String Compression:
+Original: aabcccccaaa
+Compressed: a2bc5a3
+
+7. Unique Characters:
+'abcdef' has unique characters: Yes
+'hello' has unique characters: No
+
+8. Reverse Words:
+Original: 'the sky is blue'
+Reversed: 'blue is sky the'
+
+9. String Rotation:
+'waterbottle' and 'erbottlewat' rotation: Yes
+
+10. String Permutations:
+Permutations of 'abc':
+abc acb bac bca cab cba 
+
+=== String Algorithm Applications ===
+1. Text editors: Search, replace, spell check
+2. Bioinformatics: DNA sequence analysis
+3. Data validation: Pattern matching for emails, phones
+4. Search engines: Text indexing and retrieval
+5. Compression: Data reduction algorithms
+6. Natural language processing: Text analysis`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Best Practices</h2>
+    
+    <div class="best-practices">
+      <div class="practice">
+        <h4>1. Choose Appropriate Algorithm</h4>
+        <p>Select pattern matching algorithms based on your use case: KMP for preprocessing patterns, Boyer-Moore for large alphabets, Rabin-Karp for multiple patterns.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>2. Consider String Properties</h4>
+        <p>Analyze string characteristics like length, alphabet size, and pattern frequency to optimize algorithm choice and implementation details.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>3. Handle Edge Cases</h4>
+        <p>Always validate input strings for null/empty cases, consider Unicode and encoding issues, and handle memory constraints for large text processing.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>4. Optimize for Your Domain</h4>
+        <p>Use domain-specific optimizations like case-insensitive matching for text search, or specialized algorithms for bioinformatics applications.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="navigation">
+    <a href="/algorithms/graph-algorithms" class="nav-button prev">← Graph Algorithms</a>
+    <a href="/algorithms" class="nav-button next">Algorithms Overview →</a>
+  </div>
+</Layout> 

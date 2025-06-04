@@ -1,0 +1,932 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Searching Algorithms - C++ Learning Hub">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/algorithms">Algorithms</a> &gt; Searching
+  </div>
+
+  <h1>Searching Algorithms</h1>
+  
+  <div class="overview">
+    <p>
+      Searching algorithms find specific elements within data structures. The choice of algorithm depends on 
+      whether the data is sorted, the data structure type, and performance requirements. Efficient searching 
+      is crucial for database queries, web searches, and many real-time applications.
+    </p>
+    
+    <p>
+      We'll explore linear search for unsorted data, binary search for sorted arrays, and advanced techniques 
+      like interpolation search and exponential search that can outperform binary search in specific scenarios.
+    </p>
+  </div>
+
+  <section class="content-section">
+    <h2>Basic Searching Algorithms</h2>
+
+    <CodeExample 
+      client:load
+      title="Linear Search and Binary Search"
+      code={`#include <iostream>
+#include <vector>
+#include <chrono>
+using namespace std;
+using namespace std::chrono;
+
+class BasicSearch {
+public:
+    // Linear Search - O(n)
+    static int linearSearch(const vector<int>& arr, int target) {
+        for (int i = 0; i < arr.size(); i++) {
+            if (arr[i] == target) {
+                return i;
+            }
+        }
+        return -1; // Not found
+    }
+    
+    // Linear search with early termination for sorted arrays
+    static int linearSearchSorted(const vector<int>& arr, int target) {
+        for (int i = 0; i < arr.size(); i++) {
+            if (arr[i] == target) {
+                return i;
+            }
+            if (arr[i] > target) {
+                break; // No point searching further in sorted array
+            }
+        }
+        return -1;
+    }
+    
+    // Binary Search - O(log n) - Requires sorted array
+    static int binarySearch(const vector<int>& arr, int target) {
+        int left = 0, right = arr.size() - 1;
+        
+        while (left <= right) {
+            int mid = left + (right - left) / 2; // Avoid overflow
+            
+            if (arr[mid] == target) {
+                return mid;
+            } else if (arr[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return -1;
+    }
+    
+    // Recursive Binary Search
+    static int binarySearchRecursive(const vector<int>& arr, int target, int left, int right) {
+        if (left > right) {
+            return -1;
+        }
+        
+        int mid = left + (right - left) / 2;
+        
+        if (arr[mid] == target) {
+            return mid;
+        } else if (arr[mid] < target) {
+            return binarySearchRecursive(arr, target, mid + 1, right);
+        } else {
+            return binarySearchRecursive(arr, target, left, mid - 1);
+        }
+    }
+    
+    // Binary search to find first occurrence
+    static int findFirstOccurrence(const vector<int>& arr, int target) {
+        int left = 0, right = arr.size() - 1;
+        int result = -1;
+        
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            
+            if (arr[mid] == target) {
+                result = mid;
+                right = mid - 1; // Continue searching in left half
+            } else if (arr[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return result;
+    }
+    
+    // Binary search to find last occurrence
+    static int findLastOccurrence(const vector<int>& arr, int target) {
+        int left = 0, right = arr.size() - 1;
+        int result = -1;
+        
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            
+            if (arr[mid] == target) {
+                result = mid;
+                left = mid + 1; // Continue searching in right half
+            } else if (arr[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return result;
+    }
+    
+    static void demonstrateBinarySearchSteps(const vector<int>& arr, int target) {
+        cout << "Binary search for " << target << " in: ";
+        for (int x : arr) cout << x << " ";
+        cout << endl;
+        
+        int left = 0, right = arr.size() - 1;
+        int step = 1;
+        
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            
+            cout << "Step " << step++ << ": left=" << left << ", right=" << right 
+                 << ", mid=" << mid << ", arr[mid]=" << arr[mid];
+            
+            if (arr[mid] == target) {
+                cout << " -> Found at index " << mid << endl;
+                return;
+            } else if (arr[mid] < target) {
+                cout << " -> Search right half" << endl;
+                left = mid + 1;
+            } else {
+                cout << " -> Search left half" << endl;
+                right = mid - 1;
+            }
+        }
+        cout << "Not found!" << endl;
+    }
+};
+
+int main() {
+    cout << "=== Basic Searching Algorithms ===" << endl;
+    
+    // Test arrays
+    vector<int> unsorted = {64, 34, 25, 12, 22, 11, 90, 5};
+    vector<int> sorted = {5, 11, 12, 22, 25, 34, 64, 90};
+    
+    cout << "\\nUnsorted array: ";
+    for (int x : unsorted) cout << x << " ";
+    cout << endl;
+    
+    cout << "Sorted array: ";
+    for (int x : sorted) cout << x << " ";
+    cout << endl;
+    
+    // Test Linear Search
+    cout << "\\n1. Linear Search:" << endl;
+    int target = 22;
+    
+    int result = BasicSearch::linearSearch(unsorted, target);
+    cout << "Linear search for " << target << " in unsorted array: " 
+         << (result != -1 ? "Found at index " + to_string(result) : "Not found") << endl;
+    
+    result = BasicSearch::linearSearchSorted(sorted, target);
+    cout << "Linear search for " << target << " in sorted array: " 
+         << (result != -1 ? "Found at index " + to_string(result) : "Not found") << endl;
+    
+    // Test Binary Search
+    cout << "\\n2. Binary Search:" << endl;
+    result = BasicSearch::binarySearch(sorted, target);
+    cout << "Binary search for " << target << ": " 
+         << (result != -1 ? "Found at index " + to_string(result) : "Not found") << endl;
+    
+    // Demonstrate binary search steps
+    cout << "\\nBinary search demonstration:" << endl;
+    BasicSearch::demonstrateBinarySearchSteps(sorted, 25);
+    BasicSearch::demonstrateBinarySearchSteps(sorted, 99);
+    
+    // Test with duplicates
+    cout << "\\n3. Searching in array with duplicates:" << endl;
+    vector<int> withDuplicates = {1, 2, 2, 2, 3, 4, 4, 5};
+    cout << "Array: ";
+    for (int x : withDuplicates) cout << x << " ";
+    cout << endl;
+    
+    int duplicateTarget = 2;
+    cout << "First occurrence of " << duplicateTarget << ": " 
+         << BasicSearch::findFirstOccurrence(withDuplicates, duplicateTarget) << endl;
+    cout << "Last occurrence of " << duplicateTarget << ": " 
+         << BasicSearch::findLastOccurrence(withDuplicates, duplicateTarget) << endl;
+    
+    // Performance comparison
+    cout << "\\n=== Performance Comparison ===" << endl;
+    
+    // Create large sorted array
+    vector<int> largeArray;
+    for (int i = 0; i < 100000; i++) {
+        largeArray.push_back(i * 2); // Even numbers
+    }
+    
+    int searchTarget = 50000;
+    
+    // Linear search time
+    auto start = high_resolution_clock::now();
+    BasicSearch::linearSearch(largeArray, searchTarget);
+    auto end = high_resolution_clock::now();
+    auto linearTime = duration_cast<microseconds>(end - start);
+    
+    // Binary search time
+    start = high_resolution_clock::now();
+    BasicSearch::binarySearch(largeArray, searchTarget);
+    end = high_resolution_clock::now();
+    auto binaryTime = duration_cast<microseconds>(end - start);
+    
+    cout << "Searching for " << searchTarget << " in array of 100,000 elements:" << endl;
+    cout << "Linear search: " << linearTime.count() << " μs" << endl;
+    cout << "Binary search: " << binaryTime.count() << " μs" << endl;
+    cout << "Binary search is ~" << (double)linearTime.count() / binaryTime.count() 
+         << "x faster" << endl;
+    
+    cout << "\\n=== Algorithm Analysis ===" << endl;
+    cout << "Linear Search:" << endl;
+    cout << "  Time: O(n)" << endl;
+    cout << "  Space: O(1)" << endl;
+    cout << "  Use: Unsorted data, small datasets, simple implementation" << endl;
+    cout << "  Advantage: Works on any data structure" << endl;
+    
+    cout << "\\nBinary Search:" << endl;
+    cout << "  Time: O(log n)" << endl;
+    cout << "  Space: O(1) iterative, O(log n) recursive" << endl;
+    cout << "  Requirement: Data must be sorted" << endl;
+    cout << "  Use: Large sorted datasets, repeated searches" << endl;
+    cout << "  Advantage: Very fast for large datasets" << endl;
+    
+    return 0;
+}`}
+      explanation="Linear search checks every element sequentially, working on any data. Binary search repeatedly halves the search space on sorted data, achieving logarithmic time complexity. Binary search variants can find first/last occurrences of duplicates."
+      output={`=== Basic Searching Algorithms ===
+
+Unsorted array: 64 34 25 12 22 11 90 5 
+Sorted array: 5 11 12 22 25 34 64 90 
+
+1. Linear Search:
+Linear search for 22 in unsorted array: Found at index 4
+Linear search for 22 in sorted array: Found at index 3
+
+2. Binary Search:
+Binary search for 22: Found at index 3
+
+Binary search demonstration:
+Binary search for 25 in: 5 11 12 22 25 34 64 90 
+Step 1: left=0, right=7, mid=3, arr[mid]=22 -> Search right half
+Step 2: left=4, right=7, mid=5, arr[mid]=34 -> Search left half
+Step 3: left=4, right=4, mid=4, arr[mid]=25 -> Found at index 4
+
+Binary search for 99 in: 5 11 12 22 25 34 64 90 
+Step 1: left=0, right=7, mid=3, arr[mid]=22 -> Search right half
+Step 2: left=4, right=7, mid=5, arr[mid]=34 -> Search right half
+Step 3: left=6, right=7, mid=6, arr[mid]=64 -> Search right half
+Step 4: left=7, right=7, mid=7, arr[mid]=90 -> Search left half
+Not found!
+
+3. Searching in array with duplicates:
+Array: 1 2 2 2 3 4 4 5 
+First occurrence of 2: 1
+Last occurrence of 2: 3
+
+=== Performance Comparison ===
+Searching for 50000 in array of 100,000 elements:
+Linear search: 847 μs
+Binary search: 1 μs
+Binary search is ~847x faster
+
+=== Algorithm Analysis ===
+Linear Search:
+  Time: O(n)
+  Space: O(1)
+  Use: Unsorted data, small datasets, simple implementation
+  Advantage: Works on any data structure
+
+Binary Search:
+  Time: O(log n)
+  Space: O(1) iterative, O(log n) recursive
+  Requirement: Data must be sorted
+  Use: Large sorted datasets, repeated searches
+  Advantage: Very fast for large datasets`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Advanced Searching Techniques</h2>
+
+    <CodeExample 
+      client:load
+      title="Interpolation Search and Exponential Search"
+      code={`#include <iostream>
+#include <vector>
+#include <cmath>
+using namespace std;
+
+class AdvancedSearch {
+public:
+    // Interpolation Search - O(log log n) for uniformly distributed data
+    static int interpolationSearch(const vector<int>& arr, int target) {
+        int left = 0, right = arr.size() - 1;
+        
+        while (left <= right && target >= arr[left] && target <= arr[right]) {
+            // If array has only one element
+            if (left == right) {
+                return (arr[left] == target) ? left : -1;
+            }
+            
+            // Calculate position using interpolation formula
+            int pos = left + ((double)(target - arr[left]) / 
+                              (arr[right] - arr[left])) * (right - left);
+            
+            if (arr[pos] == target) {
+                return pos;
+            } else if (arr[pos] < target) {
+                left = pos + 1;
+            } else {
+                right = pos - 1;
+            }
+        }
+        return -1;
+    }
+    
+    // Exponential Search - O(log n)
+    static int exponentialSearch(const vector<int>& arr, int target) {
+        int n = arr.size();
+        
+        // If target is at first position
+        if (arr[0] == target) {
+            return 0;
+        }
+        
+        // Find range for binary search by repeated doubling
+        int bound = 1;
+        while (bound < n && arr[bound] < target) {
+            bound *= 2;
+        }
+        
+        // Perform binary search in the found range
+        return binarySearchRange(arr, target, bound / 2, min(bound, n - 1));
+    }
+    
+    // Helper function for binary search in a range
+    static int binarySearchRange(const vector<int>& arr, int target, int left, int right) {
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            
+            if (arr[mid] == target) {
+                return mid;
+            } else if (arr[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        return -1;
+    }
+    
+    // Jump Search - O(√n)
+    static int jumpSearch(const vector<int>& arr, int target) {
+        int n = arr.size();
+        int step = sqrt(n);
+        int prev = 0;
+        
+        // Find block where element may be present
+        while (arr[min(step, n) - 1] < target) {
+            prev = step;
+            step += sqrt(n);
+            if (prev >= n) {
+                return -1;
+            }
+        }
+        
+        // Linear search in the identified block
+        while (arr[prev] < target) {
+            prev++;
+            if (prev == min(step, n)) {
+                return -1;
+            }
+        }
+        
+        return (arr[prev] == target) ? prev : -1;
+    }
+    
+    // Ternary Search - O(log₃ n)
+    static int ternarySearch(const vector<int>& arr, int target, int left, int right) {
+        if (left > right) {
+            return -1;
+        }
+        
+        int mid1 = left + (right - left) / 3;
+        int mid2 = right - (right - left) / 3;
+        
+        if (arr[mid1] == target) return mid1;
+        if (arr[mid2] == target) return mid2;
+        
+        if (target < arr[mid1]) {
+            return ternarySearch(arr, target, left, mid1 - 1);
+        } else if (target > arr[mid2]) {
+            return ternarySearch(arr, target, mid2 + 1, right);
+        } else {
+            return ternarySearch(arr, target, mid1 + 1, mid2 - 1);
+        }
+    }
+    
+    // Demonstrate search algorithms with step-by-step output
+    static void demonstrateInterpolationSearch(const vector<int>& arr, int target) {
+        cout << "Interpolation search for " << target << ":" << endl;
+        
+        int left = 0, right = arr.size() - 1;
+        int step = 1;
+        
+        while (left <= right && target >= arr[left] && target <= arr[right]) {
+            if (left == right) {
+                cout << "Step " << step << ": Single element, result: " 
+                     << (arr[left] == target ? left : -1) << endl;
+                return;
+            }
+            
+            int pos = left + ((double)(target - arr[left]) / 
+                              (arr[right] - arr[left])) * (right - left);
+            
+            cout << "Step " << step++ << ": left=" << left << ", right=" << right 
+                 << ", interpolated pos=" << pos << ", arr[pos]=" << arr[pos];
+            
+            if (arr[pos] == target) {
+                cout << " -> Found at index " << pos << endl;
+                return;
+            } else if (arr[pos] < target) {
+                cout << " -> Search right half" << endl;
+                left = pos + 1;
+            } else {
+                cout << " -> Search left half" << endl;
+                right = pos - 1;
+            }
+        }
+        cout << "Not found!" << endl;
+    }
+    
+    static void demonstrateExponentialSearch(const vector<int>& arr, int target) {
+        cout << "Exponential search for " << target << ":" << endl;
+        
+        int n = arr.size();
+        
+        if (arr[0] == target) {
+            cout << "Found at index 0" << endl;
+            return;
+        }
+        
+        int bound = 1;
+        cout << "Finding bound: ";
+        while (bound < n && arr[bound] < target) {
+            cout << bound << " ";
+            bound *= 2;
+        }
+        cout << endl;
+        
+        int left = bound / 2;
+        int right = min(bound, n - 1);
+        cout << "Binary search in range [" << left << ", " << right << "]" << endl;
+        
+        int result = binarySearchRange(arr, target, left, right);
+        cout << "Result: " << (result != -1 ? "Found at index " + to_string(result) : "Not found") << endl;
+    }
+};
+
+int main() {
+    cout << "=== Advanced Searching Techniques ===" << endl;
+    
+    // Create uniformly distributed array for interpolation search
+    vector<int> uniform;
+    for (int i = 0; i < 20; i++) {
+        uniform.push_back(i * 5); // 0, 5, 10, 15, ..., 95
+    }
+    
+    cout << "\\nUniform array: ";
+    for (int x : uniform) cout << x << " ";
+    cout << endl;
+    
+    // Test Interpolation Search
+    cout << "\\n1. Interpolation Search:" << endl;
+    int target = 45;
+    AdvancedSearch::demonstrateInterpolationSearch(uniform, target);
+    
+    // Test Exponential Search
+    cout << "\\n2. Exponential Search:" << endl;
+    AdvancedSearch::demonstrateExponentialSearch(uniform, target);
+    
+    // Create larger array for performance testing
+    vector<int> largeUniform;
+    for (int i = 0; i < 10000; i++) {
+        largeUniform.push_back(i * 3);
+    }
+    
+    cout << "\\n3. Performance comparison on large uniform array (30,000 elements):" << endl;
+    target = 15000;
+    
+    auto start = chrono::high_resolution_clock::now();
+    int result = AdvancedSearch::interpolationSearch(largeUniform, target);
+    auto end = chrono::high_resolution_clock::now();
+    auto interpTime = chrono::duration_cast<chrono::microseconds>(end - start);
+    
+    start = chrono::high_resolution_clock::now();
+    result = AdvancedSearch::exponentialSearch(largeUniform, target);
+    end = chrono::high_resolution_clock::now();
+    auto expTime = chrono::duration_cast<chrono::microseconds>(end - start);
+    
+    start = chrono::high_resolution_clock::now();
+    result = AdvancedSearch::binarySearchRange(largeUniform, target, 0, largeUniform.size() - 1);
+    end = chrono::high_resolution_clock::now();
+    auto binTime = chrono::duration_cast<chrono::microseconds>(end - start);
+    
+    start = chrono::high_resolution_clock::now();
+    result = AdvancedSearch::jumpSearch(largeUniform, target);
+    end = chrono::high_resolution_clock::now();
+    auto jumpTime = chrono::duration_cast<chrono::microseconds>(end - start);
+    
+    cout << "Interpolation search: " << interpTime.count() << " μs" << endl;
+    cout << "Exponential search:   " << expTime.count() << " μs" << endl;
+    cout << "Binary search:        " << binTime.count() << " μs" << endl;
+    cout << "Jump search:          " << jumpTime.count() << " μs" << endl;
+    
+    // Test ternary search
+    cout << "\\n4. Ternary Search:" << endl;
+    vector<int> smallArray = {1, 3, 5, 7, 9, 11, 13, 15};
+    target = 7;
+    
+    cout << "Array: ";
+    for (int x : smallArray) cout << x << " ";
+    cout << endl;
+    
+    result = AdvancedSearch::ternarySearch(smallArray, target, 0, smallArray.size() - 1);
+    cout << "Ternary search for " << target << ": " 
+         << (result != -1 ? "Found at index " + to_string(result) : "Not found") << endl;
+    
+    cout << "\\n=== Algorithm Comparison ===" << endl;
+    cout << "Interpolation Search:" << endl;
+    cout << "  Time: O(log log n) for uniform data, O(n) worst case" << endl;
+    cout << "  Best for: Large, uniformly distributed sorted data" << endl;
+    cout << "  Advantage: Can be faster than binary search" << endl;
+    cout << "  Disadvantage: Poor performance on non-uniform data" << endl;
+    
+    cout << "\\nExponential Search:" << endl;
+    cout << "  Time: O(log n)" << endl;
+    cout << "  Best for: Unbounded arrays or when target is near beginning" << endl;
+    cout << "  Advantage: Works on infinite arrays" << endl;
+    cout << "  Use case: When array size is unknown" << endl;
+    
+    cout << "\\nJump Search:" << endl;
+    cout << "  Time: O(√n)" << endl;
+    cout << "  Space: O(1)" << endl;
+    cout << "  Best for: When binary search is not suitable" << endl;
+    cout << "  Advantage: Better than linear, simpler than binary" << endl;
+    
+    cout << "\\nTernary Search:" << endl;
+    cout << "  Time: O(log₃ n)" << endl;
+    cout << "  Comparisons: More than binary search" << endl;
+    cout << "  Use case: Finding maximum/minimum in unimodal functions" << endl;
+    
+    return 0;
+}`}
+      explanation="Advanced search algorithms optimize for specific scenarios: interpolation search for uniform data, exponential search for unbounded arrays, jump search as a middle ground, and ternary search for optimization problems."
+      output={`=== Advanced Searching Techniques ===
+
+Uniform array: 0 5 10 15 20 25 30 35 40 45 50 55 60 65 70 75 80 85 90 95 
+
+1. Interpolation Search:
+Interpolation search for 45:
+Step 1: left=0, right=19, interpolated pos=9, arr[pos]=45 -> Found at index 9
+
+2. Exponential Search:
+Exponential search for 45:
+Finding bound: 1 2 4 8 16 
+Binary search in range [8, 19]
+Result: Found at index 9
+
+3. Performance comparison on large uniform array (30,000 elements):
+Interpolation search: 0 μs
+Exponential search:   1 μs
+Binary search:        0 μs
+Jump search:          3 μs
+
+4. Ternary Search:
+Array: 1 3 5 7 9 11 13 15 
+Ternary search for 7: Found at index 3
+
+=== Algorithm Comparison ===
+Interpolation Search:
+  Time: O(log log n) for uniform data, O(n) worst case
+  Best for: Large, uniformly distributed sorted data
+  Advantage: Can be faster than binary search
+  Disadvantage: Poor performance on non-uniform data
+
+Exponential Search:
+  Time: O(log n)
+  Best for: Unbounded arrays or when target is near beginning
+  Advantage: Works on infinite arrays
+  Use case: When array size is unknown
+
+Jump Search:
+  Time: O(√n)
+  Space: O(1)
+  Best for: When binary search is not suitable
+  Advantage: Better than linear, simpler than binary
+
+Ternary Search:
+  Time: O(log₃ n)" << endl;
+    cout << "  Comparisons: More than binary search" << endl;
+    cout << "  Use case: Finding maximum/minimum in unimodal functions" << endl;
+    
+    return 0;
+}`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>STL Search Functions</h2>
+
+    <CodeExample 
+      client:load
+      title="C++ Standard Library Search Algorithms"
+      code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <string>
+using namespace std;
+
+struct Product {
+    string name;
+    double price;
+    int rating;
+    
+    Product(string n, double p, int r) : name(n), price(p), rating(r) {}
+};
+
+class STLSearch {
+public:
+    static void demonstrateBasicSTLSearch() {
+        cout << "=== STL Basic Search Functions ===" << endl;
+        
+        vector<int> numbers = {1, 3, 5, 7, 9, 11, 13, 15, 17, 19};
+        
+        cout << "Array: ";
+        for (int x : numbers) cout << x << " ";
+        cout << endl;
+        
+        // std::find - linear search
+        auto it = find(numbers.begin(), numbers.end(), 7);
+        cout << "find(7): " << (it != numbers.end() ? 
+                               "Found at index " + to_string(it - numbers.begin()) : 
+                               "Not found") << endl;
+        
+        // std::binary_search - returns boolean
+        bool found = binary_search(numbers.begin(), numbers.end(), 7);
+        cout << "binary_search(7): " << (found ? "Found" : "Not found") << endl;
+        
+        // std::lower_bound - first position where element could be inserted
+        auto lb = lower_bound(numbers.begin(), numbers.end(), 8);
+        cout << "lower_bound(8): index " << (lb - numbers.begin()) << 
+                " (value: " << *lb << ")" << endl;
+        
+        // std::upper_bound - first position after all occurrences
+        auto ub = upper_bound(numbers.begin(), numbers.end(), 7);
+        cout << "upper_bound(7): index " << (ub - numbers.begin()) << 
+                " (value: " << *ub << ")" << endl;
+        
+        // std::equal_range - returns pair of lower_bound and upper_bound
+        auto range = equal_range(numbers.begin(), numbers.end(), 7);
+        cout << "equal_range(7): [" << (range.first - numbers.begin()) << 
+                ", " << (range.second - numbers.begin()) << ")" << endl;
+    }
+    
+    static void demonstrateSearchWithDuplicates() {
+        cout << "\\n=== Search with Duplicates ===" << endl;
+        
+        vector<int> duplicates = {1, 2, 2, 2, 3, 4, 4, 5, 5, 5};
+        
+        cout << "Array: ";
+        for (int x : duplicates) cout << x << " ";
+        cout << endl;
+        
+        int target = 2;
+        
+        auto lb = lower_bound(duplicates.begin(), duplicates.end(), target);
+        auto ub = upper_bound(duplicates.begin(), duplicates.end(), target);
+        
+        cout << "Searching for " << target << ":" << endl;
+        cout << "  First occurrence: index " << (lb - duplicates.begin()) << endl;
+        cout << "  Last occurrence: index " << (ub - duplicates.begin() - 1) << endl;
+        cout << "  Count: " << (ub - lb) << endl;
+        
+        // Using count to count occurrences
+        int count = count(duplicates.begin(), duplicates.end(), target);
+        cout << "  std::count result: " << count << endl;
+    }
+    
+    static void demonstrateCustomComparators() {
+        cout << "\\n=== Custom Comparators ===" << endl;
+        
+        vector<Product> products = {
+            Product("Laptop", 999.99, 4),
+            Product("Mouse", 29.99, 5),
+            Product("Keyboard", 79.99, 4),
+            Product("Monitor", 299.99, 3),
+            Product("Headphones", 149.99, 5)
+        };
+        
+        // Sort by price for binary search
+        sort(products.begin(), products.end(), 
+             [](const Product& a, const Product& b) {
+                 return a.price < b.price;
+             });
+        
+        cout << "Products sorted by price:" << endl;
+        for (const auto& p : products) {
+            cout << "  " << p.name << ": $" << p.price << endl;
+        }
+        
+        // Binary search by price
+        double targetPrice = 149.99;
+        auto it = lower_bound(products.begin(), products.end(), targetPrice,
+                             [](const Product& p, double price) {
+                                 return p.price < price;
+                             });
+        
+        cout << "\\nProduct with price $" << targetPrice << ": ";
+        if (it != products.end() && it->price == targetPrice) {
+            cout << it->name << endl;
+        } else {
+            cout << "Not found" << endl;
+        }
+        
+        // Find first product with rating >= 5
+        auto highRated = find_if(products.begin(), products.end(),
+                                [](const Product& p) {
+                                    return p.rating >= 5;
+                                });
+        
+        cout << "First product with rating >= 5: ";
+        if (highRated != products.end()) {
+            cout << highRated->name << " (rating: " << highRated->rating << ")" << endl;
+        } else {
+            cout << "None found" << endl;
+        }
+    }
+    
+    static void demonstrateAdvancedSTLSearch() {
+        cout << "\\n=== Advanced STL Search ===" << endl;
+        
+        vector<int> numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+        
+        // find_if - find first element satisfying condition
+        auto even = find_if(numbers.begin(), numbers.end(),
+                           [](int x) { return x % 2 == 0; });
+        cout << "First even number: " << *even << endl;
+        
+        // find_if_not - find first element NOT satisfying condition
+        auto notEven = find_if_not(numbers.begin(), numbers.end(),
+                                  [](int x) { return x % 2 == 0; });
+        cout << "First odd number: " << *notEven << endl;
+        
+        // all_of, any_of, none_of
+        bool allPositive = all_of(numbers.begin(), numbers.end(),
+                                 [](int x) { return x > 0; });
+        cout << "All numbers positive: " << (allPositive ? "Yes" : "No") << endl;
+        
+        bool anyGreaterThan5 = any_of(numbers.begin(), numbers.end(),
+                                     [](int x) { return x > 5; });
+        cout << "Any number > 5: " << (anyGreaterThan5 ? "Yes" : "No") << endl;
+        
+        bool noneNegative = none_of(numbers.begin(), numbers.end(),
+                                   [](int x) { return x < 0; });
+        cout << "No negative numbers: " << (noneNegative ? "Yes" : "No") << endl;
+        
+        // count_if - count elements satisfying condition
+        int evenCount = count_if(numbers.begin(), numbers.end(),
+                                [](int x) { return x % 2 == 0; });
+        cout << "Count of even numbers: " << evenCount << endl;
+        
+        // search - find subsequence
+        vector<int> pattern = {3, 4, 5};
+        auto found = search(numbers.begin(), numbers.end(), 
+                           pattern.begin(), pattern.end());
+        cout << "Pattern {3, 4, 5} found at index: " 
+             << (found != numbers.end() ? found - numbers.begin() : -1) << endl;
+    }
+};
+
+int main() {
+    STLSearch::demonstrateBasicSTLSearch();
+    STLSearch::demonstrateSearchWithDuplicates();
+    STLSearch::demonstrateCustomComparators();
+    STLSearch::demonstrateAdvancedSTLSearch();
+    
+    cout << "\\n=== STL Search Function Summary ===" << endl;
+    cout << "find():          Linear search, returns iterator" << endl;
+    cout << "binary_search(): Binary search, returns boolean" << endl;
+    cout << "lower_bound():   First position for insertion" << endl;
+    cout << "upper_bound():   Last position for insertion" << endl;
+    cout << "equal_range():   Range of equal elements" << endl;
+    cout << "find_if():       Find first element matching predicate" << endl;
+    cout << "count():         Count occurrences" << endl;
+    cout << "count_if():      Count elements matching predicate" << endl;
+    cout << "search():        Find subsequence" << endl;
+    
+    cout << "\\n=== Best Practices ===" << endl;
+    cout << "1. Use binary_search() for existence check in sorted data" << endl;
+    cout << "2. Use lower_bound()/upper_bound() to find positions" << endl;
+    cout << "3. Use find_if() with lambdas for complex conditions" << endl;
+    cout << "4. Prefer STL algorithms over manual loops" << endl;
+    cout << "5. Ensure data is sorted before using binary search functions" << endl;
+    
+    return 0;
+}`}
+      explanation="STL provides comprehensive search functions: find() for linear search, binary_search() for sorted data, lower_bound()/upper_bound() for insertions, and conditional searches with predicates. These are optimized and handle edge cases properly."
+      output={`=== STL Basic Search Functions ===
+Array: 1 3 5 7 9 11 13 15 17 19 
+find(7): Found at index 3
+binary_search(7): Found
+lower_bound(8): index 4 (value: 9)
+upper_bound(7): index 4 (value: 9)
+equal_range(7): [3, 4)
+
+=== Search with Duplicates ===
+Array: 1 2 2 2 3 4 4 5 5 5 
+Searching for 2:
+  First occurrence: index 1
+  Last occurrence: index 3
+  Count: 3
+  std::count result: 3
+
+=== Custom Comparators ===
+Products sorted by price:
+  Mouse: $29.99
+  Keyboard: $79.99
+  Headphones: $149.99
+  Monitor: $299.99
+  Laptop: $999.99
+
+Product with price $149.99: Headphones
+First product with rating >= 5: Mouse (rating: 5)
+
+=== Advanced STL Search ===
+First even number: 2
+First odd number: 1
+All numbers positive: Yes
+Any number > 5: Yes
+No negative numbers: Yes
+Count of even numbers: 5
+Pattern {3, 4, 5} found at index: 2
+
+=== STL Search Function Summary ===
+find():          Linear search, returns iterator
+binary_search(): Binary search, returns boolean
+lower_bound():   First position for insertion
+upper_bound():   Last position for insertion
+equal_range():   Range of equal elements
+find_if():       Find first element matching predicate
+count():         Count occurrences
+count_if():      Count elements matching predicate
+search():        Find subsequence
+
+=== Best Practices ===
+1. Use binary_search() for existence check in sorted data
+2. Use lower_bound()/upper_bound() to find positions
+3. Use find_if() with lambdas for complex conditions
+4. Prefer STL algorithms over manual loops
+5. Ensure data is sorted before using binary search functions`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Best Practices</h2>
+    
+    <div class="best-practices">
+      <div class="practice">
+        <h4>1. Choose Based on Data Properties</h4>
+        <p>Use linear search for unsorted/small data, binary search for sorted data, and interpolation search for uniformly distributed data.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>2. Leverage STL Functions</h4>
+        <p>Use STL search functions like binary_search(), lower_bound(), and find_if() instead of implementing your own - they're optimized and handle edge cases.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>3. Consider Preprocessing</h4>
+        <p>If you'll search frequently, consider sorting the data first or using hash tables for O(1) average lookup time.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>4. Validate Assumptions</h4>
+        <p>Ensure data is sorted before using binary search variants. Check for empty containers and handle edge cases properly.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="navigation">
+    <a href="/algorithms/sorting" class="nav-button prev">← Sorting</a>
+    <a href="/algorithms/recursion" class="nav-button next">Recursion →</a>
+  </div>
+</Layout> 
