@@ -1,0 +1,420 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Introduction to C++ - C++ Learning Hub">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/basics">Basics</a> &gt; Introduction to C++
+  </div>
+
+  <h1>Introduction to C++</h1>
+  
+  <div class="overview">
+    <p>
+      C++ is a powerful, general-purpose programming language that was developed by Bjarne Stroustrup 
+      at Bell Labs starting in 1979. It's an extension of the C programming language, which is why 
+      it was initially called "C with Classes."
+    </p>
+    
+    <p>
+      C++ combines the efficiency and flexibility of C with object-oriented programming features, 
+      making it suitable for a wide range of applications from system software to games, 
+      embedded systems, and high-performance applications.
+    </p>
+  </div>
+
+  <section class="content-section">
+    <h2>Why Learn C++?</h2>
+    
+    <div class="benefits-grid">
+      <div class="benefit">
+        <h3>🚀 Performance</h3>
+        <p>C++ provides low-level control and high performance, making it ideal for system programming and applications where speed matters.</p>
+      </div>
+      
+      <div class="benefit">
+        <h3>🏗️ Versatility</h3>
+        <p>From operating systems to game engines, from embedded systems to web servers, C++ is used everywhere.</p>
+      </div>
+      
+      <div class="benefit">
+        <h3>📚 Foundation</h3>
+        <p>Learning C++ provides a strong foundation for understanding computer science concepts and other programming languages.</p>
+      </div>
+      
+      <div class="benefit">
+        <h3>💼 Career Opportunities</h3>
+        <p>C++ skills are highly valued in the software industry, especially for system-level programming and performance-critical applications.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>Basic Structure of a C++ Program</h2>
+    
+    <p>Every C++ program has a specific structure. Let's examine the components of a simple program:</p>
+
+    <CodeExample 
+      client:load
+      title="Basic C++ Program Structure"
+      code={`// Include header files
+#include <iostream>
+
+// Use standard namespace
+using namespace std;
+
+// Main function - entry point of the program
+int main() {
+    // Program statements
+    cout << "Welcome to C++ Programming!" << endl;
+    
+    // Return statement
+    return 0;
+}`}
+      explanation="This shows the basic structure: include directives, namespace declaration, main function, and return statement. Every C++ program must have a main() function which serves as the entry point."
+      output="Welcome to C++ Programming!"
+    />
+
+    <h3>Component Breakdown:</h3>
+    <ul>
+      <li><strong>#include &lt;iostream&gt;</strong> - Includes the input/output stream library</li>
+      <li><strong>using namespace std;</strong> - Allows us to use standard library functions without std:: prefix</li>
+      <li><strong>int main()</strong> - The main function where program execution begins</li>
+      <li><strong>cout</strong> - Standard output stream for displaying text</li>
+      <li><strong>endl</strong> - Inserts a newline and flushes the output buffer</li>
+      <li><strong>return 0;</strong> - Indicates successful program termination</li>
+    </ul>
+  </section>
+
+  <section class="content-section">
+    <h2>Comments in C++</h2>
+    
+    <p>Comments are essential for code documentation and readability. C++ supports two types of comments:</p>
+
+    <CodeExample 
+      client:load
+      title="Single-line and Multi-line Comments"
+      code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // This is a single-line comment
+    cout << "Hello, World!" << endl;
+    
+    /*
+       This is a multi-line comment
+       It can span multiple lines
+       Useful for longer explanations
+    */
+    
+    cout << "Comments help make code readable!" << endl;
+    
+    return 0; // Another single-line comment
+}`}
+      explanation="Single-line comments start with // and continue to the end of the line. Multi-line comments are enclosed between /* and */ and can span multiple lines."
+      output={`Hello, World!
+Comments help make code readable!`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Basic Input and Output</h2>
+    
+    <p>C++ uses streams for input and output operations. The most commonly used are <code>cout</code> for output and <code>cin</code> for input:</p>
+
+    <CodeExample 
+      client:load
+      title="Input and Output Operations"
+      code={`#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    string name;
+    int age;
+    
+    // Output - asking for input
+    cout << "Enter your name: ";
+    cin >> name;
+    
+    cout << "Enter your age: ";
+    cin >> age;
+    
+    // Output - displaying results
+    cout << "Hello, " << name << "!" << endl;
+    cout << "You are " << age << " years old." << endl;
+    
+    return 0;
+}`}
+      explanation="This example demonstrates basic input/output. 'cin' reads input from the user, and 'cout' displays output. The >> operator extracts data from the input stream, while << inserts data into the output stream."
+      output={`Enter your name: Alice
+Enter your age: 25
+Hello, Alice!
+You are 25 years old.`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Compilation Process</h2>
+    
+    <p>Understanding how C++ code becomes an executable program is important:</p>
+    
+    <div class="compilation-steps">
+      <div class="step">
+        <h4>1. Preprocessing</h4>
+        <p>The preprocessor handles directives like #include and #define, expanding them into the source code.</p>
+      </div>
+      
+      <div class="step">
+        <h4>2. Compilation</h4>
+        <p>The compiler translates the preprocessed source code into assembly language or object code.</p>
+      </div>
+      
+      <div class="step">
+        <h4>3. Linking</h4>
+        <p>The linker combines object files and libraries to create the final executable program.</p>
+      </div>
+    </div>
+
+    <div class="terminal-example">
+      <h4>Common Compilation Commands:</h4>
+      <pre><code># Compile and run a C++ program
+g++ -o program program.cpp
+./program
+
+# Compile with debugging information
+g++ -g -o program program.cpp
+
+# Compile with optimization
+g++ -O2 -o program program.cpp</code></pre>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>Practice Exercise</h2>
+    
+    <div class="exercise">
+      <h3>Exercise 1: Your First Program</h3>
+      <p>Write a C++ program that:</p>
+      <ol>
+        <li>Asks the user for their favorite programming language</li>
+        <li>Asks for how many years they've been programming</li>
+        <li>Displays a personalized message with this information</li>
+      </ol>
+      
+      <details>
+        <summary>Solution</summary>
+        <CodeExample 
+          client:load
+          title="Exercise Solution"
+          code={`#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    string language;
+    int years;
+    
+    cout << "What's your favorite programming language? ";
+    cin >> language;
+    
+    cout << "How many years have you been programming? ";
+    cin >> years;
+    
+    cout << "\\nGreat! You've been programming in " << language;
+    cout << " for " << years << " years!" << endl;
+    cout << "Welcome to the world of C++!" << endl;
+    
+    return 0;
+}`}
+          explanation="This solution uses string and int variables to store user input, then displays a formatted message using the input values."
+        />
+      </details>
+    </div>
+  </section>
+
+  <div class="navigation">
+    <a href="/basics" class="nav-button prev">← Back to Basics</a>
+    <a href="/basics/variables" class="nav-button next">Variables & Types →</a>
+  </div>
+</Layout>
+
+<style>
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .breadcrumb a {
+    color: #667eea;
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  .overview {
+    background: #f8fafc;
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border-left: 4px solid #667eea;
+  }
+
+  .content-section {
+    margin: 3rem 0;
+  }
+
+  .benefits-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+
+  .benefit {
+    background: white;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  }
+
+  .benefit h3 {
+    margin: 0 0 1rem 0;
+    color: #1e293b;
+  }
+
+  .benefit p {
+    margin: 0;
+    color: #64748b;
+  }
+
+  .compilation-steps {
+    display: grid;
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .step {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #10b981;
+  }
+
+  .step h4 {
+    margin: 0 0 0.5rem 0;
+    color: #1e293b;
+  }
+
+  .step p {
+    margin: 0;
+    color: #64748b;
+  }
+
+  .terminal-example {
+    background: #1e293b;
+    color: #e2e8f0;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+  }
+
+  .terminal-example h4 {
+    margin: 0 0 1rem 0;
+    color: #10b981;
+  }
+
+  .terminal-example pre {
+    margin: 0;
+    background: transparent;
+    padding: 0;
+  }
+
+  .terminal-example code {
+    color: #e2e8f0;
+    font-size: 0.9rem;
+  }
+
+  .exercise {
+    background: #fff7ed;
+    padding: 2rem;
+    border-radius: 8px;
+    border-left: 4px solid #f59e0b;
+    margin: 2rem 0;
+  }
+
+  .exercise h3 {
+    margin: 0 0 1rem 0;
+    color: #92400e;
+  }
+
+  .exercise ol {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+    color: #78350f;
+  }
+
+  .exercise details {
+    margin-top: 1rem;
+  }
+
+  .exercise summary {
+    cursor: pointer;
+    font-weight: 500;
+    color: #92400e;
+    padding: 0.5rem;
+    background: #fed7aa;
+    border-radius: 4px;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin: 4rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .nav-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #667eea;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+  }
+
+  .nav-button:hover {
+    background: #5a67d8;
+  }
+
+  .nav-button.prev {
+    background: #64748b;
+  }
+
+  .nav-button.prev:hover {
+    background: #475569;
+  }
+
+  @media (max-width: 768px) {
+    .benefits-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style> 

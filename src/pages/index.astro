@@ -1,11 +1,382 @@
 ---
-import Welcome from '../components/Welcome.astro';
 import Layout from '../layouts/Layout.astro';
+import CodeExample from '../components/CodeExample.tsx';
 
 // Welcome to Astro! Wondering what to do next? Check out the Astro documentation at https://docs.astro.build
 // Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
-<Layout>
-	<Welcome />
+<Layout title="C++ Learning Hub - Master C++ Programming">
+	<div class="hero-section">
+		<h1>Welcome to C++ Learning Hub</h1>
+		<p class="hero-subtitle">
+			Master C++ programming from basics to advanced concepts including algorithms and data structures.
+			Interactive examples, clear explanations, and hands-on practice.
+		</p>
+		
+		<div class="quick-start-cards">
+			<div class="card">
+				<h3>🚀 Start with Basics</h3>
+				<p>Learn C++ fundamentals including variables, control structures, and functions.</p>
+				<a href="/basics/introduction" class="card-link">Get Started</a>
+			</div>
+			
+			<div class="card">
+				<h3>🏗️ Data Structures</h3>
+				<p>Understand arrays, vectors, linked lists, trees, and more advanced structures.</p>
+				<a href="/data-structures/arrays" class="card-link">Explore</a>
+			</div>
+			
+			<div class="card">
+				<h3>⚡ Algorithms</h3>
+				<p>Master sorting, searching, recursion, and algorithmic problem-solving.</p>
+				<a href="/algorithms/sorting" class="card-link">Learn</a>
+			</div>
+		</div>
+	</div>
+
+	<section class="featured-content">
+		<h2>Featured Examples</h2>
+		
+		<CodeExample 
+			client:load
+			title="Hello World - Your First C++ Program"
+			code={`#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Hello, World!" << endl;
+    return 0;
+}`}
+			explanation="This is the classic 'Hello World' program. It demonstrates the basic structure of a C++ program including headers, main function, and output."
+			output="Hello, World!"
+		/>
+
+		<CodeExample 
+			client:load
+			title="Variables and Data Types"
+			code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // Different data types
+    int age = 25;
+    double price = 99.99;
+    char grade = 'A';
+    string name = "Alice";
+    bool isStudent = true;
+    
+    cout << "Name: " << name << endl;
+    cout << "Age: " << age << endl;
+    cout << "Grade: " << grade << endl;
+    cout << "Price: $" << price << endl;
+    cout << "Is Student: " << (isStudent ? "Yes" : "No") << endl;
+    
+    return 0;
+}`}
+			explanation="This example shows the fundamental data types in C++: int, double, char, string, and bool. Understanding these types is crucial for C++ programming."
+			output={`Name: Alice
+Age: 25
+Grade: A
+Price: $99.99
+Is Student: Yes`}
+		/>
+
+		<CodeExample 
+			client:load
+			title="Simple Array Operations"
+			code={`#include <iostream>
+using namespace std;
+
+int main() {
+    int numbers[5] = {10, 20, 30, 40, 50};
+    
+    cout << "Array elements:" << endl;
+    for(int i = 0; i < 5; i++) {
+        cout << "numbers[" << i << "] = " << numbers[i] << endl;
+    }
+    
+    // Calculate sum
+    int sum = 0;
+    for(int i = 0; i < 5; i++) {
+        sum += numbers[i];
+    }
+    
+    cout << "Sum of all elements: " << sum << endl;
+    cout << "Average: " << (double)sum / 5 << endl;
+    
+    return 0;
+}`}
+			explanation="Arrays are fundamental data structures. This example demonstrates array declaration, initialization, iteration, and basic operations like calculating sum and average."
+			output={`Array elements:
+numbers[0] = 10
+numbers[1] = 20
+numbers[2] = 30
+numbers[3] = 40
+numbers[4] = 50
+Sum of all elements: 150
+Average: 30`}
+		/>
+	</section>
+
+	<section class="learning-path">
+		<h2>Recommended Learning Path</h2>
+		
+		<div class="path-steps">
+			<div class="step">
+				<div class="step-number">1</div>
+				<div class="step-content">
+					<h3>C++ Fundamentals</h3>
+					<p>Start with basic syntax, variables, data types, and control structures.</p>
+					<ul>
+						<li>Variables and Data Types</li>
+						<li>Input/Output Operations</li>
+						<li>Control Structures (if, while, for)</li>
+						<li>Functions</li>
+					</ul>
+				</div>
+			</div>
+			
+			<div class="step">
+				<div class="step-number">2</div>
+				<div class="step-content">
+					<h3>Object-Oriented Programming</h3>
+					<p>Learn classes, objects, inheritance, and polymorphism.</p>
+					<ul>
+						<li>Classes and Objects</li>
+						<li>Constructors and Destructors</li>
+						<li>Inheritance</li>
+						<li>Polymorphism</li>
+					</ul>
+				</div>
+			</div>
+			
+			<div class="step">
+				<div class="step-number">3</div>
+				<div class="step-content">
+					<h3>Data Structures</h3>
+					<p>Master fundamental data structures and their implementations.</p>
+					<ul>
+						<li>Arrays and Vectors</li>
+						<li>Linked Lists</li>
+						<li>Stacks and Queues</li>
+						<li>Trees and Graphs</li>
+					</ul>
+				</div>
+			</div>
+			
+			<div class="step">
+				<div class="step-number">4</div>
+				<div class="step-content">
+					<h3>Algorithms</h3>
+					<p>Implement and understand common algorithms and problem-solving techniques.</p>
+					<ul>
+						<li>Sorting Algorithms</li>
+						<li>Search Algorithms</li>
+						<li>Dynamic Programming</li>
+						<li>Graph Algorithms</li>
+					</ul>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="features">
+		<h2>Why Choose C++ Learning Hub?</h2>
+		
+		<div class="features-grid">
+			<div class="feature">
+				<h3>💻 Interactive Examples</h3>
+				<p>Run and modify code examples directly in your browser with real-time feedback.</p>
+			</div>
+			
+			<div class="feature">
+				<h3>📚 Comprehensive Coverage</h3>
+				<p>From basic syntax to advanced algorithms, everything you need to master C++.</p>
+			</div>
+			
+			<div class="feature">
+				<h3>🎯 Practical Focus</h3>
+				<p>Learn through hands-on examples and real-world programming scenarios.</p>
+			</div>
+			
+			<div class="feature">
+				<h3>📈 Progressive Learning</h3>
+				<p>Structured curriculum that builds knowledge step by step.</p>
+			</div>
+			
+			<div class="feature">
+				<h3>🔍 Visual Explanations</h3>
+				<p>Complex concepts explained with clear diagrams and visual aids.</p>
+			</div>
+			
+			<div class="feature">
+				<h3>⚡ Modern C++</h3>
+				<p>Learn modern C++ features and best practices used in industry.</p>
+			</div>
+		</div>
+	</section>
 </Layout>
+
+<style>
+	.hero-section {
+		text-align: center;
+		padding: 3rem 0;
+		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+		color: white;
+		margin: -2rem -2rem 3rem -2rem;
+		border-radius: 0 0 16px 16px;
+	}
+
+	.hero-subtitle {
+		font-size: 1.2rem;
+		margin-bottom: 2rem;
+		opacity: 0.9;
+		max-width: 600px;
+		margin-left: auto;
+		margin-right: auto;
+	}
+
+	.quick-start-cards {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+		gap: 1.5rem;
+		max-width: 900px;
+		margin: 0 auto;
+	}
+
+	.card {
+		background: white;
+		color: #334155;
+		padding: 1.5rem;
+		border-radius: 12px;
+		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+		transition: transform 0.2s ease;
+	}
+
+	.card:hover {
+		transform: translateY(-4px);
+	}
+
+	.card h3 {
+		margin: 0 0 1rem 0;
+		color: #1e293b;
+	}
+
+	.card p {
+		margin-bottom: 1rem;
+		color: #64748b;
+	}
+
+	.card-link {
+		display: inline-block;
+		background: #667eea;
+		color: white;
+		padding: 0.75rem 1.5rem;
+		border-radius: 6px;
+		text-decoration: none;
+		font-weight: 500;
+		transition: background-color 0.2s ease;
+	}
+
+	.card-link:hover {
+		background: #5a67d8;
+	}
+
+	.featured-content {
+		margin: 3rem 0;
+	}
+
+	.learning-path {
+		margin: 4rem 0;
+	}
+
+	.path-steps {
+		display: grid;
+		gap: 2rem;
+	}
+
+	.step {
+		display: flex;
+		gap: 1.5rem;
+		align-items: flex-start;
+	}
+
+	.step-number {
+		background: #667eea;
+		color: white;
+		width: 3rem;
+		height: 3rem;
+		border-radius: 50%;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		font-weight: bold;
+		font-size: 1.25rem;
+		flex-shrink: 0;
+	}
+
+	.step-content h3 {
+		margin: 0 0 0.5rem 0;
+		color: #1e293b;
+	}
+
+	.step-content p {
+		margin-bottom: 1rem;
+		color: #64748b;
+	}
+
+	.step-content ul {
+		margin: 0;
+		padding-left: 1.5rem;
+		color: #64748b;
+	}
+
+	.step-content li {
+		margin-bottom: 0.25rem;
+	}
+
+	.features {
+		margin: 4rem 0;
+	}
+
+	.features-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+		gap: 2rem;
+		margin-top: 2rem;
+	}
+
+	.feature {
+		padding: 1.5rem;
+		background: #f8fafc;
+		border-radius: 8px;
+		border-left: 4px solid #667eea;
+	}
+
+	.feature h3 {
+		margin: 0 0 1rem 0;
+		color: #1e293b;
+	}
+
+	.feature p {
+		margin: 0;
+		color: #64748b;
+	}
+
+	@media (max-width: 768px) {
+		.hero-section {
+			padding: 2rem 1rem;
+			margin: -2rem -1rem 2rem -1rem;
+		}
+
+		.step {
+			flex-direction: column;
+			text-align: center;
+		}
+
+		.features-grid {
+			grid-template-columns: 1fr;
+		}
+	}
+</style>
