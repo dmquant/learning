@@ -1,0 +1,371 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Linear Algebra">
+	<h1>Linear Algebra</h1>
+	
+	<h2>Overview</h2>
+	<p>Linear algebra is fundamental for many competitive programming problems involving matrices, linear systems, and transformations. This lesson covers essential matrix operations and their applications.</p>
+	
+	<h2>Matrix Basics</h2>
+	
+	<h3>Matrix Representation</h3>
+	<p>A matrix is a rectangular array of numbers arranged in rows and columns.</p>
+	
+	<CodeExample 
+		client:load
+		title="Matrix Declaration and Initialization"
+		code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+    // 3x3 matrix initialization
+    vector<vector<int>> matrix = {
+        {1, 2, 3},
+        {4, 5, 6},
+        {7, 8, 9}
+    };
+    
+    // Display matrix
+    cout << "Matrix:" << endl;
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 3; j++) {
+            cout << matrix[i][j] << " ";
+        }
+        cout << endl;
+    }
+    
+    return 0;
+}`}
+		explanation="Basic matrix representation using 2D vectors in C++. This is the foundation for all matrix operations."
+		output={`Matrix:
+1 2 3 
+4 5 6 
+7 8 9`}
+	/>
+	
+	<h2>Matrix Operations</h2>
+	
+	<h3>Matrix Addition and Subtraction</h3>
+	<p>Matrices of the same dimensions can be added or subtracted element-wise.</p>
+	
+	<CodeExample 
+		client:load
+		title="Matrix Addition"
+		code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<vector<int>> addMatrices(const vector<vector<int>>& A, const vector<vector<int>>& B) {
+    int rows = A.size();
+    int cols = A[0].size();
+    vector<vector<int>> result(rows, vector<int>(cols));
+    
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            result[i][j] = A[i][j] + B[i][j];
+        }
+    }
+    return result;
+}
+
+int main() {
+    vector<vector<int>> A = {{1, 2}, {3, 4}};
+    vector<vector<int>> B = {{5, 6}, {7, 8}};
+    
+    vector<vector<int>> C = addMatrices(A, B);
+    
+    cout << "Result of A + B:" << endl;
+    for (const auto& row : C) {
+        for (int val : row) {
+            cout << val << " ";
+        }
+        cout << endl;
+    }
+    
+    return 0;
+}`}
+		explanation="Matrix addition is performed element-wise. Both matrices must have the same dimensions."
+		output={`Result of A + B:
+6 8 
+10 12`}
+	/>
+	
+	<h3>Matrix Multiplication</h3>
+	<p>Matrix multiplication follows the rule: C[i][j] = Σ A[i][k] * B[k][j]</p>
+	
+	<CodeExample 
+		client:load
+		title="Matrix Multiplication"
+		code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<vector<int>> multiplyMatrices(const vector<vector<int>>& A, const vector<vector<int>>& B) {
+    int rowsA = A.size();
+    int colsA = A[0].size();
+    int colsB = B[0].size();
+    
+    vector<vector<int>> result(rowsA, vector<int>(colsB, 0));
+    
+    for (int i = 0; i < rowsA; i++) {
+        for (int j = 0; j < colsB; j++) {
+            for (int k = 0; k < colsA; k++) {
+                result[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+    return result;
+}
+
+int main() {
+    vector<vector<int>> A = {{1, 2}, {3, 4}};
+    vector<vector<int>> B = {{5, 6}, {7, 8}};
+    
+    vector<vector<int>> C = multiplyMatrices(A, B);
+    
+    cout << "Result of A * B:" << endl;
+    for (const auto& row : C) {
+        for (int val : row) {
+            cout << val << " ";
+        }
+        cout << endl;
+    }
+    
+    return 0;
+}`}
+		explanation="Matrix multiplication requires the number of columns in the first matrix to equal the number of rows in the second matrix."
+		output={`Result of A * B:
+19 22 
+43 50`}
+	/>
+	
+	<h2>Matrix Exponentiation</h2>
+	<p>Matrix exponentiation is used to compute powers of matrices efficiently, often for solving recurrence relations.</p>
+	
+	<CodeExample 
+		client:load
+		title="Fast Matrix Exponentiation"
+		code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+vector<vector<long long>> multiply(const vector<vector<long long>>& A, const vector<vector<long long>>& B) {
+    int n = A.size();
+    vector<vector<long long>> result(n, vector<long long>(n, 0));
+    
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            for (int k = 0; k < n; k++) {
+                result[i][j] += A[i][k] * B[k][j];
+            }
+        }
+    }
+    return result;
+}
+
+vector<vector<long long>> matrixPower(vector<vector<long long>> base, int exp) {
+    int n = base.size();
+    vector<vector<long long>> result(n, vector<long long>(n, 0));
+    
+    // Initialize identity matrix
+    for (int i = 0; i < n; i++) {
+        result[i][i] = 1;
+    }
+    
+    while (exp > 0) {
+        if (exp & 1) {
+            result = multiply(result, base);
+        }
+        base = multiply(base, base);
+        exp >>= 1;
+    }
+    
+    return result;
+}
+
+int main() {
+    // Fibonacci matrix [[1,1],[1,0]]
+    vector<vector<long long>> fib = {{1, 1}, {1, 0}};
+    
+    int n = 10;
+    auto result = matrixPower(fib, n);
+    
+    cout << "F(" << n << ") = " << result[0][1] << endl;
+    cout << "F(" << n+1 << ") = " << result[0][0] << endl;
+    
+    return 0;
+}`}
+		explanation="Matrix exponentiation can compute Fibonacci numbers in O(log n) time using the transformation matrix [[1,1],[1,0]]."
+		output={`F(10) = 55
+F(11) = 89`}
+	/>
+	
+	<h2>Gaussian Elimination</h2>
+	<p>Gaussian elimination is used to solve systems of linear equations and find matrix rank.</p>
+	
+	<CodeExample 
+		client:load
+		title="Gaussian Elimination for Linear Systems"
+		code={`#include <iostream>
+#include <vector>
+#include <iomanip>
+using namespace std;
+
+vector<double> gaussianElimination(vector<vector<double>> augmented) {
+    int n = augmented.size();
+    
+    // Forward elimination
+    for (int i = 0; i < n; i++) {
+        // Find pivot
+        int maxRow = i;
+        for (int k = i + 1; k < n; k++) {
+            if (abs(augmented[k][i]) > abs(augmented[maxRow][i])) {
+                maxRow = k;
+            }
+        }
+        swap(augmented[i], augmented[maxRow]);
+        
+        // Make all rows below this one 0 in current column
+        for (int k = i + 1; k < n; k++) {
+            double factor = augmented[k][i] / augmented[i][i];
+            for (int j = i; j <= n; j++) {
+                augmented[k][j] -= factor * augmented[i][j];
+            }
+        }
+    }
+    
+    // Back substitution
+    vector<double> solution(n);
+    for (int i = n - 1; i >= 0; i--) {
+        solution[i] = augmented[i][n];
+        for (int j = i + 1; j < n; j++) {
+            solution[i] -= augmented[i][j] * solution[j];
+        }
+        solution[i] /= augmented[i][i];
+    }
+    
+    return solution;
+}
+
+int main() {
+    // Solve: 2x + 3y = 7, x - y = 1
+    vector<vector<double>> augmented = {
+        {2, 3, 7},
+        {1, -1, 1}
+    };
+    
+    vector<double> solution = gaussianElimination(augmented);
+    
+    cout << fixed << setprecision(2);
+    cout << "Solution:" << endl;
+    cout << "x = " << solution[0] << endl;
+    cout << "y = " << solution[1] << endl;
+    
+    return 0;
+}`}
+		explanation="Gaussian elimination transforms the augmented matrix to row echelon form, then uses back substitution to find the solution."
+		output={`Solution:
+x = 2.00
+y = 1.00`}
+	/>
+	
+	<h2>Matrix Determinant</h2>
+	<p>The determinant is a scalar value that provides important information about a matrix.</p>
+	
+	<CodeExample 
+		client:load
+		title="Matrix Determinant Calculation"
+		code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+double determinant(vector<vector<double>> matrix) {
+    int n = matrix.size();
+    double det = 1;
+    
+    for (int i = 0; i < n; i++) {
+        // Find pivot
+        int pivot = i;
+        for (int j = i + 1; j < n; j++) {
+            if (abs(matrix[j][i]) > abs(matrix[pivot][i])) {
+                pivot = j;
+            }
+        }
+        
+        if (pivot != i) {
+            swap(matrix[i], matrix[pivot]);
+            det *= -1; // Swap changes sign
+        }
+        
+        det *= matrix[i][i];
+        
+        if (abs(matrix[i][i]) < 1e-9) {
+            return 0; // Singular matrix
+        }
+        
+        // Eliminate column
+        for (int j = i + 1; j < n; j++) {
+            double factor = matrix[j][i] / matrix[i][i];
+            for (int k = i; k < n; k++) {
+                matrix[j][k] -= factor * matrix[i][k];
+            }
+        }
+    }
+    
+    return det;
+}
+
+int main() {
+    vector<vector<double>> matrix = {
+        {1, 2, 3},
+        {4, 5, 6},
+        {7, 8, 10}
+    };
+    
+    double det = determinant(matrix);
+    cout << "Determinant = " << det << endl;
+    
+    return 0;
+}`}
+		explanation="The determinant is calculated using Gaussian elimination. A zero determinant indicates a singular (non-invertible) matrix."
+		output={`Determinant = -3`}
+	/>
+	
+	<h2>Applications</h2>
+	
+	<h3>Linear Recurrence Relations</h3>
+	<ul>
+		<li>Fibonacci sequence and its variants</li>
+		<li>Linear recurrences with constant coefficients</li>
+		<li>Matrix exponentiation for O(log n) solutions</li>
+	</ul>
+	
+	<h3>Graph Theory Applications</h3>
+	<ul>
+		<li>Adjacency matrix representation</li>
+		<li>Counting paths of length k in graphs</li>
+		<li>Matrix tree theorem for counting spanning trees</li>
+	</ul>
+	
+	<h3>Computational Geometry</h3>
+	<ul>
+		<li>Linear transformations (rotation, scaling, translation)</li>
+		<li>Solving geometric constraint systems</li>
+		<li>Computing intersections and projections</li>
+	</ul>
+	
+	<h2>Practice Problems</h2>
+	<ul>
+		<li>Compute nth Fibonacci number using matrix exponentiation</li>
+		<li>Solve systems of linear equations with floating-point precision</li>
+		<li>Count paths in directed graphs using matrix powers</li>
+		<li>Implement matrix operations with modular arithmetic</li>
+		<li>Calculate determinants of large matrices efficiently</li>
+		<li>Apply linear transformations to geometric objects</li>
+		<li>Solve linear recurrence relations with matrix methods</li>
+	</ul>
+</Layout>

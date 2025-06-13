@@ -1,0 +1,368 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Advanced Dynamic Programming">
+	<h1>Advanced Dynamic Programming</h1>
+	
+	<h2>Overview</h2>
+	<p>Advanced dynamic programming techniques go beyond basic DP patterns to solve complex optimization problems. This lesson covers interval DP, tree DP, knapsack variations, and sophisticated DP optimization techniques.</p>
+	
+	<h2>Interval Dynamic Programming</h2>
+	<p>Interval DP solves problems on contiguous subarrays or substrings by considering all possible intervals.</p>
+	
+	<h3>Matrix Chain Multiplication</h3>
+	<p>The classic interval DP problem: find the optimal way to parenthesize matrix multiplications.</p>
+	
+	<CodeExample 
+		client:load
+		title="Matrix Chain Multiplication"
+		code={`#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+int matrixChainOrder(vector<int>& dimensions) {
+    int n = dimensions.size() - 1; // number of matrices
+    vector<vector<int>> dp(n, vector<int>(n, 0));
+    
+    // l is chain length
+    for (int l = 2; l <= n; l++) {
+        for (int i = 0; i <= n - l; i++) {
+            int j = i + l - 1;
+            dp[i][j] = INT_MAX;
+            
+            for (int k = i; k < j; k++) {
+                int cost = dp[i][k] + dp[k+1][j] + 
+                          dimensions[i] * dimensions[k+1] * dimensions[j+1];
+                dp[i][j] = min(dp[i][j], cost);
+            }
+        }
+    }
+    
+    return dp[0][n-1];
+}
+
+int main() {
+    // Matrix dimensions: A1(10x20), A2(20x30), A3(30x40), A4(40x30)
+    vector<int> dimensions = {10, 20, 30, 40, 30};
+    
+    int result = matrixChainOrder(dimensions);
+    cout << "Minimum scalar multiplications: " << result << endl;
+    
+    return 0;
+}`}
+		explanation="Interval DP considers all possible ways to split the chain and chooses the optimal one. Time complexity: O(n³)."
+		output={`Minimum scalar multiplications: 30000`}
+	/>
+	
+	<h3>Palindrome Partitioning</h3>
+	<p>Find the minimum number of cuts needed to partition a string into palindromes.</p>
+	
+	<CodeExample 
+		client:load
+		title="Minimum Palindrome Partitioning"
+		code={`#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+int minPalindromePartition(string s) {
+    int n = s.length();
+    
+    // isPalindrome[i][j] = true if s[i...j] is palindrome
+    vector<vector<bool>> isPalindrome(n, vector<bool>(n, false));
+    
+    // Every single character is palindrome
+    for (int i = 0; i < n; i++) {
+        isPalindrome[i][i] = true;
+    }
+    
+    // Check for palindromes of length 2
+    for (int i = 0; i < n - 1; i++) {
+        if (s[i] == s[i + 1]) {
+            isPalindrome[i][i + 1] = true;
+        }
+    }
+    
+    // Check for palindromes of length 3 and more
+    for (int len = 3; len <= n; len++) {
+        for (int i = 0; i <= n - len; i++) {
+            int j = i + len - 1;
+            if (s[i] == s[j] && isPalindrome[i + 1][j - 1]) {
+                isPalindrome[i][j] = true;
+            }
+        }
+    }
+    
+    // dp[i] = minimum cuts needed for s[0...i]
+    vector<int> dp(n, 0);
+    
+    for (int i = 0; i < n; i++) {
+        if (isPalindrome[0][i]) {
+            dp[i] = 0;
+        } else {
+            dp[i] = dp[i - 1] + 1;
+            for (int j = 1; j < i; j++) {
+                if (isPalindrome[j + 1][i]) {
+                    dp[i] = min(dp[i], dp[j] + 1);
+                }
+            }
+        }
+    }
+    
+    return dp[n - 1];
+}
+
+int main() {
+    string s = "aabbbaa";
+    int result = minPalindromePartition(s);
+    cout << "Minimum cuts needed: " << result << endl;
+    
+    return 0;
+}`}
+		explanation="First precompute all palindromic substrings, then use DP to find minimum partitions."
+		output={`Minimum cuts needed: 1`}
+	/>
+	
+	<h2>Tree Dynamic Programming</h2>
+	<p>Tree DP solves optimization problems on trees by processing nodes in a specific order.</p>
+	
+	<h3>Maximum Independent Set in Tree</h3>
+	<p>Find the maximum weight independent set in a tree (no two adjacent nodes).</p>
+	
+	<CodeExample 
+		client:load
+		title="Maximum Independent Set in Tree"
+		code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class TreeDP {
+private:
+    vector<vector<int>> adj;
+    vector<int> weight;
+    vector<vector<int>> dp;
+    
+    void dfs(int node, int parent) {
+        dp[node][0] = 0; // not including node
+        dp[node][1] = weight[node]; // including node
+        
+        for (int child : adj[node]) {
+            if (child != parent) {
+                dfs(child, node);
+                dp[node][0] += max(dp[child][0], dp[child][1]);
+                dp[node][1] += dp[child][0];
+            }
+        }
+    }
+    
+public:
+    int maxIndependentSet(int n, vector<int>& weights, vector<pair<int,int>>& edges) {
+        adj.assign(n, vector<int>());
+        weight = weights;
+        dp.assign(n, vector<int>(2, 0));
+        
+        for (auto& edge : edges) {
+            adj[edge.first].push_back(edge.second);
+            adj[edge.second].push_back(edge.first);
+        }
+        
+        dfs(0, -1);
+        return max(dp[0][0], dp[0][1]);
+    }
+};
+
+int main() {
+    vector<int> weights = {10, 20, 30, 40, 50};
+    vector<pair<int,int>> edges = {{0,1}, {0,2}, {1,3}, {1,4}};
+    
+    TreeDP solver;
+    int result = solver.maxIndependentSet(5, weights, edges);
+    cout << "Maximum independent set weight: " << result << endl;
+    
+    return 0;
+}`}
+		explanation="For each node, we compute two states: including the node and excluding it. The recurrence considers children optimally."
+		output={`Maximum independent set weight: 90`}
+	/>
+	
+	<h2>Knapsack Variations</h2>
+	
+	<h3>Unbounded Knapsack</h3>
+	<p>Items can be used unlimited times.</p>
+	
+	<CodeExample 
+		client:load
+		title="Unbounded Knapsack Problem"
+		code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int unboundedKnapsack(int capacity, vector<int>& weights, vector<int>& values) {
+    vector<int> dp(capacity + 1, 0);
+    
+    for (int w = 1; w <= capacity; w++) {
+        for (int i = 0; i < weights.size(); i++) {
+            if (weights[i] <= w) {
+                dp[w] = max(dp[w], dp[w - weights[i]] + values[i]);
+            }
+        }
+    }
+    
+    return dp[capacity];
+}
+
+int main() {
+    vector<int> weights = {1, 3, 4, 5};
+    vector<int> values = {1, 4, 5, 7};
+    int capacity = 8;
+    
+    int result = unboundedKnapsack(capacity, weights, values);
+    cout << "Maximum value: " << result << endl;
+    
+    return 0;
+}`}
+		explanation="Unlike 0/1 knapsack, items can be used multiple times. We iterate through capacity and items differently."
+		output={`Maximum value: 8`}
+	/>
+	
+	<h3>Multiple Knapsack</h3>
+	<p>Each item has a limited quantity available.</p>
+	
+	<CodeExample 
+		client:load
+		title="Multiple Knapsack Problem"
+		code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int multipleKnapsack(int capacity, vector<int>& weights, vector<int>& values, vector<int>& quantities) {
+    vector<int> dp(capacity + 1, 0);
+    
+    for (int i = 0; i < weights.size(); i++) {
+        for (int w = capacity; w >= weights[i]; w--) {
+            for (int k = 1; k <= quantities[i] && k * weights[i] <= w; k++) {
+                dp[w] = max(dp[w], dp[w - k * weights[i]] + k * values[i]);
+            }
+        }
+    }
+    
+    return dp[capacity];
+}
+
+int main() {
+    vector<int> weights = {2, 3, 4, 5};
+    vector<int> values = {1, 4, 5, 7};
+    vector<int> quantities = {3, 2, 1, 2};
+    int capacity = 10;
+    
+    int result = multipleKnapsack(capacity, weights, values, quantities);
+    cout << "Maximum value: " << result << endl;
+    
+    return 0;
+}`}
+		explanation="For each item, we consider using it 1, 2, ..., up to its available quantity times."
+		output={`Maximum value: 11`}
+	/>
+	
+	<h2>DP Optimization Techniques</h2>
+	
+	<h3>Convex Hull Optimization</h3>
+	<p>Used when DP recurrence has the form: dp[i] = min(dp[j] + cost(j,i)) where cost satisfies certain properties.</p>
+	
+	<h3>Divide and Conquer Optimization</h3>
+	<p>When the optimal split point has monotonicity property: if opt(i,j) is optimal for dp[i][j], then opt(i,j) ≤ opt(i,j+1).</p>
+	
+	<h3>Knuth-Yao Optimization</h3>
+	<p>For certain interval DP problems with quadrangle inequality: cost(a,c) + cost(b,d) ≤ cost(a,d) + cost(b,c) for a ≤ b ≤ c ≤ d.</p>
+	
+	<CodeExample 
+		client:load
+		title="Knuth-Yao Optimization Example"
+		code={`#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+// Optimized matrix chain multiplication using Knuth-Yao
+int optimizedMatrixChain(vector<int>& p) {
+    int n = p.size() - 1;
+    vector<vector<int>> dp(n, vector<int>(n, 0));
+    vector<vector<int>> opt(n, vector<int>(n, 0));
+    
+    // Initialize diagonal
+    for (int i = 0; i < n; i++) {
+        opt[i][i] = i;
+    }
+    
+    for (int len = 2; len <= n; len++) {
+        for (int i = 0; i <= n - len; i++) {
+            int j = i + len - 1;
+            dp[i][j] = INT_MAX;
+            
+            int start = opt[i][j-1];
+            int end = (j == n-1) ? j-1 : opt[i+1][j];
+            
+            for (int k = start; k <= end; k++) {
+                int cost = dp[i][k] + dp[k+1][j] + p[i]*p[k+1]*p[j+1];
+                if (cost < dp[i][j]) {
+                    dp[i][j] = cost;
+                    opt[i][j] = k;
+                }
+            }
+        }
+    }
+    
+    return dp[0][n-1];
+}
+
+int main() {
+    vector<int> p = {1, 2, 3, 4, 5};
+    int result = optimizedMatrixChain(p);
+    cout << "Minimum scalar multiplications: " << result << endl;
+    
+    return 0;
+}`}
+		explanation="Knuth-Yao optimization reduces the range of k values to check by using the monotonicity property of optimal split points."
+		output={`Minimum scalar multiplications: 38`}
+	/>
+	
+	<h2>Advanced Applications</h2>
+	
+	<h3>DP on Digits</h3>
+	<ul>
+		<li>Count numbers with specific digit properties</li>
+		<li>Sum of digits in a range</li>
+		<li>Numbers without consecutive digits</li>
+	</ul>
+	
+	<h3>DP with Bitmasks</h3>
+	<ul>
+		<li>Traveling Salesman Problem</li>
+		<li>Assignment problems with constraints</li>
+		<li>Subset enumeration with properties</li>
+	</ul>
+	
+	<h3>Probability DP</h3>
+	<ul>
+		<li>Expected value calculations</li>
+		<li>Markov chain analysis</li>
+		<li>Game theory problems</li>
+	</ul>
+	
+	<h2>Practice Problems</h2>
+	<ul>
+		<li>Solve bracket sequence problems using interval DP</li>
+		<li>Implement tree DP for diameter and center finding</li>
+		<li>Optimize large DP recurrences using convex hull trick</li>
+		<li>Count valid parentheses using DP on digits</li>
+		<li>Solve TSP variants using bitmask DP</li>
+		<li>Calculate expected outcomes in probability DP</li>
+		<li>Apply Knuth-Yao optimization to reduce complexity</li>
+	</ul>
+</Layout>

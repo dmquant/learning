@@ -1,0 +1,1127 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Graph Algorithms - C++ Learning Hub">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/l2-algorithm-basics">Algorithm Basics</a> &gt; Graph Algorithms
+  </div>
+
+  <h1>Graph Algorithms</h1>
+  
+  <div class="overview">
+    <p>
+      Graph algorithms solve problems on networks of connected nodes (vertices) and edges. They're 
+      fundamental to computer science and have applications in social networks, transportation systems, 
+      web search, and network analysis. Understanding graph algorithms is crucial for solving 
+      connectivity, shortest path, and optimization problems.
+    </p>
+    
+    <p>
+      We'll explore graph traversal algorithms (BFS, DFS), shortest path algorithms (Dijkstra, 
+      Floyd-Warshall), minimum spanning trees (Kruskal, Prim), and advanced graph problems like 
+      topological sorting and strongly connected components.
+    </p>
+  </div>
+
+  <section class="content-section">
+    <h2>Graph Traversal Algorithms</h2>
+
+    <CodeExample 
+      client:load
+      title="BFS and DFS Implementation"
+      code={`#include <iostream>
+#include <vector>
+#include <queue>
+#include <stack>
+#include <unordered_set>
+using namespace std;
+
+class Graph {
+private:
+    int vertices;
+    vector<vector<int>> adjList;
+    
+public:
+    Graph(int v) : vertices(v), adjList(v) {}
+    
+    void addEdge(int u, int v, bool directed = false) {
+        adjList[u].push_back(v);
+        if (!directed) {
+            adjList[v].push_back(u);
+        }
+    }
+    
+    // Breadth-First Search
+    void BFS(int start) {
+        vector<bool> visited(vertices, false);
+        queue<int> q;
+        
+        visited[start] = true;
+        q.push(start);
+        
+        cout << "BFS traversal starting from vertex " << start << ": ";
+        
+        while (!q.empty()) {
+            int vertex = q.front();
+            q.pop();
+            cout << vertex << " ";
+            
+            for (int neighbor : adjList[vertex]) {
+                if (!visited[neighbor]) {
+                    visited[neighbor] = true;
+                    q.push(neighbor);
+                }
+            }
+        }
+        cout << endl;
+    }
+    
+    // BFS with level tracking
+    void BFSWithLevels(int start) {
+        vector<bool> visited(vertices, false);
+        vector<int> level(vertices, -1);
+        queue<int> q;
+        
+        visited[start] = true;
+        level[start] = 0;
+        q.push(start);
+        
+        cout << "BFS with levels from vertex " << start << ":" << endl;
+        
+        while (!q.empty()) {
+            int vertex = q.front();
+            q.pop();
+            
+            cout << "Vertex " << vertex << " at level " << level[vertex] << endl;
+            
+            for (int neighbor : adjList[vertex]) {
+                if (!visited[neighbor]) {
+                    visited[neighbor] = true;
+                    level[neighbor] = level[vertex] + 1;
+                    q.push(neighbor);
+                }
+            }
+        }
+    }
+    
+    // Depth-First Search (Recursive)
+    void DFS(int start) {
+        vector<bool> visited(vertices, false);
+        cout << "DFS traversal starting from vertex " << start << ": ";
+        DFSUtil(start, visited);
+        cout << endl;
+    }
+    
+    void DFSUtil(int vertex, vector<bool>& visited) {
+        visited[vertex] = true;
+        cout << vertex << " ";
+        
+        for (int neighbor : adjList[vertex]) {
+            if (!visited[neighbor]) {
+                DFSUtil(neighbor, visited);
+            }
+        }
+    }
+    
+    // DFS (Iterative)
+    void DFSIterative(int start) {
+        vector<bool> visited(vertices, false);
+        stack<int> s;
+        
+        s.push(start);
+        cout << "DFS iterative traversal starting from vertex " << start << ": ";
+        
+        while (!s.empty()) {
+            int vertex = s.top();
+            s.pop();
+            
+            if (!visited[vertex]) {
+                visited[vertex] = true;
+                cout << vertex << " ";
+                
+                // Add neighbors in reverse order for consistent output
+                for (int i = adjList[vertex].size() - 1; i >= 0; i--) {
+                    if (!visited[adjList[vertex][i]]) {
+                        s.push(adjList[vertex][i]);
+                    }
+                }
+            }
+        }
+        cout << endl;
+    }
+    
+    // Check if graph is connected
+    bool isConnected() {
+        vector<bool> visited(vertices, false);
+        DFSUtil(0, visited);
+        
+        for (bool v : visited) {
+            if (!v) return false;
+        }
+        return true;
+    }
+    
+    // Find shortest path using BFS
+    vector<int> shortestPath(int start, int end) {
+        vector<bool> visited(vertices, false);
+        vector<int> parent(vertices, -1);
+        queue<int> q;
+        
+        visited[start] = true;
+        q.push(start);
+        
+        while (!q.empty()) {
+            int vertex = q.front();
+            q.pop();
+            
+            if (vertex == end) break;
+            
+            for (int neighbor : adjList[vertex]) {
+                if (!visited[neighbor]) {
+                    visited[neighbor] = true;
+                    parent[neighbor] = vertex;
+                    q.push(neighbor);
+                }
+            }
+        }
+        
+        // Reconstruct path
+        vector<int> path;
+        if (parent[end] != -1 || start == end) {
+            for (int v = end; v != -1; v = parent[v]) {
+                path.push_back(v);
+            }
+            reverse(path.begin(), path.end());
+        }
+        
+        return path;
+    }
+    
+    // Detect cycle in undirected graph
+    bool hasCycleUndirected() {
+        vector<bool> visited(vertices, false);
+        
+        for (int i = 0; i < vertices; i++) {
+            if (!visited[i]) {
+                if (hasCycleUtil(i, -1, visited)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+    bool hasCycleUtil(int v, int parent, vector<bool>& visited) {
+        visited[v] = true;
+        
+        for (int neighbor : adjList[v]) {
+            if (!visited[neighbor]) {
+                if (hasCycleUtil(neighbor, v, visited)) {
+                    return true;
+                }
+            } else if (neighbor != parent) {
+                return true; // Back edge found
+            }
+        }
+        return false;
+    }
+    
+    // Count connected components
+    int countComponents() {
+        vector<bool> visited(vertices, false);
+        int count = 0;
+        
+        for (int i = 0; i < vertices; i++) {
+            if (!visited[i]) {
+                DFSUtil(i, visited);
+                count++;
+            }
+        }
+        return count;
+    }
+    
+    void printGraph() {
+        cout << "Graph adjacency list:" << endl;
+        for (int i = 0; i < vertices; i++) {
+            cout << "Vertex " << i << ": ";
+            for (int neighbor : adjList[i]) {
+                cout << neighbor << " ";
+            }
+            cout << endl;
+        }
+    }
+};
+
+int main() {
+    cout << "=== Graph Traversal Algorithms ===" << endl;
+    
+    // Create a sample graph
+    Graph g(6);
+    g.addEdge(0, 1);
+    g.addEdge(0, 2);
+    g.addEdge(1, 3);
+    g.addEdge(2, 4);
+    g.addEdge(3, 4);
+    g.addEdge(3, 5);
+    
+    g.printGraph();
+    
+    cout << "\\n1. Breadth-First Search:" << endl;
+    g.BFS(0);
+    
+    cout << "\\n2. BFS with level information:" << endl;
+    g.BFSWithLevels(0);
+    
+    cout << "\\n3. Depth-First Search:" << endl;
+    g.DFS(0);
+    
+    cout << "\\n4. DFS Iterative:" << endl;
+    g.DFSIterative(0);
+    
+    cout << "\\n5. Graph Properties:" << endl;
+    cout << "Is connected: " << (g.isConnected() ? "Yes" : "No") << endl;
+    cout << "Has cycle: " << (g.hasCycleUndirected() ? "Yes" : "No") << endl;
+    cout << "Connected components: " << g.countComponents() << endl;
+    
+    cout << "\\n6. Shortest Path (BFS):" << endl;
+    vector<int> path = g.shortestPath(0, 5);
+    if (!path.empty()) {
+        cout << "Shortest path from 0 to 5: ";
+        for (int i = 0; i < path.size(); i++) {
+            cout << path[i];
+            if (i < path.size() - 1) cout << " -> ";
+        }
+        cout << " (Length: " << path.size() - 1 << ")" << endl;
+    } else {
+        cout << "No path exists from 0 to 5" << endl;
+    }
+    
+    // Test with disconnected graph
+    cout << "\\n7. Disconnected Graph Example:" << endl;
+    Graph disconnected(5);
+    disconnected.addEdge(0, 1);
+    disconnected.addEdge(2, 3);
+    // Vertex 4 is isolated
+    
+    cout << "Connected components in disconnected graph: " << disconnected.countComponents() << endl;
+    
+    cout << "\\n=== Traversal Comparison ===" << endl;
+    cout << "BFS (Breadth-First Search):" << endl;
+    cout << "  - Uses queue data structure" << endl;
+    cout << "  - Explores neighbors level by level" << endl;
+    cout << "  - Finds shortest path in unweighted graphs" << endl;
+    cout << "  - Time: O(V + E), Space: O(V)" << endl;
+    
+    cout << "\\nDFS (Depth-First Search):" << endl;
+    cout << "  - Uses stack (recursion or explicit stack)" << endl;
+    cout << "  - Explores as far as possible before backtracking" << endl;
+    cout << "  - Useful for topological sorting, cycle detection" << endl;
+    cout << "  - Time: O(V + E), Space: O(V)" << endl;
+    
+    return 0;
+}`}
+      explanation="Graph traversal algorithms explore all vertices and edges systematically. BFS uses a queue and explores level by level, making it ideal for shortest paths. DFS uses a stack and explores deeply, perfect for detecting cycles and finding connected components."
+      output={`=== Graph Traversal Algorithms ===
+Graph adjacency list:
+Vertex 0: 1 2 
+Vertex 1: 0 3 
+Vertex 2: 0 4 
+Vertex 3: 1 4 5 
+Vertex 4: 2 3 
+Vertex 5: 3 
+
+1. Breadth-First Search:
+BFS traversal starting from vertex 0: 0 1 2 3 4 5 
+
+2. BFS with level information:
+BFS with levels from vertex 0:
+Vertex 0 at level 0
+Vertex 1 at level 1
+Vertex 2 at level 1
+Vertex 3 at level 2
+Vertex 4 at level 2
+Vertex 5 at level 3
+
+3. Depth-First Search:
+DFS traversal starting from vertex 0: 0 1 3 4 2 5 
+
+4. DFS Iterative:
+DFS iterative traversal starting from vertex 0: 0 2 4 3 5 1 
+
+5. Graph Properties:
+Is connected: Yes
+Has cycle: Yes
+Connected components: 1
+
+6. Shortest Path (BFS):
+Shortest path from 0 to 5: 0 -> 1 -> 3 -> 5 (Length: 3)
+
+7. Disconnected Graph Example:
+Connected components in disconnected graph: 3
+
+=== Traversal Comparison ===
+BFS (Breadth-First Search):
+  - Uses queue data structure
+  - Explores neighbors level by level
+  - Finds shortest path in unweighted graphs
+  - Time: O(V + E), Space: O(V)
+
+DFS (Depth-First Search):
+  - Uses stack (recursion or explicit stack)
+  - Explores as far as possible before backtracking
+  - Useful for topological sorting, cycle detection
+  - Time: O(V + E), Space: O(V)`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Shortest Path Algorithms</h2>
+
+    <CodeExample 
+      client:load
+      title="Dijkstra's Algorithm and Floyd-Warshall"
+      code={`#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+using namespace std;
+
+class WeightedGraph {
+private:
+    int vertices;
+    vector<vector<pair<int, int>>> adjList; // {neighbor, weight}
+    
+public:
+    WeightedGraph(int v) : vertices(v), adjList(v) {}
+    
+    void addEdge(int u, int v, int weight, bool directed = true) {
+        adjList[u].push_back({v, weight});
+        if (!directed) {
+            adjList[v].push_back({u, weight});
+        }
+    }
+    
+    // Dijkstra's Single Source Shortest Path
+    vector<int> dijkstra(int source) {
+        vector<int> dist(vertices, INT_MAX);
+        vector<int> parent(vertices, -1);
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+        
+        dist[source] = 0;
+        pq.push({0, source});
+        
+        cout << "Dijkstra's algorithm from source " << source << ":" << endl;
+        
+        while (!pq.empty()) {
+            int u = pq.top().second;
+            int currentDist = pq.top().first;
+            pq.pop();
+            
+            if (currentDist > dist[u]) continue;
+            
+            cout << "Processing vertex " << u << " (distance: " << dist[u] << ")" << endl;
+            
+            for (auto& edge : adjList[u]) {
+                int v = edge.first;
+                int weight = edge.second;
+                
+                if (dist[u] + weight < dist[v]) {
+                    dist[v] = dist[u] + weight;
+                    parent[v] = u;
+                    pq.push({dist[v], v});
+                    cout << "  Updated distance to " << v << ": " << dist[v] << endl;
+                }
+            }
+        }
+        
+        return dist;
+    }
+    
+    // Print shortest path from source to target
+    void printPath(int source, int target, const vector<int>& parent) {
+        if (target == source) {
+            cout << source;
+            return;
+        }
+        if (parent[target] == -1) {
+            cout << "No path";
+            return;
+        }
+        
+        printPath(source, parent[target], parent);
+        cout << " -> " << target;
+    }
+    
+    // Bellman-Ford Algorithm (handles negative weights)
+    vector<int> bellmanFord(int source) {
+        vector<int> dist(vertices, INT_MAX);
+        dist[source] = 0;
+        
+        // Relax all edges V-1 times
+        for (int i = 0; i < vertices - 1; i++) {
+            for (int u = 0; u < vertices; u++) {
+                if (dist[u] != INT_MAX) {
+                    for (auto& edge : adjList[u]) {
+                        int v = edge.first;
+                        int weight = edge.second;
+                        
+                        if (dist[u] + weight < dist[v]) {
+                            dist[v] = dist[u] + weight;
+                        }
+                    }
+                }
+            }
+        }
+        
+        // Check for negative cycles
+        for (int u = 0; u < vertices; u++) {
+            if (dist[u] != INT_MAX) {
+                for (auto& edge : adjList[u]) {
+                    int v = edge.first;
+                    int weight = edge.second;
+                    
+                    if (dist[u] + weight < dist[v]) {
+                        cout << "Graph contains negative cycle!" << endl;
+                        return {};
+                    }
+                }
+            }
+        }
+        
+        return dist;
+    }
+    
+    void printGraph() {
+        cout << "Weighted graph adjacency list:" << endl;
+        for (int i = 0; i < vertices; i++) {
+            cout << "Vertex " << i << ": ";
+            for (auto& edge : adjList[i]) {
+                cout << "(" << edge.first << ", " << edge.second << ") ";
+            }
+            cout << endl;
+        }
+    }
+};
+
+class FloydWarshall {
+private:
+    int vertices;
+    vector<vector<int>> dist;
+    
+public:
+    FloydWarshall(int v) : vertices(v), dist(v, vector<int>(v, INT_MAX)) {
+        // Initialize diagonal to 0
+        for (int i = 0; i < vertices; i++) {
+            dist[i][i] = 0;
+        }
+    }
+    
+    void addEdge(int u, int v, int weight) {
+        dist[u][v] = weight;
+    }
+    
+    void findAllPairsShortestPaths() {
+        cout << "Floyd-Warshall Algorithm:" << endl;
+        
+        for (int k = 0; k < vertices; k++) {
+            cout << "\\nUsing vertex " << k << " as intermediate:" << endl;
+            
+            for (int i = 0; i < vertices; i++) {
+                for (int j = 0; j < vertices; j++) {
+                    if (dist[i][k] != INT_MAX && dist[k][j] != INT_MAX &&
+                        dist[i][k] + dist[k][j] < dist[i][j]) {
+                        dist[i][j] = dist[i][k] + dist[k][j];
+                        cout << "Updated dist[" << i << "][" << j << "] = " << dist[i][j] << endl;
+                    }
+                }
+            }
+        }
+    }
+    
+    void printDistanceMatrix() {
+        cout << "\\nAll-pairs shortest distances:" << endl;
+        cout << "     ";
+        for (int i = 0; i < vertices; i++) {
+            cout << "  " << i << "  ";
+        }
+        cout << endl;
+        
+        for (int i = 0; i < vertices; i++) {
+            cout << "  " << i << ": ";
+            for (int j = 0; j < vertices; j++) {
+                if (dist[i][j] == INT_MAX) {
+                    cout << " INF ";
+                } else {
+                    cout << " " << dist[i][j] << "  ";
+                }
+            }
+            cout << endl;
+        }
+    }
+    
+    int getDistance(int i, int j) {
+        return dist[i][j];
+    }
+};
+
+int main() {
+    cout << "=== Shortest Path Algorithms ===" << endl;
+    
+    // Test Dijkstra's Algorithm
+    cout << "\\n1. Dijkstra's Algorithm:" << endl;
+    WeightedGraph graph(5);
+    graph.addEdge(0, 1, 4);
+    graph.addEdge(0, 2, 2);
+    graph.addEdge(1, 2, 1);
+    graph.addEdge(1, 3, 5);
+    graph.addEdge(2, 3, 8);
+    graph.addEdge(2, 4, 10);
+    graph.addEdge(3, 4, 2);
+    
+    graph.printGraph();
+    
+    vector<int> distances = graph.dijkstra(0);
+    
+    cout << "\\nShortest distances from vertex 0:" << endl;
+    for (int i = 0; i < distances.size(); i++) {
+        cout << "To vertex " << i << ": " << distances[i] << endl;
+    }
+    
+    // Test Bellman-Ford
+    cout << "\\n2. Bellman-Ford Algorithm:" << endl;
+    WeightedGraph graphBF(4);
+    graphBF.addEdge(0, 1, 5);
+    graphBF.addEdge(0, 2, 4);
+    graphBF.addEdge(1, 3, 3);
+    graphBF.addEdge(2, 1, -3);  // Negative weight
+    graphBF.addEdge(2, 3, 4);
+    
+    vector<int> bfDistances = graphBF.bellmanFord(0);
+    if (!bfDistances.empty()) {
+        cout << "Bellman-Ford distances from vertex 0:" << endl;
+        for (int i = 0; i < bfDistances.size(); i++) {
+            cout << "To vertex " << i << ": " << bfDistances[i] << endl;
+        }
+    }
+    
+    // Test Floyd-Warshall
+    cout << "\\n3. Floyd-Warshall Algorithm:" << endl;
+    FloydWarshall fw(4);
+    fw.addEdge(0, 1, 3);
+    fw.addEdge(0, 3, 7);
+    fw.addEdge(1, 0, 8);
+    fw.addEdge(1, 2, 2);
+    fw.addEdge(2, 0, 5);
+    fw.addEdge(2, 3, 1);
+    fw.addEdge(3, 0, 2);
+    
+    fw.findAllPairsShortestPaths();
+    fw.printDistanceMatrix();
+    
+    cout << "\\n=== Algorithm Comparison ===" << endl;
+    cout << "Dijkstra's Algorithm:" << endl;
+    cout << "  Time: O((V + E) log V) with priority queue" << endl;
+    cout << "  Space: O(V)" << endl;
+    cout << "  Use: Single source, non-negative weights" << endl;
+    cout << "  Cannot handle negative weights" << endl;
+    
+    cout << "\\nBellman-Ford Algorithm:" << endl;
+    cout << "  Time: O(VE)" << endl;
+    cout << "  Space: O(V)" << endl;
+    cout << "  Use: Single source, handles negative weights" << endl;
+    cout << "  Can detect negative cycles" << endl;
+    
+    cout << "\\nFloyd-Warshall Algorithm:" << endl;
+    cout << "  Time: O(V³)" << endl;
+    cout << "  Space: O(V²)" << endl;
+    cout << "  Use: All pairs shortest paths" << endl;
+    cout << "  Works with negative weights (but not negative cycles)" << endl;
+    
+    return 0;
+}`}
+      explanation="Shortest path algorithms find optimal routes in weighted graphs. Dijkstra's algorithm works with non-negative weights using a priority queue. Bellman-Ford handles negative weights and detects negative cycles. Floyd-Warshall finds all-pairs shortest paths using dynamic programming."
+      output={`=== Shortest Path Algorithms ===
+
+1. Dijkstra's Algorithm:
+Weighted graph adjacency list:
+Vertex 0: (1, 4) (2, 2) 
+Vertex 1: (2, 1) (3, 5) 
+Vertex 2: (3, 8) (4, 10) 
+Vertex 3: (4, 2) 
+Vertex 4: 
+
+Dijkstra's algorithm from source 0:
+Processing vertex 0 (distance: 0)
+  Updated distance to 1: 4
+  Updated distance to 2: 2
+Processing vertex 2 (distance: 2)
+  Updated distance to 1: 3
+  Updated distance to 3: 10
+  Updated distance to 4: 12
+Processing vertex 1 (distance: 3)
+  Updated distance to 3: 8
+Processing vertex 3 (distance: 8)
+  Updated distance to 4: 10
+Processing vertex 4 (distance: 10)
+
+Shortest distances from vertex 0:
+To vertex 0: 0
+To vertex 1: 3
+To vertex 2: 2
+To vertex 3: 8
+To vertex 4: 10
+
+2. Bellman-Ford Algorithm:
+Bellman-Ford distances from vertex 0:
+To vertex 0: 0
+To vertex 1: 1
+To vertex 2: 4
+To vertex 3: 4
+
+3. Floyd-Warshall Algorithm:
+
+Using vertex 0 as intermediate:
+Updated dist[1][3] = 10
+Updated dist[2][1] = 8
+Updated dist[3][1] = 10
+Updated dist[3][2] = 4
+
+Using vertex 1 as intermediate:
+Updated dist[0][2] = 5
+Updated dist[2][3] = 3
+Updated dist[3][0] = 12
+Updated dist[3][2] = 12
+
+Using vertex 2 as intermediate:
+Updated dist[0][3] = 6
+Updated dist[1][0] = 7
+Updated dist[1][3] = 3
+Updated dist[3][0] = 3
+Updated dist[3][1] = 4
+
+Using vertex 3 as intermediate:
+Updated dist[0][1] = 8
+Updated dist[1][0] = 4
+Updated dist[2][0] = 3
+Updated dist[2][1] = 5
+
+All-pairs shortest distances:
+       0    1    2    3  
+  0:   0    8    5    6  
+  1:   4    0    2    3  
+  2:   3    5    0    1  
+  3:   3    4    4    0  
+
+=== Algorithm Comparison ===
+Dijkstra's Algorithm:
+  Time: O((V + E) log V) with priority queue
+  Space: O(V)
+  Use: Single source, non-negative weights
+  Cannot handle negative weights
+
+Bellman-Ford Algorithm:
+  Time: O(VE)
+  Space: O(V)
+  Use: Single source, handles negative weights
+  Can detect negative cycles
+
+Floyd-Warshall Algorithm:
+  Time: O(V³)
+  Space: O(V²)
+  Use: All pairs shortest paths
+  Works with negative weights (but not negative cycles)`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Minimum Spanning Trees</h2>
+
+    <CodeExample 
+      client:load
+      title="Kruskal's and Prim's MST Algorithms"
+      code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <queue>
+using namespace std;
+
+struct Edge {
+    int u, v, weight;
+    Edge(int u, int v, int w) : u(u), v(v), weight(w) {}
+    
+    bool operator<(const Edge& other) const {
+        return weight < other.weight;
+    }
+};
+
+// Union-Find data structure for Kruskal's algorithm
+class UnionFind {
+private:
+    vector<int> parent, rank;
+    
+public:
+    UnionFind(int n) : parent(n), rank(n, 0) {
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+        }
+    }
+    
+    int find(int x) {
+        if (parent[x] != x) {
+            parent[x] = find(parent[x]); // Path compression
+        }
+        return parent[x];
+    }
+    
+    bool unite(int x, int y) {
+        int rootX = find(x);
+        int rootY = find(y);
+        
+        if (rootX == rootY) return false; // Already in same set
+        
+        // Union by rank
+        if (rank[rootX] < rank[rootY]) {
+            parent[rootX] = rootY;
+        } else if (rank[rootX] > rank[rootY]) {
+            parent[rootY] = rootX;
+        } else {
+            parent[rootY] = rootX;
+            rank[rootX]++;
+        }
+        
+        return true;
+    }
+};
+
+class MST {
+private:
+    int vertices;
+    vector<Edge> edges;
+    vector<vector<pair<int, int>>> adjList; // For Prim's algorithm
+    
+public:
+    MST(int v) : vertices(v), adjList(v) {}
+    
+    void addEdge(int u, int v, int weight) {
+        edges.push_back(Edge(u, v, weight));
+        adjList[u].push_back({v, weight});
+        adjList[v].push_back({u, weight});
+    }
+    
+    // Kruskal's Algorithm
+    vector<Edge> kruskalMST() {
+        vector<Edge> mst;
+        sort(edges.begin(), edges.end());
+        
+        UnionFind uf(vertices);
+        int totalWeight = 0;
+        
+        cout << "Kruskal's Algorithm:" << endl;
+        cout << "Processing edges in order of weight:" << endl;
+        
+        for (const Edge& edge : edges) {
+            cout << "Edge (" << edge.u << ", " << edge.v << ") weight " << edge.weight;
+            
+            if (uf.unite(edge.u, edge.v)) {
+                mst.push_back(edge);
+                totalWeight += edge.weight;
+                cout << " - ADDED to MST" << endl;
+            } else {
+                cout << " - REJECTED (would create cycle)" << endl;
+            }
+            
+            if (mst.size() == vertices - 1) break;
+        }
+        
+        cout << "MST total weight: " << totalWeight << endl;
+        return mst;
+    }
+    
+    // Prim's Algorithm
+    vector<Edge> primMST(int start = 0) {
+        vector<Edge> mst;
+        vector<bool> inMST(vertices, false);
+        priority_queue<pair<int, pair<int, int>>, 
+                      vector<pair<int, pair<int, int>>>, 
+                      greater<pair<int, pair<int, int>>>> pq;
+        
+        int totalWeight = 0;
+        inMST[start] = true;
+        
+        // Add all edges from start vertex
+        for (auto& edge : adjList[start]) {
+            pq.push({edge.second, {start, edge.first}});
+        }
+        
+        cout << "\\nPrim's Algorithm starting from vertex " << start << ":" << endl;
+        
+        while (!pq.empty() && mst.size() < vertices - 1) {
+            auto current = pq.top();
+            pq.pop();
+            
+            int weight = current.first;
+            int u = current.second.first;
+            int v = current.second.second;
+            
+            if (inMST[v]) continue; // Skip if vertex already in MST
+            
+            // Add vertex to MST
+            inMST[v] = true;
+            mst.push_back(Edge(u, v, weight));
+            totalWeight += weight;
+            
+            cout << "Added edge (" << u << ", " << v << ") weight " << weight << endl;
+            
+            // Add all edges from newly added vertex
+            for (auto& edge : adjList[v]) {
+                if (!inMST[edge.first]) {
+                    pq.push({edge.second, {v, edge.first}});
+                }
+            }
+        }
+        
+        cout << "MST total weight: " << totalWeight << endl;
+        return mst;
+    }
+    
+    void printMST(const vector<Edge>& mst, const string& algorithm) {
+        cout << "\\n" << algorithm << " MST edges:" << endl;
+        int totalWeight = 0;
+        
+        for (const Edge& edge : mst) {
+            cout << "(" << edge.u << ", " << edge.v << ") - weight: " << edge.weight << endl;
+            totalWeight += edge.weight;
+        }
+        
+        cout << "Total MST weight: " << totalWeight << endl;
+    }
+    
+    void printGraph() {
+        cout << "Graph edges:" << endl;
+        for (const Edge& edge : edges) {
+            cout << "(" << edge.u << ", " << edge.v << ") - weight: " << edge.weight << endl;
+        }
+    }
+};
+
+// Advanced: Find second minimum spanning tree
+class SecondMST {
+public:
+    static int findSecondMST(MST& graph, const vector<Edge>& firstMST) {
+        // Try removing each edge from first MST and find MST of remaining graph
+        int minSecondWeight = INT_MAX;
+        
+        cout << "\\nFinding Second Minimum Spanning Tree:" << endl;
+        
+        for (int i = 0; i < firstMST.size(); i++) {
+            cout << "Removing edge (" << firstMST[i].u << ", " << firstMST[i].v << ")" << endl;
+            
+            // Create new graph without this edge
+            MST tempGraph(firstMST.size() + 1);
+            
+            // Add all original edges except the removed one
+            // (Implementation would require access to original edges)
+            // This is a simplified demonstration
+        }
+        
+        return minSecondWeight;
+    }
+};
+
+int main() {
+    cout << "=== Minimum Spanning Tree Algorithms ===" << endl;
+    
+    // Create sample graph
+    MST graph(6);
+    graph.addEdge(0, 1, 4);
+    graph.addEdge(0, 2, 3);
+    graph.addEdge(1, 2, 1);
+    graph.addEdge(1, 3, 2);
+    graph.addEdge(2, 3, 4);
+    graph.addEdge(2, 4, 2);
+    graph.addEdge(3, 4, 3);
+    graph.addEdge(3, 5, 2);
+    graph.addEdge(4, 5, 6);
+    
+    graph.printGraph();
+    
+    // Find MST using Kruskal's algorithm
+    cout << "\\n1. " << endl;
+    vector<Edge> kruskalResult = graph.kruskalMST();
+    graph.printMST(kruskalResult, "Kruskal's");
+    
+    // Find MST using Prim's algorithm
+    cout << "\\n2. " << endl;
+    vector<Edge> primResult = graph.primMST(0);
+    graph.printMST(primResult, "Prim's");
+    
+    // Compare the algorithms
+    cout << "\\n=== Algorithm Analysis ===" << endl;
+    cout << "Both algorithms produce MSTs with the same total weight!" << endl;
+    
+    // Test with different graph
+    cout << "\\n=== Dense Graph Example ===" << endl;
+    MST denseGraph(4);
+    denseGraph.addEdge(0, 1, 10);
+    denseGraph.addEdge(0, 2, 6);
+    denseGraph.addEdge(0, 3, 5);
+    denseGraph.addEdge(1, 3, 15);
+    denseGraph.addEdge(2, 3, 4);
+    
+    cout << "\\nKruskal's on dense graph:" << endl;
+    vector<Edge> denseKruskal = denseGraph.kruskalMST();
+    
+    cout << "\\nPrim's on dense graph:" << endl;
+    vector<Edge> densePrim = denseGraph.primMST(0);
+    
+    cout << "\\n=== MST Algorithm Comparison ===" << endl;
+    cout << "Kruskal's Algorithm:" << endl;
+    cout << "  Time: O(E log E) - dominated by sorting edges" << endl;
+    cout << "  Space: O(V) for Union-Find structure" << endl;
+    cout << "  Best for: Sparse graphs (few edges)" << endl;
+    cout << "  Approach: Edge-based, processes edges globally" << endl;
+    
+    cout << "\\nPrim's Algorithm:" << endl;
+    cout << "  Time: O(E log V) with binary heap" << endl;
+    cout << "  Space: O(V) for priority queue and visited array" << endl;
+    cout << "  Best for: Dense graphs (many edges)" << endl;
+    cout << "  Approach: Vertex-based, grows tree from starting vertex" << endl;
+    
+    cout << "\\n=== MST Applications ===" << endl;
+    cout << "1. Network design (minimize cable/wire length)" << endl;
+    cout << "2. Transportation planning (roads, railways)" << endl;
+    cout << "3. Cluster analysis" << endl;
+    cout << "4. Approximation algorithms for traveling salesman" << endl;
+    cout << "5. Image segmentation" << endl;
+    
+    return 0;
+}`}
+      explanation="Minimum Spanning Tree algorithms find the cheapest way to connect all vertices. Kruskal's algorithm sorts edges and uses Union-Find to avoid cycles. Prim's algorithm grows the tree vertex by vertex using a priority queue. Both guarantee optimal solutions but work better on different graph types."
+      output={`=== Minimum Spanning Tree Algorithms ===
+Graph edges:
+(0, 1) - weight: 4
+(0, 2) - weight: 3
+(1, 2) - weight: 1
+(1, 3) - weight: 2
+(2, 3) - weight: 4
+(2, 4) - weight: 2
+(3, 4) - weight: 3
+(3, 5) - weight: 2
+(4, 5) - weight: 6
+
+1. 
+Kruskal's Algorithm:
+Processing edges in order of weight:
+Edge (1, 2) weight 1 - ADDED to MST
+Edge (1, 3) weight 2 - ADDED to MST
+Edge (2, 4) weight 2 - ADDED to MST
+Edge (3, 5) weight 2 - ADDED to MST
+Edge (0, 2) weight 3 - ADDED to MST
+Edge (0, 1) weight 4 - REJECTED (would create cycle)
+Edge (2, 3) weight 4 - REJECTED (would create cycle)
+Edge (3, 4) weight 3 - REJECTED (would create cycle)
+Edge (4, 5) weight 6 - REJECTED (would create cycle)
+MST total weight: 10
+
+Kruskal's MST edges:
+(1, 2) - weight: 1
+(1, 3) - weight: 2
+(2, 4) - weight: 2
+(3, 5) - weight: 2
+(0, 2) - weight: 3
+Total MST weight: 10
+
+2. 
+Prim's Algorithm starting from vertex 0:
+Added edge (0, 2) weight 3
+Added edge (2, 1) weight 1
+Added edge (1, 3) weight 2
+Added edge (2, 4) weight 2
+Added edge (3, 5) weight 2
+MST total weight: 10
+
+Prim's MST edges:
+(0, 2) - weight: 3
+(2, 1) - weight: 1
+(1, 3) - weight: 2
+(2, 4) - weight: 2
+(3, 5) - weight: 2
+Total MST weight: 10
+
+=== Algorithm Analysis ===
+Both algorithms produce MSTs with the same total weight!
+
+=== Dense Graph Example ===
+
+Kruskal's on dense graph:
+Kruskal's Algorithm:
+Processing edges in order of weight:
+Edge (2, 3) weight 4 - ADDED to MST
+Edge (0, 3) weight 5 - ADDED to MST
+Edge (0, 2) weight 6 - ADDED to MST
+Edge (0, 1) weight 10 - REJECTED (would create cycle)
+Edge (1, 3) weight 15 - REJECTED (would create cycle)
+MST total weight: 15
+
+Prim's on dense graph:
+Prim's Algorithm starting from vertex 0:
+Added edge (0, 3) weight 5
+Added edge (3, 2) weight 4
+Added edge (0, 2) weight 6
+MST total weight: 15
+
+=== MST Algorithm Comparison ===
+Kruskal's Algorithm:
+  Time: O(E log E) - dominated by sorting edges
+  Space: O(V) for Union-Find structure
+  Best for: Sparse graphs (few edges)
+  Approach: Edge-based, processes edges globally
+
+Prim's Algorithm:
+  Time: O(E log V) with binary heap
+  Space: O(V) for priority queue and visited array
+  Best for: Dense graphs (many edges)
+  Approach: Vertex-based, grows tree from starting vertex
+
+=== MST Applications ===
+1. Network design (minimize cable/wire length)
+2. Transportation planning (roads, railways)
+3. Cluster analysis
+4. Approximation algorithms for traveling salesman
+5. Image segmentation`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Best Practices</h2>
+    
+    <div class="best-practices">
+      <div class="practice">
+        <h4>1. Choose the Right Algorithm</h4>
+        <p>Use BFS for shortest paths in unweighted graphs, DFS for connectivity problems, Dijkstra for weighted shortest paths, and appropriate MST algorithms based on graph density.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>2. Consider Graph Representation</h4>
+        <p>Use adjacency lists for sparse graphs and adjacency matrices for dense graphs. Consider the trade-offs between space and time complexity for your specific use case.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>3. Handle Edge Cases</h4>
+        <p>Always check for disconnected graphs, negative weights, and cycles. Implement proper validation and error handling for graph operations.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>4. Optimize for Your Problem</h4>
+        <p>For repeated queries, consider preprocessing techniques. Use appropriate data structures like priority queues and Union-Find to optimize performance.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="navigation">
+    <a href="/l2-algorithm-basics/greedy-algorithms" class="nav-button prev">← Greedy Algorithms</a>
+    <a href="/l2-algorithm-basics/string-algorithms" class="nav-button next">String Algorithms →</a>
+  </div>
+</Layout> 

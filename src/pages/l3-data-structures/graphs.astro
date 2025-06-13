@@ -1,0 +1,688 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Graphs - C++ Learning Hub">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/l3-data-structures">Data Structures</a> &gt; Graphs
+  </div>
+
+  <h1>Graphs</h1>
+  
+  <div class="overview">
+    <p>
+      Graphs are non-linear data structures consisting of vertices (nodes) connected by edges. Unlike trees, 
+      graphs can have cycles and multiple paths between vertices. They're essential for modeling relationships, 
+      networks, social connections, maps, and many real-world problems.
+    </p>
+    
+    <p>
+      Graphs can be directed or undirected, weighted or unweighted, and can be represented using adjacency 
+      matrices or adjacency lists. They form the foundation for numerous algorithms in computer science.
+    </p>
+  </div>
+
+  <section class="content-section">
+    <h2>Graph Representations</h2>
+
+    <CodeExample 
+      client:load
+      title="Adjacency List and Matrix Representations"
+      code={`#include <iostream>
+#include <vector>
+#include <list>
+using namespace std;
+
+// Adjacency List Representation
+class GraphAdjList {
+private:
+    int vertices;
+    vector<vector<int>> adjList;
+
+public:
+    GraphAdjList(int v) : vertices(v) {
+        adjList.resize(vertices);
+    }
+    
+    void addEdge(int u, int v, bool directed = false) {
+        adjList[u].push_back(v);
+        if (!directed) {
+            adjList[v].push_back(u);
+        }
+    }
+    
+    void printGraph() {
+        cout << "Adjacency List Representation:" << endl;
+        for (int i = 0; i < vertices; i++) {
+            cout << "Vertex " << i << ": ";
+            for (int neighbor : adjList[i]) {
+                cout << neighbor << " ";
+            }
+            cout << endl;
+        }
+    }
+    
+    vector<int> getNeighbors(int vertex) {
+        return adjList[vertex];
+    }
+    
+    int getVertices() const { return vertices; }
+};
+
+// Adjacency Matrix Representation
+class GraphAdjMatrix {
+private:
+    int vertices;
+    vector<vector<int>> adjMatrix;
+
+public:
+    GraphAdjMatrix(int v) : vertices(v) {
+        adjMatrix.resize(vertices, vector<int>(vertices, 0));
+    }
+    
+    void addEdge(int u, int v, bool directed = false, int weight = 1) {
+        adjMatrix[u][v] = weight;
+        if (!directed) {
+            adjMatrix[v][u] = weight;
+        }
+    }
+    
+    void printGraph() {
+        cout << "Adjacency Matrix Representation:" << endl;
+        cout << "   ";
+        for (int i = 0; i < vertices; i++) {
+            cout << i << " ";
+        }
+        cout << endl;
+        
+        for (int i = 0; i < vertices; i++) {
+            cout << i << ": ";
+            for (int j = 0; j < vertices; j++) {
+                cout << adjMatrix[i][j] << " ";
+            }
+            cout << endl;
+        }
+    }
+    
+    bool hasEdge(int u, int v) {
+        return adjMatrix[u][v] != 0;
+    }
+    
+    int getWeight(int u, int v) {
+        return adjMatrix[u][v];
+    }
+    
+    int getVertices() const { return vertices; }
+};
+
+int main() {
+    cout << "=== Graph Representations ===" << endl;
+    
+    // Create sample graph:
+    // 0 -- 1 -- 2
+    // |    |    |
+    // 3 -- 4 -- 5
+    
+    cout << "\\nSample Graph Structure:" << endl;
+    cout << "0 -- 1 -- 2" << endl;
+    cout << "|    |    |" << endl;
+    cout << "3 -- 4 -- 5" << endl;
+    
+    // Adjacency List
+    cout << "\\n1. " << endl;
+    GraphAdjList graphList(6);
+    graphList.addEdge(0, 1);
+    graphList.addEdge(0, 3);
+    graphList.addEdge(1, 2);
+    graphList.addEdge(1, 4);
+    graphList.addEdge(2, 5);
+    graphList.addEdge(3, 4);
+    graphList.addEdge(4, 5);
+    
+    graphList.printGraph();
+    
+    // Adjacency Matrix
+    cout << "\\n2. " << endl;
+    GraphAdjMatrix graphMatrix(6);
+    graphMatrix.addEdge(0, 1);
+    graphMatrix.addEdge(0, 3);
+    graphMatrix.addEdge(1, 2);
+    graphMatrix.addEdge(1, 4);
+    graphMatrix.addEdge(2, 5);
+    graphMatrix.addEdge(3, 4);
+    graphMatrix.addEdge(4, 5);
+    
+    graphMatrix.printGraph();
+    
+    cout << "\\n=== Comparison ===" << endl;
+    cout << "Adjacency List:" << endl;
+    cout << "  Space: O(V + E)" << endl;
+    cout << "  Add edge: O(1)" << endl;
+    cout << "  Check edge: O(degree)" << endl;
+    cout << "  Best for: Sparse graphs" << endl;
+    
+    cout << "\\nAdjacency Matrix:" << endl;
+    cout << "  Space: O(V²)" << endl;
+    cout << "  Add edge: O(1)" << endl;
+    cout << "  Check edge: O(1)" << endl;
+    cout << "  Best for: Dense graphs" << endl;
+    
+    return 0;
+}`}
+      explanation="Graphs can be represented using adjacency lists (space-efficient for sparse graphs) or adjacency matrices (faster edge lookups for dense graphs). The choice depends on the graph density and operations needed."
+      output={`=== Graph Representations ===
+
+Sample Graph Structure:
+0 -- 1 -- 2
+|    |    |
+3 -- 4 -- 5
+
+1. Adjacency List Representation:
+Vertex 0: 1 3 
+Vertex 1: 0 2 4 
+Vertex 2: 1 5 
+Vertex 3: 0 4 
+Vertex 4: 1 3 5 
+Vertex 5: 2 4 
+
+2. Adjacency Matrix Representation:
+   0 1 2 3 4 5 
+0: 0 1 0 1 0 0 
+1: 1 0 1 0 1 0 
+2: 0 1 0 0 0 1 
+3: 1 0 0 0 1 0 
+4: 0 1 0 1 0 1 
+5: 0 0 1 0 1 0 
+
+=== Comparison ===
+Adjacency List:
+  Space: O(V + E)
+  Add edge: O(1)
+  Check edge: O(degree)
+  Best for: Sparse graphs
+
+Adjacency Matrix:
+  Space: O(V²)
+  Add edge: O(1)
+  Check edge: O(1)
+  Best for: Dense graphs`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Graph Traversal Algorithms</h2>
+
+    <CodeExample 
+      client:load
+      title="DFS and BFS Implementation"
+      code={`#include <iostream>
+#include <vector>
+#include <queue>
+#include <stack>
+using namespace std;
+
+class GraphTraversal {
+private:
+    int vertices;
+    vector<vector<int>> adjList;
+
+public:
+    GraphTraversal(int v) : vertices(v) {
+        adjList.resize(vertices);
+    }
+    
+    void addEdge(int u, int v) {
+        adjList[u].push_back(v);
+        adjList[v].push_back(u);
+    }
+    
+    // Depth-First Search (Recursive)
+    void dfsRecursive(int start, vector<bool>& visited) {
+        visited[start] = true;
+        cout << start << " ";
+        
+        for (int neighbor : adjList[start]) {
+            if (!visited[neighbor]) {
+                dfsRecursive(neighbor, visited);
+            }
+        }
+    }
+    
+    // Depth-First Search (Iterative using stack)
+    void dfsIterative(int start) {
+        vector<bool> visited(vertices, false);
+        stack<int> st;
+        
+        st.push(start);
+        
+        cout << "DFS Iterative: ";
+        while (!st.empty()) {
+            int vertex = st.top();
+            st.pop();
+            
+            if (!visited[vertex]) {
+                visited[vertex] = true;
+                cout << vertex << " ";
+                
+                // Add neighbors to stack (in reverse order for same traversal as recursive)
+                for (auto it = adjList[vertex].rbegin(); it != adjList[vertex].rend(); ++it) {
+                    if (!visited[*it]) {
+                        st.push(*it);
+                    }
+                }
+            }
+        }
+        cout << endl;
+    }
+    
+    // Breadth-First Search
+    void bfs(int start) {
+        vector<bool> visited(vertices, false);
+        queue<int> q;
+        
+        visited[start] = true;
+        q.push(start);
+        
+        cout << "BFS: ";
+        while (!q.empty()) {
+            int vertex = q.front();
+            q.pop();
+            cout << vertex << " ";
+            
+            for (int neighbor : adjList[vertex]) {
+                if (!visited[neighbor]) {
+                    visited[neighbor] = true;
+                    q.push(neighbor);
+                }
+            }
+        }
+        cout << endl;
+    }
+    
+    // DFS to check connectivity
+    bool isConnected() {
+        vector<bool> visited(vertices, false);
+        dfsRecursive(0, visited);
+        
+        for (bool v : visited) {
+            if (!v) return false;
+        }
+        return true;
+    }
+    
+    // Find connected components
+    void findConnectedComponents() {
+        vector<bool> visited(vertices, false);
+        int components = 0;
+        
+        cout << "Connected Components:" << endl;
+        for (int i = 0; i < vertices; i++) {
+            if (!visited[i]) {
+                cout << "Component " << ++components << ": ";
+                dfsRecursive(i, visited);
+                cout << endl;
+            }
+        }
+        cout << "Total components: " << components << endl;
+    }
+    
+    // Detect cycle in undirected graph
+    bool hasCycleDFS(int vertex, vector<bool>& visited, int parent) {
+        visited[vertex] = true;
+        
+        for (int neighbor : adjList[vertex]) {
+            if (!visited[neighbor]) {
+                if (hasCycleDFS(neighbor, visited, vertex)) {
+                    return true;
+                }
+            } else if (neighbor != parent) {
+                return true;  // Back edge found
+            }
+        }
+        return false;
+    }
+    
+    bool hasCycle() {
+        vector<bool> visited(vertices, false);
+        
+        for (int i = 0; i < vertices; i++) {
+            if (!visited[i]) {
+                if (hasCycleDFS(i, visited, -1)) {
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+};
+
+int main() {
+    cout << "=== Graph Traversal Algorithms ===" << endl;
+    
+    // Create sample graph
+    cout << "\\nSample Graph:" << endl;
+    cout << "0 -- 1 -- 3" << endl;
+    cout << "|    |" << endl;
+    cout << "2 -- 4" << endl;
+    
+    GraphTraversal graph(5);
+    graph.addEdge(0, 1);
+    graph.addEdge(0, 2);
+    graph.addEdge(1, 3);
+    graph.addEdge(1, 4);
+    graph.addEdge(2, 4);
+    
+    // Test traversals
+    cout << "\\nTraversals starting from vertex 0:" << endl;
+    
+    vector<bool> visited(5, false);
+    cout << "DFS Recursive: ";
+    graph.dfsRecursive(0, visited);
+    cout << endl;
+    
+    graph.dfsIterative(0);
+    graph.bfs(0);
+    
+    // Test connectivity
+    cout << "\\nConnectivity Analysis:" << endl;
+    cout << "Is graph connected? " << (graph.isConnected() ? "Yes" : "No") << endl;
+    cout << "Has cycle? " << (graph.hasCycle() ? "Yes" : "No") << endl;
+    
+    // Test with disconnected graph
+    cout << "\\nAdding disconnected component:" << endl;
+    GraphTraversal disconnectedGraph(7);
+    disconnectedGraph.addEdge(0, 1);
+    disconnectedGraph.addEdge(0, 2);
+    disconnectedGraph.addEdge(3, 4);
+    disconnectedGraph.addEdge(5, 6);
+    
+    disconnectedGraph.findConnectedComponents();
+    
+    cout << "\\n=== Algorithm Complexities ===" << endl;
+    cout << "DFS Time: O(V + E), Space: O(V)" << endl;
+    cout << "BFS Time: O(V + E), Space: O(V)" << endl;
+    cout << "Applications:" << endl;
+    cout << "  DFS: Topological sorting, detecting cycles, pathfinding" << endl;
+    cout << "  BFS: Shortest path in unweighted graphs, level-order traversal" << endl;
+    
+    return 0;
+}`}
+      explanation="DFS explores as deep as possible before backtracking, using recursion or a stack. BFS explores level by level using a queue. Both are fundamental for graph analysis, connectivity checking, and pathfinding."
+      output={`=== Graph Traversal Algorithms ===
+
+Sample Graph:
+0 -- 1 -- 3
+|    |
+2 -- 4
+
+Traversals starting from vertex 0:
+DFS Recursive: 0 1 3 4 2 
+DFS Iterative: 0 2 4 1 3 
+BFS: 0 1 2 3 4 
+
+Connectivity Analysis:
+Is graph connected? Yes
+Has cycle? Yes
+
+Adding disconnected component:
+Connected Components:
+Component 1: 0 1 2 
+Component 2: 3 4 
+Component 3: 5 6 
+Total components: 3
+
+=== Algorithm Complexities ===
+DFS Time: O(V + E), Space: O(V)
+BFS Time: O(V + E), Space: O(V)
+Applications:
+  DFS: Topological sorting, detecting cycles, pathfinding
+  BFS: Shortest path in unweighted graphs, level-order traversal`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Shortest Path Algorithms</h2>
+
+    <CodeExample 
+      client:load
+      title="Dijkstra's Algorithm Implementation"
+      code={`#include <iostream>
+#include <vector>
+#include <queue>
+#include <limits>
+using namespace std;
+
+class WeightedGraph {
+private:
+    int vertices;
+    vector<vector<pair<int, int>>> adjList; // {destination, weight}
+
+public:
+    WeightedGraph(int v) : vertices(v) {
+        adjList.resize(vertices);
+    }
+    
+    void addEdge(int u, int v, int weight) {
+        adjList[u].push_back({v, weight});
+        adjList[v].push_back({u, weight});
+    }
+    
+    // Dijkstra's Algorithm for shortest paths
+    vector<int> dijkstra(int source) {
+        const int INF = numeric_limits<int>::max();
+        vector<int> distance(vertices, INF);
+        vector<bool> visited(vertices, false);
+        vector<int> parent(vertices, -1);
+        
+        // Priority queue: {distance, vertex}
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+        
+        distance[source] = 0;
+        pq.push({0, source});
+        
+        cout << "Dijkstra's Algorithm from vertex " << source << ":" << endl;
+        
+        while (!pq.empty()) {
+            int u = pq.top().second;
+            pq.pop();
+            
+            if (visited[u]) continue;
+            visited[u] = true;
+            
+            cout << "Processing vertex " << u << " (distance: " << distance[u] << ")" << endl;
+            
+            for (auto& edge : adjList[u]) {
+                int v = edge.first;
+                int weight = edge.second;
+                
+                if (!visited[v] && distance[u] + weight < distance[v]) {
+                    distance[v] = distance[u] + weight;
+                    parent[v] = u;
+                    pq.push({distance[v], v});
+                    cout << "  Updated distance to " << v << ": " << distance[v] << endl;
+                }
+            }
+        }
+        
+        return distance;
+    }
+    
+    // Print shortest path from source to destination
+    void printPath(int source, int dest, const vector<int>& parent) {
+        if (dest == source) {
+            cout << source;
+            return;
+        }
+        
+        if (parent[dest] == -1) {
+            cout << "No path exists";
+            return;
+        }
+        
+        printPath(source, parent[dest], parent);
+        cout << " -> " << dest;
+    }
+    
+    // Floyd-Warshall Algorithm for all-pairs shortest paths
+    void floydWarshall() {
+        const int INF = numeric_limits<int>::max();
+        vector<vector<int>> dist(vertices, vector<int>(vertices, INF));
+        
+        // Initialize distances
+        for (int i = 0; i < vertices; i++) {
+            dist[i][i] = 0;
+        }
+        
+        for (int u = 0; u < vertices; u++) {
+            for (auto& edge : adjList[u]) {
+                int v = edge.first;
+                int weight = edge.second;
+                dist[u][v] = weight;
+            }
+        }
+        
+        // Floyd-Warshall algorithm
+        for (int k = 0; k < vertices; k++) {
+            for (int i = 0; i < vertices; i++) {
+                for (int j = 0; j < vertices; j++) {
+                    if (dist[i][k] != INF && dist[k][j] != INF &&
+                        dist[i][k] + dist[k][j] < dist[i][j]) {
+                        dist[i][j] = dist[i][k] + dist[k][j];
+                    }
+                }
+            }
+        }
+        
+        cout << "\\nAll-pairs shortest distances (Floyd-Warshall):" << endl;
+        cout << "   ";
+        for (int i = 0; i < vertices; i++) {
+            cout << i << "  ";
+        }
+        cout << endl;
+        
+        for (int i = 0; i < vertices; i++) {
+            cout << i << ": ";
+            for (int j = 0; j < vertices; j++) {
+                if (dist[i][j] == INF) {
+                    cout << "∞  ";
+                } else {
+                    cout << dist[i][j] << "  ";
+                }
+            }
+            cout << endl;
+        }
+    }
+};
+
+int main() {
+    cout << "=== Shortest Path Algorithms ===" << endl;
+    
+    // Create weighted graph
+    cout << "\\nWeighted Graph:" << endl;
+    cout << "    2     3" << endl;
+    cout << "0 ---- 1 ---- 2" << endl;
+    cout << "|      |      |" << endl;
+    cout << "|6     |1     |4" << endl;
+    cout << "|      |      |" << endl;
+    cout << "3 ---- 4 ---- 5" << endl;
+    cout << "    1     2" << endl;
+    
+    WeightedGraph graph(6);
+    graph.addEdge(0, 1, 2);
+    graph.addEdge(0, 3, 6);
+    graph.addEdge(1, 2, 3);
+    graph.addEdge(1, 4, 1);
+    graph.addEdge(2, 5, 4);
+    graph.addEdge(3, 4, 1);
+    graph.addEdge(4, 5, 2);
+    
+    // Run Dijkstra's algorithm
+    vector<int> distances = graph.dijkstra(0);
+    
+    cout << "\\nShortest distances from vertex 0:" << endl;
+    for (int i = 0; i < 6; i++) {
+        cout << "To vertex " << i << ": " << distances[i] << endl;
+    }
+    
+    // Run Floyd-Warshall
+    graph.floydWarshall();
+    
+    cout << "\\n=== Algorithm Comparison ===" << endl;
+    cout << "Dijkstra's Algorithm:" << endl;
+    cout << "  Time: O((V + E) log V) with priority queue" << endl;
+    cout << "  Space: O(V)" << endl;
+    cout << "  Use: Single-source shortest paths in weighted graphs" << endl;
+    cout << "  Limitation: Cannot handle negative weights" << endl;
+    
+    cout << "\\nFloyd-Warshall Algorithm:" << endl;
+    cout << "  Time: O(V³)" << endl;
+    cout << "  Space: O(V²)" << endl;
+    cout << "  Use: All-pairs shortest paths" << endl;
+    cout << "  Advantage: Can handle negative weights (but not negative cycles)" << endl;
+    
+    return 0;
+}`}
+      explanation="Dijkstra's algorithm finds shortest paths from a single source using a greedy approach with priority queue. Floyd-Warshall finds all-pairs shortest paths using dynamic programming. Both are fundamental for network routing and optimization."
+      output={`=== Shortest Path Algorithms ===
+
+Weighted Graph:
+    2     3
+0 ---- 1 ---- 2
+|      |      |
+|6     |1     |4
+|      |      |
+3 ---- 4 ---- 5
+    1     2
+
+Dijkstra's Algorithm from vertex 0:
+Processing vertex 0 (distance: 0)
+  Updated distance to 1: 2
+  Updated distance to 3: 6
+Processing vertex 1 (distance: 2)
+  Updated distance to 2: 5
+  Updated distance to 4: 3
+Processing vertex 4 (distance: 3)
+  Updated distance to 5: 5
+  Updated distance to 3: 4
+Processing vertex 3 (distance: 4)
+Processing vertex 2 (distance: 5)
+Processing vertex 5 (distance: 5)
+
+Shortest distances from vertex 0:
+To vertex 0: 0
+To vertex 1: 2
+To vertex 2: 5
+To vertex 3: 4
+To vertex 4: 3
+To vertex 5: 5
+
+All-pairs shortest distances (Floyd-Warshall):
+   0  1  2  3  4  5  
+0: 0  2  5  4  3  5  
+1: 2  0  3  5  1  3  
+2: 5  3  0  8  4  4  
+3: 4  5  8  0  1  3  
+4: 3  1  4  1  0  2  
+5: 5  3  4  3  2  0  
+
+=== Algorithm Comparison ===
+Dijkstra's Algorithm:
+  Time: O((V + E) log V) with priority queue
+  Space: O(V)
+  Use: Single-source shortest paths in weighted graphs
+  Limitation: Cannot handle negative weights
+
+Floyd-Warshall Algorithm:
+  Time: O(V³)
+  Space: O(V²)
+  Use: All-pairs shortest paths
+  Advantage: Can handle negative weights (but not negative cycles)`}
+    />
+  </section>
+
+  <div class="navigation">
+    <a href="/l3-data-structures/trees" class="nav-button prev">← Trees</a>
+    <a href="/l3-data-structures/hash-tables" class="nav-button next">Hash Tables →</a>
+  </div>
+</Layout> 

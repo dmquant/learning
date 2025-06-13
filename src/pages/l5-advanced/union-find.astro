@@ -1,0 +1,69 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Union-Find (Disjoint Set)">
+	<h1>Union-Find (Disjoint Set)</h1>
+	
+	<h2>Overview</h2>
+	<p>Union-Find is a data structure that efficiently maintains a collection of disjoint sets and supports two main operations: union (merge two sets) and find (determine which set an element belongs to).</p>
+	
+	<h2>Key Concepts</h2>
+	<ul>
+		<li><strong>Disjoint Sets:</strong> Collections of elements with no overlap</li>
+		<li><strong>Representative:</strong> A unique element that identifies each set</li>
+		<li><strong>Path Compression:</strong> Optimization that flattens the tree structure</li>
+		<li><strong>Union by Rank:</strong> Optimization that keeps trees balanced</li>
+	</ul>
+	
+	<h2>Basic Operations</h2>
+	
+	<h3>Find Operation</h3>
+	<p>Determines which set an element belongs to by finding its root representative.</p>
+	
+	<h3>Union Operation</h3>
+	<p>Merges two sets by connecting their root representatives.</p>
+	
+	<h2>Optimizations</h2>
+	
+	<h3>Path Compression</h3>
+	<p>During find operations, make every node point directly to the root. This flattens the tree and speeds up future operations.</p>
+	
+	<h3>Union by Rank</h3>
+	<p>Always attach the smaller tree under the root of the larger tree. This keeps the trees balanced and maintains logarithmic height.</p>
+	
+	<h2>Time Complexity</h2>
+	<ul>
+		<li><strong>Without optimizations:</strong> O(n) per operation in worst case</li>
+		<li><strong>With path compression only:</strong> O(log n) amortized</li>
+		<li><strong>With union by rank only:</strong> O(log n) per operation</li>
+		<li><strong>With both optimizations:</strong> O(α(n)) amortized, where α is the inverse Ackermann function</li>
+	</ul>
+	
+	<h2>Applications</h2>
+	<ul>
+		<li><strong>Kruskal's MST Algorithm:</strong> Detect cycles when adding edges</li>
+		<li><strong>Connected Components:</strong> Find connected components in a graph</li>
+		<li><strong>Percolation:</strong> Model connectivity in random systems</li>
+		<li><strong>Image Processing:</strong> Connected component labeling</li>
+		<li><strong>Network Connectivity:</strong> Dynamic connectivity queries</li>
+	</ul>
+	
+	<h2>Variants</h2>
+	
+	<h3>Weighted Union-Find</h3>
+	<p>Maintains additional information about the relationship between elements and their representatives.</p>
+	
+	<h3>Persistent Union-Find</h3>
+	<p>Supports queries about the state of the data structure at different points in time.</p>
+	
+	<h2>Practice Problems</h2>
+	<ul>
+		<li>Implement basic Union-Find with path compression</li>
+		<li>Add union by rank optimization</li>
+		<li>Find number of connected components in a graph</li>
+		<li>Detect cycles in an undirected graph</li>
+		<li>Solve the "Friends and Enemies" problem</li>
+		<li>Implement Kruskal's algorithm using Union-Find</li>
+	</ul>
+</Layout> 

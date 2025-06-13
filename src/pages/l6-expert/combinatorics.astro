@@ -1,0 +1,95 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Combinatorics">
+	<h1>Combinatorics</h1>
+	
+	<h2>Overview</h2>
+	<p>Combinatorics is the branch of mathematics dealing with counting, arrangement, and selection of objects. This lesson covers advanced combinatorial techniques essential for competitive programming.</p>
+	
+	<h2>Fundamental Principles</h2>
+	
+	<h3>Addition Principle</h3>
+	<p>If there are m ways to do one thing and n ways to do another, and these cannot be done simultaneously, then there are m + n ways to do either.</p>
+	
+	<h3>Multiplication Principle</h3>
+	<p>If there are m ways to do one thing and n ways to do another, then there are m × n ways to do both.</p>
+	
+	<h2>Permutations and Combinations</h2>
+	
+	<h3>Permutations</h3>
+	<ul>
+		<li><strong>P(n,r) = n!/(n-r)!</strong> - Arrangements of r objects from n objects</li>
+		<li><strong>Circular Permutations:</strong> (n-1)! ways to arrange n objects in a circle</li>
+		<li><strong>Permutations with Repetition:</strong> n!/(n₁!×n₂!×...×nₖ!)</li>
+	</ul>
+	
+	<h3>Combinations</h3>
+	<ul>
+		<li><strong>C(n,r) = n!/(r!×(n-r)!)</strong> - Selections of r objects from n objects</li>
+		<li><strong>Pascal's Identity:</strong> C(n,r) = C(n-1,r-1) + C(n-1,r)</li>
+		<li><strong>Vandermonde's Identity:</strong> C(m+n,r) = Σ C(m,k)×C(n,r-k)</li>
+	</ul>
+	
+	<h2>Inclusion-Exclusion Principle</h2>
+	<p>For counting objects that satisfy at least one of several conditions:</p>
+	<p><strong>|A₁ ∪ A₂ ∪ ... ∪ Aₙ| = Σ|Aᵢ| - Σ|Aᵢ ∩ Aⱼ| + Σ|Aᵢ ∩ Aⱼ ∩ Aₖ| - ... + (-1)ⁿ⁺¹|A₁ ∩ A₂ ∩ ... ∩ Aₙ|</strong></p>
+	
+	<h3>Applications</h3>
+	<ul>
+		<li>Counting derangements (permutations with no fixed points)</li>
+		<li>Euler's totient function φ(n)</li>
+		<li>Counting surjective functions</li>
+		<li>Rook polynomial problems</li>
+	</ul>
+	
+	<h2>Catalan Numbers</h2>
+	<p>The nth Catalan number is given by: <strong>Cₙ = (1/(n+1)) × C(2n,n) = C(2n,n) - C(2n,n+1)</strong></p>
+	
+	<h3>Recurrence Relation</h3>
+	<p><strong>C₀ = 1, Cₙ = Σ(k=0 to n-1) Cₖ × Cₙ₋₁₋ₖ</strong></p>
+	
+	<h3>Applications of Catalan Numbers</h3>
+	<ul>
+		<li>Number of valid parentheses sequences of length 2n</li>
+		<li>Number of binary trees with n internal nodes</li>
+		<li>Number of ways to triangulate a convex (n+2)-gon</li>
+		<li>Number of monotonic lattice paths from (0,0) to (n,n) that don't cross y=x</li>
+		<li>Number of ways to arrange n pairs of parentheses</li>
+	</ul>
+	
+	<h2>Generating Functions</h2>
+	<p>A generating function is a formal power series whose coefficients encode information about a sequence.</p>
+	
+	<h3>Ordinary Generating Functions</h3>
+	<p><strong>G(x) = Σ aₙxⁿ</strong> where aₙ is the coefficient we want to find</p>
+	
+	<h3>Exponential Generating Functions</h3>
+	<p><strong>G(x) = Σ aₙ(xⁿ/n!)</strong> useful for labeled structures</p>
+	
+	<h2>Advanced Topics</h2>
+	
+	<h3>Stirling Numbers</h3>
+	<ul>
+		<li><strong>First Kind S(n,k):</strong> Number of permutations of n elements with k cycles</li>
+		<li><strong>Second Kind S(n,k):</strong> Number of ways to partition n objects into k non-empty subsets</li>
+	</ul>
+	
+	<h3>Bell Numbers</h3>
+	<p>Bₙ = Σ(k=0 to n) S(n,k) - Total number of partitions of n objects</p>
+	
+	<h3>Burnside's Lemma</h3>
+	<p>For counting objects under group actions: <strong>|X/G| = (1/|G|) × Σ |Fix(g)|</strong></p>
+	
+	<h2>Practice Problems</h2>
+	<ul>
+		<li>Calculate binomial coefficients modulo a prime</li>
+		<li>Count derangements using inclusion-exclusion</li>
+		<li>Solve problems involving Catalan numbers</li>
+		<li>Apply Burnside's lemma to necklace problems</li>
+		<li>Use generating functions to solve recurrence relations</li>
+		<li>Count lattice paths with restrictions</li>
+		<li>Solve partition problems using Stirling numbers</li>
+	</ul>
+</Layout> 

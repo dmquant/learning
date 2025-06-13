@@ -1,0 +1,412 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Greedy Algorithms - C++ Learning Hub">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/l2-algorithm-basics">Algorithm Basics</a> &gt; Greedy Algorithms
+  </div>
+
+  <h1>Greedy Algorithms</h1>
+  
+  <div class="overview">
+    <p>
+      Greedy algorithms make locally optimal choices at each step, hoping to find a global optimum. 
+      They're characterized by making the best immediate choice without considering future consequences. 
+      While not always optimal, greedy algorithms are often simple, efficient, and work well for many 
+      optimization problems.
+    </p>
+    
+    <p>
+      We'll explore classic greedy problems including activity selection, fractional knapsack, 
+      Huffman coding, and graph algorithms like Dijkstra's shortest path and minimum spanning trees.
+    </p>
+  </div>
+
+  <section class="content-section">
+    <h2>Classic Greedy Problems</h2>
+
+    <CodeExample 
+      client:load
+      title="Activity Selection and Fractional Knapsack"
+      code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+struct Activity {
+    int start, finish, index;
+    Activity(int s, int f, int i) : start(s), finish(f), index(i) {}
+};
+
+struct Item {
+    int weight, value;
+    double ratio;
+    int index;
+    
+    Item(int w, int v, int i) : weight(w), value(v), index(i) {
+        ratio = (double)value / weight;
+    }
+};
+
+class GreedyAlgorithms {
+public:
+    // Activity Selection Problem
+    static vector<int> activitySelection(vector<Activity>& activities) {
+        // Sort by finish time
+        sort(activities.begin(), activities.end(), 
+             [](const Activity& a, const Activity& b) {
+                 return a.finish < b.finish;
+             });
+        
+        vector<int> selected;
+        selected.push_back(activities[0].index);
+        int lastSelected = 0;
+        
+        for (int i = 1; i < activities.size(); i++) {
+            if (activities[i].start >= activities[lastSelected].finish) {
+                selected.push_back(activities[i].index);
+                lastSelected = i;
+            }
+        }
+        
+        return selected;
+    }
+    
+    // Fractional Knapsack Problem
+    static double fractionalKnapsack(vector<Item>& items, int capacity) {
+        // Sort by value-to-weight ratio in descending order
+        sort(items.begin(), items.end(), 
+             [](const Item& a, const Item& b) {
+                 return a.ratio > b.ratio;
+             });
+        
+        double totalValue = 0.0;
+        int currentWeight = 0;
+        
+        cout << "Knapsack filling process:" << endl;
+        
+        for (auto& item : items) {
+            if (currentWeight + item.weight <= capacity) {
+                // Take the whole item
+                currentWeight += item.weight;
+                totalValue += item.value;
+                cout << "Take full item " << item.index 
+                     << " (weight: " << item.weight 
+                     << ", value: " << item.value << ")" << endl;
+            } else {
+                // Take fraction of the item
+                int remainingCapacity = capacity - currentWeight;
+                double fraction = (double)remainingCapacity / item.weight;
+                totalValue += item.value * fraction;
+                cout << "Take " << fraction << " of item " << item.index 
+                     << " (weight: " << remainingCapacity 
+                     << ", value: " << item.value * fraction << ")" << endl;
+                break;
+            }
+        }
+        
+        return totalValue;
+    }
+    
+    // Job Scheduling with Deadlines
+    struct Job {
+        int id, deadline, profit;
+        Job(int i, int d, int p) : id(i), deadline(d), profit(p) {}
+    };
+    
+    static pair<int, int> jobScheduling(vector<Job>& jobs) {
+        // Sort jobs by profit in descending order
+        sort(jobs.begin(), jobs.end(), 
+             [](const Job& a, const Job& b) {
+                 return a.profit > b.profit;
+             });
+        
+        int maxDeadline = 0;
+        for (const auto& job : jobs) {
+            maxDeadline = max(maxDeadline, job.deadline);
+        }
+        
+        vector<bool> timeSlot(maxDeadline + 1, false);
+        vector<int> selectedJobs;
+        int totalProfit = 0;
+        
+        for (const auto& job : jobs) {
+            // Find the latest available time slot before or at deadline
+            for (int t = job.deadline; t >= 1; t--) {
+                if (!timeSlot[t]) {
+                    timeSlot[t] = true;
+                    selectedJobs.push_back(job.id);
+                    totalProfit += job.profit;
+                    break;
+                }
+            }
+        }
+        
+        cout << "Selected jobs: ";
+        for (int jobId : selectedJobs) {
+            cout << jobId << " ";
+        }
+        cout << endl;
+        
+        return {selectedJobs.size(), totalProfit};
+    }
+    
+    // Minimum Coins Problem
+    static vector<int> minCoins(vector<int>& coins, int amount) {
+        sort(coins.rbegin(), coins.rend()); // Sort in descending order
+        
+        vector<int> result;
+        
+        for (int coin : coins) {
+            while (amount >= coin) {
+                result.push_back(coin);
+                amount -= coin;
+            }
+        }
+        
+        return result;
+    }
+    
+    // Egyptian Fractions
+    static void printEgyptianFractions(int numerator, int denominator) {
+        cout << "Egyptian fractions for " << numerator << "/" << denominator << ": ";
+        
+        while (numerator > 0) {
+            int unitDenom = (denominator + numerator - 1) / numerator; // Ceiling division
+            cout << "1/" << unitDenom;
+            
+            numerator = numerator * unitDenom - denominator;
+            denominator = denominator * unitDenom;
+            
+            if (numerator > 0) cout << " + ";
+        }
+        cout << endl;
+    }
+    
+    // Platform Assignment (Train Scheduling)
+    static int minPlatforms(vector<pair<int, int>>& trains) {
+        vector<pair<int, int>> events;
+        
+        for (const auto& train : trains) {
+            events.push_back({train.first, 1});  // Arrival: +1 platform
+            events.push_back({train.second, -1}); // Departure: -1 platform
+        }
+        
+        // Sort events by time, departures before arrivals at same time
+        sort(events.begin(), events.end(), 
+             [](const pair<int, int>& a, const pair<int, int>& b) {
+                 if (a.first == b.first) return a.second < b.second;
+                 return a.first < b.first;
+             });
+        
+        int platforms = 0, maxPlatforms = 0;
+        
+        for (const auto& event : events) {
+            platforms += event.second;
+            maxPlatforms = max(maxPlatforms, platforms);
+        }
+        
+        return maxPlatforms;
+    }
+};
+
+int main() {
+    cout << "=== Greedy Algorithms ===" << endl;
+    
+    // Activity Selection
+    cout << "\\n1. Activity Selection Problem:" << endl;
+    vector<Activity> activities = {
+        Activity(1, 4, 1), Activity(3, 5, 2), Activity(0, 6, 3),
+        Activity(5, 7, 4), Activity(3, 8, 5), Activity(5, 9, 6),
+        Activity(6, 10, 7), Activity(8, 11, 8), Activity(8, 12, 9),
+        Activity(2, 13, 10), Activity(12, 14, 11)
+    };
+    
+    cout << "Activities (start, finish):" << endl;
+    for (const auto& activity : activities) {
+        cout << "Activity " << activity.index << ": [" 
+             << activity.start << ", " << activity.finish << "]" << endl;
+    }
+    
+    vector<int> selected = GreedyAlgorithms::activitySelection(activities);
+    cout << "\\nSelected activities: ";
+    for (int id : selected) {
+        cout << id << " ";
+    }
+    cout << "\\nMaximum activities: " << selected.size() << endl;
+    
+    // Fractional Knapsack
+    cout << "\\n2. Fractional Knapsack Problem:" << endl;
+    vector<Item> items = {
+        Item(20, 100, 1), Item(30, 120, 2), Item(10, 60, 3)
+    };
+    int capacity = 50;
+    
+    cout << "Items (weight, value, ratio):" << endl;
+    for (const auto& item : items) {
+        cout << "Item " << item.index << ": weight=" << item.weight 
+             << ", value=" << item.value << ", ratio=" << item.ratio << endl;
+    }
+    cout << "Knapsack capacity: " << capacity << endl;
+    
+    double maxValue = GreedyAlgorithms::fractionalKnapsack(items, capacity);
+    cout << "Maximum value: " << maxValue << endl;
+    
+    // Job Scheduling
+    cout << "\\n3. Job Scheduling with Deadlines:" << endl;
+    vector<GreedyAlgorithms::Job> jobs = {
+        GreedyAlgorithms::Job(1, 4, 20), GreedyAlgorithms::Job(2, 1, 10),
+        GreedyAlgorithms::Job(3, 1, 40), GreedyAlgorithms::Job(4, 1, 30)
+    };
+    
+    cout << "Jobs (id, deadline, profit):" << endl;
+    for (const auto& job : jobs) {
+        cout << "Job " << job.id << ": deadline=" << job.deadline 
+             << ", profit=" << job.profit << endl;
+    }
+    
+    auto result = GreedyAlgorithms::jobScheduling(jobs);
+    cout << "Jobs completed: " << result.first << ", Total profit: " << result.second << endl;
+    
+    // Minimum Coins
+    cout << "\\n4. Minimum Coins (Greedy):" << endl;
+    vector<int> coins = {1, 5, 10, 25};
+    int amount = 67;
+    cout << "Coins available: ";
+    for (int coin : coins) cout << coin << " ";
+    cout << "\\nAmount: " << amount << endl;
+    
+    vector<int> usedCoins = GreedyAlgorithms::minCoins(coins, amount);
+    cout << "Coins used: ";
+    for (int coin : usedCoins) cout << coin << " ";
+    cout << "\\nTotal coins: " << usedCoins.size() << endl;
+    
+    // Egyptian Fractions
+    cout << "\\n5. Egyptian Fractions:" << endl;
+    GreedyAlgorithms::printEgyptianFractions(6, 14);
+    GreedyAlgorithms::printEgyptianFractions(12, 13);
+    
+    // Platform Assignment
+    cout << "\\n6. Minimum Platforms Required:" << endl;
+    vector<pair<int, int>> trains = {{900, 910}, {940, 1200}, {950, 1120}, {1100, 1130}, {1500, 1900}, {1800, 2000}};
+    cout << "Train schedules (arrival, departure):" << endl;
+    for (int i = 0; i < trains.size(); i++) {
+        cout << "Train " << (i + 1) << ": " << trains[i].first << " - " << trains[i].second << endl;
+    }
+    
+    int platforms = GreedyAlgorithms::minPlatforms(trains);
+    cout << "Minimum platforms required: " << platforms << endl;
+    
+    cout << "\\n=== Greedy Algorithm Characteristics ===" << endl;
+    cout << "1. Greedy Choice Property: Local optimum leads to global optimum" << endl;
+    cout << "2. Optimal Substructure: Optimal solution contains optimal subproblems" << endl;
+    cout << "3. No Backtracking: Once a choice is made, it's never reconsidered" << endl;
+    cout << "4. Efficiency: Usually O(n log n) due to sorting, O(n) for processing" << endl;
+    cout << "\\nNote: Greedy doesn't always give optimal solution (e.g., coin change with arbitrary denominations)" << endl;
+    
+    return 0;
+}`}
+      explanation="Greedy algorithms make locally optimal choices at each step. Activity selection uses earliest finish time, fractional knapsack uses value-to-weight ratio, and job scheduling uses highest profit first. The key is identifying the right greedy criterion for each problem."
+      output={`=== Greedy Algorithms ===
+
+1. Activity Selection Problem:
+Activities (start, finish):
+Activity 1: [1, 4]
+Activity 2: [3, 5]
+Activity 3: [0, 6]
+Activity 4: [5, 7]
+Activity 5: [3, 8]
+Activity 6: [5, 9]
+Activity 7: [6, 10]
+Activity 8: [8, 11]
+Activity 9: [8, 12]
+Activity 10: [2, 13]
+Activity 11: [12, 14]
+
+Selected activities: 1 2 4 8 11 
+Maximum activities: 5
+
+2. Fractional Knapsack Problem:
+Items (weight, value, ratio):
+Item 1: weight=20, value=100, ratio=5
+Item 2: weight=30, value=120, ratio=4
+Item 3: weight=10, value=60, ratio=6
+Knapsack capacity: 50
+Knapsack filling process:
+Take full item 3 (weight: 10, value: 60)
+Take full item 1 (weight: 20, value: 100)
+Take 0.666667 of item 2 (weight: 20, value: 80)
+Maximum value: 240
+
+3. Job Scheduling with Deadlines:
+Jobs (id, deadline, profit):
+Job 1: deadline=4, profit=20
+Job 2: deadline=1, profit=10
+Job 3: deadline=1, profit=40
+Job 4: deadline=1, profit=30
+Selected jobs: 3 1 
+Jobs completed: 2, Total profit: 60
+
+4. Minimum Coins (Greedy):
+Coins available: 1 5 10 25 
+Amount: 67
+Coins used: 25 25 10 5 1 1 
+Total coins: 6
+
+5. Egyptian Fractions:
+Egyptian fractions for 6/14: 1/3 + 1/11 + 1/231
+Egyptian fractions for 12/13: 1/2 + 1/3 + 1/12 + 1/156
+
+6. Minimum Platforms Required:
+Train schedules (arrival, departure):
+Train 1: 900 - 910
+Train 2: 940 - 1200
+Train 3: 950 - 1120
+Train 4: 1100 - 1130
+Train 5: 1500 - 1900
+Train 6: 1800 - 2000
+Minimum platforms required: 3
+
+=== Greedy Algorithm Characteristics ===
+1. Greedy Choice Property: Local optimum leads to global optimum
+2. Optimal Substructure: Optimal solution contains optimal subproblems
+3. No Backtracking: Once a choice is made, it's never reconsidered
+4. Efficiency: Usually O(n log n) due to sorting, O(n) for processing
+
+Note: Greedy doesn't always give optimal solution (e.g., coin change with arbitrary denominations)`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Best Practices</h2>
+    
+    <div class="best-practices">
+      <div class="practice">
+        <h4>1. Prove Greedy Choice Property</h4>
+        <p>Before implementing, verify that making the locally optimal choice at each step leads to a globally optimal solution for your specific problem.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>2. Choose the Right Criteria</h4>
+        <p>The success of a greedy algorithm depends on selecting the appropriate greedy criterion (e.g., earliest deadline, highest ratio, minimum cost).</p>
+      </div>
+      
+      <div class="practice">
+        <h4>3. Consider Edge Cases</h4>
+        <p>Test your greedy algorithm with edge cases and adversarial inputs to ensure it behaves correctly when the greedy choice might not be obvious.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>4. Know When Greedy Fails</h4>
+        <p>Understand problems where greedy algorithms don't work (like general knapsack or shortest path with negative weights) and use DP or other approaches instead.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="navigation">
+    <a href="/l2-algorithm-basics/dynamic-programming" class="nav-button prev">← Dynamic Programming</a>
+    <a href="/l2-algorithm-basics/graph-algorithms" class="nav-button next">Graph Algorithms →</a>
+  </div>
+</Layout> 

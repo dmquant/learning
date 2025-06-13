@@ -1,0 +1,581 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Arrays in C++ - Data Structures - C++ Learning Hub">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/l3-data-structures">Data Structures</a> &gt; Arrays
+  </div>
+
+  <h1>Arrays in C++</h1>
+  
+  <div class="overview">
+    <p>
+      Arrays are fundamental data structures that store multiple elements of the same type in contiguous memory locations. 
+      They provide efficient access to elements using indices and are the building blocks for more complex data structures.
+    </p>
+    
+    <p>
+      In C++, arrays are zero-indexed, meaning the first element is at index 0, the second at index 1, and so on.
+      Understanding arrays is crucial for learning other data structures and algorithms.
+    </p>
+  </div>
+
+  <section class="content-section">
+    <h2>Array Declaration and Initialization</h2>
+    
+    <p>There are several ways to declare and initialize arrays in C++:</p>
+
+    <CodeExample 
+      client:load
+      title="Array Declaration Methods"
+      code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // Method 1: Declare then assign
+    int numbers[5];
+    numbers[0] = 10;
+    numbers[1] = 20;
+    numbers[2] = 30;
+    numbers[3] = 40;
+    numbers[4] = 50;
+    
+    // Method 2: Declare and initialize
+    int scores[4] = {85, 92, 78, 96};
+    
+    // Method 3: Let compiler determine size
+    int grades[] = {88, 91, 84, 79, 93};
+    
+    // Method 4: Initialize with zeros
+    int zeros[3] = {0}; // All elements become 0
+    
+    // Display arrays
+    cout << "Numbers: ";
+    for(int i = 0; i < 5; i++) {
+        cout << numbers[i] << " ";
+    }
+    cout << endl;
+    
+    cout << "Scores: ";
+    for(int i = 0; i < 4; i++) {
+        cout << scores[i] << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}`}
+      explanation="This example shows different ways to declare and initialize arrays. You can specify the size explicitly or let the compiler determine it from the initialization list."
+      output={`Numbers: 10 20 30 40 50 
+Scores: 85 92 78 96 `}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Array Operations</h2>
+    
+    <h3>Accessing and Modifying Elements</h3>
+    <p>Array elements are accessed using the subscript operator []:</p>
+
+    <CodeExample 
+      client:load
+      title="Basic Array Operations"
+      code={`#include <iostream>
+using namespace std;
+
+int main() {
+    int arr[5] = {1, 2, 3, 4, 5};
+    
+    cout << "Original array: ";
+    for(int i = 0; i < 5; i++) {
+        cout << arr[i] << " ";
+    }
+    cout << endl;
+    
+    // Accessing elements
+    cout << "First element: " << arr[0] << endl;
+    cout << "Last element: " << arr[4] << endl;
+    
+    // Modifying elements
+    arr[2] = 10; // Change third element
+    arr[4] = 20; // Change last element
+    
+    cout << "Modified array: ";
+    for(int i = 0; i < 5; i++) {
+        cout << arr[i] << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}`}
+      explanation="Arrays provide direct access to elements using indices. You can both read from and write to array elements using the [] operator."
+      output={`Original array: 1 2 3 4 5 
+First element: 1
+Last element: 5
+Modified array: 1 2 10 4 20 `}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Array Algorithms</h2>
+    
+    <h3>Finding Maximum and Minimum</h3>
+
+    <CodeExample 
+      client:load
+      title="Finding Max and Min in Array"
+      code={`#include <iostream>
+using namespace std;
+
+int main() {
+    int numbers[] = {45, 23, 78, 12, 67, 34, 89, 56};
+    int size = sizeof(numbers) / sizeof(numbers[0]);
+    
+    // Find maximum
+    int max = numbers[0];
+    int maxIndex = 0;
+    for(int i = 1; i < size; i++) {
+        if(numbers[i] > max) {
+            max = numbers[i];
+            maxIndex = i;
+        }
+    }
+    
+    // Find minimum
+    int min = numbers[0];
+    int minIndex = 0;
+    for(int i = 1; i < size; i++) {
+        if(numbers[i] < min) {
+            min = numbers[i];
+            minIndex = i;
+        }
+    }
+    
+    cout << "Array: ";
+    for(int i = 0; i < size; i++) {
+        cout << numbers[i] << " ";
+    }
+    cout << endl;
+    
+    cout << "Maximum: " << max << " at index " << maxIndex << endl;
+    cout << "Minimum: " << min << " at index " << minIndex << endl;
+    
+    return 0;
+}`}
+      explanation="This algorithm iterates through the array once, keeping track of the maximum and minimum values and their positions. Time complexity is O(n)."
+      output={`Array: 45 23 78 12 67 34 89 56 
+Maximum: 89 at index 6
+Minimum: 12 at index 3`}
+    />
+
+    <h3>Linear Search</h3>
+
+    <CodeExample 
+      client:load
+      title="Linear Search Algorithm"
+      code={`#include <iostream>
+using namespace std;
+
+int linearSearch(int arr[], int size, int target) {
+    for(int i = 0; i < size; i++) {
+        if(arr[i] == target) {
+            return i; // Return index if found
+        }
+    }
+    return -1; // Return -1 if not found
+}
+
+int main() {
+    int numbers[] = {64, 34, 25, 12, 22, 11, 90};
+    int size = sizeof(numbers) / sizeof(numbers[0]);
+    int target;
+    
+    cout << "Array: ";
+    for(int i = 0; i < size; i++) {
+        cout << numbers[i] << " ";
+    }
+    cout << endl;
+    
+    target = 25;
+    int result = linearSearch(numbers, size, target);
+    if(result != -1) {
+        cout << "Element " << target << " found at index " << result << endl;
+    } else {
+        cout << "Element " << target << " not found" << endl;
+    }
+    
+    target = 99;
+    result = linearSearch(numbers, size, target);
+    if(result != -1) {
+        cout << "Element " << target << " found at index " << result << endl;
+    } else {
+        cout << "Element " << target << " not found" << endl;
+    }
+    
+    return 0;
+}`}
+      explanation="Linear search checks each element sequentially until the target is found or the array is exhausted. Time complexity is O(n), space complexity is O(1)."
+      output={`Array: 64 34 25 12 22 11 90 
+Element 25 found at index 2
+Element 99 not found`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Sorting Arrays</h2>
+    
+    <h3>Bubble Sort</h3>
+
+    <CodeExample 
+      client:load
+      title="Bubble Sort Implementation"
+      code={`#include <iostream>
+using namespace std;
+
+void bubbleSort(int arr[], int n) {
+    for(int i = 0; i < n-1; i++) {
+        // Flag to optimize - if no swaps occur, array is sorted
+        bool swapped = false;
+        
+        for(int j = 0; j < n-i-1; j++) {
+            if(arr[j] > arr[j+1]) {
+                // Swap elements
+                int temp = arr[j];
+                arr[j] = arr[j+1];
+                arr[j+1] = temp;
+                swapped = true;
+            }
+        }
+        
+        // If no swapping occurred, array is sorted
+        if(!swapped) break;
+    }
+}
+
+void printArray(int arr[], int size) {
+    for(int i = 0; i < size; i++) {
+        cout << arr[i] << " ";
+    }
+    cout << endl;
+}
+
+int main() {
+    int arr[] = {64, 34, 25, 12, 22, 11, 90};
+    int n = sizeof(arr) / sizeof(arr[0]);
+    
+    cout << "Original array: ";
+    printArray(arr, n);
+    
+    bubbleSort(arr, n);
+    
+    cout << "Sorted array: ";
+    printArray(arr, n);
+    
+    return 0;
+}`}
+      explanation="Bubble sort repeatedly steps through the array, compares adjacent elements and swaps them if they're in the wrong order. Time complexity is O(n²), but optimized version can be O(n) for already sorted arrays."
+      output={`Original array: 64 34 25 12 22 11 90 
+Sorted array: 11 12 22 25 34 64 90 `}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Multi-dimensional Arrays</h2>
+    
+    <p>C++ supports multi-dimensional arrays, with 2D arrays being the most common:</p>
+
+    <CodeExample 
+      client:load
+      title="2D Array Operations"
+      code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // 2D array declaration and initialization
+    int matrix[3][4] = {
+        {1, 2, 3, 4},
+        {5, 6, 7, 8},
+        {9, 10, 11, 12}
+    };
+    
+    int rows = 3, cols = 4;
+    
+    cout << "Matrix:" << endl;
+    for(int i = 0; i < rows; i++) {
+        for(int j = 0; j < cols; j++) {
+            cout << matrix[i][j] << "\\t";
+        }
+        cout << endl;
+    }
+    
+    // Calculate sum of each row
+    cout << "\\nRow sums:" << endl;
+    for(int i = 0; i < rows; i++) {
+        int sum = 0;
+        for(int j = 0; j < cols; j++) {
+            sum += matrix[i][j];
+        }
+        cout << "Row " << i + 1 << ": " << sum << endl;
+    }
+    
+    // Calculate sum of each column
+    cout << "\\nColumn sums:" << endl;
+    for(int j = 0; j < cols; j++) {
+        int sum = 0;
+        for(int i = 0; i < rows; i++) {
+            sum += matrix[i][j];
+        }
+        cout << "Column " << j + 1 << ": " << sum << endl;
+    }
+    
+    return 0;
+}`}
+      explanation="2D arrays are arrays of arrays, accessed using two indices [row][column]. They're useful for representing matrices, grids, and tabular data."
+      output={`Matrix:
+1	2	3	4	
+5	6	7	8	
+9	10	11	12	
+
+Row sums:
+Row 1: 10
+Row 2: 26
+Row 3: 42
+
+Column sums:
+Column 1: 15
+Column 2: 18
+Column 3: 21
+Column 4: 24`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Array vs Vector</h2>
+    
+    <div class="comparison">
+      <div class="comparison-section">
+        <h3>Static Arrays</h3>
+        <ul>
+          <li>Fixed size determined at compile time</li>
+          <li>Memory allocated on stack</li>
+          <li>No bounds checking</li>
+          <li>Faster access (no overhead)</li>
+          <li>Cannot be resized</li>
+        </ul>
+      </div>
+      
+      <div class="comparison-section">
+        <h3>Vectors (Dynamic Arrays)</h3>
+        <ul>
+          <li>Dynamic size can change at runtime</li>
+          <li>Memory allocated on heap</li>
+          <li>Bounds checking with .at()</li>
+          <li>Slight overhead but more flexible</li>
+          <li>Can grow and shrink</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>Best Practices</h2>
+    
+    <div class="best-practices">
+      <div class="practice">
+        <h4>1. Always Check Bounds</h4>
+        <p>C++ doesn't automatically check array bounds. Always ensure your indices are within valid range.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>2. Initialize Arrays</h4>
+        <p>Always initialize arrays to avoid garbage values that can lead to unpredictable behavior.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>3. Use const for Size</h4>
+        <p>Define array sizes using const variables to make code more maintainable.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>4. Pass Size with Array</h4>
+        <p>When passing arrays to functions, always pass the size as a separate parameter.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>Practice Exercises</h2>
+    
+    <div class="exercise">
+      <h3>Exercise 1: Array Statistics</h3>
+      <p>Write a program that:</p>
+      <ol>
+        <li>Creates an array of 10 integers</li>
+        <li>Fills it with user input</li>
+        <li>Calculates and displays the sum, average, maximum, and minimum</li>
+      </ol>
+    </div>
+    
+    <div class="exercise">
+      <h3>Exercise 2: Array Reversal</h3>
+      <p>Implement a function that reverses an array in-place without using extra memory.</p>
+    </div>
+    
+    <div class="exercise">
+      <h3>Exercise 3: Matrix Addition</h3>
+      <p>Write a program that adds two 3x3 matrices and displays the result.</p>
+    </div>
+  </section>
+
+  <div class="navigation">
+    <a href="/l3-data-structures" class="nav-button prev">← Data Structures</a>
+    <a href="/l3-data-structures/vectors" class="nav-button next">Vectors →</a>
+  </div>
+</Layout>
+
+<style>
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .breadcrumb a {
+    color: #667eea;
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  .overview {
+    background: #f0f9ff;
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border-left: 4px solid #0ea5e9;
+  }
+
+  .content-section {
+    margin: 3rem 0;
+  }
+
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin: 2rem 0;
+  }
+
+  .comparison-section {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border: 1px solid #e2e8f0;
+  }
+
+  .comparison-section h3 {
+    margin: 0 0 1rem 0;
+    color: #1e293b;
+  }
+
+  .comparison-section ul {
+    margin: 0;
+    padding-left: 1.5rem;
+    color: #64748b;
+  }
+
+  .comparison-section li {
+    margin-bottom: 0.5rem;
+  }
+
+  .best-practices {
+    display: grid;
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .practice {
+    background: #f0fdf4;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #22c55e;
+  }
+
+  .practice h4 {
+    margin: 0 0 0.5rem 0;
+    color: #166534;
+  }
+
+  .practice p {
+    margin: 0;
+    color: #166534;
+  }
+
+  .exercise {
+    background: #fff7ed;
+    padding: 2rem;
+    border-radius: 8px;
+    border-left: 4px solid #f59e0b;
+    margin: 2rem 0;
+  }
+
+  .exercise h3 {
+    margin: 0 0 1rem 0;
+    color: #92400e;
+  }
+
+  .exercise ol {
+    margin: 1rem 0;
+    padding-left: 1.5rem;
+    color: #78350f;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin: 4rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .nav-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #667eea;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+  }
+
+  .nav-button:hover {
+    background: #5a67d8;
+  }
+
+  .nav-button.prev {
+    background: #64748b;
+  }
+
+  .nav-button.prev:hover {
+    background: #475569;
+  }
+
+  @media (max-width: 768px) {
+    .comparison {
+      grid-template-columns: 1fr;
+    }
+
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style> 

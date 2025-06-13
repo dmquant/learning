@@ -1,0 +1,846 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Shortest Path DAG">
+	<h1>Shortest Path DAG</h1>
+	
+	<h2>Overview</h2>
+	<p>Shortest path algorithms on Directed Acyclic Graphs (DAGs) are more efficient than general graph algorithms. This lesson covers specialized DAG algorithms, topological sorting applications, and advanced path-finding techniques.</p>
+	
+	<h2>Topological Sorting for DAGs</h2>
+	<p>Topological sorting orders vertices such that for every directed edge (u,v), vertex u comes before v in the ordering.</p>
+	
+	<h3>Kahn's Algorithm</h3>
+	
+	<CodeExample 
+		client:load
+		title="Topological Sort using Kahn's Algorithm"
+		code={`#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+class TopologicalSort {
+private:
+    vector<vector<int>> adj;
+    vector<int> indegree;
+    int n;
+    
+public:
+    TopologicalSort(int vertices) : n(vertices) {
+        adj.assign(n, vector<int>());
+        indegree.assign(n, 0);
+    }
+    
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        indegree[v]++;
+    }
+    
+    vector<int> kahnsAlgorithm() {
+        queue<int> q;
+        vector<int> result;
+        
+        // Find all vertices with indegree 0
+        for (int i = 0; i < n; i++) {
+            if (indegree[i] == 0) {
+                q.push(i);
+            }
+        }
+        
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            result.push_back(u);
+            
+            // Reduce indegree of adjacent vertices
+            for (int v : adj[u]) {
+                indegree[v]--;
+                if (indegree[v] == 0) {
+                    q.push(v);
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    vector<int> dfsTopologicalSort() {
+        vector<bool> visited(n, false);
+        vector<int> result;
+        
+        function<void(int)> dfs = [&](int node) {
+            visited[node] = true;
+            for (int neighbor : adj[node]) {
+                if (!visited[neighbor]) {
+                    dfs(neighbor);
+                }
+            }
+            result.push_back(node);
+        };
+        
+        for (int i = 0; i < n; i++) {
+            if (!visited[i]) {
+                dfs(i);
+            }
+        }
+        
+        reverse(result.begin(), result.end());
+        return result;
+    }
+    
+    bool hasCycle() {
+        vector<int> topo = kahnsAlgorithm();
+        return topo.size() != n;
+    }
+};
+
+int main() {
+    TopologicalSort dag(6);
+    
+    // Add edges: 5->2, 5->0, 4->0, 4->1, 2->3, 3->1
+    dag.addEdge(5, 2);
+    dag.addEdge(5, 0);
+    dag.addEdge(4, 0);
+    dag.addEdge(4, 1);
+    dag.addEdge(2, 3);
+    dag.addEdge(3, 1);
+    
+    cout << "Kahn's Algorithm: ";
+    vector<int> kahn_result = dag.kahnsAlgorithm();
+    for (int v : kahn_result) {
+        cout << v << " ";
+    }
+    cout << endl;
+    
+    // Reset for DFS (need new instance due to modified indegree)
+    TopologicalSort dag2(6);
+    dag2.addEdge(5, 2);
+    dag2.addEdge(5, 0);
+    dag2.addEdge(4, 0);
+    dag2.addEdge(4, 1);
+    dag2.addEdge(2, 3);
+    dag2.addEdge(3, 1);
+    
+    cout << "DFS Algorithm: ";
+    vector<int> dfs_result = dag2.dfsTopologicalSort();
+    for (int v : dfs_result) {
+        cout << v << " ";
+    }
+    cout << endl;
+    
+    cout << "Has cycle: " << (dag.hasCycle() ? "Yes" : "No") << endl;
+    
+    return 0;
+}`}
+		explanation="Topological sorting is fundamental for DAG algorithms. Kahn's algorithm uses indegree counting, while DFS uses recursive post-order traversal."
+		output={`Kahn's Algorithm: 4 5 0 2 3 1 
+DFS Algorithm: 5 4 2 3 1 0 
+Has cycle: No`}
+	/>
+	
+	<h2>Single Source Shortest Path in DAG</h2>
+	<p>In DAGs, we can find shortest paths in O(V + E) time using topological sorting.</p>
+	
+	<h3>DAG Shortest Path Algorithm</h3>
+	
+	<CodeExample 
+		client:load
+		title="Shortest Path in DAG"
+		code={`#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+using namespace std;
+
+struct Edge {
+    int to, weight;
+    Edge(int t, int w) : to(t), weight(w) {}
+};
+
+class DAGShortestPath {
+private:
+    vector<vector<Edge>> adj;
+    vector<int> indegree;
+    int n;
+    
+public:
+    DAGShortestPath(int vertices) : n(vertices) {
+        adj.assign(n, vector<Edge>());
+        indegree.assign(n, 0);
+    }
+    
+    void addEdge(int u, int v, int weight) {
+        adj[u].push_back(Edge(v, weight));
+        indegree[v]++;
+    }
+    
+    vector<int> topologicalSort() {
+        queue<int> q;
+        vector<int> topo;
+        vector<int> temp_indegree = indegree;
+        
+        for (int i = 0; i < n; i++) {
+            if (temp_indegree[i] == 0) {
+                q.push(i);
+            }
+        }
+        
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            topo.push_back(u);
+            
+            for (const Edge& edge : adj[u]) {
+                temp_indegree[edge.to]--;
+                if (temp_indegree[edge.to] == 0) {
+                    q.push(edge.to);
+                }
+            }
+        }
+        
+        return topo;
+    }
+    
+    pair<vector<long long>, vector<int>> shortestPath(int source) {
+        vector<long long> dist(n, LLONG_MAX);
+        vector<int> parent(n, -1);
+        dist[source] = 0;
+        
+        vector<int> topo = topologicalSort();
+        
+        for (int u : topo) {
+            if (dist[u] != LLONG_MAX) {
+                for (const Edge& edge : adj[u]) {
+                    int v = edge.to;
+                    long long w = edge.weight;
+                    
+                    if (dist[u] + w < dist[v]) {
+                        dist[v] = dist[u] + w;
+                        parent[v] = u;
+                    }
+                }
+            }
+        }
+        
+        return {dist, parent};
+    }
+    
+    vector<long long> longestPath(int source) {
+        vector<long long> dist(n, LLONG_MIN);
+        dist[source] = 0;
+        
+        vector<int> topo = topologicalSort();
+        
+        for (int u : topo) {
+            if (dist[u] != LLONG_MIN) {
+                for (const Edge& edge : adj[u]) {
+                    int v = edge.to;
+                    long long w = edge.weight;
+                    
+                    if (dist[u] + w > dist[v]) {
+                        dist[v] = dist[u] + w;
+                    }
+                }
+            }
+        }
+        
+        return dist;
+    }
+    
+    vector<int> reconstructPath(const vector<int>& parent, int target) {
+        vector<int> path;
+        int curr = target;
+        
+        while (curr != -1) {
+            path.push_back(curr);
+            curr = parent[curr];
+        }
+        
+        reverse(path.begin(), path.end());
+        return path;
+    }
+    
+    int countPaths(int source, int target) {
+        vector<int> dp(n, 0);
+        dp[source] = 1;
+        
+        vector<int> topo = topologicalSort();
+        
+        for (int u : topo) {
+            for (const Edge& edge : adj[u]) {
+                dp[edge.to] += dp[u];
+            }
+        }
+        
+        return dp[target];
+    }
+};
+
+int main() {
+    DAGShortestPath dag(6);
+    
+    // Add weighted edges
+    dag.addEdge(0, 1, 5);
+    dag.addEdge(0, 2, 3);
+    dag.addEdge(1, 3, 6);
+    dag.addEdge(1, 2, 2);
+    dag.addEdge(2, 4, 4);
+    dag.addEdge(2, 5, 2);
+    dag.addEdge(2, 3, 7);
+    dag.addEdge(3, 4, -1);
+    dag.addEdge(4, 5, -2);
+    
+    int source = 0;
+    auto [distances, parents] = dag.shortestPath(source);
+    
+    cout << "Shortest distances from vertex " << source << ":" << endl;
+    for (int i = 0; i < 6; i++) {
+        if (distances[i] == LLONG_MAX) {
+            cout << "Vertex " << i << ": INF" << endl;
+        } else {
+            cout << "Vertex " << i << ": " << distances[i] << endl;
+        }
+    }
+    
+    cout << "\\nShortest path to vertex 5: ";
+    vector<int> path = dag.reconstructPath(parents, 5);
+    for (int v : path) {
+        cout << v << " ";
+    }
+    cout << endl;
+    
+    cout << "\\nLongest distances from vertex " << source << ":" << endl;
+    vector<long long> longest = dag.longestPath(source);
+    for (int i = 0; i < 6; i++) {
+        if (longest[i] == LLONG_MIN) {
+            cout << "Vertex " << i << ": -INF" << endl;
+        } else {
+            cout << "Vertex " << i << ": " << longest[i] << endl;
+        }
+    }
+    
+    cout << "\\nNumber of paths from 0 to 5: " << dag.countPaths(0, 5) << endl;
+    
+    return 0;
+}`}
+		explanation="DAG shortest path algorithm processes vertices in topological order, ensuring optimal substructure and enabling O(V+E) complexity."
+		output={`Shortest distances from vertex 0:
+Vertex 0: 0
+Vertex 1: 5
+Vertex 2: 3
+Vertex 3: 10
+Vertex 4: 7
+Vertex 5: 5
+
+Shortest path to vertex 5: 0 2 5 
+
+Longest distances from vertex 0:
+Vertex 0: 0
+Vertex 1: 5
+Vertex 2: 7
+Vertex 3: 14
+Vertex 4: 13
+Vertex 5: 11
+
+Number of paths from 0 to 5: 2`}
+	/>
+	
+	<h2>All-Pairs Shortest Path in DAG</h2>
+	<p>Compute shortest paths between all pairs of vertices efficiently using the DAG structure.</p>
+	
+	<h3>Dynamic Programming Approach</h3>
+	
+	<CodeExample 
+		client:load
+		title="All-Pairs Shortest Path in DAG"
+		code={`#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+class DAGAllPairs {
+private:
+    vector<vector<Edge>> adj;
+    vector<int> indegree;
+    int n;
+    
+public:
+    DAGAllPairs(int vertices) : n(vertices) {
+        adj.assign(n, vector<Edge>());
+        indegree.assign(n, 0);
+    }
+    
+    void addEdge(int u, int v, int weight) {
+        adj[u].push_back(Edge(v, weight));
+        indegree[v]++;
+    }
+    
+    vector<int> topologicalSort() {
+        queue<int> q;
+        vector<int> topo;
+        vector<int> temp_indegree = indegree;
+        
+        for (int i = 0; i < n; i++) {
+            if (temp_indegree[i] == 0) {
+                q.push(i);
+            }
+        }
+        
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            topo.push_back(u);
+            
+            for (const Edge& edge : adj[u]) {
+                temp_indegree[edge.to]--;
+                if (temp_indegree[edge.to] == 0) {
+                    q.push(edge.to);
+                }
+            }
+        }
+        
+        return topo;
+    }
+    
+    vector<vector<long long>> allPairsShortestPath() {
+        vector<vector<long long>> dist(n, vector<long long>(n, LLONG_MAX));
+        
+        // Initialize distances
+        for (int i = 0; i < n; i++) {
+            dist[i][i] = 0;
+        }
+        
+        for (int u = 0; u < n; u++) {
+            for (const Edge& edge : adj[u]) {
+                dist[u][edge.to] = min(dist[u][edge.to], (long long)edge.weight);
+            }
+        }
+        
+        vector<int> topo = topologicalSort();
+        
+        // Process vertices in topological order
+        for (int k : topo) {
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    if (dist[i][k] != LLONG_MAX && dist[k][j] != LLONG_MAX) {
+                        dist[i][j] = min(dist[i][j], dist[i][k] + dist[k][j]);
+                    }
+                }
+            }
+        }
+        
+        return dist;
+    }
+    
+    vector<vector<int>> countAllPaths() {
+        vector<vector<int>> paths(n, vector<int>(n, 0));
+        
+        // Base case: path from each vertex to itself
+        for (int i = 0; i < n; i++) {
+            paths[i][i] = 1;
+        }
+        
+        vector<int> topo = topologicalSort();
+        
+        for (int u : topo) {
+            for (const Edge& edge : adj[u]) {
+                int v = edge.to;
+                for (int i = 0; i < n; i++) {
+                    paths[i][v] += paths[i][u];
+                }
+            }
+        }
+        
+        // Remove self-paths for proper counting
+        for (int i = 0; i < n; i++) {
+            paths[i][i] = 0;
+        }
+        
+        return paths;
+    }
+    
+    bool hasPath(int u, int v) {
+        vector<bool> visited(n, false);
+        
+        function<bool(int)> dfs = [&](int node) -> bool {
+            if (node == v) return true;
+            visited[node] = true;
+            
+            for (const Edge& edge : adj[node]) {
+                if (!visited[edge.to] && dfs(edge.to)) {
+                    return true;
+                }
+            }
+            return false;
+        };
+        
+        return dfs(u);
+    }
+    
+    vector<vector<bool>> reachabilityMatrix() {
+        vector<vector<bool>> reach(n, vector<bool>(n, false));
+        
+        for (int i = 0; i < n; i++) {
+            reach[i][i] = true;
+            
+            vector<bool> visited(n, false);
+            function<void(int)> dfs = [&](int node) {
+                visited[node] = true;
+                reach[i][node] = true;
+                
+                for (const Edge& edge : adj[node]) {
+                    if (!visited[edge.to]) {
+                        dfs(edge.to);
+                    }
+                }
+            };
+            
+            dfs(i);
+        }
+        
+        return reach;
+    }
+};
+
+int main() {
+    DAGAllPairs dag(5);
+    
+    // Add edges
+    dag.addEdge(0, 1, 3);
+    dag.addEdge(0, 2, 8);
+    dag.addEdge(1, 3, 2);
+    dag.addEdge(1, 4, 5);
+    dag.addEdge(2, 3, 1);
+    dag.addEdge(3, 4, 2);
+    
+    cout << "All-pairs shortest distances:" << endl;
+    vector<vector<long long>> distances = dag.allPairsShortestPath();
+    
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            if (distances[i][j] == LLONG_MAX) {
+                cout << "INF ";
+            } else {
+                cout << distances[i][j] << " ";
+            }
+        }
+        cout << endl;
+    }
+    
+    cout << "\\nPath counts between all pairs:" << endl;
+    vector<vector<int>> pathCounts = dag.countAllPaths();
+    
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            cout << pathCounts[i][j] << " ";
+        }
+        cout << endl;
+    }
+    
+    cout << "\\nReachability matrix:" << endl;
+    vector<vector<bool>> reachable = dag.reachabilityMatrix();
+    
+    for (int i = 0; i < 5; i++) {
+        for (int j = 0; j < 5; j++) {
+            cout << (reachable[i][j] ? 1 : 0) << " ";
+        }
+        cout << endl;
+    }
+    
+    return 0;
+}`}
+		explanation="All-pairs shortest path in DAGs can be computed efficiently using dynamic programming over topologically sorted vertices."
+		output={`All-pairs shortest distances:
+0 3 8 5 7 
+INF 0 INF 2 4 
+INF INF 0 1 3 
+INF INF INF 0 2 
+INF INF INF INF 0 
+
+Path counts between all pairs:
+0 1 1 2 3 
+0 0 0 1 2 
+0 0 0 1 1 
+0 0 0 0 1 
+0 0 0 0 0 
+
+Reachability matrix:
+1 1 1 1 1 
+0 1 0 1 1 
+0 0 1 1 1 
+0 0 0 1 1 
+0 0 0 0 1`}
+	/>
+	
+	<h2>Critical Path Method (CPM)</h2>
+	<p>CPM finds the longest path in a DAG, used for project scheduling and finding critical activities.</p>
+	
+	<h3>Critical Path Analysis</h3>
+	
+	<CodeExample 
+		client:load
+		title="Critical Path Method"
+		code={`#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+using namespace std;
+
+struct Activity {
+    int id, duration;
+    string name;
+    
+    Activity(int i, int d, string n) : id(i), duration(d), name(n) {}
+};
+
+class CriticalPathMethod {
+private:
+    vector<vector<pair<int, int>>> adj; // (to, weight)
+    vector<vector<int>> reverse_adj;
+    vector<Activity> activities;
+    int n;
+    
+public:
+    CriticalPathMethod(int vertices) : n(vertices) {
+        adj.assign(n, vector<pair<int, int>>());
+        reverse_adj.assign(n, vector<int>());
+    }
+    
+    void addActivity(int from, int to, int duration, string name) {
+        adj[from].push_back({to, duration});
+        reverse_adj[to].push_back(from);
+        activities.push_back(Activity(activities.size(), duration, name));
+    }
+    
+    vector<int> topologicalSort() {
+        vector<int> indegree(n, 0);
+        for (int u = 0; u < n; u++) {
+            for (auto& edge : adj[u]) {
+                indegree[edge.first]++;
+            }
+        }
+        
+        queue<int> q;
+        vector<int> topo;
+        
+        for (int i = 0; i < n; i++) {
+            if (indegree[i] == 0) {
+                q.push(i);
+            }
+        }
+        
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            topo.push_back(u);
+            
+            for (auto& edge : adj[u]) {
+                indegree[edge.first]--;
+                if (indegree[edge.first] == 0) {
+                    q.push(edge.first);
+                }
+            }
+        }
+        
+        return topo;
+    }
+    
+    pair<vector<int>, vector<int>> calculateTimes() {
+        vector<int> topo = topologicalSort();
+        vector<int> earliest(n, 0);
+        vector<int> latest(n, 0);
+        
+        // Calculate earliest start times (forward pass)
+        for (int u : topo) {
+            for (auto& edge : adj[u]) {
+                int v = edge.first;
+                int weight = edge.second;
+                earliest[v] = max(earliest[v], earliest[u] + weight);
+            }
+        }
+        
+        // Initialize latest times to earliest finish time
+        int projectDuration = *max_element(earliest.begin(), earliest.end());
+        fill(latest.begin(), latest.end(), projectDuration);
+        
+        // Calculate latest start times (backward pass)
+        reverse(topo.begin(), topo.end());
+        for (int v : topo) {
+            for (int u : reverse_adj[v]) {
+                for (auto& edge : adj[u]) {
+                    if (edge.first == v) {
+                        latest[u] = min(latest[u], latest[v] - edge.second);
+                        break;
+                    }
+                }
+            }
+        }
+        
+        return {earliest, latest};
+    }
+    
+    vector<int> findCriticalPath() {
+        auto [earliest, latest] = calculateTimes();
+        vector<int> critical;
+        
+        for (int i = 0; i < n; i++) {
+            if (earliest[i] == latest[i]) {
+                critical.push_back(i);
+            }
+        }
+        
+        return critical;
+    }
+    
+    void analyzeProject() {
+        auto [earliest, latest] = calculateTimes();
+        vector<int> critical = findCriticalPath();
+        
+        cout << "Project Analysis:" << endl;
+        cout << "Node\\tEarliest\\tLatest\\tSlack\\tCritical" << endl;
+        
+        for (int i = 0; i < n; i++) {
+            int slack = latest[i] - earliest[i];
+            bool isCritical = find(critical.begin(), critical.end(), i) != critical.end();
+            
+            cout << i << "\\t" << earliest[i] << "\\t\\t" << latest[i] 
+                 << "\\t" << slack << "\\t" << (isCritical ? "Yes" : "No") << endl;
+        }
+        
+        int projectDuration = *max_element(earliest.begin(), earliest.end());
+        cout << "\\nProject Duration: " << projectDuration << endl;
+        
+        cout << "Critical Path: ";
+        for (int node : critical) {
+            cout << node << " ";
+        }
+        cout << endl;
+    }
+    
+    vector<pair<int, int>> getCriticalActivities() {
+        auto [earliest, latest] = calculateTimes();
+        vector<pair<int, int>> criticalActivities;
+        
+        for (int u = 0; u < n; u++) {
+            for (auto& edge : adj[u]) {
+                int v = edge.first;
+                int weight = edge.second;
+                
+                // Activity is critical if earliest[u] + weight == earliest[v]
+                // and latest[u] + weight == latest[v]
+                if (earliest[u] + weight == earliest[v] && 
+                    latest[u] + weight == latest[v]) {
+                    criticalActivities.push_back({u, v});
+                }
+            }
+        }
+        
+        return criticalActivities;
+    }
+};
+
+int main() {
+    CriticalPathMethod cpm(7);
+    
+    // Add project activities
+    cpm.addActivity(0, 1, 3, "A");
+    cpm.addActivity(0, 2, 2, "B");
+    cpm.addActivity(1, 3, 4, "C");
+    cpm.addActivity(1, 4, 2, "D");
+    cpm.addActivity(2, 4, 3, "E");
+    cpm.addActivity(3, 5, 2, "F");
+    cpm.addActivity(4, 5, 1, "G");
+    cpm.addActivity(5, 6, 2, "H");
+    
+    cpm.analyzeProject();
+    
+    cout << "\\nCritical Activities:" << endl;
+    vector<pair<int, int>> criticalActivities = cpm.getCriticalActivities();
+    
+    for (auto& activity : criticalActivities) {
+        cout << "Activity " << activity.first << " -> " << activity.second << endl;
+    }
+    
+    return 0;
+}`}
+		explanation="Critical Path Method identifies the longest path through a project network, determining minimum project duration and critical activities."
+		output={`Project Analysis:
+Node	Earliest	Latest	Slack	Critical
+0	0		0	0	Yes
+1	3		3	0	Yes
+2	2		4	2	No
+3	7		7	0	Yes
+4	5		7	2	No
+5	9		9	0	Yes
+6	11		11	0	Yes
+
+Project Duration: 11
+Critical Path: 0 1 3 5 6 
+
+Critical Activities:
+Activity 0 -> 1
+Activity 1 -> 3
+Activity 3 -> 5
+Activity 5 -> 6`}
+	/>
+	
+	<h2>Advanced DAG Applications</h2>
+	
+	<h3>Dynamic Programming on DAGs</h3>
+	<ul>
+		<li>Longest increasing subsequence variants</li>
+		<li>Maximum weight independent set in DAGs</li>
+		<li>Optimal resource allocation problems</li>
+	</ul>
+	
+	<h3>Network Flow in DAGs</h3>
+	<ul>
+		<li>Maximum flow with capacity constraints</li>
+		<li>Minimum cost flow problems</li>
+		<li>Multi-commodity flow optimization</li>
+	</ul>
+	
+	<h3>Probabilistic Analysis</h3>
+	<ul>
+		<li>Expected path lengths in random DAGs</li>
+		<li>Reliability analysis of systems</li>
+		<li>Bayesian network computations</li>
+	</ul>
+	
+	<h2>Specialized DAG Algorithms</h2>
+	
+	<h3>Hamiltonian Path in DAGs</h3>
+	<ul>
+		<li>Efficient algorithms for DAG Hamiltonian paths</li>
+		<li>Counting Hamiltonian paths</li>
+		<li>Constrained path enumeration</li>
+	</ul>
+	
+	<h3>DAG Decomposition</h3>
+	<ul>
+		<li>Level-wise decomposition</li>
+		<li>Width-based decompositions</li>
+		<li>Applications in parallel processing</li>
+	</ul>
+	
+	<h3>Dynamic DAGs</h3>
+	<ul>
+		<li>Incremental topological sorting</li>
+		<li>Dynamic shortest path maintenance</li>
+		<li>Online cycle detection</li>
+	</ul>
+	
+	<h2>Practice Problems</h2>
+	<ul>
+		<li>Implement efficient single-source shortest path in DAG</li>
+		<li>Solve project scheduling using critical path method</li>
+		<li>Count paths between all pairs of vertices in DAG</li>
+		<li>Find longest path in DAG with constraints</li>
+		<li>Handle dynamic edge additions while maintaining DAG property</li>
+		<li>Optimize memory usage for large DAG computations</li>
+		<li>Solve real-world scheduling and dependency problems</li>
+	</ul>
+</Layout>

@@ -1,0 +1,834 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Control Structures - C++ Learning Hub">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/l1-syntax-basics">Syntax Basics</a> &gt; Control Structures
+  </div>
+
+  <h1>Control Structures</h1>
+  
+  <div class="overview">
+    <p>
+      Control structures determine the flow of execution in a program. They allow you to make decisions, 
+      repeat actions, and branch the execution path based on conditions. Understanding control structures 
+      is essential for writing effective programs.
+    </p>
+    
+    <p>
+      C++ provides several types of control structures: conditional statements (if, switch), 
+      loops (for, while, do-while), and jump statements (break, continue, return).
+    </p>
+  </div>
+
+  <section class="content-section">
+    <h2>Conditional Statements</h2>
+    
+    <h3>If Statement</h3>
+    <p>The if statement executes code based on a boolean condition:</p>
+
+    <CodeExample 
+      client:load
+      title="Basic If Statements"
+      code={`#include <iostream>
+using namespace std;
+
+int main() {
+    int score = 85;
+    int age = 17;
+    
+    // Simple if statement
+    if (score >= 90) {
+        cout << "Excellent grade!" << endl;
+    }
+    
+    // If-else statement
+    if (age >= 18) {
+        cout << "You can vote!" << endl;
+    } else {
+        cout << "You cannot vote yet." << endl;
+    }
+    
+    // If-else if-else chain
+    if (score >= 90) {
+        cout << "Grade: A" << endl;
+    } else if (score >= 80) {
+        cout << "Grade: B" << endl;
+    } else if (score >= 70) {
+        cout << "Grade: C" << endl;
+    } else if (score >= 60) {
+        cout << "Grade: D" << endl;
+    } else {
+        cout << "Grade: F" << endl;
+    }
+    
+    // Nested if statements
+    if (score >= 60) {
+        cout << "You passed!" << endl;
+        if (score >= 90) {
+            cout << "With honors!" << endl;
+        }
+    }
+    
+    return 0;
+}`}
+      explanation="If statements allow conditional execution. Use else for alternative actions and else-if for multiple conditions. Nested if statements handle complex logic."
+      output={`You cannot vote yet.
+Grade: B
+You passed!`}
+    />
+
+    <h3>Logical Operators</h3>
+
+    <CodeExample 
+      client:load
+      title="Logical Operators in Conditions"
+      code={`#include <iostream>
+using namespace std;
+
+int main() {
+    int age = 20;
+    bool hasLicense = true;
+    bool hasInsurance = false;
+    int temperature = 75;
+    
+    // Logical AND (&&)
+    if (age >= 18 && hasLicense) {
+        cout << "Can drive!" << endl;
+    }
+    
+    // Logical OR (||)
+    if (temperature < 32 || temperature > 100) {
+        cout << "Extreme temperature!" << endl;
+    } else {
+        cout << "Normal temperature." << endl;
+    }
+    
+    // Logical NOT (!)
+    if (!hasInsurance) {
+        cout << "Warning: No insurance!" << endl;
+    }
+    
+    // Complex conditions
+    if ((age >= 16 && age < 18) || (age >= 18 && hasLicense && hasInsurance)) {
+        cout << "Driving conditions met." << endl;
+    }
+    
+    // Short-circuit evaluation
+    int x = 0;
+    if (x != 0 && (10 / x) > 1) {  // Second condition not evaluated if x == 0
+        cout << "This won't execute" << endl;
+    } else {
+        cout << "Safe from division by zero!" << endl;
+    }
+    
+    return 0;
+}`}
+      explanation="Logical operators combine conditions: && (AND), || (OR), ! (NOT). C++ uses short-circuit evaluation, which can prevent errors and improve efficiency."
+      output={`Can drive!
+Normal temperature.
+Warning: No insurance!
+Safe from division by zero!`}
+    />
+
+    <h3>Switch Statement</h3>
+
+    <CodeExample 
+      client:load
+      title="Switch Statement"
+      code={`#include <iostream>
+using namespace std;
+
+int main() {
+    char grade = 'B';
+    int day = 3;
+    
+    // Basic switch statement
+    cout << "Grade analysis:" << endl;
+    switch (grade) {
+        case 'A':
+            cout << "Excellent work!" << endl;
+            break;
+        case 'B':
+            cout << "Good job!" << endl;
+            break;
+        case 'C':
+            cout << "Satisfactory." << endl;
+            break;
+        case 'D':
+            cout << "Needs improvement." << endl;
+            break;
+        case 'F':
+            cout << "Failing grade." << endl;
+            break;
+        default:
+            cout << "Invalid grade." << endl;
+            break;
+    }
+    
+    // Switch with fall-through (no break)
+    cout << "\\nDay of week:" << endl;
+    switch (day) {
+        case 1:
+        case 2:
+        case 3:
+        case 4:
+        case 5:
+            cout << "Weekday - Go to work/school!" << endl;
+            break;
+        case 6:
+        case 7:
+            cout << "Weekend - Time to relax!" << endl;
+            break;
+        default:
+            cout << "Invalid day number." << endl;
+            break;
+    }
+    
+    // Switch with multiple operations
+    int operation = 2;
+    int a = 10, b = 5;
+    
+    cout << "\\nCalculator:" << endl;
+    switch (operation) {
+        case 1: {
+            int result = a + b;
+            cout << a << " + " << b << " = " << result << endl;
+            break;
+        }
+        case 2: {
+            int result = a - b;
+            cout << a << " - " << b << " = " << result << endl;
+            break;
+        }
+        case 3: {
+            int result = a * b;
+            cout << a << " * " << b << " = " << result << endl;
+            break;
+        }
+        default:
+            cout << "Unknown operation." << endl;
+            break;
+    }
+    
+    return 0;
+}`}
+      explanation="Switch statements provide clean multi-way branching for discrete values. Use break to prevent fall-through, or omit it for intentional fall-through behavior."
+      output={`Grade analysis:
+Good job!
+
+Day of week:
+Weekday - Go to work/school!
+
+Calculator:
+10 - 5 = 5`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Loops</h2>
+    
+    <h3>For Loop</h3>
+
+    <CodeExample 
+      client:load
+      title="For Loop Variations"
+      code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // Basic for loop
+    cout << "Counting from 1 to 5:" << endl;
+    for (int i = 1; i <= 5; i++) {
+        cout << i << " ";
+    }
+    cout << endl;
+    
+    // Counting backwards
+    cout << "\\nCountdown:" << endl;
+    for (int i = 5; i >= 1; i--) {
+        cout << i << " ";
+    }
+    cout << "Blast off!" << endl;
+    
+    // Step by different amount
+    cout << "\\nEven numbers from 0 to 10:" << endl;
+    for (int i = 0; i <= 10; i += 2) {
+        cout << i << " ";
+    }
+    cout << endl;
+    
+    // Multiple variables in for loop
+    cout << "\\nFibonacci sequence (first 8 terms):" << endl;
+    for (int a = 0, b = 1, count = 0; count < 8; count++) {
+        cout << a << " ";
+        int temp = a + b;
+        a = b;
+        b = temp;
+    }
+    cout << endl;
+    
+    // Nested loops - multiplication table
+    cout << "\\n3x3 Multiplication table:" << endl;
+    for (int i = 1; i <= 3; i++) {
+        for (int j = 1; j <= 3; j++) {
+            cout << i * j << "\\t";
+        }
+        cout << endl;
+    }
+    
+    return 0;
+}`}
+      explanation="For loops are ideal when you know the number of iterations. They consist of initialization, condition, and increment/decrement. Nested loops create multi-dimensional patterns."
+      output={`Counting from 1 to 5:
+1 2 3 4 5 
+
+Countdown:
+5 4 3 2 1 Blast off!
+
+Even numbers from 0 to 10:
+0 2 4 6 8 10 
+
+Fibonacci sequence (first 8 terms):
+0 1 1 2 3 5 8 13 
+
+3x3 Multiplication table:
+1	2	3	
+2	4	6	
+3	6	9	`}
+    />
+
+    <h3>While Loop</h3>
+
+    <CodeExample 
+      client:load
+      title="While Loop Examples"
+      code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // Basic while loop
+    int count = 1;
+    cout << "While loop counting:" << endl;
+    while (count <= 5) {
+        cout << count << " ";
+        count++;
+    }
+    cout << endl;
+    
+    // Input validation with while loop
+    int number;
+    cout << "\\nEnter a number between 1 and 10: ";
+    // Simulating user input for demonstration
+    number = 15;  // This would typically come from cin >> number;
+    
+    while (number < 1 || number > 10) {
+        cout << "Invalid input! Please enter a number between 1 and 10: ";
+        // In real program: cin >> number;
+        number = 5;  // Simulating correct input
+        break;       // For demonstration only
+    }
+    cout << "You entered: " << number << endl;
+    
+    // Finding digits in a number
+    int num = 12345;
+    int digitCount = 0;
+    int temp = num;
+    
+    cout << "\\nCounting digits in " << num << ":" << endl;
+    while (temp > 0) {
+        temp /= 10;
+        digitCount++;
+    }
+    cout << "Number of digits: " << digitCount << endl;
+    
+    // Sum of digits
+    temp = num;
+    int sum = 0;
+    cout << "\\nDigits of " << num << ": ";
+    while (temp > 0) {
+        int digit = temp % 10;
+        cout << digit << " ";
+        sum += digit;
+        temp /= 10;
+    }
+    cout << "\\nSum of digits: " << sum << endl;
+    
+    return 0;
+}`}
+      explanation="While loops continue as long as the condition is true. They're useful for input validation, processing data of unknown size, and situations where the loop count isn't predetermined."
+      output={`While loop counting:
+1 2 3 4 5 
+
+Enter a number between 1 and 10: Invalid input! Please enter a number between 1 and 10: You entered: 5
+
+Counting digits in 12345:
+Number of digits: 5
+
+Digits of 12345: 5 4 3 2 1 
+Sum of digits: 15`}
+    />
+
+    <h3>Do-While Loop</h3>
+
+    <CodeExample 
+      client:load
+      title="Do-While Loop"
+      code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // Basic do-while loop
+    int i = 1;
+    cout << "Do-while loop (executes at least once):" << endl;
+    do {
+        cout << i << " ";
+        i++;
+    } while (i <= 5);
+    cout << endl;
+    
+    // Do-while vs while when condition is initially false
+    int x = 10;
+    
+    cout << "\\nWhile loop with false condition:" << endl;
+    while (x < 5) {
+        cout << "This won't print" << endl;
+    }
+    cout << "While loop didn't execute." << endl;
+    
+    cout << "\\nDo-while loop with false condition:" << endl;
+    do {
+        cout << "This prints once!" << endl;
+    } while (x < 5);
+    
+    // Menu system example
+    int choice;
+    cout << "\\nSimple menu system:" << endl;
+    do {
+        cout << "\\n--- Menu ---" << endl;
+        cout << "1. Option A" << endl;
+        cout << "2. Option B" << endl;
+        cout << "3. Exit" << endl;
+        cout << "Choice: ";
+        
+        // Simulating user input
+        static int menuDemo = 0;
+        choice = (menuDemo == 0) ? 1 : (menuDemo == 1) ? 2 : 3;
+        menuDemo++;
+        cout << choice << endl;
+        
+        switch (choice) {
+            case 1:
+                cout << "You selected Option A" << endl;
+                break;
+            case 2:
+                cout << "You selected Option B" << endl;
+                break;
+            case 3:
+                cout << "Goodbye!" << endl;
+                break;
+            default:
+                cout << "Invalid choice!" << endl;
+                break;
+        }
+    } while (choice != 3);
+    
+    return 0;
+}`}
+      explanation="Do-while loops execute the body at least once before checking the condition. They're perfect for menu systems and situations where you need to execute code before testing a condition."
+      output={`Do-while loop (executes at least once):
+1 2 3 4 5 
+
+While loop with false condition:
+While loop didn't execute.
+
+Do-while loop with false condition:
+This prints once!
+
+Simple menu system:
+
+--- Menu ---
+1. Option A
+2. Option B
+3. Exit
+Choice: 1
+You selected Option A
+
+--- Menu ---
+1. Option A
+2. Option B
+3. Exit
+Choice: 2
+You selected Option B
+
+--- Menu ---
+1. Option A
+2. Option B
+3. Exit
+Choice: 3
+Goodbye!`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Loop Control Statements</h2>
+    
+    <h3>Break and Continue</h3>
+
+    <CodeExample 
+      client:load
+      title="Break and Continue Statements"
+      code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // Break statement - exits the loop
+    cout << "Break example - finding first number divisible by 7:" << endl;
+    for (int i = 15; i <= 30; i++) {
+        if (i % 7 == 0) {
+            cout << "Found: " << i << endl;
+            break;  // Exit the loop immediately
+        }
+        cout << i << " is not divisible by 7" << endl;
+    }
+    
+    // Continue statement - skips to next iteration
+    cout << "\\nContinue example - printing odd numbers 1-10:" << endl;
+    for (int i = 1; i <= 10; i++) {
+        if (i % 2 == 0) {
+            continue;  // Skip even numbers
+        }
+        cout << i << " ";
+    }
+    cout << endl;
+    
+    // Break in nested loops
+    cout << "\\nBreak in nested loops - finding first pair that sums to 10:" << endl;
+    bool found = false;
+    for (int i = 1; i <= 5 && !found; i++) {
+        for (int j = 1; j <= 5; j++) {
+            if (i + j == 10) {
+                cout << "Found pair: " << i << " + " << j << " = 10" << endl;
+                found = true;
+                break;  // This only breaks the inner loop
+            }
+        }
+    }
+    
+    // Using labels for breaking outer loop (alternative approach)
+    cout << "\\nBreaking outer loop with goto (not recommended):" << endl;
+    for (int i = 1; i <= 3; i++) {
+        for (int j = 1; j <= 3; j++) {
+            cout << "(" << i << "," << j << ") ";
+            if (i == 2 && j == 2) {
+                goto end_loops;  // Jump out of both loops
+            }
+        }
+        cout << endl;
+    }
+    end_loops:
+    cout << "\\nExited nested loops." << endl;
+    
+    // Continue with while loop
+    cout << "\\nSkipping multiples of 3 in range 1-15:" << endl;
+    int num = 0;
+    while (num < 15) {
+        num++;
+        if (num % 3 == 0) {
+            continue;
+        }
+        cout << num << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}`}
+      explanation="Break exits the current loop completely, while continue skips to the next iteration. In nested loops, these statements only affect the innermost loop unless you use techniques like goto or flags."
+      output={`Break example - finding first number divisible by 7:
+15 is not divisible by 7
+16 is not divisible by 7
+17 is not divisible by 7
+18 is not divisible by 7
+19 is not divisible by 7
+20 is not divisible by 7
+Found: 21
+
+Continue example - printing odd numbers 1-10:
+1 3 5 7 9 
+
+Break in nested loops - finding first pair that sums to 10:
+Found pair: 5 + 5 = 10
+
+Breaking outer loop with goto (not recommended):
+(1,1) (1,2) (1,3) 
+(2,1) (2,2) 
+Exited nested loops.
+
+Skipping multiples of 3 in range 1-15:
+1 2 4 5 7 8 10 11 13 14`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Range-Based For Loop (C++11)</h2>
+
+    <CodeExample 
+      client:load
+      title="Range-Based For Loop"
+      code={`#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+int main() {
+    // With arrays
+    int numbers[] = {1, 2, 3, 4, 5};
+    
+    cout << "Array elements:" << endl;
+    for (int num : numbers) {
+        cout << num << " ";
+    }
+    cout << endl;
+    
+    // With vectors
+    vector<string> fruits = {"apple", "banana", "orange", "grape"};
+    
+    cout << "\\nFruits list:" << endl;
+    for (const string& fruit : fruits) {
+        cout << "- " << fruit << endl;
+    }
+    
+    // With auto keyword
+    cout << "\\nUsing auto:" << endl;
+    for (const auto& fruit : fruits) {
+        cout << fruit << " has " << fruit.length() << " letters" << endl;
+    }
+    
+    // Modifying elements (use reference)
+    vector<int> values = {1, 2, 3, 4, 5};
+    
+    cout << "\\nOriginal values: ";
+    for (int val : values) {
+        cout << val << " ";
+    }
+    
+    cout << "\\nDoubling values..." << endl;
+    for (int& val : values) {  // Note the reference &
+        val *= 2;
+    }
+    
+    cout << "Modified values: ";
+    for (int val : values) {
+        cout << val << " ";
+    }
+    cout << endl;
+    
+    // With string
+    string word = "Hello";
+    cout << "\\nCharacters in '" << word << "':" << endl;
+    for (char c : word) {
+        cout << c << " ";
+    }
+    cout << endl;
+    
+    // Converting to uppercase
+    cout << "Converting to uppercase: ";
+    for (char& c : word) {
+        if (c >= 'a' && c <= 'z') {
+            c = c - 'a' + 'A';
+        }
+    }
+    cout << word << endl;
+    
+    return 0;
+}`}
+      explanation="Range-based for loops provide a clean syntax for iterating over containers. Use const& for read-only access, & for modification, and auto for type deduction."
+      output={`Array elements:
+1 2 3 4 5 
+
+Fruits list:
+- apple
+- banana
+- orange
+- grape
+
+Using auto:
+apple has 5 letters
+banana has 6 letters
+orange has 6 letters
+grape has 5 letters
+
+Original values: 1 2 3 4 5 
+Doubling values...
+Modified values: 2 4 6 8 10 
+
+Characters in 'Hello':
+H e l l o 
+Converting to uppercase: HELLO`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Best Practices</h2>
+    
+    <div class="best-practices">
+      <div class="practice">
+        <h4>1. Choose the Right Loop</h4>
+        <p>Use for loops when you know the iteration count, while loops for unknown counts, and do-while for at-least-once execution.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>2. Avoid Infinite Loops</h4>
+        <p>Always ensure loop conditions can become false. Initialize loop variables properly and update them correctly.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>3. Use Range-Based Loops</h4>
+        <p>Prefer range-based for loops when iterating over containers. They're safer and more readable.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>4. Keep Conditions Simple</h4>
+        <p>Use clear, simple conditions. Complex logic can be moved to separate boolean variables for readability.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>5. Consider Performance</h4>
+        <p>Be mindful of expensive operations in loop conditions and bodies. Move invariant calculations outside loops.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>Practice Exercises</h2>
+    
+    <div class="exercise">
+      <h3>Exercise 1: Number Guessing Game</h3>
+      <p>Create a guessing game where the computer picks a random number and the user tries to guess it. Use loops and conditionals to provide feedback.</p>
+    </div>
+    
+    <div class="exercise">
+      <h3>Exercise 2: Prime Number Checker</h3>
+      <p>Write a program that checks if a number is prime using loops and conditional statements.</p>
+    </div>
+    
+    <div class="exercise">
+      <h3>Exercise 3: Pattern Printing</h3>
+      <p>Use nested loops to print various patterns like pyramids, diamonds, or number triangles.</p>
+    </div>
+  </section>
+
+  <div class="navigation">
+    <a href="/l1-syntax-basics/variables" class="nav-button prev">← Variables & Types</a>
+    <a href="/l1-syntax-basics/functions" class="nav-button next">Functions →</a>
+  </div>
+</Layout>
+
+<style>
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .breadcrumb a {
+    color: #667eea;
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  .overview {
+    background: #f0f9ff;
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border-left: 4px solid #0ea5e9;
+  }
+
+  .content-section {
+    margin: 3rem 0;
+  }
+
+  .best-practices {
+    display: grid;
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .practice {
+    background: #f0fdf4;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #22c55e;
+  }
+
+  .practice h4 {
+    margin: 0 0 0.5rem 0;
+    color: #166534;
+  }
+
+  .practice p {
+    margin: 0;
+    color: #166534;
+  }
+
+  .exercise {
+    background: #fff7ed;
+    padding: 2rem;
+    border-radius: 8px;
+    border-left: 4px solid #f59e0b;
+    margin: 2rem 0;
+  }
+
+  .exercise h3 {
+    margin: 0 0 1rem 0;
+    color: #92400e;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin: 4rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .nav-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #667eea;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+  }
+
+  .nav-button:hover {
+    background: #5a67d8;
+  }
+
+  .nav-button.prev {
+    background: #64748b;
+  }
+
+  .nav-button.prev:hover {
+    background: #475569;
+  }
+
+  @media (max-width: 768px) {
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style> 

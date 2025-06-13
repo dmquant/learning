@@ -1,0 +1,62 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Advanced Graph Algorithms">
+	<h1>Advanced Graph Algorithms</h1>
+	
+	<h2>Overview</h2>
+	<p>This lesson covers advanced graph algorithms including minimum spanning trees, shortest path variations, and specialized graph techniques used in competitive programming.</p>
+	
+	<h2>Topics Covered</h2>
+	<ul>
+		<li>Minimum Spanning Tree (MST) algorithms</li>
+		<li>Second minimum spanning tree</li>
+		<li>Single-source shortest paths</li>
+		<li>K-shortest paths algorithms</li>
+		<li>Differential constraints</li>
+		<li>Layered graph techniques</li>
+	</ul>
+	
+	<h2>Minimum Spanning Tree</h2>
+	<p>A minimum spanning tree is a subset of edges that connects all vertices with minimum total weight.</p>
+	
+	<h3>Key Algorithms</h3>
+	<ul>
+		<li><strong>Kruskal's Algorithm:</strong> Sort edges by weight and use Union-Find to detect cycles</li>
+		<li><strong>Prim's Algorithm:</strong> Grow the MST by adding the minimum weight edge from the current tree</li>
+		<li><strong>Borůvka's Algorithm:</strong> Parallel algorithm that finds MST components simultaneously</li>
+	</ul>
+	
+	<h2>Shortest Path Algorithms</h2>
+	
+	<h3>Advanced Techniques</h3>
+	<ul>
+		<li><strong>Dijkstra's Algorithm:</strong> Single-source shortest paths with non-negative weights</li>
+		<li><strong>Bellman-Ford Algorithm:</strong> Handles negative weights and detects negative cycles</li>
+		<li><strong>Floyd-Warshall Algorithm:</strong> All-pairs shortest paths</li>
+		<li><strong>Johnson's Algorithm:</strong> All-pairs shortest paths with negative weights</li>
+	</ul>
+	
+	<h2>Differential Constraints</h2>
+	<p>Differential constraints involve systems of inequalities. These can be modeled as shortest path problems on constraint graphs.</p>
+	
+	<h3>Applications</h3>
+	<ul>
+		<li>Scheduling problems with time constraints</li>
+		<li>Resource allocation with capacity limits</li>
+		<li>Layout problems with distance requirements</li>
+	</ul>
+	
+	<h2>Layered Graphs</h2>
+	<p>Layered graphs are used to model problems where the state includes additional dimensions beyond just the current vertex.</p>
+	
+	<h2>Practice Problems</h2>
+	<ul>
+		<li>Find the minimum spanning tree of a weighted graph</li>
+		<li>Implement Dijkstra's algorithm for shortest paths</li>
+		<li>Solve a differential constraints system</li>
+		<li>Find the second minimum spanning tree</li>
+		<li>Shortest path with limited fuel/resources</li>
+	</ul>
+</Layout> 

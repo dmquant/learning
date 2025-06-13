@@ -1,0 +1,451 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Advanced Segment Trees">
+	<h1>Advanced Segment Trees</h1>
+	
+	<h2>Overview</h2>
+	<p>Advanced segment tree techniques extend basic segment trees to handle complex range operations, persistent queries, and multi-dimensional problems. This lesson covers lazy propagation, persistent segment trees, and advanced applications.</p>
+	
+	<h2>Lazy Propagation</h2>
+	<p>Lazy propagation enables efficient range updates by deferring updates until they're actually needed.</p>
+	
+	<h3>Range Update with Lazy Propagation</h3>
+	
+	<CodeExample 
+		client:load
+		title="Segment Tree with Lazy Propagation"
+		code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+class LazySegmentTree {
+private:
+    vector<long long> tree, lazy;
+    int n;
+    
+    void push(int node, int start, int end) {
+        if (lazy[node] != 0) {
+            tree[node] += lazy[node] * (end - start + 1);
+            if (start != end) {
+                lazy[2*node] += lazy[node];
+                lazy[2*node+1] += lazy[node];
+            }
+            lazy[node] = 0;
+        }
+    }
+    
+    void updateRange(int node, int start, int end, int l, int r, int val) {
+        push(node, start, end);
+        if (start > r || end < l) return;
+        
+        if (start >= l && end <= r) {
+            lazy[node] += val;
+            push(node, start, end);
+            return;
+        }
+        
+        int mid = (start + end) / 2;
+        updateRange(2*node, start, mid, l, r, val);
+        updateRange(2*node+1, mid+1, end, l, r, val);
+        
+        push(2*node, start, mid);
+        push(2*node+1, mid+1, end);
+        tree[node] = tree[2*node] + tree[2*node+1];
+    }
+    
+    long long queryRange(int node, int start, int end, int l, int r) {
+        if (start > r || end < l) return 0;
+        
+        push(node, start, end);
+        if (start >= l && end <= r) return tree[node];
+        
+        int mid = (start + end) / 2;
+        return queryRange(2*node, start, mid, l, r) +
+               queryRange(2*node+1, mid+1, end, l, r);
+    }
+    
+public:
+    LazySegmentTree(vector<int>& arr) {
+        n = arr.size();
+        tree.assign(4 * n, 0);
+        lazy.assign(4 * n, 0);
+        build(arr, 1, 0, n - 1);
+    }
+    
+    void build(vector<int>& arr, int node, int start, int end) {
+        if (start == end) {
+            tree[node] = arr[start];
+        } else {
+            int mid = (start + end) / 2;
+            build(arr, 2*node, start, mid);
+            build(arr, 2*node+1, mid+1, end);
+            tree[node] = tree[2*node] + tree[2*node+1];
+        }
+    }
+    
+    void update(int l, int r, int val) {
+        updateRange(1, 0, n - 1, l, r, val);
+    }
+    
+    long long query(int l, int r) {
+        return queryRange(1, 0, n - 1, l, r);
+    }
+};
+
+int main() {
+    vector<int> arr = {1, 3, 5, 7, 9, 11};
+    LazySegmentTree st(arr);
+    
+    cout << "Initial sum [1,3]: " << st.query(1, 3) << endl;
+    
+    st.update(1, 3, 10);
+    cout << "After adding 10 to [1,3]: " << st.query(1, 3) << endl;
+    cout << "Sum [0,5]: " << st.query(0, 5) << endl;
+    
+    return 0;
+}`}
+		explanation="Lazy propagation allows O(log n) range updates by storing pending updates and applying them only when necessary."
+		output={`Initial sum [1,3]: 15
+After adding 10 to [1,3]: 45
+Sum [0,5]: 66`}
+	/>
+	
+	<h2>Persistent Segment Trees</h2>
+	<p>Persistent segment trees maintain all previous versions of the tree, enabling queries on historical states.</p>
+	
+	<h3>Persistent Segment Tree Implementation</h3>
+	
+	<CodeExample 
+		client:load
+		title="Persistent Segment Tree"
+		code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+struct Node {
+    int value;
+    Node* left;
+    Node* right;
+    
+    Node(int val = 0) : value(val), left(nullptr), right(nullptr) {}
+    Node(int val, Node* l, Node* r) : value(val), left(l), right(r) {}
+};
+
+class PersistentSegmentTree {
+private:
+    vector<Node*> roots;
+    int n;
+    
+    Node* build(vector<int>& arr, int start, int end) {
+        if (start == end) {
+            return new Node(arr[start]);
+        }
+        
+        int mid = (start + end) / 2;
+        Node* left = build(arr, start, mid);
+        Node* right = build(arr, mid + 1, end);
+        
+        return new Node(left->value + right->value, left, right);
+    }
+    
+    Node* update(Node* node, int start, int end, int idx, int val) {
+        if (start == end) {
+            return new Node(val);
+        }
+        
+        int mid = (start + end) / 2;
+        if (idx <= mid) {
+            Node* newLeft = update(node->left, start, mid, idx, val);
+            return new Node(newLeft->value + node->right->value, newLeft, node->right);
+        } else {
+            Node* newRight = update(node->right, mid + 1, end, idx, val);
+            return new Node(node->left->value + newRight->value, node->left, newRight);
+        }
+    }
+    
+    int query(Node* node, int start, int end, int l, int r) {
+        if (r < start || end < l) return 0;
+        if (l <= start && end <= r) return node->value;
+        
+        int mid = (start + end) / 2;
+        return query(node->left, start, mid, l, r) +
+               query(node->right, mid + 1, end, l, r);
+    }
+    
+public:
+    PersistentSegmentTree(vector<int>& arr) {
+        n = arr.size();
+        roots.push_back(build(arr, 0, n - 1));
+    }
+    
+    void update(int version, int idx, int val) {
+        Node* newRoot = update(roots[version], 0, n - 1, idx, val);
+        roots.push_back(newRoot);
+    }
+    
+    int query(int version, int l, int r) {
+        return query(roots[version], 0, n - 1, l, r);
+    }
+    
+    int getVersionCount() {
+        return roots.size();
+    }
+};
+
+int main() {
+    vector<int> arr = {1, 2, 3, 4, 5};
+    PersistentSegmentTree pst(arr);
+    
+    cout << "Version 0, sum [0,4]: " << pst.query(0, 0, 4) << endl;
+    
+    pst.update(0, 2, 10); // Update index 2 to value 10
+    cout << "Version 1, sum [0,4]: " << pst.query(1, 0, 4) << endl;
+    cout << "Version 0, sum [0,4]: " << pst.query(0, 0, 4) << endl; // Original version unchanged
+    
+    pst.update(1, 0, 100); // Update index 0 to value 100
+    cout << "Version 2, sum [0,4]: " << pst.query(2, 0, 4) << endl;
+    
+    return 0;
+}`}
+		explanation="Persistent segment trees create new nodes only for changed paths, sharing unchanged subtrees between versions."
+		output={`Version 0, sum [0,4]: 15
+Version 1, sum [0,4]: 22
+Version 0, sum [0,4]: 15
+Version 2, sum [0,4]: 121`}
+	/>
+	
+	<h2>2D Segment Trees</h2>
+	<p>2D segment trees handle range queries and updates on 2D grids.</p>
+	
+	<h3>2D Range Sum Queries</h3>
+	
+	<CodeExample 
+		client:load
+		title="2D Segment Tree"
+		code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+class SegmentTree2D {
+private:
+    vector<vector<int>> tree;
+    int n, m;
+    
+    void buildY(int vx, int lx, int rx, int vy, int ly, int ry, vector<vector<int>>& matrix) {
+        if (ly == ry) {
+            if (lx == rx) {
+                tree[vx][vy] = matrix[lx][ly];
+            } else {
+                tree[vx][vy] = tree[2*vx][vy] + tree[2*vx+1][vy];
+            }
+        } else {
+            int my = (ly + ry) / 2;
+            buildY(vx, lx, rx, 2*vy, ly, my, matrix);
+            buildY(vx, lx, rx, 2*vy+1, my+1, ry, matrix);
+            tree[vx][vy] = tree[vx][2*vy] + tree[vx][2*vy+1];
+        }
+    }
+    
+    void buildX(int vx, int lx, int rx, vector<vector<int>>& matrix) {
+        if (lx != rx) {
+            int mx = (lx + rx) / 2;
+            buildX(2*vx, lx, mx, matrix);
+            buildX(2*vx+1, mx+1, rx, matrix);
+        }
+        buildY(vx, lx, rx, 1, 0, m-1, matrix);
+    }
+    
+    int queryY(int vx, int vy, int ly, int ry, int y1, int y2) {
+        if (y1 > y2) return 0;
+        if (y1 == ly && y2 == ry) return tree[vx][vy];
+        
+        int my = (ly + ry) / 2;
+        return queryY(vx, 2*vy, ly, my, y1, min(y2, my)) +
+               queryY(vx, 2*vy+1, my+1, ry, max(y1, my+1), y2);
+    }
+    
+    int queryX(int vx, int lx, int rx, int x1, int x2, int y1, int y2) {
+        if (x1 > x2) return 0;
+        if (x1 == lx && x2 == rx) return queryY(vx, 1, 0, m-1, y1, y2);
+        
+        int mx = (lx + rx) / 2;
+        return queryX(2*vx, lx, mx, x1, min(x2, mx), y1, y2) +
+               queryX(2*vx+1, mx+1, rx, max(x1, mx+1), x2, y1, y2);
+    }
+    
+public:
+    SegmentTree2D(vector<vector<int>>& matrix) {
+        n = matrix.size();
+        m = matrix[0].size();
+        tree.assign(4*n, vector<int>(4*m, 0));
+        buildX(1, 0, n-1, matrix);
+    }
+    
+    int query(int x1, int y1, int x2, int y2) {
+        return queryX(1, 0, n-1, x1, x2, y1, y2);
+    }
+};
+
+int main() {
+    vector<vector<int>> matrix = {
+        {1, 2, 3, 4},
+        {5, 6, 7, 8},
+        {9, 10, 11, 12},
+        {13, 14, 15, 16}
+    };
+    
+    SegmentTree2D st2d(matrix);
+    
+    cout << "Sum of rectangle (1,1) to (2,2): " << st2d.query(1, 1, 2, 2) << endl;
+    cout << "Sum of rectangle (0,0) to (3,3): " << st2d.query(0, 0, 3, 3) << endl;
+    cout << "Sum of rectangle (0,0) to (1,1): " << st2d.query(0, 0, 1, 1) << endl;
+    
+    return 0;
+}`}
+		explanation="2D segment trees use nested segment trees to handle 2D range queries efficiently in O(log²n) time."
+		output={`Sum of rectangle (1,1) to (2,2): 34
+Sum of rectangle (0,0) to (3,3): 136
+Sum of rectangle (0,0) to (1,1): 14`}
+	/>
+	
+	<h2>Dynamic Segment Trees</h2>
+	<p>Dynamic segment trees handle very large coordinate ranges by creating nodes only when needed.</p>
+	
+	<h3>Sparse Segment Tree</h3>
+	
+	<CodeExample 
+		client:load
+		title="Dynamic Segment Tree"
+		code={`#include <iostream>
+#include <unordered_map>
+using namespace std;
+
+class DynamicSegmentTree {
+private:
+    unordered_map<int, long long> tree;
+    int n;
+    
+    void update(int node, int start, int end, int idx, int val) {
+        if (start == end) {
+            tree[node] = val;
+            return;
+        }
+        
+        int mid = (start + end) / 2;
+        if (idx <= mid) {
+            update(2*node, start, mid, idx, val);
+        } else {
+            update(2*node+1, mid+1, end, idx, val);
+        }
+        
+        tree[node] = tree[2*node] + tree[2*node+1];
+    }
+    
+    long long query(int node, int start, int end, int l, int r) {
+        if (r < start || end < l) return 0;
+        if (tree.find(node) == tree.end()) return 0; // Node doesn't exist
+        if (l <= start && end <= r) return tree[node];
+        
+        int mid = (start + end) / 2;
+        return query(2*node, start, mid, l, r) +
+               query(2*node+1, mid+1, end, l, r);
+    }
+    
+public:
+    DynamicSegmentTree(int size) : n(size) {}
+    
+    void update(int idx, int val) {
+        update(1, 0, n-1, idx, val);
+    }
+    
+    long long query(int l, int r) {
+        return query(1, 0, n-1, l, r);
+    }
+    
+    void printTreeSize() {
+        cout << "Tree nodes created: " << tree.size() << endl;
+    }
+};
+
+int main() {
+    DynamicSegmentTree dst(1000000); // Very large range
+    
+    dst.update(1000, 5);
+    dst.update(999999, 10);
+    dst.update(500000, 7);
+    
+    cout << "Sum [999, 1001]: " << dst.query(999, 1001) << endl;
+    cout << "Sum [499999, 500001]: " << dst.query(499999, 500001) << endl;
+    cout << "Sum [0, 999999]: " << dst.query(0, 999999) << endl;
+    
+    dst.printTreeSize();
+    
+    return 0;
+}`}
+		explanation="Dynamic segment trees only create nodes that are actually used, enabling efficient operations on very large ranges."
+		output={`Sum [999, 1001]: 5
+Sum [499999, 500001]: 7
+Sum [0, 999999]: 22
+Tree nodes created: 21`}
+	/>
+	
+	<h2>Advanced Applications</h2>
+	
+	<h3>Range Maximum Query with Updates</h3>
+	<ul>
+		<li>Find maximum element in range</li>
+		<li>Support range maximum updates</li>
+		<li>Handle both point and range operations</li>
+	</ul>
+	
+	<h3>Range GCD Queries</h3>
+	<ul>
+		<li>Compute GCD of elements in range</li>
+		<li>Handle GCD-based modifications</li>
+		<li>Segment tree with GCD operations</li>
+	</ul>
+	
+	<h3>Range Mode Queries</h3>
+	<ul>
+		<li>Find most frequent element in range</li>
+		<li>Use frequency arrays within nodes</li>
+		<li>Handle insertions and deletions</li>
+	</ul>
+	
+	<h2>Optimization Techniques</h2>
+	
+	<h3>Memory Optimization</h3>
+	<ul>
+		<li>Node pooling for better cache performance</li>
+		<li>Implicit segment trees using arrays</li>
+		<li>Compressed representations for sparse data</li>
+	</ul>
+	
+	<h3>Time Optimization</h3>
+	<ul>
+		<li>Bottom-up segment tree construction</li>
+		<li>Iterative implementations</li>
+		<li>SIMD optimizations for bulk operations</li>
+	</ul>
+	
+	<h3>Fractional Cascading</h3>
+	<ul>
+		<li>Accelerate multi-dimensional queries</li>
+		<li>Combine with persistent structures</li>
+		<li>Advanced range searching techniques</li>
+	</ul>
+	
+	<h2>Practice Problems</h2>
+	<ul>
+		<li>Implement lazy propagation with multiple operation types</li>
+		<li>Build persistent segment trees for historical queries</li>
+		<li>Solve 2D range problems using nested segment trees</li>
+		<li>Handle coordinate compression in dynamic segment trees</li>
+		<li>Implement range GCD queries with updates</li>
+		<li>Combine segment trees with other data structures</li>
+		<li>Optimize segment tree operations for competitive programming</li>
+	</ul>
+</Layout>

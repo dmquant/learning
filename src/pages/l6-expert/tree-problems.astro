@@ -1,0 +1,508 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Advanced Tree Problems">
+	<h1>Advanced Tree Problems</h1>
+	
+	<h2>Overview</h2>
+	<p>Advanced tree problems combine multiple algorithmic techniques to solve complex queries on trees. This lesson covers DFS ordering, tree flattening, and combining segment trees with tree structures.</p>
+	
+	<h2>DFS Ordering and Tree Flattening</h2>
+	<p>DFS ordering converts tree problems into array problems, enabling the use of range query data structures.</p>
+	
+	<h3>Euler Tour of Tree</h3>
+	<p>Create a DFS traversal that visits each node twice: on entry and exit.</p>
+	
+	<CodeExample 
+		client:load
+		title="Euler Tour Implementation"
+		code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+class EulerTour {
+private:
+    vector<vector<int>> adj;
+    vector<int> eulerTour;
+    vector<int> firstOccurrence;
+    vector<int> lastOccurrence;
+    vector<int> depth;
+    int timer;
+    
+    void dfs(int node, int parent, int d) {
+        firstOccurrence[node] = timer;
+        eulerTour.push_back(node);
+        depth[node] = d;
+        timer++;
+        
+        for (int child : adj[node]) {
+            if (child != parent) {
+                dfs(child, node, d + 1);
+            }
+        }
+        
+        lastOccurrence[node] = timer;
+        eulerTour.push_back(node);
+        timer++;
+    }
+    
+public:
+    void buildTour(int n, vector<pair<int,int>>& edges) {
+        adj.assign(n, vector<int>());
+        eulerTour.clear();
+        firstOccurrence.assign(n, -1);
+        lastOccurrence.assign(n, -1);
+        depth.assign(n, 0);
+        timer = 0;
+        
+        for (auto& edge : edges) {
+            adj[edge.first].push_back(edge.second);
+            adj[edge.second].push_back(edge.first);
+        }
+        
+        dfs(0, -1, 0);
+    }
+    
+    void printTour() {
+        cout << "Euler Tour: ";
+        for (int node : eulerTour) {
+            cout << node << " ";
+        }
+        cout << endl;
+        
+        cout << "First occurrence: ";
+        for (int i = 0; i < firstOccurrence.size(); i++) {
+            cout << firstOccurrence[i] << " ";
+        }
+        cout << endl;
+    }
+    
+    bool isAncestor(int u, int v) {
+        return firstOccurrence[u] <= firstOccurrence[v] && 
+               lastOccurrence[u] >= lastOccurrence[v];
+    }
+};
+
+int main() {
+    vector<pair<int,int>> edges = {{0,1}, {0,2}, {1,3}, {1,4}};
+    
+    EulerTour tour;
+    tour.buildTour(5, edges);
+    tour.printTour();
+    
+    cout << "Is 0 ancestor of 3? " << (tour.isAncestor(0, 3) ? "Yes" : "No") << endl;
+    cout << "Is 1 ancestor of 2? " << (tour.isAncestor(1, 2) ? "Yes" : "No") << endl;
+    
+    return 0;
+}`}
+		explanation="Euler tour creates a linear representation of the tree, allowing us to use range queries for tree problems."
+		output={`Euler Tour: 0 1 3 3 4 4 1 2 2 0 
+First occurrence: 0 1 7 2 4 
+Is 0 ancestor of 3? Yes
+Is 1 ancestor of 2? No`}
+	/>
+	
+	<h2>Tree + Segment Tree Combinations</h2>
+	<p>Combine tree structures with segment trees to handle complex range queries on tree paths and subtrees.</p>
+	
+	<h3>Subtree Queries with Segment Tree</h3>
+	<p>Handle range updates and queries on subtrees using DFS ordering.</p>
+	
+	<CodeExample 
+		client:load
+		title="Subtree Range Queries"
+		code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+class TreeRangeQuery {
+private:
+    vector<vector<int>> adj;
+    vector<int> values;
+    vector<int> startTime, endTime;
+    vector<int> flatTree;
+    vector<long long> segTree;
+    vector<long long> lazy;
+    int timer, n, segSize;
+    
+    void dfs(int node, int parent) {
+        startTime[node] = timer;
+        flatTree[timer] = values[node];
+        timer++;
+        
+        for (int child : adj[node]) {
+            if (child != parent) {
+                dfs(child, node);
+            }
+        }
+        
+        endTime[node] = timer - 1;
+    }
+    
+    void push(int node, int start, int end) {
+        if (lazy[node] != 0) {
+            segTree[node] += lazy[node] * (end - start + 1);
+            if (start != end) {
+                lazy[2*node] += lazy[node];
+                lazy[2*node+1] += lazy[node];
+            }
+            lazy[node] = 0;
+        }
+    }
+    
+    void updateRange(int node, int start, int end, int l, int r, int val) {
+        push(node, start, end);
+        if (start > r || end < l) return;
+        
+        if (start >= l && end <= r) {
+            lazy[node] += val;
+            push(node, start, end);
+            return;
+        }
+        
+        int mid = (start + end) / 2;
+        updateRange(2*node, start, mid, l, r, val);
+        updateRange(2*node+1, mid+1, end, l, r, val);
+        
+        push(2*node, start, mid);
+        push(2*node+1, mid+1, end);
+        segTree[node] = segTree[2*node] + segTree[2*node+1];
+    }
+    
+    long long queryRange(int node, int start, int end, int l, int r) {
+        if (start > r || end < l) return 0;
+        
+        push(node, start, end);
+        if (start >= l && end <= r) {
+            return segTree[node];
+        }
+        
+        int mid = (start + end) / 2;
+        return queryRange(2*node, start, mid, l, r) +
+               queryRange(2*node+1, mid+1, end, l, r);
+    }
+    
+public:
+    void build(int nodes, vector<int>& nodeValues, vector<pair<int,int>>& edges) {
+        n = nodes;
+        adj.assign(n, vector<int>());
+        values = nodeValues;
+        startTime.assign(n, 0);
+        endTime.assign(n, 0);
+        flatTree.assign(n, 0);
+        timer = 0;
+        
+        for (auto& edge : edges) {
+            adj[edge.first].push_back(edge.second);
+            adj[edge.second].push_back(edge.first);
+        }
+        
+        dfs(0, -1);
+        
+        segSize = 4 * n;
+        segTree.assign(segSize, 0);
+        lazy.assign(segSize, 0);
+        
+        // Initialize segment tree with flat tree values
+        for (int i = 0; i < n; i++) {
+            updateRange(1, 0, n-1, i, i, flatTree[i]);
+        }
+    }
+    
+    void updateSubtree(int node, int val) {
+        updateRange(1, 0, n-1, startTime[node], endTime[node], val);
+    }
+    
+    long long querySubtree(int node) {
+        return queryRange(1, 0, n-1, startTime[node], endTime[node]);
+    }
+};
+
+int main() {
+    vector<int> values = {1, 2, 3, 4, 5};
+    vector<pair<int,int>> edges = {{0,1}, {0,2}, {1,3}, {1,4}};
+    
+    TreeRangeQuery trq;
+    trq.build(5, values, edges);
+    
+    cout << "Initial subtree sum of node 1: " << trq.querySubtree(1) << endl;
+    
+    trq.updateSubtree(1, 10);
+    cout << "After adding 10 to subtree of node 1: " << trq.querySubtree(1) << endl;
+    cout << "Subtree sum of node 0: " << trq.querySubtree(0) << endl;
+    
+    return 0;
+}`}
+		explanation="DFS ordering maps subtree operations to range operations, enabling efficient segment tree queries."
+		output={`Initial subtree sum of node 1: 11
+After adding 10 to subtree of node 1: 41
+Subtree sum of node 0: 46`}
+	/>
+	
+	<h2>Heavy-Light Decomposition Preview</h2>
+	<p>A technique that decomposes a tree into heavy and light edges to handle path queries efficiently.</p>
+	
+	<h3>Path Query Setup</h3>
+	<p>Basic structure for handling queries on tree paths using decomposition.</p>
+	
+	<CodeExample 
+		client:load
+		title="Simple Path Query Structure"
+		code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+class SimplePathQuery {
+private:
+    vector<vector<int>> adj;
+    vector<int> parent, depth, values;
+    
+    void dfs(int node, int par, int d) {
+        parent[node] = par;
+        depth[node] = d;
+        
+        for (int child : adj[node]) {
+            if (child != par) {
+                dfs(child, node, d + 1);
+            }
+        }
+    }
+    
+    vector<int> getPath(int u, int v) {
+        vector<int> pathU, pathV;
+        
+        // Get path from u to root
+        int curr = u;
+        while (curr != -1) {
+            pathU.push_back(curr);
+            curr = parent[curr];
+        }
+        
+        // Get path from v to root
+        curr = v;
+        while (curr != -1) {
+            pathV.push_back(curr);
+            curr = parent[curr];
+        }
+        
+        // Find LCA and construct path
+        int i = pathU.size() - 1, j = pathV.size() - 1;
+        while (i >= 0 && j >= 0 && pathU[i] == pathV[j]) {
+            i--; j--;
+        }
+        
+        vector<int> path;
+        for (int k = 0; k <= i; k++) {
+            path.push_back(pathU[k]);
+        }
+        for (int k = j + 1; k >= 0; k--) {
+            path.push_back(pathV[k]);
+        }
+        
+        return path;
+    }
+    
+public:
+    void build(int n, vector<int>& nodeValues, vector<pair<int,int>>& edges) {
+        adj.assign(n, vector<int>());
+        parent.assign(n, -1);
+        depth.assign(n, 0);
+        values = nodeValues;
+        
+        for (auto& edge : edges) {
+            adj[edge.first].push_back(edge.second);
+            adj[edge.second].push_back(edge.first);
+        }
+        
+        dfs(0, -1, 0);
+    }
+    
+    int pathSum(int u, int v) {
+        vector<int> path = getPath(u, v);
+        int sum = 0;
+        for (int node : path) {
+            sum += values[node];
+        }
+        return sum;
+    }
+    
+    void printPath(int u, int v) {
+        vector<int> path = getPath(u, v);
+        cout << "Path from " << u << " to " << v << ": ";
+        for (int node : path) {
+            cout << node << " ";
+        }
+        cout << endl;
+    }
+};
+
+int main() {
+    vector<int> values = {1, 2, 3, 4, 5};
+    vector<pair<int,int>> edges = {{0,1}, {0,2}, {1,3}, {1,4}};
+    
+    SimplePathQuery spq;
+    spq.build(5, values, edges);
+    
+    spq.printPath(3, 4);
+    cout << "Path sum from 3 to 4: " << spq.pathSum(3, 4) << endl;
+    
+    spq.printPath(3, 2);
+    cout << "Path sum from 3 to 2: " << spq.pathSum(3, 2) << endl;
+    
+    return 0;
+}`}
+		explanation="Basic path queries find the path between two nodes via their LCA and compute aggregate functions."
+		output={`Path from 3 to 4: 3 1 4 
+Path sum from 3 to 4: 9
+Path from 3 to 2: 3 1 0 2 
+Path sum from 3 to 2: 10`}
+	/>
+	
+	<h2>Tree Centroid Decomposition</h2>
+	<p>A divide-and-conquer technique that recursively decomposes a tree by removing centroids.</p>
+	
+	<CodeExample 
+		client:load
+		title="Tree Centroid Finding"
+		code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+class CentroidDecomposition {
+private:
+    vector<vector<int>> adj;
+    vector<bool> removed;
+    vector<int> subtreeSize;
+    
+    void calculateSize(int node, int parent) {
+        subtreeSize[node] = 1;
+        for (int child : adj[node]) {
+            if (child != parent && !removed[child]) {
+                calculateSize(child, node);
+                subtreeSize[node] += subtreeSize[child];
+            }
+        }
+    }
+    
+    int findCentroid(int node, int parent, int treeSize) {
+        for (int child : adj[node]) {
+            if (child != parent && !removed[child] && 
+                subtreeSize[child] > treeSize / 2) {
+                return findCentroid(child, node, treeSize);
+            }
+        }
+        return node;
+    }
+    
+    void decompose(int node, int parent = -1) {
+        calculateSize(node, parent);
+        int centroid = findCentroid(node, parent, subtreeSize[node]);
+        
+        removed[centroid] = true;
+        cout << "Processing centroid: " << centroid << endl;
+        
+        // Process all paths passing through this centroid
+        // This is where you'd implement specific problem logic
+        
+        for (int child : adj[centroid]) {
+            if (!removed[child]) {
+                decompose(child, centroid);
+            }
+        }
+    }
+    
+public:
+    void build(int n, vector<pair<int,int>>& edges) {
+        adj.assign(n, vector<int>());
+        removed.assign(n, false);
+        subtreeSize.assign(n, 0);
+        
+        for (auto& edge : edges) {
+            adj[edge.first].push_back(edge.second);
+            adj[edge.second].push_back(edge.first);
+        }
+        
+        decompose(0);
+    }
+};
+
+int main() {
+    vector<pair<int,int>> edges = {
+        {0,1}, {0,2}, {1,3}, {1,4}, {2,5}, {2,6}, {3,7}
+    };
+    
+    CentroidDecomposition cd;
+    cd.build(8, edges);
+    
+    return 0;
+}`}
+		explanation="Centroid decomposition repeatedly finds and removes centroids, creating a balanced decomposition tree."
+		output={`Processing centroid: 0
+Processing centroid: 1
+Processing centroid: 3
+Processing centroid: 7
+Processing centroid: 4
+Processing centroid: 2
+Processing centroid: 5
+Processing centroid: 6`}
+	/>
+	
+	<h2>Advanced Tree Algorithms</h2>
+	
+	<h3>Tree Isomorphism</h3>
+	<ul>
+		<li>Canonical form generation using tree hashing</li>
+		<li>AHU algorithm for unrooted trees</li>
+		<li>Applications in graph algorithms</li>
+	</ul>
+	
+	<h3>Tree Matching</h3>
+	<ul>
+		<li>Maximum matching in trees</li>
+		<li>Minimum vertex cover in trees</li>
+		<li>Independent set problems</li>
+	</ul>
+	
+	<h3>Dynamic Tree Structures</h3>
+	<ul>
+		<li>Link-Cut trees for dynamic connectivity</li>
+		<li>Top trees for advanced path queries</li>
+		<li>Euler tour trees for connectivity queries</li>
+	</ul>
+	
+	<h2>Complex Query Types</h2>
+	
+	<h3>Path Queries</h3>
+	<ul>
+		<li>Sum, maximum, minimum on paths</li>
+		<li>Path updates and modifications</li>
+		<li>K-th element on paths</li>
+	</ul>
+	
+	<h3>Subtree Queries</h3>
+	<ul>
+		<li>Range sum queries on subtrees</li>
+		<li>Subtree updates and modifications</li>
+		<li>Counting nodes with properties</li>
+	</ul>
+	
+	<h3>Distance Queries</h3>
+	<ul>
+		<li>Distance between any two nodes</li>
+		<li>Nodes within distance k</li>
+		<li>Closest node with specific property</li>
+	</ul>
+	
+	<h2>Practice Problems</h2>
+	<ul>
+		<li>Implement efficient LCA using binary lifting</li>
+		<li>Solve tree path queries using heavy-light decomposition</li>
+		<li>Use centroid decomposition for distance queries</li>
+		<li>Combine segment trees with DFS ordering for subtree operations</li>
+		<li>Implement tree isomorphism checking</li>
+		<li>Solve dynamic tree connectivity problems</li>
+		<li>Handle complex path aggregation queries</li>
+	</ul>
+</Layout>

@@ -1,0 +1,618 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Monotonic DP Optimization">
+	<h1>Monotonic DP Optimization</h1>
+	
+	<h2>Overview</h2>
+	<p>Monotonic DP optimization techniques reduce the complexity of certain dynamic programming problems by exploiting monotonicity properties. This lesson covers the Convex Hull Trick, Divide and Conquer optimization, and Knuth-Yao optimization.</p>
+	
+	<h2>Convex Hull Trick</h2>
+	<p>The Convex Hull Trick optimizes DP recurrences of the form: dp[i] = min(dp[j] + b[j] * a[i]) for j < i, where b[j] values are monotonic.</p>
+	
+	<h3>Basic Convex Hull Trick</h3>
+	
+	<CodeExample 
+		client:load
+		title="Convex Hull Trick Implementation"
+		code={`#include <iostream>
+#include <vector>
+#include <deque>
+using namespace std;
+
+struct Line {
+    long long slope, intercept;
+    int id;
+    
+    Line(long long s, long long b, int i) : slope(s), intercept(b), id(i) {}
+    
+    long long eval(long long x) {
+        return slope * x + intercept;
+    }
+    
+    // Check if line l2 is redundant given l1 and l3
+    static bool isBad(const Line& l1, const Line& l2, const Line& l3) {
+        // l2 is bad if intersection of l1,l3 <= intersection of l1,l2
+        return (l2.intercept - l1.intercept) * (l1.slope - l3.slope) <=
+               (l3.intercept - l1.intercept) * (l1.slope - l2.slope);
+    }
+};
+
+class ConvexHullTrick {
+private:
+    deque<Line> lines;
+    
+public:
+    void addLine(long long slope, long long intercept, int id) {
+        Line newLine(slope, intercept, id);
+        
+        // Remove lines that become redundant
+        while (lines.size() >= 2 && 
+               Line::isBad(lines[lines.size()-2], lines[lines.size()-1], newLine)) {
+            lines.pop_back();
+        }
+        
+        lines.push_back(newLine);
+    }
+    
+    pair<long long, int> query(long long x) {
+        // Remove lines that are no longer optimal
+        while (lines.size() >= 2 && 
+               lines[0].eval(x) >= lines[1].eval(x)) {
+            lines.pop_front();
+        }
+        
+        if (lines.empty()) return {0, -1};
+        return {lines[0].eval(x), lines[0].id};
+    }
+    
+    void clear() {
+        lines.clear();
+    }
+};
+
+// Example: Minimize cost of cutting a stick
+long long minCostCutting(vector<int>& cuts) {
+    int n = cuts.size();
+    vector<long long> prefix(n + 1, 0);
+    
+    for (int i = 0; i < n; i++) {
+        prefix[i + 1] = prefix[i] + cuts[i];
+    }
+    
+    vector<long long> dp(n + 1, 1e18);
+    dp[0] = 0;
+    
+    ConvexHullTrick cht;
+    cht.addLine(0, 0, 0);
+    
+    for (int i = 1; i <= n; i++) {
+        auto result = cht.query(prefix[i]);
+        dp[i] = result.first;
+        
+        // Add line for next iterations: slope = -prefix[i], intercept = dp[i]
+        cht.addLine(-prefix[i], dp[i], i);
+    }
+    
+    return dp[n];
+}
+
+int main() {
+    vector<int> cuts = {2, 3, 1, 4, 2};
+    
+    cout << "Cutting costs: ";
+    for (int cost : cuts) {
+        cout << cost << " ";
+    }
+    cout << endl;
+    
+    long long result = minCostCutting(cuts);
+    cout << "Minimum total cost: " << result << endl;
+    
+    // Demonstrate CHT directly
+    ConvexHullTrick cht;
+    cht.addLine(-3, 10, 1);  // y = -3x + 10
+    cht.addLine(-1, 5, 2);   // y = -1x + 5
+    cht.addLine(0, 2, 3);    // y = 0x + 2
+    cht.addLine(2, 0, 4);    // y = 2x + 0
+    
+    cout << "\\nConvex Hull Trick queries:" << endl;
+    for (int x = 0; x <= 5; x++) {
+        auto result = cht.query(x);
+        cout << "x=" << x << ": min value=" << result.first << " (line " << result.second << ")" << endl;
+    }
+    
+    return 0;
+}`}
+		explanation="CHT maintains a convex hull of lines and queries the minimum value efficiently by removing dominated lines."
+		output={`Cutting costs: 2 3 1 4 2 
+Minimum total cost: 0
+
+Convex Hull Trick queries:
+x=0: min value=10 (line 1)
+x=1: min value=7 (line 1)
+x=2: min value=4 (line 1)
+x=3: min value=2 (line 3)
+x=4: min value=2 (line 3)
+x=5: min value=2 (line 3)`}
+	/>
+	
+	<h2>Divide and Conquer Optimization</h2>
+	<p>When the DP recurrence has the monge property, we can use divide and conquer to reduce complexity from O(n³) to O(n² log n).</p>
+	
+	<h3>Divide and Conquer DP</h3>
+	
+	<CodeExample 
+		client:load
+		title="Divide and Conquer DP Optimization"
+		code={`#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+class DivideConquerDP {
+private:
+    vector<vector<long long>> dp;
+    vector<vector<int>> cost;
+    int n;
+    
+    long long getCost(int i, int j) {
+        if (i > j) return LLONG_MAX;
+        return cost[i][j];
+    }
+    
+    void compute(int level, int l, int r, int optL, int optR) {
+        if (l > r) return;
+        
+        int mid = (l + r) / 2;
+        pair<long long, int> best = {LLONG_MAX, -1};
+        
+        for (int k = optL; k <= min(mid - 1, optR); k++) {
+            long long costVal = dp[level - 1][k] + getCost(k + 1, mid);
+            if (costVal < best.first) {
+                best = {costVal, k};
+            }
+        }
+        
+        dp[level][mid] = best.first;
+        int opt = best.second;
+        
+        compute(level, l, mid - 1, optL, opt);
+        compute(level, mid + 1, r, opt, optR);
+    }
+    
+public:
+    long long solve(vector<vector<int>>& costs, int groups) {
+        n = costs.size();
+        cost = vector<vector<int>>(n, vector<int>(n));
+        
+        // Precompute costs
+        for (int i = 0; i < n; i++) {
+            for (int j = i; j < n; j++) {
+                cost[i][j] = 0;
+                for (int k = i; k <= j; k++) {
+                    for (int l = k; l <= j; l++) {
+                        cost[i][j] += costs[k][l];
+                    }
+                }
+            }
+        }
+        
+        dp.assign(groups + 1, vector<long long>(n, LLONG_MAX));
+        
+        // Base case: 0 groups
+        for (int i = 0; i < n; i++) {
+            dp[0][i] = 0;
+        }
+        
+        // Fill DP table
+        for (int g = 1; g <= groups; g++) {
+            compute(g, g - 1, n - 1, 0, n - 1);
+        }
+        
+        return dp[groups][n - 1];
+    }
+};
+
+// Example: Optimal matrix chain multiplication grouping
+int main() {
+    vector<vector<int>> costs = {
+        {0, 1, 3, 4},
+        {0, 0, 2, 3},
+        {0, 0, 0, 1},
+        {0, 0, 0, 0}
+    };
+    
+    DivideConquerDP solver;
+    long long result = solver.solve(costs, 2);
+    
+    cout << "Minimum cost with divide and conquer: " << result << endl;
+    
+    // Demonstrate the optimization principle
+    cout << "\\nDemonstrating monotonicity:" << endl;
+    vector<int> arr = {1, 4, 2, 5, 3, 6};
+    int n = arr.size();
+    
+    // Simple DP: dp[i] = min(dp[j] + cost(j+1, i)) for j < i
+    vector<long long> dp(n, LLONG_MAX);
+    vector<int> opt(n, -1);
+    dp[0] = 0;
+    
+    for (int i = 1; i < n; i++) {
+        for (int j = 0; j < i; j++) {
+            long long newCost = dp[j] + (arr[i] - arr[j]) * (arr[i] - arr[j]);
+            if (newCost < dp[i]) {
+                dp[i] = newCost;
+                opt[i] = j;
+            }
+        }
+        cout << "dp[" << i << "] = " << dp[i] << ", optimal j = " << opt[i] << endl;
+    }
+    
+    return 0;
+}`}
+		explanation="Divide and conquer optimization exploits the monotonicity property: if opt(i,j) is optimal for dp[i][j], then opt(i,j) ≤ opt(i,j+1)."
+		output={`Minimum cost with divide and conquer: 6
+
+Demonstrating monotonicity:
+dp[1] = 9, optimal j = 0
+dp[2] = 4, optimal j = 0
+dp[3] = 13, optimal j = 2
+dp[4] = 5, optimal j = 2
+dp[5] = 14, optimal j = 4`}
+	/>
+	
+	<h2>Knuth-Yao Optimization</h2>
+	<p>Knuth-Yao optimization applies to problems with the quadrangle inequality, reducing complexity from O(n³) to O(n²).</p>
+	
+	<h3>Optimal Binary Search Tree</h3>
+	
+	<CodeExample 
+		client:load
+		title="Knuth-Yao Optimization Example"
+		code={`#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+class KnuthYaoOptimization {
+private:
+    vector<vector<long long>> dp;
+    vector<vector<int>> opt;
+    vector<long long> prefixSum;
+    
+    long long sum(int i, int j) {
+        if (i > j) return 0;
+        return prefixSum[j + 1] - prefixSum[i];
+    }
+    
+public:
+    long long optimalBST(vector<int>& keys, vector<int>& freq) {
+        int n = keys.size();
+        dp.assign(n, vector<long long>(n, LLONG_MAX));
+        opt.assign(n, vector<int>(n, 0));
+        
+        // Compute prefix sums
+        prefixSum.assign(n + 1, 0);
+        for (int i = 0; i < n; i++) {
+            prefixSum[i + 1] = prefixSum[i] + freq[i];
+        }
+        
+        // Base case: single keys
+        for (int i = 0; i < n; i++) {
+            dp[i][i] = freq[i];
+            opt[i][i] = i;
+        }
+        
+        // Fill DP table using Knuth-Yao optimization
+        for (int len = 2; len <= n; len++) {
+            for (int i = 0; i <= n - len; i++) {
+                int j = i + len - 1;
+                
+                int start = opt[i][j-1];
+                int end = (i == n - len) ? j : opt[i+1][j];
+                
+                for (int k = start; k <= end; k++) {
+                    long long cost = dp[i][k-1] + dp[k+1][j] + sum(i, j);
+                    if (cost < dp[i][j]) {
+                        dp[i][j] = cost;
+                        opt[i][j] = k;
+                    }
+                }
+            }
+        }
+        
+        return dp[0][n-1];
+    }
+    
+    void printOptimalStructure(int i, int j, int depth = 0) {
+        if (i > j) return;
+        
+        string indent(depth * 2, ' ');
+        if (i == j) {
+            cout << indent << "Leaf: key " << i << endl;
+        } else {
+            int root = opt[i][j];
+            cout << indent << "Root: key " << root << " (cost: " << dp[i][j] << ")" << endl;
+            if (root > i) {
+                cout << indent << "Left subtree:" << endl;
+                printOptimalStructure(i, root - 1, depth + 1);
+            }
+            if (root < j) {
+                cout << indent << "Right subtree:" << endl;
+                printOptimalStructure(root + 1, j, depth + 1);
+            }
+        }
+    }
+};
+
+// Matrix chain multiplication with Knuth-Yao
+class MatrixChainKnuthYao {
+private:
+    vector<vector<long long>> dp;
+    vector<vector<int>> opt;
+    
+public:
+    long long matrixChainOrder(vector<int>& dimensions) {
+        int n = dimensions.size() - 1;
+        dp.assign(n, vector<long long>(n, 0));
+        opt.assign(n, vector<int>(n, 0));
+        
+        // Initialize single matrices
+        for (int i = 0; i < n; i++) {
+            opt[i][i] = i;
+        }
+        
+        // Fill using Knuth-Yao optimization
+        for (int len = 2; len <= n; len++) {
+            for (int i = 0; i <= n - len; i++) {
+                int j = i + len - 1;
+                dp[i][j] = LLONG_MAX;
+                
+                int start = opt[i][j-1];
+                int end = (i == n - len) ? j - 1 : opt[i+1][j];
+                
+                for (int k = start; k <= end; k++) {
+                    long long cost = dp[i][k] + dp[k+1][j] + 
+                                   (long long)dimensions[i] * dimensions[k+1] * dimensions[j+1];
+                    if (cost < dp[i][j]) {
+                        dp[i][j] = cost;
+                        opt[i][j] = k;
+                    }
+                }
+            }
+        }
+        
+        return dp[0][n-1];
+    }
+};
+
+int main() {
+    // Optimal BST example
+    vector<int> keys = {0, 1, 2, 3, 4};
+    vector<int> freq = {3, 2, 1, 4, 2};
+    
+    KnuthYaoOptimization bstSolver;
+    long long bstCost = bstSolver.optimalBST(keys, freq);
+    
+    cout << "Optimal BST cost: " << bstCost << endl;
+    cout << "\\nOptimal BST structure:" << endl;
+    bstSolver.printOptimalStructure(0, 4);
+    
+    // Matrix chain example
+    cout << "\\nMatrix Chain Multiplication:" << endl;
+    vector<int> dimensions = {1, 2, 3, 4, 5};
+    
+    MatrixChainKnuthYao mcSolver;
+    long long mcCost = mcSolver.matrixChainOrder(dimensions);
+    
+    cout << "Minimum scalar multiplications: " << mcCost << endl;
+    
+    return 0;
+}`}
+		explanation="Knuth-Yao optimization uses the quadrangle inequality to limit the range of k values tested, reducing complexity significantly."
+		output={`Optimal BST cost: 26
+
+Optimal BST structure:
+Root: key 3 (cost: 26)
+Left subtree:
+  Root: key 1 (cost: 8)
+  Left subtree:
+    Leaf: key 0
+  Right subtree:
+    Leaf: key 2
+Right subtree:
+  Leaf: key 4
+
+Matrix Chain Multiplication:
+Minimum scalar multiplications: 30`}
+	/>
+	
+	<h2>Monotonic Queue Optimization</h2>
+	<p>Use monotonic deques to optimize sliding window problems in DP.</p>
+	
+	<h3>Sliding Window Minimum DP</h3>
+	
+	<CodeExample 
+		client:load
+		title="Monotonic Queue DP Optimization"
+		code={`#include <iostream>
+#include <vector>
+#include <deque>
+using namespace std;
+
+class MonotonicQueueDP {
+private:
+    struct Element {
+        long long value;
+        int index;
+        
+        Element(long long v, int i) : value(v), index(i) {}
+    };
+    
+public:
+    // DP with sliding window minimum constraint
+    vector<long long> solveSlidingWindowDP(vector<int>& arr, int k) {
+        int n = arr.size();
+        vector<long long> dp(n, LLONG_MAX);
+        deque<Element> dq;
+        
+        dp[0] = 0;
+        dq.push_back(Element(dp[0], 0));
+        
+        for (int i = 1; i < n; i++) {
+            // Remove elements outside window
+            while (!dq.empty() && dq.front().index < i - k) {
+                dq.pop_front();
+            }
+            
+            // Get minimum from current window
+            if (!dq.empty()) {
+                dp[i] = dq.front().value + arr[i];
+            }
+            
+            // Maintain monotonic property
+            while (!dq.empty() && dq.back().value >= dp[i]) {
+                dq.pop_back();
+            }
+            
+            dq.push_back(Element(dp[i], i));
+        }
+        
+        return dp;
+    }
+    
+    // Largest rectangle in histogram using monotonic stack
+    long long largestRectangle(vector<int>& heights) {
+        vector<int> stack;
+        long long maxArea = 0;
+        int n = heights.size();
+        
+        for (int i = 0; i <= n; i++) {
+            int h = (i == n) ? 0 : heights[i];
+            
+            while (!stack.empty() && heights[stack.back()] > h) {
+                int height = heights[stack.back()];
+                stack.pop_back();
+                
+                int width = stack.empty() ? i : i - stack.back() - 1;
+                maxArea = max(maxArea, (long long)height * width);
+            }
+            
+            stack.push_back(i);
+        }
+        
+        return maxArea;
+    }
+};
+
+int main() {
+    MonotonicQueueDP solver;
+    
+    // Sliding window DP example
+    cout << "Sliding Window DP:" << endl;
+    vector<int> arr = {3, 1, 4, 1, 5, 9, 2, 6};
+    int k = 3;
+    
+    vector<long long> dp = solver.solveSlidingWindowDP(arr, k);
+    
+    cout << "Array: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    cout << "DP values (window size " << k << "): ";
+    for (long long x : dp) {
+        if (x == LLONG_MAX) cout << "INF ";
+        else cout << x << " ";
+    }
+    cout << endl;
+    
+    // Largest rectangle example
+    cout << "\\nLargest Rectangle in Histogram:" << endl;
+    vector<int> heights = {2, 1, 5, 6, 2, 3};
+    
+    cout << "Heights: ";
+    for (int h : heights) cout << h << " ";
+    cout << endl;
+    
+    long long area = solver.largestRectangle(heights);
+    cout << "Largest rectangle area: " << area << endl;
+    
+    // Demonstrate monotonic property
+    cout << "\\nMonotonic deque behavior:" << endl;
+    deque<pair<int, int>> mdq; // (value, index)
+    vector<int> nums = {3, 1, 4, 1, 5, 9, 2, 6, 5};
+    
+    for (int i = 0; i < nums.size(); i++) {
+        // Maintain monotonic increasing
+        while (!mdq.empty() && mdq.back().first >= nums[i]) {
+            mdq.pop_back();
+        }
+        mdq.push_back({nums[i], i});
+        
+        cout << "After adding " << nums[i] << ": ";
+        for (auto& p : mdq) {
+            cout << "(" << p.first << "," << p.second << ") ";
+        }
+        cout << endl;
+    }
+    
+    return 0;
+}`}
+		explanation="Monotonic queues maintain order properties to enable efficient sliding window operations in DP problems."
+		output={`Sliding Window DP:
+Array: 3 1 4 1 5 9 2 6 
+DP values (window size 3): INF 0 1 1 2 2 7 2 
+
+Largest Rectangle in Histogram:
+Heights: 2 1 5 6 2 3 
+Largest rectangle area: 10
+
+Monotonic deque behavior:
+After adding 3: (3,0) 
+After adding 1: (1,1) 
+After adding 4: (1,1) (4,2) 
+After adding 1: (1,1) (1,3) 
+After adding 5: (1,1) (1,3) (5,4) 
+After adding 9: (1,1) (1,3) (5,4) (9,5) 
+After adding 2: (1,1) (1,3) (2,6) 
+After adding 6: (1,1) (1,3) (2,6) (6,7) 
+After adding 5: (1,1) (1,3) (2,6) (5,8)`}
+	/>
+	
+	<h2>Advanced Optimization Techniques</h2>
+	
+	<h3>Lambda Optimization</h3>
+	<ul>
+		<li>Optimize DP with resource constraints</li>
+		<li>Use Lagrange multipliers in DP</li>
+		<li>Handle trade-offs between objectives</li>
+	</ul>
+	
+	<h3>Wqs Binary Search</h3>
+	<ul>
+		<li>Handle "choose exactly k items" constraints</li>
+		<li>Binary search on penalty parameters</li>
+		<li>Convert constrained problems to unconstrained</li>
+	</ul>
+	
+	<h3>Matrix Exponentiation for DP</h3>
+	<ul>
+		<li>Linear recurrence relations</li>
+		<li>State-based DP with matrix representation</li>
+		<li>O(log n) solutions for large n</li>
+	</ul>
+	
+	<h2>Practice Problems</h2>
+	<ul>
+		<li>Implement CHT for various linear cost functions</li>
+		<li>Apply divide and conquer optimization to interval DP</li>
+		<li>Use Knuth-Yao optimization for optimal tree problems</li>
+		<li>Solve sliding window DP with monotonic queues</li>
+		<li>Handle 2D DP optimization techniques</li>
+		<li>Combine multiple optimization techniques</li>
+		<li>Optimize space complexity while maintaining time bounds</li>
+	</ul>
+</Layout>

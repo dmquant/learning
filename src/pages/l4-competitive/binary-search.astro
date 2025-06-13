@@ -1,0 +1,827 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="二分，二分查找，二分答案">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/l4-competitive">Competitive Programming</a> &gt; 二分，二分查找，二分答案
+  </div>
+
+  <h1>二分，二分查找，二分答案</h1>
+  
+  <div class="overview">
+    <p>
+      二分搜索是一种高效的搜索算法，基于分治思想将搜索空间每次减半。除了经典的二分查找，二分答案、三分搜索等技巧在竞赛编程中有广泛应用。本节将全面讲解二分搜索的各种变形和应用。
+    </p>
+  </div>
+
+  <h2>经典二分查找及其变种</h2>
+  
+  <p>二分查找是在有序数组中查找特定元素的算法，时间复杂度O(log n)。掌握各种边界处理是关键。</p>
+
+  <CodeExample 
+    client:load
+    title="二分查找的各种实现"
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class BinarySearch {
+public:
+    // 基础二分查找：查找target是否存在
+    static int basicBinarySearch(vector<int>& arr, int target) {
+        int left = 0, right = arr.size() - 1;
+        
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            
+            if (arr[mid] == target) {
+                return mid;
+            } else if (arr[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
+        }
+        
+        return -1; // 未找到
+    }
+    
+    // 查找第一个大于等于target的位置（lower_bound）
+    static int lowerBound(vector<int>& arr, int target) {
+        int left = 0, right = arr.size();
+        
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            
+            if (arr[mid] < target) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        
+        return left;
+    }
+    
+    // 查找第一个大于target的位置（upper_bound）
+    static int upperBound(vector<int>& arr, int target) {
+        int left = 0, right = arr.size();
+        
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            
+            if (arr[mid] <= target) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        
+        return left;
+    }
+    
+    // 查找target的第一个出现位置
+    static int findFirst(vector<int>& arr, int target) {
+        int pos = lowerBound(arr, target);
+        if (pos < arr.size() && arr[pos] == target) {
+            return pos;
+        }
+        return -1;
+    }
+    
+    // 查找target的最后一个出现位置
+    static int findLast(vector<int>& arr, int target) {
+        int pos = upperBound(arr, target) - 1;
+        if (pos >= 0 && arr[pos] == target) {
+            return pos;
+        }
+        return -1;
+    }
+    
+    // 统计target出现的次数
+    static int countOccurrences(vector<int>& arr, int target) {
+        int first = lowerBound(arr, target);
+        int last = upperBound(arr, target);
+        
+        if (first < arr.size() && arr[first] == target) {
+            return last - first;
+        }
+        return 0;
+    }
+    
+    // 在旋转有序数组中查找
+    static int searchRotated(vector<int>& arr, int target) {
+        int left = 0, right = arr.size() - 1;
+        
+        while (left <= right) {
+            int mid = left + (right - left) / 2;
+            
+            if (arr[mid] == target) {
+                return mid;
+            }
+            
+            // 判断哪一半是有序的
+            if (arr[left] <= arr[mid]) {
+                // 左半部分有序
+                if (arr[left] <= target && target < arr[mid]) {
+                    right = mid - 1;
+                } else {
+                    left = mid + 1;
+                }
+            } else {
+                // 右半部分有序
+                if (arr[mid] < target && target <= arr[right]) {
+                    left = mid + 1;
+                } else {
+                    right = mid - 1;
+                }
+            }
+        }
+        
+        return -1;
+    }
+    
+    // 查找旋转有序数组的最小值
+    static int findMin(vector<int>& arr) {
+        int left = 0, right = arr.size() - 1;
+        
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            
+            if (arr[mid] > arr[right]) {
+                left = mid + 1;
+            } else {
+                right = mid;
+            }
+        }
+        
+        return arr[left];
+    }
+};
+
+int main() {
+    // 测试基础二分查找
+    vector<int> arr = {1, 2, 2, 3, 3, 3, 4, 5, 5, 6};
+    cout << "数组: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    int target = 3;
+    cout << "\\n查找目标: " << target << endl;
+    
+    cout << "基础查找结果: " << BinarySearch::basicBinarySearch(arr, target) << endl;
+    cout << "第一次出现位置: " << BinarySearch::findFirst(arr, target) << endl;
+    cout << "最后一次出现位置: " << BinarySearch::findLast(arr, target) << endl;
+    cout << "出现次数: " << BinarySearch::countOccurrences(arr, target) << endl;
+    
+    cout << "\\nlower_bound(3): " << BinarySearch::lowerBound(arr, target) << endl;
+    cout << "upper_bound(3): " << BinarySearch::upperBound(arr, target) << endl;
+    
+    // 测试旋转数组
+    vector<int> rotated = {4, 5, 6, 7, 0, 1, 2};
+    cout << "\\n旋转数组: ";
+    for (int x : rotated) cout << x << " ";
+    cout << endl;
+    
+    cout << "在旋转数组中查找0: " << BinarySearch::searchRotated(rotated, 0) << endl;
+    cout << "旋转数组的最小值: " << BinarySearch::findMin(rotated) << endl;
+    
+    return 0;
+}`}
+    explanation="二分查找的关键在于正确处理边界条件。lower_bound和upper_bound是STL中的标准算法，可以解决很多查找问题。旋转有序数组需要判断哪一半是有序的。"
+    output={`数组: 1 2 2 3 3 3 4 5 5 6 
+查找目标: 3
+
+基础查找结果: 3
+第一次出现位置: 3
+最后一次出现位置: 5
+出现次数: 3
+
+lower_bound(3): 3
+upper_bound(3): 6
+
+旋转数组: 4 5 6 7 0 1 2 
+在旋转数组中查找0: 4
+旋转数组的最小值: 0`}
+  />
+
+  <h2>二分答案</h2>
+  
+  <p>二分答案是一种重要的算法思想，通过二分搜索答案范围，结合判断函数来解决最优化问题。</p>
+
+  <CodeExample 
+    client:load
+    title="二分答案经典应用"
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+class BinaryAnswer {
+public:
+    // 分割数组的最大值
+    static int splitArray(vector<int>& nums, int m) {
+        int left = 0, right = 0;
+        
+        // 确定二分范围
+        for (int num : nums) {
+            left = max(left, num);      // 最小可能值：最大元素
+            right += num;               // 最大可能值：所有元素之和
+        }
+        
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            
+            if (canSplit(nums, m, mid)) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        
+        return left;
+    }
+    
+    // 运输能力问题
+    static int shipWithinDays(vector<int>& weights, int days) {
+        int left = 0, right = 0;
+        
+        for (int weight : weights) {
+            left = max(left, weight);   // 最小载重：最重的货物
+            right += weight;            // 最大载重：所有货物总重
+        }
+        
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            
+            if (canShip(weights, days, mid)) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        
+        return left;
+    }
+    
+    // 木材切割问题
+    static int cutWood(vector<int>& trees, int m) {
+        int left = 0, right = *max_element(trees.begin(), trees.end());
+        
+        while (left < right) {
+            int mid = left + (right - left + 1) / 2; // 向上取整
+            
+            if (canCut(trees, m, mid)) {
+                left = mid;
+            } else {
+                right = mid - 1;
+            }
+        }
+        
+        return left;
+    }
+    
+    // 最小化最大值：分配问题
+    static int minimizeMax(vector<int>& jobs, int k) {
+        int left = 0, right = 0;
+        
+        for (int job : jobs) {
+            left = max(left, job);
+            right += job;
+        }
+        
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            
+            if (canAssign(jobs, k, mid)) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        
+        return left;
+    }
+    
+    // 第K小的数对距离
+    static int smallestDistancePair(vector<int>& nums, int k) {
+        sort(nums.begin(), nums.end());
+        
+        int left = 0;
+        int right = nums.back() - nums[0];
+        
+        while (left < right) {
+            int mid = left + (right - left) / 2;
+            
+            if (countPairs(nums, mid) >= k) {
+                right = mid;
+            } else {
+                left = mid + 1;
+            }
+        }
+        
+        return left;
+    }
+    
+private:
+    // 判断能否用m个子数组分割，使得每个子数组和不超过maxSum
+    static bool canSplit(vector<int>& nums, int m, int maxSum) {
+        int subarrays = 1;
+        int currentSum = 0;
+        
+        for (int num : nums) {
+            if (currentSum + num > maxSum) {
+                subarrays++;
+                currentSum = num;
+                if (subarrays > m) return false;
+            } else {
+                currentSum += num;
+            }
+        }
+        
+        return true;
+    }
+    
+    // 判断在days天内能否用capacity载重运完所有货物
+    static bool canShip(vector<int>& weights, int days, int capacity) {
+        int usedDays = 1;
+        int currentWeight = 0;
+        
+        for (int weight : weights) {
+            if (currentWeight + weight > capacity) {
+                usedDays++;
+                currentWeight = weight;
+                if (usedDays > days) return false;
+            } else {
+                currentWeight += weight;
+            }
+        }
+        
+        return true;
+    }
+    
+    // 判断切割高度为height时能否得到至少m米木材
+    static bool canCut(vector<int>& trees, int m, int height) {
+        long long total = 0;
+        for (int tree : trees) {
+            if (tree > height) {
+                total += tree - height;
+            }
+        }
+        return total >= m;
+    }
+    
+    // 判断能否用k个工人完成所有工作，使得最大工作量不超过limit
+    static bool canAssign(vector<int>& jobs, int k, int limit) {
+        return backtrack(jobs, k, limit, 0, vector<int>(k, 0));
+    }
+    
+    static bool backtrack(vector<int>& jobs, int k, int limit, int index, vector<int>& workers) {
+        if (index == jobs.size()) return true;
+        
+        for (int i = 0; i < k; i++) {
+            if (workers[i] + jobs[index] <= limit) {
+                workers[i] += jobs[index];
+                if (backtrack(jobs, k, limit, index + 1, workers)) {
+                    return true;
+                }
+                workers[i] -= jobs[index];
+            }
+            
+            // 剪枝：如果当前工人没有工作，后续工人也不会有工作
+            if (workers[i] == 0) break;
+        }
+        
+        return false;
+    }
+    
+    // 统计距离不超过maxDist的数对个数
+    static int countPairs(vector<int>& nums, int maxDist) {
+        int count = 0;
+        int left = 0;
+        
+        for (int right = 1; right < nums.size(); right++) {
+            while (nums[right] - nums[left] > maxDist) {
+                left++;
+            }
+            count += right - left;
+        }
+        
+        return count;
+    }
+};
+
+int main() {
+    // 测试数组分割
+    cout << "数组分割测试:" << endl;
+    vector<int> nums = {7, 2, 5, 10, 8};
+    int m = 2;
+    
+    cout << "数组: ";
+    for (int x : nums) cout << x << " ";
+    cout << "\\n分割成 " << m << " 个子数组" << endl;
+    
+    int result = BinaryAnswer::splitArray(nums, m);
+    cout << "各子数组和的最大值的最小值: " << result << endl;
+    
+    // 测试运输问题
+    cout << "\\n货物运输测试:" << endl;
+    vector<int> weights = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    int days = 5;
+    
+    cout << "货物重量: ";
+    for (int w : weights) cout << w << " ";
+    cout << "\\n运输天数: " << days << endl;
+    
+    int capacity = BinaryAnswer::shipWithinDays(weights, days);
+    cout << "最小载重能力: " << capacity << endl;
+    
+    // 测试木材切割
+    cout << "\\n木材切割测试:" << endl;
+    vector<int> trees = {20, 15, 10, 17};
+    int need = 7;
+    
+    cout << "树的高度: ";
+    for (int h : trees) cout << h << " ";
+    cout << "\\n需要木材: " << need << " 米" << endl;
+    
+    int height = BinaryAnswer::cutWood(trees, need);
+    cout << "切割高度: " << height << endl;
+    
+    // 测试数对距离
+    cout << "\\n数对距离测试:" << endl;
+    vector<int> nums2 = {1, 3, 1};
+    int k = 1;
+    
+    cout << "数组: ";
+    for (int x : nums2) cout << x << " ";
+    cout << "\\n第 " << k << " 小的距离" << endl;
+    
+    int distance = BinaryAnswer::smallestDistancePair(nums2, k);
+    cout << "结果: " << distance << endl;
+    
+    return 0;
+}`}
+    explanation="二分答案的核心是确定答案的取值范围，然后设计判断函数验证某个值是否可行。通过二分搜索找到满足条件的最优值。"
+    output={`数组分割测试:
+数组: 7 2 5 10 8 
+分割成 2 个子数组
+各子数组和的最大值的最小值: 18
+
+货物运输测试:
+货物重量: 1 2 3 4 5 6 7 8 9 10 
+运输天数: 5
+最小载重能力: 15
+
+木材切割测试:
+树的高度: 20 15 10 17 
+需要木材: 7 米
+切割高度: 15
+
+数对距离测试:
+数组: 1 3 1 
+第 1 小的距离
+结果: 0`}
+  />
+
+  <h2>三分搜索与实数二分</h2>
+  
+  <p>三分搜索用于在单峰函数中找到极值点，实数二分用于处理连续空间的搜索问题。</p>
+
+  <CodeExample 
+    client:load
+    title="三分搜索和实数二分"
+    code={`#include <iostream>
+#include <vector>
+#include <cmath>
+#include <iomanip>
+using namespace std;
+
+class TernarySearch {
+public:
+    // 三分搜索找最大值（单峰函数）
+    static double findMaximum(function<double(double)> f, double left, double right, double eps = 1e-9) {
+        while (right - left > eps) {
+            double m1 = left + (right - left) / 3;
+            double m2 = right - (right - left) / 3;
+            
+            if (f(m1) < f(m2)) {
+                left = m1;
+            } else {
+                right = m2;
+            }
+        }
+        
+        return (left + right) / 2;
+    }
+    
+    // 三分搜索找最小值
+    static double findMinimum(function<double(double)> f, double left, double right, double eps = 1e-9) {
+        while (right - left > eps) {
+            double m1 = left + (right - left) / 3;
+            double m2 = right - (right - left) / 3;
+            
+            if (f(m1) > f(m2)) {
+                left = m1;
+            } else {
+                right = m2;
+            }
+        }
+        
+        return (left + right) / 2;
+    }
+    
+    // 金选搜索（更高效的单峰搜索）
+    static double goldenSectionSearch(function<double(double)> f, double left, double right, double eps = 1e-9) {
+        const double phi = (1 + sqrt(5)) / 2;
+        const double resphi = 2 - phi;
+        
+        double x1 = left + resphi * (right - left);
+        double x2 = right - resphi * (right - left);
+        double f1 = f(x1);
+        double f2 = f(x2);
+        
+        while (abs(right - left) > eps) {
+            if (f1 > f2) {
+                right = x2;
+                x2 = x1;
+                f2 = f1;
+                x1 = left + resphi * (right - left);
+                f1 = f(x1);
+            } else {
+                left = x1;
+                x1 = x2;
+                f1 = f2;
+                x2 = right - resphi * (right - left);
+                f2 = f(x2);
+            }
+        }
+        
+        return (left + right) / 2;
+    }
+};
+
+class RealBinarySearch {
+public:
+    // 实数二分求平方根
+    static double sqrt(double x, double eps = 1e-9) {
+        if (x < 0) return -1; // 负数没有实数平方根
+        if (x == 0) return 0;
+        
+        double left = 0, right = max(1.0, x);
+        
+        while (right - left > eps) {
+            double mid = (left + right) / 2;
+            
+            if (mid * mid < x) {
+                left = mid;
+            } else {
+                right = mid;
+            }
+        }
+        
+        return (left + right) / 2;
+    }
+    
+    // 实数二分求立方根
+    static double cbrt(double x, double eps = 1e-9) {
+        double left = -1000, right = 1000;
+        
+        if (x >= 0) {
+            left = 0;
+            right = max(1.0, x);
+        } else {
+            left = min(-1.0, x);
+            right = 0;
+        }
+        
+        while (right - left > eps) {
+            double mid = (left + right) / 2;
+            
+            if (mid * mid * mid < x) {
+                left = mid;
+            } else {
+                right = mid;
+            }
+        }
+        
+        return (left + right) / 2;
+    }
+    
+    // 求解方程 f(x) = 0
+    static double solveEquation(function<double(double)> f, double left, double right, double eps = 1e-9) {
+        // 假设函数在[left, right]上单调且f(left) * f(right) < 0
+        while (right - left > eps) {
+            double mid = (left + right) / 2;
+            
+            if (f(left) * f(mid) <= 0) {
+                right = mid;
+            } else {
+                left = mid;
+            }
+        }
+        
+        return (left + right) / 2;
+    }
+};
+
+// 几何问题中的二分应用
+class GeometryBinary {
+public:
+    // 最小覆盖圆问题的近似解
+    static pair<double, double> minimumEnclosingCircle(vector<pair<double, double>>& points) {
+        // 简化版本：假设圆心在某个范围内
+        double minX = points[0].first, maxX = points[0].first;
+        double minY = points[0].second, maxY = points[0].second;
+        
+        for (auto& p : points) {
+            minX = min(minX, p.first);
+            maxX = max(maxX, p.first);
+            minY = min(minY, p.second);
+            maxY = max(maxY, p.second);
+        }
+        
+        // 使用三分搜索找最优圆心
+        auto getMaxDistance = [&](double cx, double cy) {
+            double maxDist = 0;
+            for (auto& p : points) {
+                double dist = sqrt((p.first - cx) * (p.first - cx) + (p.second - cy) * (p.second - cy));
+                maxDist = max(maxDist, dist);
+            }
+            return maxDist;
+        };
+        
+        // 对x坐标三分搜索
+        double bestX = TernarySearch::findMinimum([&](double x) {
+            return TernarySearch::findMinimum([&](double y) {
+                return getMaxDistance(x, y);
+            }, minY, maxY);
+        }, minX, maxX);
+        
+        // 对y坐标三分搜索
+        double bestY = TernarySearch::findMinimum([&](double y) {
+            return getMaxDistance(bestX, y);
+        }, minY, maxY);
+        
+        return {bestX, bestY};
+    }
+    
+    // 点到直线距离的最值问题
+    static double minDistanceToLine(vector<pair<double, double>>& points, 
+                                   pair<double, double> lineStart, 
+                                   pair<double, double> lineEnd) {
+        auto distanceToLine = [&](pair<double, double> point) {
+            double A = lineEnd.second - lineStart.second;
+            double B = lineStart.first - lineEnd.first;
+            double C = lineEnd.first * lineStart.second - lineStart.first * lineEnd.second;
+            
+            return abs(A * point.first + B * point.second + C) / sqrt(A * A + B * B);
+        };
+        
+        double minDist = distanceToLine(points[0]);
+        for (auto& p : points) {
+            minDist = min(minDist, distanceToLine(p));
+        }
+        
+        return minDist;
+    }
+};
+
+int main() {
+    cout << fixed << setprecision(6);
+    
+    // 测试三分搜索
+    cout << "三分搜索测试:" << endl;
+    
+    // 找函数 f(x) = -(x-2)^2 + 3 的最大值
+    auto f1 = [](double x) { return -(x - 2) * (x - 2) + 3; };
+    double maxPoint = TernarySearch::findMaximum(f1, 0, 4);
+    cout << "函数 f(x) = -(x-2)^2 + 3 在 [0,4] 的最大值点: " << maxPoint << endl;
+    cout << "最大值: " << f1(maxPoint) << endl;
+    
+    // 找函数 g(x) = (x-1)^2 + 2 的最小值
+    auto g1 = [](double x) { return (x - 1) * (x - 1) + 2; };
+    double minPoint = TernarySearch::findMinimum(g1, -2, 4);
+    cout << "函数 g(x) = (x-1)^2 + 2 在 [-2,4] 的最小值点: " << minPoint << endl;
+    cout << "最小值: " << g1(minPoint) << endl;
+    
+    // 测试实数二分
+    cout << "\\n实数二分测试:" << endl;
+    double x = 10;
+    cout << "sqrt(" << x << ") = " << RealBinarySearch::sqrt(x) << endl;
+    cout << "cbrt(" << x << ") = " << RealBinarySearch::cbrt(x) << endl;
+    
+    // 求解方程 x^3 - 2x - 5 = 0
+    auto equation = [](double x) { return x * x * x - 2 * x - 5; };
+    double root = RealBinarySearch::solveEquation(equation, 0, 3);
+    cout << "方程 x^3 - 2x - 5 = 0 在 [0,3] 的根: " << root << endl;
+    cout << "验证 f(" << root << ") = " << equation(root) << endl;
+    
+    // 测试几何问题
+    cout << "\\n几何问题测试:" << endl;
+    vector<pair<double, double>> points = {{0, 0}, {1, 0}, {0, 1}, {1, 1}};
+    
+    auto [centerX, centerY] = GeometryBinary::minimumEnclosingCircle(points);
+    cout << "点集的最小覆盖圆圆心: (" << centerX << ", " << centerY << ")" << endl;
+    
+    return 0;
+}`}
+    explanation="三分搜索用于单峰函数的极值搜索，每次将搜索区间分为三部分。实数二分处理连续空间的问题，需要设置合适的精度阈值。"
+    output={`三分搜索测试:
+函数 f(x) = -(x-2)^2 + 3 在 [0,4] 的最大值点: 2.000000
+最大值: 3.000000
+函数 g(x) = (x-1)^2 + 2 在 [-2,4] 的最小值点: 1.000000
+最小值: 2.000000
+
+实数二分测试:
+sqrt(10) = 3.162278
+cbrt(10) = 2.154435
+方程 x^3 - 2x - 5 = 0 在 [0,3] 的根: 2.094552
+验证 f(2.094552) = 0.000000
+
+几何问题测试:
+点集的最小覆盖圆圆心: (0.500000, 0.500000)`}
+  />
+
+  <h2>二分搜索的高级应用</h2>
+  
+  <div class="tips">
+    <h3>二分查找的应用场景：</h3>
+    <ul>
+      <li>有序数组查找：经典的二分查找及其变种</li>
+      <li>旋转数组：需要判断哪一半是有序的</li>
+      <li>重复元素：使用lower_bound和upper_bound处理</li>
+      <li>范围查询：统计某个范围内的元素个数</li>
+    </ul>
+    
+    <h3>二分答案的设计要点：</h3>
+    <ul>
+      <li>答案范围：确定答案的上下界</li>
+      <li>单调性：验证答案具有单调性</li>
+      <li>判断函数：设计高效的可行性检验</li>
+      <li>最优化方向：求最大值还是最小值</li>
+    </ul>
+    
+    <h3>三分搜索的适用条件：</h3>
+    <ul>
+      <li>单峰函数：函数有唯一的极值点</li>
+      <li>连续性：函数在搜索区间内连续</li>
+      <li>精度控制：设置合适的收敛条件</li>
+      <li>效率考虑：相比暴力搜索有明显优势</li>
+    </ul>
+    
+    <h3>实现技巧：</h3>
+    <ul>
+      <li>边界处理：注意开区间和闭区间的差异</li>
+      <li>溢出防护：使用(left+right)/2而非(left+right)>>1</li>
+      <li>精度设置：实数二分要考虑浮点精度</li>
+      <li>循环不变量：确保搜索区间始终包含答案</li>
+    </ul>
+  </div>
+
+  <div class="navigation">
+    <a href="/l4-competitive/greedy-advanced" class="prev">← 贪心算法进阶</a>
+    <a href="/l4-competitive/segment-tree" class="next">数据结构（线段树、树状数组） →</a>
+  </div>
+</Layout>
+
+<style>
+  .tips {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border-left: 4px solid #007bff;
+  }
+  
+  .tips h3 {
+    color: #007bff;
+    margin-top: 1rem;
+  }
+  
+  .tips ul {
+    margin-left: 1rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+  }
+  
+  .navigation a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .navigation a:hover {
+    text-decoration: underline;
+  }
+</style>

@@ -6,34 +6,133 @@ import CodeExample from '../components/CodeExample.tsx';
 // Don't want to use any of this? Delete everything in this file, the `assets`, `components`, and `layouts` directories, and start fresh.
 ---
 
-<Layout title="C++ Learning Hub - Master C++ Programming">
-	<div class="hero-section">
-		<h1>Welcome to C++ Learning Hub</h1>
-		<p class="hero-subtitle">
-			Master C++ programming from basics to advanced concepts including algorithms and data structures.
-			Interactive examples, clear explanations, and hands-on practice.
-		</p>
+<Layout title="C++ Learning Hub">
+	<main>
+		<h1>C++ Learning Hub</h1>
+		<p class="intro">Master C++ programming from basics to advanced competitive programming</p>
 		
-		<div class="quick-start-cards">
-			<div class="card">
-				<h3>🚀 Start with Basics</h3>
-				<p>Learn C++ fundamentals including variables, control structures, and functions.</p>
-				<a href="/basics/introduction" class="card-link">Get Started</a>
+		<div class="level-grid">
+			<div class="level-card">
+				<div class="card-header">
+					<div class="level-icon">🚀</div>
+					<div class="level-meta">
+						<span class="difficulty beginner">Beginner</span>
+						<span class="lessons">7 Lessons</span>
+					</div>
+				</div>
+				<h2><a href="/l1-syntax-basics/">Syntax Basics</a></h2>
+				<p>Learn C++ programming from scratch, master basic syntax and core concepts</p>
+				<div class="card-footer">
+					<div class="topics">
+						<span class="topic">Variables</span>
+						<span class="topic">Functions</span>
+						<span class="topic">Classes</span>
+						<span class="topic">Pointers</span>
+					</div>
+				</div>
 			</div>
 			
-			<div class="card">
-				<h3>🏗️ Data Structures</h3>
-				<p>Understand arrays, vectors, linked lists, trees, and more advanced structures.</p>
-				<a href="/data-structures/arrays" class="card-link">Explore</a>
+			<div class="level-card">
+				<div class="card-header">
+					<div class="level-icon">🧠</div>
+					<div class="level-meta">
+						<span class="difficulty intermediate">Intermediate</span>
+						<span class="lessons">7 Lessons</span>
+					</div>
+				</div>
+				<h2><a href="/l2-algorithm-basics/">Algorithm Basics</a></h2>
+				<p>Master core algorithmic thinking and build a solid foundation for advanced programming</p>
+				<div class="card-footer">
+					<div class="topics">
+						<span class="topic">Sorting</span>
+						<span class="topic">Searching</span>
+						<span class="topic">Recursion</span>
+						<span class="topic">Dynamic Programming</span>
+					</div>
+				</div>
 			</div>
 			
-			<div class="card">
-				<h3>⚡ Algorithms</h3>
-				<p>Master sorting, searching, recursion, and algorithmic problem-solving.</p>
-				<a href="/algorithms/sorting" class="card-link">Learn</a>
+			<div class="level-card">
+				<div class="card-header">
+					<div class="level-icon">🏗️</div>
+					<div class="level-meta">
+						<span class="difficulty intermediate">Intermediate</span>
+						<span class="lessons">8 Lessons</span>
+					</div>
+				</div>
+				<h2><a href="/l3-data-structures/">Data Structures</a></h2>
+				<p>Deep understanding of classic data structures and efficient data organization methods</p>
+				<div class="card-footer">
+					<div class="topics">
+						<span class="topic">Arrays</span>
+						<span class="topic">Linked Lists</span>
+						<span class="topic">Trees</span>
+						<span class="topic">Hash Tables</span>
+					</div>
+				</div>
+			</div>
+			
+			<div class="level-card">
+				<div class="card-header">
+					<div class="level-icon">🏆</div>
+					<div class="level-meta">
+						<span class="difficulty advanced">Advanced</span>
+						<span class="lessons">14 Lessons</span>
+					</div>
+				</div>
+				<h2><a href="/l4-competitive/">Competitive Programming</a></h2>
+				<p>Master advanced algorithms and data structures to enhance competitive programming skills</p>
+				<div class="card-footer">
+					<div class="topics">
+						<span class="topic">STL</span>
+						<span class="topic">Segment Trees</span>
+						<span class="topic">Graph Theory</span>
+						<span class="topic">Number Theory</span>
+					</div>
+				</div>
+			</div>
+			
+			<div class="level-card">
+				<div class="card-header">
+					<div class="level-icon">🌟</div>
+					<div class="level-meta">
+						<span class="difficulty expert">Expert</span>
+						<span class="lessons">7 Lessons</span>
+					</div>
+				</div>
+				<h2><a href="/l5-advanced/">Advanced Algorithms</a></h2>
+				<p>Explore cutting-edge algorithms and advanced computational techniques</p>
+				<div class="card-footer">
+					<div class="topics">
+						<span class="topic">Advanced Graph Theory</span>
+						<span class="topic">Union-Find</span>
+						<span class="topic">Sweep Line</span>
+						<span class="topic">DP Optimization</span>
+					</div>
+				</div>
+			</div>
+			
+			<div class="level-card">
+				<div class="card-header">
+					<div class="level-icon">🚀</div>
+					<div class="level-meta">
+						<span class="difficulty expert">Expert</span>
+						<span class="lessons">10 Lessons</span>
+					</div>
+				</div>
+				<h2><a href="/l6-expert/">Expert Level</a></h2>
+				<p>Master the most advanced C++ techniques and cutting-edge algorithms</p>
+				<div class="card-footer">
+					<div class="topics">
+						<span class="topic">Combinatorics</span>
+						<span class="topic">Linear Algebra</span>
+						<span class="topic">Advanced DP</span>
+						<span class="topic">Balanced Trees</span>
+					</div>
+				</div>
 			</div>
 		</div>
-	</div>
+	</main>
 
 	<section class="featured-content">
 		<h2>Featured Examples</h2>
@@ -126,13 +225,15 @@ Average: 30`}
 			<div class="step">
 				<div class="step-number">1</div>
 				<div class="step-content">
-					<h3>C++ Fundamentals</h3>
-					<p>Start with basic syntax, variables, data types, and control structures.</p>
+					<h3>Syntax Basics</h3>
+					<p>Start with C++ fundamentals, master basic syntax, variables, data types and control structures.</p>
 					<ul>
-						<li>Variables and Data Types</li>
-						<li>Input/Output Operations</li>
-						<li>Control Structures (if, while, for)</li>
-						<li>Functions</li>
+						<li>Introduction to C++</li>
+						<li>Variables & Basic Operations</li>
+						<li>Data Types</li>
+						<li>Loop Structures</li>
+						<li>Functions & Applications</li>
+						<li>Pointers</li>
 					</ul>
 				</div>
 			</div>
@@ -140,13 +241,15 @@ Average: 30`}
 			<div class="step">
 				<div class="step-number">2</div>
 				<div class="step-content">
-					<h3>Object-Oriented Programming</h3>
-					<p>Learn classes, objects, inheritance, and polymorphism.</p>
+					<h3>Algorithm Basics</h3>
+					<p>Learn core algorithmic thinking, including sorting, searching, recursion and introduction to dynamic programming.</p>
 					<ul>
-						<li>Classes and Objects</li>
-						<li>Constructors and Destructors</li>
-						<li>Inheritance</li>
-						<li>Polymorphism</li>
+						<li>Sorting Algorithms</li>
+						<li>Search & Backtracking Algorithms</li>
+						<li>Recursion & Recurrence</li>
+						<li>Greedy Approach</li>
+						<li>Dynamic Programming Basics</li>
+						<li>Mathematical Foundations</li>
 					</ul>
 				</div>
 			</div>
@@ -154,27 +257,31 @@ Average: 30`}
 			<div class="step">
 				<div class="step-number">3</div>
 				<div class="step-content">
-					<h3>Data Structures</h3>
-					<p>Master fundamental data structures and their implementations.</p>
+					<h3>Data Structures + Advanced Algorithms</h3>
+					<p>Deep dive into data structures and advanced algorithmic patterns.</p>
 					<ul>
-						<li>Arrays and Vectors</li>
-						<li>Linked Lists</li>
-						<li>Stacks and Queues</li>
-						<li>Trees and Graphs</li>
+						<li>Stacks, Queues, Lists, Trees</li>
+						<li>STL Containers</li>
+						<li>Graph Storage & Traversal</li>
+						<li>Classic DP Models</li>
+						<li>Shortest Path Algorithms</li>
+						<li>Number Theory Basics</li>
 					</ul>
 				</div>
 			</div>
 			
 			<div class="step">
-				<div class="step-number">4</div>
+				<div class="step-number">4+</div>
 				<div class="step-content">
-					<h3>Algorithms</h3>
-					<p>Implement and understand common algorithms and problem-solving techniques.</p>
+					<h3>Competitive Programming</h3>
+					<p>Master advanced data structures and competitive programming techniques.</p>
 					<ul>
-						<li>Sorting Algorithms</li>
-						<li>Search Algorithms</li>
-						<li>Dynamic Programming</li>
-						<li>Graph Algorithms</li>
+						<li>Segment Trees, Fenwick Trees</li>
+						<li>String Algorithms</li>
+						<li>Advanced Graph Theory</li>
+						<li>Advanced Number Theory</li>
+						<li>DP Optimizations</li>
+						<li>Balanced Trees</li>
 					</ul>
 				</div>
 			</div>
@@ -219,68 +326,210 @@ Average: 30`}
 </Layout>
 
 <style>
-	.hero-section {
-		text-align: center;
-		padding: 3rem 0;
-		background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-		color: white;
-		margin: -2rem -2rem 3rem -2rem;
-		border-radius: 0 0 16px 16px;
-	}
-
-	.hero-subtitle {
-		font-size: 1.2rem;
-		margin-bottom: 2rem;
-		opacity: 0.9;
-		max-width: 600px;
-		margin-left: auto;
-		margin-right: auto;
-	}
-
-	.quick-start-cards {
-		display: grid;
-		grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-		gap: 1.5rem;
-		max-width: 900px;
-		margin: 0 auto;
-	}
-
-	.card {
-		background: white;
-		color: #334155;
-		padding: 1.5rem;
-		border-radius: 12px;
-		box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-		transition: transform 0.2s ease;
-	}
-
-	.card:hover {
-		transform: translateY(-4px);
-	}
-
-	.card h3 {
-		margin: 0 0 1rem 0;
+	main {
+		margin: auto;
+		padding: 2rem;
+		width: 1200px;
+		max-width: calc(100% - 2rem);
 		color: #1e293b;
+		line-height: 1.6;
 	}
-
-	.card p {
+	
+	h1 {
+		font-size: 3rem;
+		font-weight: 700;
+		line-height: 1;
+		text-align: center;
 		margin-bottom: 1rem;
-		color: #64748b;
+		background: linear-gradient(135deg, #4f46e5, #7c3aed);
+		-webkit-background-clip: text;
+		-webkit-text-fill-color: transparent;
+		background-clip: text;
+	}
+	
+	.intro {
+		font-size: 1.25rem;
+		text-align: center;
+		color: #6b7280;
+		margin-bottom: 3rem;
+	}
+	
+	.level-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+		gap: 2rem;
+		margin-top: 2rem;
+	}
+	
+	.level-card {
+		background: white;
+		border: 1px solid #e2e8f0;
+		border-radius: 12px;
+		padding: 0;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		overflow: hidden;
+		position: relative;
+	}
+	
+	.level-card:hover {
+		box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+		transform: translateY(-4px);
+		border-color: #4f46e5;
 	}
 
-	.card-link {
-		display: inline-block;
-		background: #667eea;
-		color: white;
-		padding: 0.75rem 1.5rem;
-		border-radius: 6px;
-		text-decoration: none;
+	.level-card:hover .level-icon {
+		transform: scale(1.2) rotate(5deg);
+	}
+
+	.card-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 1.5rem 1.5rem 1rem 1.5rem;
+		background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+		border-bottom: 1px solid #e2e8f0;
+	}
+
+	.level-icon {
+		font-size: 2rem;
+		transition: all 0.3s ease;
+	}
+
+	.level-meta {
+		display: flex;
+		gap: 0.75rem;
+		align-items: center;
+	}
+
+	.difficulty {
+		padding: 0.25rem 0.75rem;
+		border-radius: 20px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	.difficulty.beginner {
+		background: #dcfce7;
+		color: #166534;
+	}
+
+	.difficulty.intermediate {
+		background: #fef3c7;
+		color: #92400e;
+	}
+
+	.difficulty.advanced {
+		background: #fecaca;
+		color: #991b1b;
+	}
+
+	.difficulty.expert {
+		background: #f3e8ff;
+		color: #6b21a8;
+	}
+
+	.lessons {
+		background: #e0e7ff;
+		color: #3730a3;
+		padding: 0.25rem 0.75rem;
+		border-radius: 20px;
+		font-size: 0.75rem;
 		font-weight: 500;
-		transition: background-color 0.2s ease;
 	}
 
-	.card-link:hover {
-		background: #5a67d8;
+	.level-card h2 {
+		margin: 0 0 0.75rem 0;
+		font-size: 1.5rem;
+		padding: 0 1.5rem;
+	}
+	
+	.level-card h2 a {
+		color: #1e293b;
+		text-decoration: none;
+		font-weight: 600;
+		transition: color 0.3s ease;
+	}
+	
+	.level-card:hover h2 a {
+		color: #4f46e5;
+	}
+	
+	.level-card p {
+		margin: 0 0 1.5rem 0;
+		color: #6b7280;
+		font-size: 0.95rem;
+		line-height: 1.6;
+		padding: 0 1.5rem;
+	}
+
+	.card-footer {
+		padding: 1rem 1.5rem 1.5rem 1.5rem;
+		background: #fafbfc;
+		border-top: 1px solid #f1f5f9;
+	}
+
+	.topics {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.topic {
+		background: white;
+		border: 1px solid #e2e8f0;
+		color: #64748b;
+		padding: 0.375rem 0.75rem;
+		border-radius: 6px;
+		font-size: 0.8rem;
+		font-weight: 500;
+		transition: all 0.2s ease;
+	}
+
+	.level-card:hover .topic {
+		border-color: #c7d2fe;
+		background: #f0f4ff;
+		color: #4338ca;
+	}
+
+	/* Progress indicator */
+	.level-card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 3px;
+		background: linear-gradient(90deg, #4f46e5, #7c3aed);
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform 0.3s ease;
+	}
+
+	.level-card:hover::before {
+		transform: scaleX(1);
+	}
+
+	@media (max-width: 768px) {
+		main {
+			padding: 1rem;
+		}
+		
+		h1 {
+			font-size: 2rem;
+		}
+		
+		.level-grid {
+			grid-template-columns: 1fr;
+			gap: 1.5rem;
+		}
+
+		.level-meta {
+			flex-direction: column;
+			gap: 0.5rem;
+		}
 	}
 
 	.featured-content {
@@ -362,21 +611,5 @@ Average: 30`}
 	.feature p {
 		margin: 0;
 		color: #64748b;
-	}
-
-	@media (max-width: 768px) {
-		.hero-section {
-			padding: 2rem 1rem;
-			margin: -2rem -1rem 2rem -1rem;
-		}
-
-		.step {
-			flex-direction: column;
-			text-align: center;
-		}
-
-		.features-grid {
-			grid-template-columns: 1fr;
-		}
 	}
 </style>

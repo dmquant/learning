@@ -1,0 +1,706 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Variables & Data Types - C++ Learning Hub">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/l1-syntax-basics">Syntax Basics</a> &gt; Variables & Types
+  </div>
+
+  <h1>Variables & Data Types</h1>
+  
+  <div class="overview">
+    <p>
+      Variables are containers that store data values. In C++, every variable must be declared with a specific data type 
+      before it can be used. The data type determines what kind of data the variable can hold and how much memory it occupies.
+    </p>
+    
+    <p>
+      Understanding data types is fundamental to C++ programming as it affects memory usage, performance, and the operations 
+      you can perform on the data.
+    </p>
+  </div>
+
+  <section class="content-section">
+    <h2>Variable Declaration and Initialization</h2>
+    
+    <p>Variables in C++ must be declared before use. You can declare and initialize them in several ways:</p>
+
+    <CodeExample 
+      client:load
+      title="Variable Declaration Methods"
+      code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // Declaration only
+    int age;
+    
+    // Declaration with initialization
+    int score = 95;
+    
+    // Multiple declarations
+    int x, y, z;
+    
+    // Multiple declarations with initialization
+    int a = 10, b = 20, c = 30;
+    
+    // Assignment after declaration
+    age = 25;
+    x = 100;
+    y = 200;
+    z = 300;
+    
+    cout << "Age: " << age << endl;
+    cout << "Score: " << score << endl;
+    cout << "Values: " << a << ", " << b << ", " << c << endl;
+    cout << "Coordinates: (" << x << ", " << y << ", " << z << ")" << endl;
+    
+    return 0;
+}`}
+      explanation="This shows different ways to declare and initialize variables. It's generally better to initialize variables when you declare them to avoid using uninitialized values."
+      output={`Age: 25
+Score: 95
+Values: 10, 20, 30
+Coordinates: (100, 200, 300)`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Fundamental Data Types</h2>
+    
+    <h3>Integer Types</h3>
+
+    <CodeExample 
+      client:load
+      title="Integer Data Types"
+      code={`#include <iostream>
+#include <limits>
+using namespace std;
+
+int main() {
+    // Different integer types
+    char letter = 'A';                    // 1 byte
+    short smallNum = 32767;               // 2 bytes
+    int number = 2147483647;              // 4 bytes
+    long bigNum = 2147483647L;            // 4 or 8 bytes
+    long long veryBigNum = 9223372036854775807LL; // 8 bytes
+    
+    // Unsigned variants
+    unsigned int positiveOnly = 4294967295U;
+    unsigned char byte = 255;
+    
+    cout << "Character: " << letter << " (ASCII: " << (int)letter << ")" << endl;
+    cout << "Short: " << smallNum << endl;
+    cout << "Int: " << number << endl;
+    cout << "Long: " << bigNum << endl;
+    cout << "Long Long: " << veryBigNum << endl;
+    cout << "Unsigned int: " << positiveOnly << endl;
+    cout << "Unsigned char: " << (int)byte << endl;
+    
+    // Display sizes
+    cout << "\\nSizes in bytes:" << endl;
+    cout << "char: " << sizeof(char) << endl;
+    cout << "short: " << sizeof(short) << endl;
+    cout << "int: " << sizeof(int) << endl;
+    cout << "long: " << sizeof(long) << endl;
+    cout << "long long: " << sizeof(long long) << endl;
+    
+    return 0;
+}`}
+      explanation="Integer types vary in size and range. Unsigned types can only hold positive values but have double the positive range. The 'sizeof' operator returns the size in bytes."
+      output={`Character: A (ASCII: 65)
+Short: 32767
+Int: 2147483647
+Long: 2147483647
+Long Long: 9223372036854775807
+Unsigned int: 4294967295
+Unsigned char: 255
+
+Sizes in bytes:
+char: 1
+short: 2
+int: 4
+long: 8
+long long: 8`}
+    />
+
+    <h3>Floating-Point Types</h3>
+
+    <CodeExample 
+      client:load
+      title="Floating-Point Data Types"
+      code={`#include <iostream>
+#include <iomanip>
+using namespace std;
+
+int main() {
+    float price = 19.99f;           // 4 bytes, ~7 decimal digits
+    double distance = 384400.5;     // 8 bytes, ~15 decimal digits
+    long double precise = 3.14159265358979323846L; // 12-16 bytes
+    
+    cout << fixed << setprecision(10);
+    cout << "Float: " << price << endl;
+    cout << "Double: " << distance << endl;
+    cout << "Long double: " << precise << endl;
+    
+    // Scientific notation
+    double scientific = 1.5e6;      // 1.5 * 10^6 = 1500000
+    double small = 2.5e-3;          // 2.5 * 10^-3 = 0.0025
+    
+    cout << "\\nScientific notation:" << endl;
+    cout << "1.5e6 = " << scientific << endl;
+    cout << "2.5e-3 = " << small << endl;
+    
+    // Precision demonstration
+    float f = 1.23456789f;
+    double d = 1.23456789;
+    
+    cout << "\\nPrecision comparison:" << endl;
+    cout << "Float:  " << f << endl;
+    cout << "Double: " << d << endl;
+    
+    return 0;
+}`}
+      explanation="Floating-point types store decimal numbers. Float has less precision than double. Use 'f' suffix for float literals and scientific notation for very large or small numbers."
+      output={`Float: 19.9900000000
+Double: 384400.5000000000
+Long double: 3.1415926536
+
+Scientific notation:
+1.5e6 = 1500000.0000000000
+2.5e-3 = 0.0025000000
+
+Precision comparison:
+Float:  1.2345679998
+Double: 1.2345678900`}
+    />
+
+    <h3>Boolean and Character Types</h3>
+
+    <CodeExample 
+      client:load
+      title="Boolean and Character Types"
+      code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // Boolean type
+    bool isTrue = true;
+    bool isFalse = false;
+    bool result = (5 > 3);          // Expression result
+    
+    cout << "Boolean values:" << endl;
+    cout << "isTrue: " << isTrue << endl;           // Prints 1
+    cout << "isFalse: " << isFalse << endl;         // Prints 0
+    cout << "5 > 3: " << result << endl;            // Prints 1
+    
+    // Using boolalpha for true/false output
+    cout << boolalpha;
+    cout << "With boolalpha:" << endl;
+    cout << "isTrue: " << isTrue << endl;           // Prints true
+    cout << "isFalse: " << isFalse << endl;         // Prints false
+    
+    // Character operations
+    char grade = 'A';
+    char nextGrade = grade + 1;     // ASCII arithmetic
+    
+    cout << "\\nCharacter operations:" << endl;
+    cout << "Grade: " << grade << endl;
+    cout << "Next grade: " << nextGrade << endl;
+    cout << "ASCII value of A: " << (int)grade << endl;
+    
+    // Character input/output
+    char input = 'z';
+    char upper = input - 32;        // Convert to uppercase
+    
+    cout << "Lowercase: " << input << endl;
+    cout << "Uppercase: " << upper << endl;
+    
+    return 0;
+}`}
+      explanation="Boolean type stores true/false values (displayed as 1/0 by default). Characters are stored as ASCII values, allowing arithmetic operations for case conversion and other manipulations."
+      output={`Boolean values:
+isTrue: 1
+isFalse: 0
+5 > 3: 1
+With boolalpha:
+isTrue: true
+isFalse: false
+
+Character operations:
+Grade: A
+Next grade: B
+ASCII value of A: 65
+Lowercase: z
+Uppercase: Z`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>String Type</h2>
+    
+    <p>C++ provides the string class for handling text data more easily than C-style character arrays:</p>
+
+    <CodeExample 
+      client:load
+      title="String Operations"
+      code={`#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    // String declaration and initialization
+    string name = "Alice";
+    string greeting = "Hello, ";
+    string message;
+    
+    // String concatenation
+    message = greeting + name + "!";
+    cout << message << endl;
+    
+    // String properties
+    cout << "Length of message: " << message.length() << endl;
+    cout << "Size of message: " << message.size() << endl;
+    cout << "Is empty? " << (message.empty() ? "Yes" : "No") << endl;
+    
+    // String access
+    cout << "First character: " << message[0] << endl;
+    cout << "Last character: " << message[message.length() - 1] << endl;
+    
+    // String modification
+    string text = "Programming";
+    text += " in C++";               // Append
+    cout << "After append: " << text << endl;
+    
+    // Substring
+    string sub = text.substr(0, 11);  // Extract "Programming"
+    cout << "Substring: " << sub << endl;
+    
+    // String comparison
+    string word1 = "apple";
+    string word2 = "banana";
+    
+    if (word1 < word2) {
+        cout << word1 << " comes before " << word2 << " alphabetically" << endl;
+    }
+    
+    return 0;
+}`}
+      explanation="The string class provides many useful methods for text manipulation. Strings can be concatenated with +, compared with standard operators, and modified with various member functions."
+      output={`Hello, Alice!
+Length of message: 13
+Size of message: 13
+Is empty? No
+First character: H
+Last character: !
+After append: Programming in C++
+Substring: Programming
+apple comes before banana alphabetically`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Type Conversion</h2>
+    
+    <h3>Implicit Type Conversion</h3>
+
+    <CodeExample 
+      client:load
+      title="Implicit Type Conversion"
+      code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // Implicit conversions (automatic)
+    int intVal = 42;
+    double doubleVal = intVal;      // int to double (safe)
+    
+    cout << "Original int: " << intVal << endl;
+    cout << "Converted to double: " << doubleVal << endl;
+    
+    // Potential data loss
+    double pi = 3.14159;
+    int truncated = pi;             // double to int (loses decimal)
+    
+    cout << "Original double: " << pi << endl;
+    cout << "Truncated to int: " << truncated << endl;
+    
+    // Character to int
+    char letter = 'A';
+    int ascii = letter;             // char to int
+    
+    cout << "Character: " << letter << endl;
+    cout << "ASCII value: " << ascii << endl;
+    
+    // Mixed arithmetic
+    int a = 5;
+    double b = 2.5;
+    double result = a + b;          // int promoted to double
+    
+    cout << "5 + 2.5 = " << result << endl;
+    
+    return 0;
+}`}
+      explanation="Implicit conversions happen automatically when compatible types are mixed. Widening conversions (smaller to larger type) are safe, but narrowing conversions may lose data."
+      output={`Original int: 42
+Converted to double: 42
+Original double: 3.14159
+Truncated to int: 3
+Character: A
+ASCII value: 65
+5 + 2.5 = 7.5`}
+    />
+
+    <h3>Explicit Type Conversion (Casting)</h3>
+
+    <CodeExample 
+      client:load
+      title="Explicit Type Conversion"
+      code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // C-style casting
+    double value = 9.8;
+    int casted = (int)value;
+    
+    cout << "C-style cast: " << casted << endl;
+    
+    // C++ style casting (preferred)
+    double pi = 3.14159;
+    int intPi = static_cast<int>(pi);
+    
+    cout << "static_cast: " << intPi << endl;
+    
+    // Casting for calculations
+    int numerator = 7;
+    int denominator = 3;
+    
+    // Without casting - integer division
+    cout << "Integer division: " << numerator / denominator << endl;
+    
+    // With casting - floating-point division
+    double result = static_cast<double>(numerator) / denominator;
+    cout << "Floating-point division: " << result << endl;
+    
+    // Character conversions
+    int digit = 5;
+    char digitChar = static_cast<char>('0' + digit);
+    
+    cout << "Number " << digit << " as character: " << digitChar << endl;
+    
+    // String to number conversion (C++11 and later)
+    string numStr = "123";
+    int converted = stoi(numStr);       // string to int
+    
+    cout << "String \\"" << numStr << "\\" as int: " << converted << endl;
+    
+    return 0;
+}`}
+      explanation="Explicit casting gives you control over type conversions. static_cast is the preferred method in C++. Use casting carefully to avoid data loss and ensure your intentions are clear."
+      output={`C-style cast: 9
+static_cast: 3
+Integer division: 2
+Floating-point division: 2.33333
+Number 5 as character: 5
+String "123" as int: 123`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Constants</h2>
+    
+    <p>Constants are values that cannot be changed during program execution:</p>
+
+    <CodeExample 
+      client:load
+      title="Constants in C++"
+      code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // const keyword
+    const double PI = 3.14159;
+    const int MAX_SIZE = 100;
+    const string GREETING = "Welcome!";
+    
+    cout << "PI = " << PI << endl;
+    cout << "Max size = " << MAX_SIZE << endl;
+    cout << "Greeting: " << GREETING << endl;
+    
+    // PI = 3.14;  // Error! Cannot modify const variable
+    
+    // Compile-time constants with constexpr (C++11)
+    constexpr int ARRAY_SIZE = 10;
+    constexpr double GRAVITY = 9.81;
+    
+    cout << "Array size: " << ARRAY_SIZE << endl;
+    cout << "Gravity: " << GRAVITY << endl;
+    
+    // Using constants in calculations
+    double radius = 5.0;
+    double area = PI * radius * radius;
+    double circumference = 2 * PI * radius;
+    
+    cout << "\\nCircle with radius " << radius << ":" << endl;
+    cout << "Area: " << area << endl;
+    cout << "Circumference: " << circumference << endl;
+    
+    // Constant expressions
+    const int BASE = 10;
+    const int MULTIPLIER = 5;
+    const int RESULT = BASE * MULTIPLIER;   // Computed at compile time
+    
+    cout << "\\nConstant calculation: " << RESULT << endl;
+    
+    return 0;
+}`}
+      explanation="Use 'const' for runtime constants and 'constexpr' for compile-time constants. Constants make code more readable, maintainable, and help prevent accidental modifications."
+      output={`PI = 3.14159
+Max size = 100
+Greeting: Welcome!
+Array size: 10
+Gravity: 9.81
+
+Circle with radius 5:
+Area: 78.5397
+Circumference: 31.4159
+
+Constant calculation: 50`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Auto Keyword (C++11)</h2>
+    
+    <p>The auto keyword lets the compiler automatically deduce the variable type:</p>
+
+    <CodeExample 
+      client:load
+      title="Auto Type Deduction"
+      code={`#include <iostream>
+#include <string>
+#include <vector>
+using namespace std;
+
+int main() {
+    // Basic auto usage
+    auto number = 42;           // Deduced as int
+    auto price = 19.99;         // Deduced as double
+    auto letter = 'A';          // Deduced as char
+    auto name = string("Alice"); // Deduced as string
+    
+    cout << "number (int): " << number << endl;
+    cout << "price (double): " << price << endl;
+    cout << "letter (char): " << letter << endl;
+    cout << "name (string): " << name << endl;
+    
+    // Auto with expressions
+    auto sum = number + price;   // Deduced as double
+    auto isValid = (number > 0); // Deduced as bool
+    
+    cout << "\\nsum (double): " << sum << endl;
+    cout << "isValid (bool): " << isValid << endl;
+    
+    // Auto with complex types
+    vector<int> numbers = {1, 2, 3, 4, 5};
+    auto it = numbers.begin();   // Deduced as vector<int>::iterator
+    
+    cout << "\\nFirst element via iterator: " << *it << endl;
+    
+    // Auto in loops (range-based for)
+    cout << "Numbers: ";
+    for (auto num : numbers) {   // num is deduced as int
+        cout << num << " ";
+    }
+    cout << endl;
+    
+    // Auto with const and references
+    const auto MAX_VAL = 100;    // const int
+    auto& ref = number;          // int&
+    
+    ref = 50;                    // Modifies original number
+    cout << "\\nAfter modifying reference: " << number << endl;
+    
+    return 0;
+}`}
+      explanation="The auto keyword makes code cleaner and safer by letting the compiler deduce types. It's especially useful with complex types like iterators and in template programming."
+      output={`number (int): 42
+price (double): 19.99
+letter (char): A
+name (string): Alice
+
+sum (double): 61.99
+isValid (bool): 1
+
+First element via iterator: 1
+Numbers: 1 2 3 4 5 
+
+After modifying reference: 50`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Best Practices</h2>
+    
+    <div class="best-practices">
+      <div class="practice">
+        <h4>1. Initialize Variables</h4>
+        <p>Always initialize variables when declaring them to avoid undefined behavior from garbage values.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>2. Use Appropriate Types</h4>
+        <p>Choose the smallest type that can hold your data range. Use unsigned types only when you need the extra positive range.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>3. Use const for Constants</h4>
+        <p>Declare values that don't change as const. Use constexpr for compile-time constants.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>4. Meaningful Names</h4>
+        <p>Use descriptive variable names that clearly indicate the purpose and content of the variable.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>5. Be Careful with Type Conversions</h4>
+        <p>Understand implicit conversions and use explicit casting when needed to avoid unexpected results.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>Practice Exercises</h2>
+    
+    <div class="exercise">
+      <h3>Exercise 1: Temperature Converter</h3>
+      <p>Create a program that converts temperature between Celsius and Fahrenheit using appropriate data types.</p>
+    </div>
+    
+    <div class="exercise">
+      <h3>Exercise 2: Data Type Explorer</h3>
+      <p>Write a program that displays the size and range of all fundamental data types on your system.</p>
+    </div>
+    
+    <div class="exercise">
+      <h3>Exercise 3: String Manipulator</h3>
+      <p>Create a program that takes a full name and extracts the first name, last name, and displays initials.</p>
+    </div>
+  </section>
+
+  <div class="navigation">
+    <a href="/l1-syntax-basics/introduction" class="nav-button prev">← Introduction</a>
+    <a href="/l1-syntax-basics/control-structures" class="nav-button next">Control Structures →</a>
+  </div>
+</Layout>
+
+<style>
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .breadcrumb a {
+    color: #667eea;
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  .overview {
+    background: #f0f9ff;
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border-left: 4px solid #0ea5e9;
+  }
+
+  .content-section {
+    margin: 3rem 0;
+  }
+
+  .best-practices {
+    display: grid;
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .practice {
+    background: #f0fdf4;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #22c55e;
+  }
+
+  .practice h4 {
+    margin: 0 0 0.5rem 0;
+    color: #166534;
+  }
+
+  .practice p {
+    margin: 0;
+    color: #166534;
+  }
+
+  .exercise {
+    background: #fff7ed;
+    padding: 2rem;
+    border-radius: 8px;
+    border-left: 4px solid #f59e0b;
+    margin: 2rem 0;
+  }
+
+  .exercise h3 {
+    margin: 0 0 1rem 0;
+    color: #92400e;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin: 4rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .nav-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #667eea;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+  }
+
+  .nav-button:hover {
+    background: #5a67d8;
+  }
+
+  .nav-button.prev {
+    background: #64748b;
+  }
+
+  .nav-button.prev:hover {
+    background: #475569;
+  }
+
+  @media (max-width: 768px) {
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style> 

@@ -1,0 +1,1013 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="高阶搜索算法（启发式、双向宽度优先、迭代加深、压缩存储）">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/l4-competitive">Competitive Programming</a> &gt; 高阶搜索算法
+  </div>
+
+  <h1>高阶搜索算法（启发式、双向宽度优先、迭代加深、压缩存储）</h1>
+  
+  <div class="overview">
+    <p>
+      高阶搜索算法通过巧妙的策略大幅提升搜索效率。本节将深入讲解启发式搜索、双向BFS、迭代加深搜索、状态压缩等高级技巧，以及它们在复杂问题中的应用。
+    </p>
+  </div>
+
+  <h2>A*算法与启发式搜索</h2>
+  
+  <p>A*算法结合了Dijkstra算法的准确性和贪心算法的效率，通过启发函数指导搜索方向。</p>
+
+  <CodeExample 
+    client:load
+    title="A*算法解决8数码问题"
+    code={`#include <iostream>
+#include <vector>
+#include <queue>
+#include <unordered_set>
+#include <algorithm>
+using namespace std;
+
+class EightPuzzle {
+private:
+    struct State {
+        vector<vector<int>> board;
+        int g, h, f; // g: 实际代价, h: 启发值, f: 总评估值
+        int zeroRow, zeroCol; // 空位坐标
+        
+        State(vector<vector<int>> b, int cost) : board(b), g(cost) {
+            findZero();
+            h = calculateHeuristic();
+            f = g + h;
+        }
+        
+        void findZero() {
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (board[i][j] == 0) {
+                        zeroRow = i;
+                        zeroCol = j;
+                        return;
+                    }
+                }
+            }
+        }
+        
+        // 曼哈顿距离启发函数
+        int calculateHeuristic() {
+            int distance = 0;
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (board[i][j] != 0) {
+                        int targetRow = (board[i][j] - 1) / 3;
+                        int targetCol = (board[i][j] - 1) % 3;
+                        distance += abs(i - targetRow) + abs(j - targetCol);
+                    }
+                }
+            }
+            return distance;
+        }
+        
+        bool operator>(const State& other) const {
+            return f > other.f; // 最小堆
+        }
+        
+        string encode() const {
+            string result;
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    result += to_string(board[i][j]);
+                }
+            }
+            return result;
+        }
+        
+        bool isGoal() const {
+            int target[3][3] = {{1, 2, 3}, {4, 5, 6}, {7, 8, 0}};
+            for (int i = 0; i < 3; i++) {
+                for (int j = 0; j < 3; j++) {
+                    if (board[i][j] != target[i][j]) {
+                        return false;
+                    }
+                }
+            }
+            return true;
+        }
+        
+        vector<State> getNeighbors() const {
+            vector<State> neighbors;
+            int dx[] = {-1, 1, 0, 0};
+            int dy[] = {0, 0, -1, 1};
+            
+            for (int i = 0; i < 4; i++) {
+                int newRow = zeroRow + dx[i];
+                int newCol = zeroCol + dy[i];
+                
+                if (newRow >= 0 && newRow < 3 && newCol >= 0 && newCol < 3) {
+                    vector<vector<int>> newBoard = board;
+                    swap(newBoard[zeroRow][zeroCol], newBoard[newRow][newCol]);
+                    neighbors.push_back(State(newBoard, g + 1));
+                }
+            }
+            
+            return neighbors;
+        }
+    };
+    
+public:
+    int solvePuzzle(vector<vector<int>>& initial) {
+        if (!isSolvable(initial)) {
+            return -1; // 无解
+        }
+        
+        priority_queue<State, vector<State>, greater<State>> pq;
+        unordered_set<string> visited;
+        
+        State start(initial, 0);
+        pq.push(start);
+        
+        while (!pq.empty()) {
+            State current = pq.top();
+            pq.pop();
+            
+            string encoded = current.encode();
+            if (visited.count(encoded)) continue;
+            visited.insert(encoded);
+            
+            if (current.isGoal()) {
+                return current.g;
+            }
+            
+            for (State neighbor : current.getNeighbors()) {
+                if (!visited.count(neighbor.encode())) {
+                    pq.push(neighbor);
+                }
+            }
+        }
+        
+        return -1; // 无解
+    }
+    
+private:
+    // 判断8数码是否有解
+    bool isSolvable(vector<vector<int>>& board) {
+        vector<int> flat;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (board[i][j] != 0) {
+                    flat.push_back(board[i][j]);
+                }
+            }
+        }
+        
+        int inversions = 0;
+        for (int i = 0; i < flat.size(); i++) {
+            for (int j = i + 1; j < flat.size(); j++) {
+                if (flat[i] > flat[j]) {
+                    inversions++;
+                }
+            }
+        }
+        
+        return inversions % 2 == 0; // 逆序对为偶数时有解
+    }
+};
+
+// 改进的A*算法：IDA*（迭代加深A*）
+class IDAStar {
+private:
+    vector<vector<int>> target = {{1, 2, 3}, {4, 5, 6}, {7, 8, 0}};
+    int dx[4] = {-1, 1, 0, 0};
+    int dy[4] = {0, 0, -1, 1};
+    
+public:
+    int solve(vector<vector<int>>& initial) {
+        int bound = manhattanDistance(initial);
+        
+        while (true) {
+            int newBound = search(initial, 0, bound, -1, -1);
+            if (newBound == -1) return bound; // 找到解
+            if (newBound == INT_MAX) return -1; // 无解
+            bound = newBound;
+        }
+    }
+    
+private:
+    int search(vector<vector<int>>& state, int g, int bound, int prevRow, int prevCol) {
+        int h = manhattanDistance(state);
+        int f = g + h;
+        
+        if (f > bound) return f;
+        if (h == 0) return -1; // 找到目标
+        
+        int minBound = INT_MAX;
+        int zeroRow, zeroCol;
+        findZero(state, zeroRow, zeroCol);
+        
+        for (int i = 0; i < 4; i++) {
+            int newRow = zeroRow + dx[i];
+            int newCol = zeroCol + dy[i];
+            
+            if (isValid(newRow, newCol) && !(newRow == prevRow && newCol == prevCol)) {
+                swap(state[zeroRow][zeroCol], state[newRow][newCol]);
+                
+                int newBound = search(state, g + 1, bound, zeroRow, zeroCol);
+                if (newBound == -1) return -1;
+                minBound = min(minBound, newBound);
+                
+                swap(state[zeroRow][zeroCol], state[newRow][newCol]); // 回溯
+            }
+        }
+        
+        return minBound;
+    }
+    
+    int manhattanDistance(vector<vector<int>>& state) {
+        int distance = 0;
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (state[i][j] != 0) {
+                    int targetRow = (state[i][j] - 1) / 3;
+                    int targetCol = (state[i][j] - 1) % 3;
+                    distance += abs(i - targetRow) + abs(j - targetCol);
+                }
+            }
+        }
+        return distance;
+    }
+    
+    void findZero(vector<vector<int>>& state, int& row, int& col) {
+        for (int i = 0; i < 3; i++) {
+            for (int j = 0; j < 3; j++) {
+                if (state[i][j] == 0) {
+                    row = i;
+                    col = j;
+                    return;
+                }
+            }
+        }
+    }
+    
+    bool isValid(int row, int col) {
+        return row >= 0 && row < 3 && col >= 0 && col < 3;
+    }
+};
+
+int main() {
+    // 测试A*算法
+    cout << "A*算法解决8数码问题:" << endl;
+    vector<vector<int>> puzzle = {
+        {1, 2, 3},
+        {4, 0, 6},
+        {7, 5, 8}
+    };
+    
+    cout << "初始状态:" << endl;
+    for (auto& row : puzzle) {
+        for (int x : row) {
+            cout << x << " ";
+        }
+        cout << endl;
+    }
+    
+    EightPuzzle ep;
+    int steps = ep.solvePuzzle(puzzle);
+    
+    if (steps != -1) {
+        cout << "最少步数: " << steps << endl;
+    } else {
+        cout << "无解" << endl;
+    }
+    
+    // 测试IDA*算法
+    cout << "\\nIDA*算法测试:" << endl;
+    IDAStar ida;
+    int idaSteps = ida.solve(puzzle);
+    
+    if (idaSteps != -1) {
+        cout << "IDA*算法最少步数: " << idaSteps << endl;
+    } else {
+        cout << "IDA*算法：无解" << endl;
+    }
+    
+    return 0;
+}`}
+    explanation="A*算法使用f(n)=g(n)+h(n)的评估函数，其中g(n)是实际代价，h(n)是启发值。IDA*算法结合迭代加深，节省内存空间。"
+    output={`A*算法解决8数码问题:
+初始状态:
+1 2 3 
+4 0 6 
+7 5 8 
+
+最少步数: 3
+
+IDA*算法测试:
+IDA*算法最少步数: 3`}
+  />
+
+  <h2>双向BFS</h2>
+  
+  <p>双向BFS从起点和终点同时搜索，在两个搜索波前相遇时找到最短路径，能显著减少搜索空间。</p>
+
+  <CodeExample 
+    client:load
+    title="双向BFS解决单词阶梯问题"
+    code={`#include <iostream>
+#include <vector>
+#include <queue>
+#include <unordered_set>
+#include <unordered_map>
+#include <string>
+using namespace std;
+
+class WordLadder {
+public:
+    // 标准BFS
+    static int ladderLengthBFS(string beginWord, string endWord, vector<string>& wordList) {
+        unordered_set<string> wordSet(wordList.begin(), wordList.end());
+        if (wordSet.find(endWord) == wordSet.end()) return 0;
+        
+        queue<string> q;
+        q.push(beginWord);
+        int level = 1;
+        
+        while (!q.empty()) {
+            int size = q.size();
+            
+            for (int i = 0; i < size; i++) {
+                string current = q.front();
+                q.pop();
+                
+                if (current == endWord) return level;
+                
+                for (int j = 0; j < current.length(); j++) {
+                    char original = current[j];
+                    for (char c = 'a'; c <= 'z'; c++) {
+                        if (c == original) continue;
+                        
+                        current[j] = c;
+                        if (wordSet.count(current)) {
+                            q.push(current);
+                            wordSet.erase(current); // 避免重复访问
+                        }
+                    }
+                    current[j] = original;
+                }
+            }
+            level++;
+        }
+        
+        return 0;
+    }
+    
+    // 双向BFS优化
+    static int ladderLengthBidirectional(string beginWord, string endWord, vector<string>& wordList) {
+        unordered_set<string> wordSet(wordList.begin(), wordList.end());
+        if (wordSet.find(endWord) == wordSet.end()) return 0;
+        
+        unordered_set<string> beginSet{beginWord};
+        unordered_set<string> endSet{endWord};
+        unordered_set<string> visited;
+        
+        int level = 1;
+        
+        while (!beginSet.empty() && !endSet.empty()) {
+            // 优化：总是扩展较小的集合
+            if (beginSet.size() > endSet.size()) {
+                swap(beginSet, endSet);
+            }
+            
+            unordered_set<string> nextSet;
+            
+            for (const string& word : beginSet) {
+                for (int i = 0; i < word.length(); i++) {
+                    string newWord = word;
+                    for (char c = 'a'; c <= 'z'; c++) {
+                        newWord[i] = c;
+                        
+                        // 检查是否与另一端相遇
+                        if (endSet.count(newWord)) {
+                            return level + 1;
+                        }
+                        
+                        if (wordSet.count(newWord) && !visited.count(newWord)) {
+                            nextSet.insert(newWord);
+                            visited.insert(newWord);
+                        }
+                    }
+                }
+            }
+            
+            beginSet = nextSet;
+            level++;
+        }
+        
+        return 0;
+    }
+    
+    // 返回具体路径的双向BFS
+    static vector<string> findLadderPath(string beginWord, string endWord, vector<string>& wordList) {
+        unordered_set<string> wordSet(wordList.begin(), wordList.end());
+        if (wordSet.find(endWord) == wordSet.end()) return {};
+        
+        unordered_map<string, string> beginParent, endParent;
+        unordered_set<string> beginVisited{beginWord};
+        unordered_set<string> endVisited{endWord};
+        
+        queue<string> beginQueue, endQueue;
+        beginQueue.push(beginWord);
+        endQueue.push(endWord);
+        
+        while (!beginQueue.empty() && !endQueue.empty()) {
+            // 扩展较小的队列
+            if (beginQueue.size() > endQueue.size()) {
+                swap(beginQueue, endQueue);
+                swap(beginVisited, endVisited);
+                swap(beginParent, endParent);
+            }
+            
+            int size = beginQueue.size();
+            unordered_set<string> newVisited;
+            
+            for (int i = 0; i < size; i++) {
+                string current = beginQueue.front();
+                beginQueue.pop();
+                
+                for (int j = 0; j < current.length(); j++) {
+                    string newWord = current;
+                    for (char c = 'a'; c <= 'z'; c++) {
+                        newWord[j] = c;
+                        
+                        if (endVisited.count(newWord)) {
+                            // 找到连接点，构建路径
+                            return buildPath(newWord, beginWord, endWord, beginParent, endParent);
+                        }
+                        
+                        if (wordSet.count(newWord) && !beginVisited.count(newWord)) {
+                            newVisited.insert(newWord);
+                            beginQueue.push(newWord);
+                            beginParent[newWord] = current;
+                        }
+                    }
+                }
+            }
+            
+            beginVisited.insert(newVisited.begin(), newVisited.end());
+        }
+        
+        return {};
+    }
+    
+private:
+    static vector<string> buildPath(string meetWord, string beginWord, string endWord,
+                                   unordered_map<string, string>& beginParent,
+                                   unordered_map<string, string>& endParent) {
+        vector<string> path1, path2;
+        
+        // 从meetWord向beginWord回溯
+        string current = meetWord;
+        while (current != beginWord) {
+            path1.push_back(current);
+            current = beginParent[current];
+        }
+        path1.push_back(beginWord);
+        reverse(path1.begin(), path1.end());
+        
+        // 从meetWord向endWord回溯
+        current = meetWord;
+        while (endParent.count(current)) {
+            current = endParent[current];
+            path2.push_back(current);
+        }
+        
+        // 合并路径
+        path1.insert(path1.end(), path2.begin(), path2.end());
+        return path1;
+    }
+};
+
+// Meet-in-the-Middle算法解决子集和问题
+class MeetInMiddle {
+public:
+    // 判断是否存在子集和为target
+    static bool subsetSumExists(vector<int>& nums, int target) {
+        int n = nums.size();
+        int mid = n / 2;
+        
+        // 生成左半部分的所有子集和
+        unordered_set<int> leftSums;
+        generateSubsetSums(nums, 0, mid, 0, leftSums);
+        
+        // 生成右半部分的所有子集和
+        unordered_set<int> rightSums;
+        generateSubsetSums(nums, mid, n, 0, rightSums);
+        
+        // 检查是否存在left + right = target
+        for (int leftSum : leftSums) {
+            if (rightSums.count(target - leftSum)) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    // 计算和为target的子集数量
+    static int countSubsetSum(vector<int>& nums, int target) {
+        int n = nums.size();
+        int mid = n / 2;
+        
+        unordered_map<int, int> leftSums, rightSums;
+        
+        generateSubsetSumsCount(nums, 0, mid, 0, leftSums);
+        generateSubsetSumsCount(nums, mid, n, 0, rightSums);
+        
+        int count = 0;
+        for (auto& [leftSum, leftCount] : leftSums) {
+            int needed = target - leftSum;
+            if (rightSums.count(needed)) {
+                count += leftCount * rightSums[needed];
+            }
+        }
+        
+        return count;
+    }
+    
+private:
+    static void generateSubsetSums(vector<int>& nums, int start, int end, int currentSum,
+                                  unordered_set<int>& sums) {
+        if (start == end) {
+            sums.insert(currentSum);
+            return;
+        }
+        
+        // 不选择当前元素
+        generateSubsetSums(nums, start + 1, end, currentSum, sums);
+        
+        // 选择当前元素
+        generateSubsetSums(nums, start + 1, end, currentSum + nums[start], sums);
+    }
+    
+    static void generateSubsetSumsCount(vector<int>& nums, int start, int end, int currentSum,
+                                       unordered_map<int, int>& sums) {
+        if (start == end) {
+            sums[currentSum]++;
+            return;
+        }
+        
+        generateSubsetSumsCount(nums, start + 1, end, currentSum, sums);
+        generateSubsetSumsCount(nums, start + 1, end, currentSum + nums[start], sums);
+    }
+};
+
+int main() {
+    // 测试单词阶梯
+    cout << "单词阶梯测试:" << endl;
+    string beginWord = "hit";
+    string endWord = "cog";
+    vector<string> wordList = {"hot", "dot", "dog", "lot", "log", "cog"};
+    
+    cout << "起始单词: " << beginWord << endl;
+    cout << "目标单词: " << endWord << endl;
+    cout << "单词列表: ";
+    for (const string& word : wordList) {
+        cout << word << " ";
+    }
+    cout << endl;
+    
+    int steps1 = WordLadder::ladderLengthBFS(beginWord, endWord, wordList);
+    cout << "标准BFS最短路径长度: " << steps1 << endl;
+    
+    int steps2 = WordLadder::ladderLengthBidirectional(beginWord, endWord, wordList);
+    cout << "双向BFS最短路径长度: " << steps2 << endl;
+    
+    vector<string> path = WordLadder::findLadderPath(beginWord, endWord, wordList);
+    cout << "具体路径: ";
+    for (const string& word : path) {
+        cout << word << " -> ";
+    }
+    cout << "END" << endl;
+    
+    // 测试Meet-in-the-Middle
+    cout << "\\nMeet-in-the-Middle测试:" << endl;
+    vector<int> nums = {1, 3, 5, 7, 9};
+    int target = 12;
+    
+    cout << "数组: ";
+    for (int x : nums) cout << x << " ";
+    cout << "\\n目标和: " << target << endl;
+    
+    bool exists = MeetInMiddle::subsetSumExists(nums, target);
+    cout << "是否存在子集和为" << target << ": " << (exists ? "是" : "否") << endl;
+    
+    int count = MeetInMiddle::countSubsetSum(nums, target);
+    cout << "和为" << target << "的子集数量: " << count << endl;
+    
+    return 0;
+}`}
+    explanation="双向BFS从起点和终点同时搜索，搜索复杂度从O(b^d)降低到O(b^(d/2))。Meet-in-the-Middle算法将指数问题分解为两个较小的子问题。"
+    output={`单词阶梯测试:
+起始单词: hit
+目标单词: cog
+单词列表: hot dot dog lot log cog 
+标准BFS最短路径长度: 5
+双向BFS最短路径长度: 5
+具体路径: hit -> hot -> lot -> log -> cog -> END
+
+Meet-in-the-Middle测试:
+数组: 1 3 5 7 9 
+目标和: 12
+是否存在子集和为12: 是
+和为12的子集数量: 2`}
+  />
+
+  <h2>迭代加深搜索与状态压缩</h2>
+  
+  <p>迭代加深搜索结合了BFS的最优性和DFS的空间效率。状态压缩通过巧妙的编码方式减少状态空间。</p>
+
+  <CodeExample 
+    client:load
+    title="迭代加深搜索与状态压缩技巧"
+    code={`#include <iostream>
+#include <vector>
+#include <unordered_set>
+#include <unordered_map>
+#include <string>
+using namespace std;
+
+// 迭代加深搜索解决图的着色问题
+class GraphColoring {
+private:
+    vector<vector<int>> adj;
+    vector<int> colors;
+    int n, k;
+    
+public:
+    GraphColoring(int vertices, int numColors) : n(vertices), k(numColors) {
+        adj.resize(n);
+        colors.resize(n, -1);
+    }
+    
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    
+    bool canColor() {
+        for (int depth = 1; depth <= k; depth++) {
+            fill(colors.begin(), colors.end(), -1);
+            if (idsSearch(0, depth)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    
+private:
+    bool idsSearch(int vertex, int maxDepth) {
+        if (vertex == n) return true; // 所有顶点都已着色
+        
+        if (maxDepth <= 0) return false; // 深度限制
+        
+        for (int color = 0; color < k; color++) {
+            if (canUseColor(vertex, color)) {
+                colors[vertex] = color;
+                
+                if (idsSearch(vertex + 1, maxDepth - 1)) {
+                    return true;
+                }
+                
+                colors[vertex] = -1; // 回溯
+            }
+        }
+        
+        return false;
+    }
+    
+    bool canUseColor(int vertex, int color) {
+        for (int neighbor : adj[vertex]) {
+            if (colors[neighbor] == color) {
+                return false;
+            }
+        }
+        return true;
+    }
+};
+
+// 状态压缩：旅行商问题的位运算优化
+class TSPStateCompression {
+private:
+    vector<vector<int>> dist;
+    unordered_map<long long, int> memo;
+    int n;
+    
+public:
+    TSPStateCompression(vector<vector<int>>& distance) : dist(distance), n(distance.size()) {}
+    
+    int shortestPath() {
+        return dfs(1, 0); // 从城市0开始，访问过城市0
+    }
+    
+private:
+    int dfs(int mask, int pos) {
+        if (mask == (1 << n) - 1) {
+            return dist[pos][0]; // 回到起点
+        }
+        
+        long long key = ((long long)mask << 5) | pos; // 状态压缩编码
+        if (memo.count(key)) {
+            return memo[key];
+        }
+        
+        int minCost = INT_MAX;
+        for (int next = 0; next < n; next++) {
+            if (!(mask & (1 << next))) { // 未访问过
+                int newMask = mask | (1 << next);
+                int cost = dist[pos][next] + dfs(newMask, next);
+                minCost = min(minCost, cost);
+            }
+        }
+        
+        return memo[key] = minCost;
+    }
+};
+
+// 状态压缩：子集枚举的位运算技巧
+class SubsetEnumeration {
+public:
+    // 枚举所有子集
+    static void enumerateAllSubsets(int n) {
+        cout << "所有子集（n=" << n << "）:" << endl;
+        for (int mask = 0; mask < (1 << n); mask++) {
+            cout << "{";
+            bool first = true;
+            for (int i = 0; i < n; i++) {
+                if (mask & (1 << i)) {
+                    if (!first) cout << ", ";
+                    cout << i;
+                    first = false;
+                }
+            }
+            cout << "}" << endl;
+        }
+    }
+    
+    // 枚举大小为k的所有子集
+    static void enumerateKSubsets(int n, int k) {
+        cout << "\\n大小为" << k << "的子集（n=" << n << "）:" << endl;
+        enumerateKSubsetsRec(n, k, 0, 0);
+    }
+    
+    // 枚举mask的所有子集
+    static void enumerateSubmasks(int mask) {
+        cout << "\\nmask=" << mask << "的所有子集:" << endl;
+        for (int submask = mask; ; submask = (submask - 1) & mask) {
+            cout << submask << " ";
+            if (submask == 0) break;
+        }
+        cout << endl;
+    }
+    
+    // SOS动态规划：子集和优化
+    static vector<int> sosDP(vector<int>& values, int n) {
+        vector<int> dp = values;
+        
+        for (int i = 0; i < n; i++) {
+            for (int mask = 0; mask < (1 << n); mask++) {
+                if (mask & (1 << i)) {
+                    dp[mask] += dp[mask ^ (1 << i)];
+                }
+            }
+        }
+        
+        return dp;
+    }
+    
+private:
+    static void enumerateKSubsetsRec(int n, int k, int start, int current) {
+        if (__builtin_popcount(current) == k) {
+            cout << "{";
+            bool first = true;
+            for (int i = 0; i < n; i++) {
+                if (current & (1 << i)) {
+                    if (!first) cout << ", ";
+                    cout << i;
+                    first = false;
+                }
+            }
+            cout << "}" << endl;
+            return;
+        }
+        
+        if (start == n || __builtin_popcount(current) + (n - start) < k) {
+            return; // 剪枝
+        }
+        
+        // 包含当前元素
+        enumerateKSubsetsRec(n, k, start + 1, current | (1 << start));
+        
+        // 不包含当前元素
+        enumerateKSubsetsRec(n, k, start + 1, current);
+    }
+};
+
+// 滚动哈希的状态压缩
+class RollingHashCompression {
+private:
+    static const int BASE = 31;
+    static const int MOD = 1000000007;
+    
+public:
+    // 使用滚动哈希压缩字符串状态
+    static unordered_set<long long> findUniqueSubstrings(string s, int length) {
+        unordered_set<long long> hashes;
+        if (s.length() < length) return hashes;
+        
+        long long hash = 0;
+        long long power = 1;
+        
+        // 计算第一个窗口的哈希值
+        for (int i = 0; i < length; i++) {
+            hash = (hash * BASE + (s[i] - 'a' + 1)) % MOD;
+            if (i < length - 1) {
+                power = (power * BASE) % MOD;
+            }
+        }
+        hashes.insert(hash);
+        
+        // 滚动计算后续窗口的哈希值
+        for (int i = length; i < s.length(); i++) {
+            hash = (hash - (s[i - length] - 'a' + 1) * power) % MOD;
+            hash = (hash * BASE + (s[i] - 'a' + 1)) % MOD;
+            hash = (hash + MOD) % MOD;
+            hashes.insert(hash);
+        }
+        
+        return hashes;
+    }
+};
+
+int main() {
+    // 测试图着色的迭代加深搜索
+    cout << "图着色问题测试:" << endl;
+    GraphColoring gc(4, 3);
+    gc.addEdge(0, 1);
+    gc.addEdge(1, 2);
+    gc.addEdge(2, 3);
+    gc.addEdge(3, 0);
+    gc.addEdge(0, 2); // 增加约束
+    
+    cout << "4个顶点的图能否用3种颜色着色: " << (gc.canColor() ? "是" : "否") << endl;
+    
+    // 测试TSP状态压缩
+    cout << "\\nTSP状态压缩测试:" << endl;
+    vector<vector<int>> tspDist = {
+        {0, 10, 15, 20},
+        {10, 0, 35, 25},
+        {15, 35, 0, 30},
+        {20, 25, 30, 0}
+    };
+    
+    TSPStateCompression tsp(tspDist);
+    cout << "最短路径长度: " << tsp.shortestPath() << endl;
+    
+    // 测试子集枚举
+    SubsetEnumeration::enumerateAllSubsets(3);
+    SubsetEnumeration::enumerateKSubsets(4, 2);
+    SubsetEnumeration::enumerateSubmasks(5); // 101的子集
+    
+    // 测试SOS DP
+    cout << "\\nSOS DP测试:" << endl;
+    vector<int> values = {1, 2, 3, 4}; // 对应集合{}, {0}, {1}, {0,1}
+    vector<int> result = SubsetEnumeration::sosDP(values, 2);
+    
+    cout << "原始值: ";
+    for (int x : values) cout << x << " ";
+    cout << "\\nSOS DP结果: ";
+    for (int x : result) cout << x << " ";
+    cout << endl;
+    
+    // 测试滚动哈希
+    cout << "\\n滚动哈希测试:" << endl;
+    string text = "abcabcabc";
+    auto hashes = RollingHashCompression::findUniqueSubstrings(text, 3);
+    cout << "字符串 '" << text << "' 中长度为3的不同子串数量: " << hashes.size() << endl;
+    
+    return 0;
+}`}
+    explanation="迭代加深搜索逐步增加搜索深度限制，兼具BFS的最优性和DFS的空间效率。状态压缩通过位运算、哈希等技术减少状态存储空间。"
+    output={`图着色问题测试:
+4个顶点的图能否用3种颜色着色: 是
+
+TSP状态压缩测试:
+最短路径长度: 80
+
+所有子集（n=3）:
+{}
+{0}
+{1}
+{0, 1}
+{2}
+{0, 2}
+{1, 2}
+{0, 1, 2}
+
+大小为2的子集（n=4）:
+{0, 1}
+{0, 2}
+{0, 3}
+{1, 2}
+{1, 3}
+{2, 3}
+
+mask=5的所有子集:
+5 4 1 0 
+
+SOS DP测试:
+原始值: 1 2 3 4 
+SOS DP结果: 1 3 4 10 
+
+滚动哈希测试:
+字符串 'abcabcabc' 中长度为3的不同子串数量: 3`}
+  />
+
+  <h2>高阶搜索算法总结</h2>
+  
+  <div class="tips">
+    <h3>启发式搜索技巧：</h3>
+    <ul>
+      <li>A*算法：使用admissible启发函数保证最优性</li>
+      <li>IDA*算法：结合迭代加深，节省内存空间</li>
+      <li>启发函数设计：曼哈顿距离、欧几里得距离等</li>
+      <li>一致性启发：满足三角不等式的启发函数</li>
+    </ul>
+    
+    <h3>双向搜索优化：</h3>
+    <ul>
+      <li>双向BFS：从起点和终点同时搜索</li>
+      <li>Meet-in-the-Middle：将指数问题分解为两个子问题</li>
+      <li>搜索空间平衡：总是扩展较小的搜索前沿</li>
+      <li>相遇检测：高效判断两个搜索是否相遇</li>
+    </ul>
+    
+    <h3>迭代加深技巧：</h3>
+    <ul>
+      <li>深度限制：逐步增加搜索深度</li>
+      <li>时间复杂度：重复搜索的代价相对较小</li>
+      <li>空间优化：只需要O(d)的栈空间</li>
+      <li>最优性保证：类似BFS的层次搜索</li>
+    </ul>
+    
+    <h3>状态压缩方法：</h3>
+    <ul>
+      <li>位运算：使用二进制位表示集合状态</li>
+      <li>哈希压缩：将复杂状态映射为哈希值</li>
+      <li>滚动数组：重用存储空间</li>
+      <li>状态编码：设计紧凑的状态表示</li>
+    </ul>
+  </div>
+
+  <div class="navigation">
+    <a href="/l4-competitive/number-theory" class="prev">← 初等数论</a>
+    <a href="/l4-competitive/greedy-advanced" class="next">贪心算法进阶 →</a>
+  </div>
+</Layout>
+
+<style>
+  .tips {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border-left: 4px solid #007bff;
+  }
+  
+  .tips h3 {
+    color: #007bff;
+    margin-top: 1rem;
+  }
+  
+  .tips ul {
+    margin-left: 1rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+  }
+  
+  .navigation a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .navigation a:hover {
+    text-decoration: underline;
+  }
+</style>

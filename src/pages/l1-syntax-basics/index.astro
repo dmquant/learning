@@ -1,0 +1,319 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Syntax Basics">
+	<h1>Syntax Basics</h1>
+	<p class="section-description">Learn C++ programming from scratch, master basic syntax and core concepts</p>
+	
+	<h2>Course Content</h2>
+	
+	<div class="lesson-grid">
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">🚀</div>
+				<div class="lesson-meta">
+					<span class="difficulty beginner">Beginner</span>
+					<span class="duration">45 min</span>
+				</div>
+			</div>
+			<h3><a href="/l1-syntax-basics/introduction">1. Introduction to C++</a></h3>
+			<p>Basic introduction to C++ language, development environment setup and first program</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">Dev Environment</span>
+					<span class="topic">Hello World</span>
+					<span class="topic">Compilation</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">📊</div>
+				<div class="lesson-meta">
+					<span class="difficulty beginner">Beginner</span>
+					<span class="duration">60 min</span>
+				</div>
+			</div>
+			<h3><a href="/l1-syntax-basics/variables">2. Variables & Basic Operations</a></h3>
+			<p>Data types, variable declaration, basic arithmetic operations and type conversion</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">Data Types</span>
+					<span class="topic">Variables</span>
+					<span class="topic">Operators</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">🔀</div>
+				<div class="lesson-meta">
+					<span class="difficulty beginner">Beginner</span>
+					<span class="duration">75 min</span>
+				</div>
+			</div>
+			<h3><a href="/l1-syntax-basics/control-structures">3. Control Structures</a></h3>
+			<p>Conditional statements, loops, flow control and logical operations</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">if/else</span>
+					<span class="topic">for/while</span>
+					<span class="topic">switch</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">⚙️</div>
+				<div class="lesson-meta">
+					<span class="difficulty intermediate">Intermediate</span>
+					<span class="duration">90 min</span>
+				</div>
+			</div>
+			<h3><a href="/l1-syntax-basics/functions">4. Functions & Applications</a></h3>
+			<p>Function definition, parameter passing, function overloading and scope</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">Function Definition</span>
+					<span class="topic">Parameters</span>
+					<span class="topic">Overloading</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">🏗️</div>
+				<div class="lesson-meta">
+					<span class="difficulty intermediate">Intermediate</span>
+					<span class="duration">120 min</span>
+				</div>
+			</div>
+			<h3><a href="/l1-syntax-basics/classes">5. Classes & Objects</a></h3>
+			<p>Object-oriented programming basics, class definition and usage, constructors and destructors</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">Class Definition</span>
+					<span class="topic">Objects</span>
+					<span class="topic">Constructors</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">👉</div>
+				<div class="lesson-meta">
+					<span class="difficulty advanced">Advanced</span>
+					<span class="duration">100 min</span>
+				</div>
+			</div>
+			<h3><a href="/l1-syntax-basics/pointers">6. Pointers</a></h3>
+			<p>Pointer concepts, pointer operations, dynamic memory allocation and pointer arithmetic</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">Pointer Basics</span>
+					<span class="topic">Memory Address</span>
+					<span class="topic">Pointer Arithmetic</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">🧠</div>
+				<div class="lesson-meta">
+					<span class="difficulty advanced">Advanced</span>
+					<span class="duration">110 min</span>
+				</div>
+			</div>
+			<h3><a href="/l1-syntax-basics/memory">7. Memory Management</a></h3>
+			<p>Memory allocation and deallocation, smart pointers, memory optimization and memory leaks</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">Dynamic Memory</span>
+					<span class="topic">Smart Pointers</span>
+					<span class="topic">Memory Optimization</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</Layout>
+
+<style>
+	.section-description {
+		font-size: 1.1rem;
+		color: #6b7280;
+		margin-bottom: 2rem;
+		text-align: center;
+	}
+
+	.lesson-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+		gap: 2rem;
+		margin-top: 2rem;
+	}
+	
+	.lesson-card {
+		background: white;
+		border: 1px solid #e2e8f0;
+		border-radius: 12px;
+		padding: 0;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		overflow: hidden;
+		position: relative;
+	}
+	
+	.lesson-card:hover {
+		box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+		transform: translateY(-4px);
+		border-color: #4f46e5;
+	}
+
+	.lesson-card:hover .lesson-icon {
+		transform: scale(1.2) rotate(5deg);
+	}
+
+	.card-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 1.5rem 1.5rem 1rem 1.5rem;
+		background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+		border-bottom: 1px solid #e2e8f0;
+	}
+
+	.lesson-icon {
+		font-size: 2rem;
+		transition: all 0.3s ease;
+	}
+
+	.lesson-meta {
+		display: flex;
+		gap: 0.75rem;
+		align-items: center;
+	}
+
+	.difficulty {
+		padding: 0.25rem 0.75rem;
+		border-radius: 20px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	.difficulty.beginner {
+		background: #dcfce7;
+		color: #166534;
+	}
+
+	.difficulty.intermediate {
+		background: #fef3c7;
+		color: #92400e;
+	}
+
+	.difficulty.advanced {
+		background: #fecaca;
+		color: #991b1b;
+	}
+
+	.duration {
+		background: #e0e7ff;
+		color: #3730a3;
+		padding: 0.25rem 0.75rem;
+		border-radius: 20px;
+		font-size: 0.75rem;
+		font-weight: 500;
+	}
+
+	.lesson-card h3 {
+		margin: 0 0 0.75rem 0;
+		font-size: 1.25rem;
+		padding: 0 1.5rem;
+	}
+	
+	.lesson-card h3 a {
+		color: #1e293b;
+		text-decoration: none;
+		font-weight: 600;
+		transition: color 0.3s ease;
+	}
+	
+	.lesson-card:hover h3 a {
+		color: #4f46e5;
+	}
+	
+	.lesson-card p {
+		margin: 0 0 1.5rem 0;
+		color: #6b7280;
+		font-size: 0.9rem;
+		line-height: 1.6;
+		padding: 0 1.5rem;
+	}
+
+	.card-footer {
+		padding: 1rem 1.5rem 1.5rem 1.5rem;
+		background: #fafbfc;
+		border-top: 1px solid #f1f5f9;
+	}
+
+	.topics {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.topic {
+		background: white;
+		border: 1px solid #e2e8f0;
+		color: #64748b;
+		padding: 0.375rem 0.75rem;
+		border-radius: 6px;
+		font-size: 0.8rem;
+		font-weight: 500;
+		transition: all 0.2s ease;
+	}
+
+	.lesson-card:hover .topic {
+		border-color: #c7d2fe;
+		background: #f0f4ff;
+		color: #4338ca;
+	}
+
+	/* Progress indicator */
+	.lesson-card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 3px;
+		background: linear-gradient(90deg, #4f46e5, #7c3aed);
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform 0.3s ease;
+	}
+
+	.lesson-card:hover::before {
+		transform: scaleX(1);
+	}
+
+	@media (max-width: 768px) {
+		.lesson-grid {
+			grid-template-columns: 1fr;
+			gap: 1.5rem;
+		}
+
+		.lesson-meta {
+			flex-direction: column;
+			gap: 0.5rem;
+		}
+	}
+</style>
