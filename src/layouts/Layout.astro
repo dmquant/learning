@@ -434,7 +434,7 @@ const { title } = Astro.props;
 		display: grid;
 		grid-template-areas: 
 			"topbar topbar topbar"
-			"sidebar content toc";
+			"content content content";
 		grid-template-columns: 280px 1fr 250px;
 		grid-template-rows: 70px 1fr;
 		min-height: 100vh;
@@ -608,12 +608,17 @@ const { title } = Astro.props;
 	
 	/* Sidebar */
 	.sidebar {
-		grid-area: sidebar;
+		position: fixed;
+		left: 0;
+		top: 70px;
+		width: 280px;
+		height: calc(100vh - 70px);
 		background: var(--surface);
 		border-right: 1px solid var(--border);
 		padding: 1.5rem 0;
 		overflow-y: auto;
 		box-shadow: 2px 0 8px var(--shadow-light);
+		z-index: 50;
 	}
 	
 	.sidebar-header {
@@ -706,7 +711,8 @@ const { title } = Astro.props;
 	
 	/* Main Content */
 	.content {
-		grid-area: content;
+		margin-left: 280px;
+		margin-right: 250px;
 		padding: 2rem;
 		background: var(--background);
 		overflow-y: auto;
@@ -795,11 +801,16 @@ const { title } = Astro.props;
 
 	/* Table of Contents */
 	.toc-sidebar {
-		grid-area: toc;
+		position: fixed;
+		right: 0;
+		top: 70px;
+		width: 250px;
+		height: calc(100vh - 70px);
 		background: var(--surface);
 		border-left: 1px solid var(--border);
 		overflow: visible;
 		box-shadow: -2px 0 8px var(--shadow-light);
+		z-index: 40;
 	}
 
 	.toc-sticky {
@@ -944,11 +955,7 @@ const { title } = Astro.props;
 		}
 
 		.sidebar {
-			position: fixed;
 			left: -280px;
-			top: 70px;
-			height: calc(100vh - 70px);
-			z-index: 50;
 			transition: left 0.3s ease;
 		}
 
@@ -961,12 +968,7 @@ const { title } = Astro.props;
 		}
 
 		.toc-sidebar {
-			position: fixed;
 			right: -250px;
-			top: 70px;
-			height: calc(100vh - 70px);
-			width: 250px;
-			z-index: 40;
 			transition: right 0.3s ease;
 		}
 
@@ -985,6 +987,8 @@ const { title } = Astro.props;
 		}
 
 		.content {
+			margin-left: 0;
+			margin-right: 0;
 			padding: 1.5rem;
 		}
 
