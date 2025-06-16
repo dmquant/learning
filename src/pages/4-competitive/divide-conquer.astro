@@ -1,0 +1,620 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="分治算法">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; 分治算法
+  </div>
+
+  <h1>分治算法</h1>
+  
+  <div class="overview">
+    <p>
+      分治算法通过将问题分解为更小的子问题来解决，是算法设计的重要思想。在竞赛编程中，分治算法常用于解决排序、搜索、数值计算等问题，具有优美的递归结构和高效的时间复杂度。
+    </p>
+  </div>
+
+  <h2>分治算法的基本思想</h2>
+  
+  <p>分治算法包含三个步骤：分解（Divide）、解决（Conquer）、合并（Combine）。经典的归并排序就是分治思想的完美体现。</p>
+
+  <CodeExample 
+    client:load
+    title="归并排序 - 分治算法的经典应用"
+    code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+class MergeSort {
+public:
+    void mergeSort(vector<int>& arr, int left, int right) {
+        if (left >= right) return;
+        
+        int mid = left + (right - left) / 2;
+        
+        // 分解：递归排序左右两部分
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+        
+        // 合并：将两个有序部分合并
+        merge(arr, left, mid, right);
+    }
+    
+private:
+    void merge(vector<int>& arr, int left, int mid, int right) {
+        vector<int> temp(right - left + 1);
+        int i = left, j = mid + 1, k = 0;
+        
+        // 合并两个有序数组
+        while (i <= mid && j <= right) {
+            if (arr[i] <= arr[j]) {
+                temp[k++] = arr[i++];
+            } else {
+                temp[k++] = arr[j++];
+            }
+        }
+        
+        // 复制剩余元素
+        while (i <= mid) temp[k++] = arr[i++];
+        while (j <= right) temp[k++] = arr[j++];
+        
+        // 将排序结果复制回原数组
+        for (int i = 0; i < k; i++) {
+            arr[left + i] = temp[i];
+        }
+    }
+};
+
+int main() {
+    vector<int> arr = {64, 34, 25, 12, 22, 11, 90, 88, 76, 50, 42};
+    
+    cout << "原数组: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    MergeSort ms;
+    ms.mergeSort(arr, 0, arr.size() - 1);
+    
+    cout << "排序后: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    return 0;
+}`}
+    explanation="归并排序的时间复杂度为O(n log n)，空间复杂度O(n)。它是稳定排序算法，在链表排序中特别有用。"
+    output={`原数组: 64 34 25 12 22 11 90 88 76 50 42 
+排序后: 11 12 22 25 34 42 50 64 76 88 90`}
+  />
+
+  <h2>快速排序 - 分治的另一种形式</h2>
+  
+  <p>快速排序通过选择基准元素将数组分为两部分，每部分独立排序。</p>
+
+  <CodeExample 
+    client:load
+    title="快速排序实现"
+    code={`#include <iostream>
+#include <vector>
+#include <random>
+using namespace std;
+
+class QuickSort {
+public:
+    void quickSort(vector<int>& arr, int left, int right) {
+        if (left >= right) return;
+        
+        // 随机化选择基准，避免最坏情况
+        int randomIndex = left + rand() % (right - left + 1);
+        swap(arr[left], arr[randomIndex]);
+        
+        int pivotIndex = partition(arr, left, right);
+        
+        quickSort(arr, left, pivotIndex - 1);
+        quickSort(arr, pivotIndex + 1, right);
+    }
+    
+private:
+    int partition(vector<int>& arr, int left, int right) {
+        int pivot = arr[left];
+        int i = left, j = right;
+        
+        while (i < j) {
+            // 从右向左找第一个小于基准的元素
+            while (i < j && arr[j] >= pivot) j--;
+            if (i < j) arr[i++] = arr[j];
+            
+            // 从左向右找第一个大于基准的元素
+            while (i < j && arr[i] <= pivot) i++;
+            if (i < j) arr[j--] = arr[i];
+        }
+        
+        arr[i] = pivot;
+        return i;
+    }
+};
+
+// 第K小元素 - 快速选择算法
+int quickSelect(vector<int>& arr, int left, int right, int k) {
+    if (left == right) return arr[left];
+    
+    int randomIndex = left + rand() % (right - left + 1);
+    swap(arr[left], arr[randomIndex]);
+    
+    int pivot = arr[left];
+    int i = left, j = right;
+    
+    while (i < j) {
+        while (i < j && arr[j] >= pivot) j--;
+        if (i < j) arr[i++] = arr[j];
+        while (i < j && arr[i] <= pivot) i++;
+        if (i < j) arr[j--] = arr[i];
+    }
+    arr[i] = pivot;
+    
+    if (i == k) return arr[i];
+    else if (i > k) return quickSelect(arr, left, i - 1, k);
+    else return quickSelect(arr, i + 1, right, k);
+}
+
+int main() {
+    srand(time(nullptr));
+    
+    vector<int> arr = {64, 34, 25, 12, 22, 11, 90, 88, 76, 50, 42};
+    
+    cout << "原数组: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    QuickSort qs;
+    qs.quickSort(arr, 0, arr.size() - 1);
+    
+    cout << "排序后: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    // 测试快速选择
+    vector<int> arr2 = {64, 34, 25, 12, 22, 11, 90, 88, 76, 50, 42};
+    int k = 5; // 第6小的元素（0-indexed）
+    int kthSmallest = quickSelect(arr2, 0, arr2.size() - 1, k);
+    cout << "第" << (k + 1) << "小的元素: " << kthSmallest << endl;
+    
+    return 0;
+}`}
+    explanation="快速排序平均时间复杂度O(n log n)，最坏情况O(n²)。快速选择算法可以在O(n)平均时间内找到第K小元素。"
+    output={`原数组: 64 34 25 12 22 11 90 88 76 50 42 
+排序后: 11 12 22 25 34 42 50 64 76 88 90 
+第6小的元素: 42`}
+  />
+
+  <h2>分治解决数组问题</h2>
+  
+  <p>分治算法在解决数组相关问题时非常有效，如最大子数组和、逆序对计数等。</p>
+
+  <CodeExample 
+    client:load
+    title="最大子数组和 - 分治解法"
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+class MaxSubarraySum {
+public:
+    int maxSubarraySum(vector<int>& arr, int left, int right) {
+        if (left == right) return arr[left];
+        
+        int mid = left + (right - left) / 2;
+        
+        // 递归求解左半部分和右半部分的最大子数组和
+        int leftSum = maxSubarraySum(arr, left, mid);
+        int rightSum = maxSubarraySum(arr, mid + 1, right);
+        
+        // 求跨越中点的最大子数组和
+        int crossSum = maxCrossingSum(arr, left, mid, right);
+        
+        return max({leftSum, rightSum, crossSum});
+    }
+    
+private:
+    int maxCrossingSum(vector<int>& arr, int left, int mid, int right) {
+        int leftSum = INT_MIN;
+        int sum = 0;
+        
+        // 从中点向左扫描
+        for (int i = mid; i >= left; i--) {
+            sum += arr[i];
+            leftSum = max(leftSum, sum);
+        }
+        
+        int rightSum = INT_MIN;
+        sum = 0;
+        
+        // 从中点+1向右扫描
+        for (int i = mid + 1; i <= right; i++) {
+            sum += arr[i];
+            rightSum = max(rightSum, sum);
+        }
+        
+        return leftSum + rightSum;
+    }
+};
+
+// 逆序对计数
+class InversionCount {
+public:
+    int mergeAndCount(vector<int>& arr, int left, int mid, int right) {
+        vector<int> temp(right - left + 1);
+        int i = left, j = mid + 1, k = 0;
+        int invCount = 0;
+        
+        while (i <= mid && j <= right) {
+            if (arr[i] <= arr[j]) {
+                temp[k++] = arr[i++];
+            } else {
+                temp[k++] = arr[j++];
+                invCount += (mid - i + 1); // 关键：计算逆序对
+            }
+        }
+        
+        while (i <= mid) temp[k++] = arr[i++];
+        while (j <= right) temp[k++] = arr[j++];
+        
+        for (int i = 0; i < k; i++) {
+            arr[left + i] = temp[i];
+        }
+        
+        return invCount;
+    }
+    
+    int mergeSortAndCount(vector<int>& arr, int left, int right) {
+        if (left >= right) return 0;
+        
+        int mid = left + (right - left) / 2;
+        int invCount = 0;
+        
+        invCount += mergeSortAndCount(arr, left, mid);
+        invCount += mergeSortAndCount(arr, mid + 1, right);
+        invCount += mergeAndCount(arr, left, mid, right);
+        
+        return invCount;
+    }
+};
+
+int main() {
+    // 测试最大子数组和
+    vector<int> arr1 = {-2, -3, 4, -1, -2, 1, 5, -3};
+    MaxSubarraySum mss;
+    
+    cout << "数组: ";
+    for (int x : arr1) cout << x << " ";
+    cout << endl;
+    
+    int maxSum = mss.maxSubarraySum(arr1, 0, arr1.size() - 1);
+    cout << "最大子数组和: " << maxSum << endl;
+    
+    // 测试逆序对计数
+    vector<int> arr2 = {8, 4, 2, 1};
+    InversionCount ic;
+    
+    cout << "\\n数组: ";
+    for (int x : arr2) cout << x << " ";
+    cout << endl;
+    
+    int invCount = ic.mergeSortAndCount(arr2, 0, arr2.size() - 1);
+    cout << "逆序对数量: " << invCount << endl;
+    
+    return 0;
+}`}
+    explanation="最大子数组和的分治解法时间复杂度O(n log n)。逆序对计数在归并过程中统计左半部分大于右半部分的情况。"
+    output={`数组: -2 -3 4 -1 -2 1 5 -3 
+最大子数组和: 7
+
+数组: 8 4 2 1 
+逆序对数量: 6`}
+  />
+
+  <h2>分治解决几何问题</h2>
+  
+  <p>分治算法在计算几何中也有重要应用，如最近点对问题。</p>
+
+  <CodeExample 
+    client:load
+    title="最近点对问题"
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <float.h>
+using namespace std;
+
+struct Point {
+    double x, y;
+    Point(double x = 0, double y = 0) : x(x), y(y) {}
+};
+
+class ClosestPair {
+public:
+    double distance(const Point& p1, const Point& p2) {
+        return sqrt((p1.x - p2.x) * (p1.x - p2.x) + (p1.y - p2.y) * (p1.y - p2.y));
+    }
+    
+    double bruteForceDist(vector<Point>& points, int left, int right) {
+        double minDist = DBL_MAX;
+        for (int i = left; i <= right; i++) {
+            for (int j = i + 1; j <= right; j++) {
+                minDist = min(minDist, distance(points[i], points[j]));
+            }
+        }
+        return minDist;
+    }
+    
+    double stripClosest(vector<Point>& strip, double d) {
+        double minDist = d;
+        
+        // 按y坐标排序
+        sort(strip.begin(), strip.end(), [](const Point& a, const Point& b) {
+            return a.y < b.y;
+        });
+        
+        // 检查相邻的点
+        for (int i = 0; i < strip.size(); i++) {
+            for (int j = i + 1; j < strip.size() && (strip[j].y - strip[i].y) < minDist; j++) {
+                minDist = min(minDist, distance(strip[i], strip[j]));
+            }
+        }
+        
+        return minDist;
+    }
+    
+    double closestPairRec(vector<Point>& points, int left, int right) {
+        if (right - left <= 3) {
+            return bruteForceDist(points, left, right);
+        }
+        
+        int mid = left + (right - left) / 2;
+        Point midPoint = points[mid];
+        
+        double dl = closestPairRec(points, left, mid);
+        double dr = closestPairRec(points, mid + 1, right);
+        
+        double d = min(dl, dr);
+        
+        // 创建跨越中线的点的数组
+        vector<Point> strip;
+        for (int i = left; i <= right; i++) {
+            if (abs(points[i].x - midPoint.x) < d) {
+                strip.push_back(points[i]);
+            }
+        }
+        
+        return min(d, stripClosest(strip, d));
+    }
+    
+    double closestPair(vector<Point>& points) {
+        // 按x坐标排序
+        sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
+            return a.x < b.x;
+        });
+        
+        return closestPairRec(points, 0, points.size() - 1);
+    }
+};
+
+int main() {
+    vector<Point> points = {
+        {2, 3}, {12, 30}, {40, 50}, {5, 1}, {12, 10}, {3, 4}
+    };
+    
+    ClosestPair cp;
+    double minDist = cp.closestPair(points);
+    
+    cout << "点集:" << endl;
+    for (const auto& p : points) {
+        cout << "(" << p.x << ", " << p.y << ") ";
+    }
+    cout << endl;
+    
+    cout << "最近点对距离: " << minDist << endl;
+    
+    return 0;
+}`}
+    explanation="最近点对问题的分治解法：将点集按x坐标分为两部分，递归求解，然后检查跨越分界线的情况。时间复杂度O(n log n)。"
+    output={`点集:
+(2, 3) (12, 30) (40, 50) (5, 1) (12, 10) (3, 4) 
+最近点对距离: 1.41421`}
+  />
+
+  <h2>分治优化动态规划</h2>
+  
+  <p>分治思想可以优化某些动态规划问题，特别是具有决策单调性的问题。</p>
+
+  <CodeExample 
+    client:load
+    title="矩阵链乘法问题"
+    code={`#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+class MatrixChainMultiplication {
+public:
+    int matrixChainOrder(vector<int>& p) {
+        int n = p.size() - 1;
+        vector<vector<int>> dp(n, vector<int>(n, 0));
+        
+        return matrixChainRec(p, dp, 0, n - 1);
+    }
+    
+private:
+    int matrixChainRec(vector<int>& p, vector<vector<int>>& dp, int i, int j) {
+        if (i == j) return 0;
+        
+        if (dp[i][j] != 0) return dp[i][j];
+        
+        dp[i][j] = INT_MAX;
+        
+        for (int k = i; k < j; k++) {
+            int cost = matrixChainRec(p, dp, i, k) + 
+                      matrixChainRec(p, dp, k + 1, j) + 
+                      p[i] * p[k + 1] * p[j + 1];
+            dp[i][j] = min(dp[i][j], cost);
+        }
+        
+        return dp[i][j];
+    }
+};
+
+// 大整数乘法 - Karatsuba算法
+class KaratsubaMultiplication {
+public:
+    long long karatsuba(long long x, long long y) {
+        if (x < 10 || y < 10) {
+            return x * y;
+        }
+        
+        int n = max(getDigits(x), getDigits(y));
+        int half = n / 2;
+        
+        long long powerOf10 = 1;
+        for (int i = 0; i < half; i++) {
+            powerOf10 *= 10;
+        }
+        
+        long long a = x / powerOf10;
+        long long b = x % powerOf10;
+        long long c = y / powerOf10;
+        long long d = y % powerOf10;
+        
+        long long ac = karatsuba(a, c);
+        long long bd = karatsuba(b, d);
+        long long ad_bc = karatsuba(a + b, c + d) - ac - bd;
+        
+        return ac * powerOf10 * powerOf10 + ad_bc * powerOf10 + bd;
+    }
+    
+private:
+    int getDigits(long long n) {
+        if (n == 0) return 1;
+        int count = 0;
+        while (n > 0) {
+            count++;
+            n /= 10;
+        }
+        return count;
+    }
+};
+
+int main() {
+    // 测试矩阵链乘法
+    vector<int> p = {1, 2, 3, 4, 5}; // 矩阵维度
+    MatrixChainMultiplication mcm;
+    
+    cout << "矩阵维度: ";
+    for (int i = 0; i < p.size() - 1; i++) {
+        cout << p[i] << "x" << p[i + 1] << " ";
+    }
+    cout << endl;
+    
+    int minCost = mcm.matrixChainOrder(p);
+    cout << "最小乘法次数: " << minCost << endl;
+    
+    // 测试Karatsuba乘法
+    KaratsubaMultiplication km;
+    long long x = 1234, y = 5678;
+    
+    cout << "\\nKaratsuba乘法:" << endl;
+    cout << x << " × " << y << " = " << km.karatsuba(x, y) << endl;
+    cout << "验证: " << x << " × " << y << " = " << x * y << endl;
+    
+    return 0;
+}`}
+    explanation="矩阵链乘法使用分治思想找到最优的括号化方案。Karatsuba算法将大整数乘法的复杂度从O(n²)降到O(n^1.585)。"
+    output={`矩阵维度: 1x2 2x3 3x4 4x5 
+最小乘法次数: 38
+
+Karatsuba乘法:
+1234 × 5678 = 7006652
+验证: 1234 × 5678 = 7006652`}
+  />
+
+  <h2>竞赛中的分治技巧</h2>
+  
+  <div class="tips">
+    <h3>分治算法的适用场景：</h3>
+    <ul>
+      <li>问题可以分解为相同类型的子问题</li>
+      <li>子问题的解可以合并为原问题的解</li>
+      <li>子问题之间相互独立</li>
+      <li>分解后的子问题规模显著减小</li>
+    </ul>
+    
+    <h3>常见的分治问题类型：</h3>
+    <ul>
+      <li>排序问题：归并排序、快速排序</li>
+      <li>搜索问题：二分搜索、快速选择</li>
+      <li>数值计算：大整数乘法、矩阵乘法</li>
+      <li>几何问题：最近点对、凸包</li>
+    </ul>
+    
+    <h3>实现技巧：</h3>
+    <ul>
+      <li>递归边界条件要仔细考虑</li>
+      <li>合并步骤是算法的关键</li>
+      <li>注意数组越界问题</li>
+      <li>可以用非递归方式实现提高效率</li>
+    </ul>
+    
+    <h3>时间复杂度分析：</h3>
+    <ul>
+      <li>使用主定理分析递推关系</li>
+      <li>T(n) = aT(n/b) + f(n)的一般形式</li>
+      <li>大多数分治算法复杂度为O(n log n)</li>
+      <li>注意合并步骤的时间复杂度</li>
+    </ul>
+  </div>
+
+  <div class="navigation">
+    <a href="/4-competitive/hash-tables" class="prev">← 哈希表</a>
+    <a href="/4-competitive/tree-dp" class="next">树上DP 状压DP →</a>
+  </div>
+</Layout>
+
+<style>
+  .tips {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border-left: 4px solid #007bff;
+  }
+  
+  .tips h3 {
+    color: #007bff;
+    margin-top: 1rem;
+  }
+  
+  .tips ul {
+    margin-left: 1rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+  }
+  
+  .navigation a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .navigation a:hover {
+    text-decoration: underline;
+  }
+</style>

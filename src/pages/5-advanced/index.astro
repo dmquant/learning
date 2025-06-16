@@ -1,0 +1,310 @@
+---
+import Layout from '../../layouts/Layout.astro';
+---
+
+<Layout title="Advanced Algorithms">
+	<h1>Advanced Algorithms</h1>
+	<p class="section-description">Explore cutting-edge algorithms and advanced computational techniques</p>
+	
+	<h2>Course Content</h2>
+	
+	<div class="lesson-grid">
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">🌐</div>
+				<div class="lesson-meta">
+					<span class="difficulty expert">Expert</span>
+					<span class="duration">180 min</span>
+				</div>
+			</div>
+			<h3><a href="/5-advanced/graph-theory">1. Advanced Graph Theory</a></h3>
+			<p>Bipartite graphs, Eulerian graphs, biconnected components and strongly connected components</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">Bipartite Graphs</span>
+					<span class="topic">Eulerian Graphs</span>
+					<span class="topic">SCC</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">🛤️</div>
+				<div class="lesson-meta">
+					<span class="difficulty expert">Expert</span>
+					<span class="duration">200 min</span>
+				</div>
+			</div>
+			<h3><a href="/5-advanced/graph-algorithms">2. Advanced Graph Algorithms</a></h3>
+			<p>Minimum spanning tree, second MST, single-source shortest paths, k-shortest paths, differential constraints, layered graphs</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">MST</span>
+					<span class="topic">Shortest Paths</span>
+					<span class="topic">Differential Constraints</span>
+					<span class="topic">Layered Graphs</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">📊</div>
+				<div class="lesson-meta">
+					<span class="difficulty expert">Expert</span>
+					<span class="duration">170 min</span>
+				</div>
+			</div>
+			<h3><a href="/5-advanced/difference-doubling">3. Difference Arrays & Doubling</a></h3>
+			<p>1D/multi-dimensional/tree difference arrays, advanced doubling algorithms (ST table, LCA)</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">Difference Arrays</span>
+					<span class="topic">ST Table</span>
+					<span class="topic">LCA</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">🔗</div>
+				<div class="lesson-meta">
+					<span class="difficulty expert">Expert</span>
+					<span class="duration">150 min</span>
+				</div>
+			</div>
+			<h3><a href="/5-advanced/union-find">4. Union-Find (Disjoint Set)</a></h3>
+			<p>Advanced union-find data structure with path compression and union by rank optimizations</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">Path Compression</span>
+					<span class="topic">Union by Rank</span>
+					<span class="topic">Applications</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">📏</div>
+				<div class="lesson-meta">
+					<span class="difficulty expert">Expert</span>
+					<span class="duration">160 min</span>
+				</div>
+			</div>
+			<h3><a href="/5-advanced/sweep-line">5. Sweep Line Algorithm</a></h3>
+			<p>Line sweep techniques for computational geometry and interval problems</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">Line Sweep</span>
+					<span class="topic">Computational Geometry</span>
+					<span class="topic">Interval Problems</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">🌳</div>
+				<div class="lesson-meta">
+					<span class="difficulty expert">Expert</span>
+					<span class="duration">140 min</span>
+				</div>
+			</div>
+			<h3><a href="/5-advanced/binary-trie">6. Binary Trie (01-Trie)</a></h3>
+			<p>Binary trie data structure for XOR operations and bit manipulation problems</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">Binary Trie</span>
+					<span class="topic">XOR Operations</span>
+					<span class="topic">Bit Manipulation</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">⚡</div>
+				<div class="lesson-meta">
+					<span class="difficulty expert">Expert</span>
+					<span class="duration">190 min</span>
+				</div>
+			</div>
+			<h3><a href="/5-advanced/data-structure-dp">7. Data Structure Optimized DP</a></h3>
+			<p>Using advanced data structures to optimize dynamic programming solutions</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">DP Optimization</span>
+					<span class="topic">Segment Tree DP</span>
+					<span class="topic">Convex Hull Trick</span>
+				</div>
+			</div>
+		</div>
+	</div>
+</Layout>
+
+<style>
+	.section-description {
+		font-size: 1.1rem;
+		color: #6b7280;
+		margin-bottom: 2rem;
+		text-align: center;
+	}
+
+	.lesson-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+		gap: 2rem;
+		margin-top: 2rem;
+	}
+	
+	.lesson-card {
+		background: white;
+		border: 1px solid #e2e8f0;
+		border-radius: 12px;
+		padding: 0;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		overflow: hidden;
+		position: relative;
+	}
+	
+	.lesson-card:hover {
+		box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+		transform: translateY(-4px);
+		border-color: #4f46e5;
+	}
+
+	.lesson-card:hover .lesson-icon {
+		transform: scale(1.2) rotate(5deg);
+	}
+
+	.card-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 1.5rem 1.5rem 1rem 1.5rem;
+		background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+		border-bottom: 1px solid #e2e8f0;
+	}
+
+	.lesson-icon {
+		font-size: 2rem;
+		transition: all 0.3s ease;
+	}
+
+	.lesson-meta {
+		display: flex;
+		gap: 0.75rem;
+		align-items: center;
+	}
+
+	.difficulty {
+		padding: 0.25rem 0.75rem;
+		border-radius: 20px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	.difficulty.expert {
+		background: #f3e8ff;
+		color: #6b21a8;
+	}
+
+	.duration {
+		background: #e0e7ff;
+		color: #3730a3;
+		padding: 0.25rem 0.75rem;
+		border-radius: 20px;
+		font-size: 0.75rem;
+		font-weight: 500;
+	}
+
+	.lesson-card h3 {
+		margin: 0 0 0.75rem 0;
+		font-size: 1.25rem;
+		padding: 0 1.5rem;
+	}
+	
+	.lesson-card h3 a {
+		color: #1e293b;
+		text-decoration: none;
+		font-weight: 600;
+		transition: color 0.3s ease;
+	}
+	
+	.lesson-card:hover h3 a {
+		color: #4f46e5;
+	}
+	
+	.lesson-card p {
+		margin: 0 0 1.5rem 0;
+		color: #6b7280;
+		font-size: 0.9rem;
+		line-height: 1.6;
+		padding: 0 1.5rem;
+	}
+
+	.card-footer {
+		padding: 1rem 1.5rem 1.5rem 1.5rem;
+		background: #fafbfc;
+		border-top: 1px solid #f1f5f9;
+	}
+
+	.topics {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.topic {
+		background: white;
+		border: 1px solid #e2e8f0;
+		color: #64748b;
+		padding: 0.375rem 0.75rem;
+		border-radius: 6px;
+		font-size: 0.8rem;
+		font-weight: 500;
+		transition: all 0.2s ease;
+	}
+
+	.lesson-card:hover .topic {
+		border-color: #c7d2fe;
+		background: #f0f4ff;
+		color: #4338ca;
+	}
+
+	/* Progress indicator */
+	.lesson-card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 3px;
+		background: linear-gradient(90deg, #4f46e5, #7c3aed);
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform 0.3s ease;
+	}
+
+	.lesson-card:hover::before {
+		transform: scaleX(1);
+	}
+
+	@media (max-width: 768px) {
+		.lesson-grid {
+			grid-template-columns: 1fr;
+			gap: 1.5rem;
+		}
+
+		.lesson-meta {
+			flex-direction: column;
+			gap: 0.5rem;
+		}
+	}
+</style>

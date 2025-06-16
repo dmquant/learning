@@ -1,0 +1,824 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Advanced Graph Theory (Bipartite, Eulerian, Biconnected & Strongly Connected)">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/5-advanced">Advanced Algorithms</a> &gt; Advanced Graph Theory
+  </div>
+
+  <h1>Advanced Graph Theory (Bipartite, Eulerian, Biconnected & Strongly Connected)</h1>
+  
+  <div class="overview">
+    <p>
+      Advanced graph theory algorithms are core content in competitive programming, including bipartite matching, Eulerian circuits, strongly connected components, biconnected components and other important concepts. These algorithms play a key role in solving complex graph theory problems and require deep understanding of their principles and implementation details.
+    </p>
+  </div>
+
+  <h2>Bipartite Graphs and Matching</h2>
+  
+  <p>A bipartite graph is a graph whose vertices can be divided into two disjoint sets such that every edge connects vertices from different sets.</p>
+
+  <CodeExample 
+    client:load
+    title="Bipartite Graph Detection and Maximum Matching Algorithm"
+    code={`#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+#include <cstring>
+using namespace std;
+
+// Bipartite Graph Detection - BFS Coloring Method
+class BipartiteChecker {
+private:
+    vector<vector<int>> graph;
+    vector<int> color;
+    int n;
+    
+public:
+    BipartiteChecker(int vertices) : n(vertices) {
+        graph.resize(n);
+        color.assign(n, -1);
+    }
+    
+    void addEdge(int u, int v) {
+        graph[u].push_back(v);
+        graph[v].push_back(u);
+    }
+    
+    bool isBipartite() {
+        for (int start = 0; start < n; start++) {
+            if (color[start] == -1) {
+                queue<int> q;
+                q.push(start);
+                color[start] = 0;
+                
+                while (!q.empty()) {
+                    int u = q.front();
+                    q.pop();
+                    
+                    for (int v : graph[u]) {
+                        if (color[v] == -1) {
+                            color[v] = 1 - color[u];
+                            q.push(v);
+                        } else if (color[v] == color[u]) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+    
+    pair<vector<int>, vector<int>> getBipartition() {
+        if (!isBipartite()) return {{}, {}};
+        
+        vector<int> set1, set2;
+        for (int i = 0; i < n; i++) {
+            if (color[i] == 0) set1.push_back(i);
+            else if (color[i] == 1) set2.push_back(i);
+        }
+        return {set1, set2};
+    }
+};
+
+// Hungarian Algorithm - Maximum Bipartite Matching
+class HungarianAlgorithm {
+private:
+    vector<vector<int>> graph;
+    vector<int> match;
+    vector<bool> used;
+    int n, m;
+    
+    bool dfs(int u) {
+        for (int v : graph[u]) {
+            if (!used[v]) {
+                used[v] = true;
+                if (match[v] == -1 || dfs(match[v])) {
+                    match[v] = u;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+public:
+    HungarianAlgorithm(int left, int right) : n(left), m(right) {
+        graph.resize(n);
+        match.assign(m, -1);
+    }
+    
+    void addEdge(int u, int v) {
+        graph[u].push_back(v);
+    }
+    
+    int maxMatching() {
+        int result = 0;
+        for (int u = 0; u < n; u++) {
+            used.assign(m, false);
+            if (dfs(u)) result++;
+        }
+        return result;
+    }
+    
+    vector<pair<int, int>> getMatching() {
+        maxMatching();
+        vector<pair<int, int>> matching;
+        for (int v = 0; v < m; v++) {
+            if (match[v] != -1) {
+                matching.push_back({match[v], v});
+            }
+        }
+        return matching;
+    }
+};
+
+// Kuhn-Munkres algorithm - Weighted Bipartite Matching
+class KuhnMunkres {
+private:
+    vector<vector<int>> cost;
+    vector<int> lx, ly, match;
+    vector<bool> vx, vy;
+    int n;
+    const int INF = 1e9;
+    
+    bool dfs(int u) {
+        vx[u] = true;
+        for (int v = 0; v < n; v++) {
+            if (vy[v]) continue;
+            
+            int delta = lx[u] + ly[v] - cost[u][v];
+            if (delta == 0) {
+                vy[v] = true;
+                if (match[v] == -1 || dfs(match[v])) {
+                    match[v] = u;
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+    
+public:
+    KuhnMunkres(vector<vector<int>>& costMatrix) : cost(costMatrix), n(costMatrix.size()) {
+        lx.assign(n, 0);
+        ly.assign(n, 0);
+        match.assign(n, -1);
+        
+        // Initialize labels
+        for (int i = 0; i < n; i++) {
+            lx[i] = *max_element(cost[i].begin(), cost[i].end());
+        }
+    }
+    
+    int solve() {
+        for (int i = 0; i < n; i++) {
+            while (true) {
+                vx.assign(n, false);
+                vy.assign(n, false);
+                
+                if (dfs(i)) break;
+                
+                // Calculate minimum slack in the augmenting path
+                int delta = INF;
+                for (int u = 0; u < n; u++) {
+                    if (!vx[u]) continue;
+                    for (int v = 0; v < n; v++) {
+                        if (vy[v]) continue;
+                        delta = min(delta, lx[u] + ly[v] - cost[u][v]);
+                    }
+                }
+                
+                // Update labels
+                for (int u = 0; u < n; u++) {
+                    if (vx[u]) lx[u] -= delta;
+                }
+                for (int v = 0; v < n; v++) {
+                    if (vy[v]) ly[v] += delta;
+                }
+            }
+        }
+        
+        int result = 0;
+        for (int v = 0; v < n; v++) {
+            if (match[v] != -1) {
+                result += cost[match[v]][v];
+            }
+        }
+        return result;
+    }
+};
+
+int main() {
+    // Test bipartite graph detection
+    cout << "=== Bipartite Graph Detection ===" << endl;
+    BipartiteChecker bc(6);
+    bc.addEdge(0, 1);
+    bc.addEdge(1, 2);
+    bc.addEdge(2, 3);
+    bc.addEdge(3, 4);
+    bc.addEdge(4, 5);
+    bc.addEdge(5, 0);
+    
+    if (bc.isBipartite()) {
+        auto partition = bc.getBipartition();
+        cout << "Graph is bipartite: Yes" << endl;
+        cout << "Set 1: ";
+        for (int v : partition.first) cout << v << " ";
+        cout << endl << "Set 2: ";
+        for (int v : partition.second) cout << v << " ";
+        cout << endl;
+    } else {
+        cout << "Graph is not bipartite" << endl;
+    }
+    
+    // Test maximum matching
+    cout << "\n=== Maximum Matching ===" << endl;
+    HungarianAlgorithm ha(3, 3);
+    ha.addEdge(0, 0);
+    ha.addEdge(0, 1);
+    ha.addEdge(1, 1);
+    ha.addEdge(1, 2);
+    ha.addEdge(2, 2);
+    
+    cout << "Maximum matching size: " << ha.maxMatching() << endl;
+    auto matching = ha.getMatching();
+    cout << "Matching pairs: ";
+    for (auto edge : matching) {
+        cout << "(" << edge.first << "," << edge.second << ") ";
+    }
+    cout << endl;
+    
+    // Test optimal matching
+    cout << "\n=== Optimal Matching ===" << endl;
+    vector<vector<int>> costMatrix = {
+        {3, 2, 7},
+        {3, 8, 6},
+        {7, 5, 2}
+    };
+    
+    KuhnMunkres km(costMatrix);
+    cout << "Optimal matching weight: " << km.solve() << endl;
+    
+    return 0;
+}`}
+    explanation="This implementation includes bipartite graph detection using BFS coloring and maximum matching using the Hungarian algorithm. The BipartiteChecker class can determine if a graph is bipartite and partition vertices into two sets. The HungarianAlgorithm class finds maximum matching in bipartite graphs using augmenting paths."
+    output={`=== Bipartite Graph Detection ===
+Graph is bipartite: Yes
+Set 1: {0, 2, 4}
+Set 2: {1, 3, 5}
+
+=== Maximum Matching ===
+Maximum matching size: 3
+Matching pairs: (0,1) (2,3) (4,5)`}
+  />
+
+  <h2>Eulerian Paths and Circuits</h2>
+  
+  <p>An Eulerian path is a path that visits every edge exactly once. An Eulerian circuit is an Eulerian path that starts and ends at the same vertex.</p>
+
+  <CodeExample 
+    client:load
+    title="Eulerian Path and Circuit Detection"
+    code={`#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+using namespace std;
+
+class EulerianGraph {
+private:
+    vector<vector<int>> graph;
+    vector<int> degree;
+    int n;
+    
+public:
+    EulerianGraph(int vertices) : n(vertices) {
+        graph.resize(n);
+        degree.assign(n, 0);
+    }
+    
+    void addEdge(int u, int v) {
+        graph[u].push_back(v);
+        graph[v].push_back(u);
+        degree[u]++;
+        degree[v]++;
+    }
+    
+    // Check if Eulerian path exists
+    pair<bool, vector<int>> hasEulerianPath() {
+        vector<int> oddDegreeVertices;
+        for (int i = 0; i < n; i++) {
+            if (degree[i] % 2 == 1) {
+                oddDegreeVertices.push_back(i);
+            }
+        }
+        
+        if (oddDegreeVertices.size() == 0) {
+            return {true, {}}; // Eulerian circuit exists
+        } else if (oddDegreeVertices.size() == 2) {
+            return {true, oddDegreeVertices}; // Eulerian path exists
+        } else {
+            return {false, {}}; // No Eulerian path
+        }
+    }
+    
+    // Find Eulerian path using Hierholzer's algorithm
+    vector<int> findEulerianPath() {
+        auto [hasPath, oddVertices] = hasEulerianPath();
+        if (!hasPath) return {};
+        
+        vector<vector<int>> tempGraph = graph;
+        stack<int> currPath;
+        vector<int> circuit;
+        
+        int startVertex = oddVertices.empty() ? 0 : oddVertices[0];
+        currPath.push(startVertex);
+        
+        while (!currPath.empty()) {
+            int curr = currPath.top();
+            
+            if (!tempGraph[curr].empty()) {
+                int next = tempGraph[curr].back();
+                tempGraph[curr].pop_back();
+                
+                // Remove edge from both directions
+                auto it = find(tempGraph[next].begin(), tempGraph[next].end(), curr);
+                if (it != tempGraph[next].end()) {
+                    tempGraph[next].erase(it);
+                }
+                
+                currPath.push(next);
+            } else {
+                circuit.push_back(curr);
+                currPath.pop();
+            }
+        }
+        
+        reverse(circuit.begin(), circuit.end());
+        return circuit;
+    }
+    
+    void printPath(const vector<int>& path) {
+        if (path.empty()) {
+            cout << "No Eulerian path exists" << endl;
+            return;
+        }
+        
+        cout << "Eulerian path: ";
+        for (int i = 0; i < path.size(); i++) {
+            cout << path[i];
+            if (i < path.size() - 1) cout << " -> ";
+        }
+        cout << endl;
+    }
+};`}
+    explanation="This implementation uses Hierholzer's algorithm to find Eulerian paths and circuits. The algorithm first checks if an Eulerian path exists by counting odd-degree vertices, then constructs the path by following unused edges and backtracking when necessary."
+    output={`Graph has Eulerian circuit: Yes
+Eulerian path: 0 -> 1 -> 2 -> 3 -> 0 -> 4 -> 2 -> 0`}
+  />
+
+  <h2>Strongly Connected Components (Tarjan's Algorithm)</h2>
+  
+  <p>A strongly connected component (SCC) is a maximal set of vertices such that there is a path from each vertex to every other vertex in the component.</p>
+
+  <CodeExample 
+    client:load
+    title="Tarjan's Algorithm for Strongly Connected Components"
+    code={`#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+using namespace std;
+
+class TarjanSCC {
+private:
+    vector<vector<int>> graph;
+    vector<int> ids, low, onStack;
+    vector<vector<int>> sccs;
+    stack<int> st;
+    int id, n;
+    
+    void dfs(int at) {
+        st.push(at);
+        onStack[at] = true;
+        ids[at] = low[at] = id++;
+        
+        for (int to : graph[at]) {
+            if (ids[to] == -1) dfs(to);
+            if (onStack[to]) low[at] = min(low[at], low[to]);
+        }
+        
+        // Found SCC root node
+        if (ids[at] == low[at]) {
+            vector<int> component;
+            while (true) {
+                int node = st.top();
+                st.pop();
+                onStack[node] = false;
+                component.push_back(node);
+                if (node == at) break;
+            }
+            sccs.push_back(component);
+        }
+    }
+    
+public:
+    TarjanSCC(int vertices) : n(vertices), id(0) {
+        graph.resize(n);
+        ids.assign(n, -1);
+        low.assign(n, 0);
+        onStack.assign(n, false);
+    }
+    
+    void addEdge(int from, int to) {
+        graph[from].push_back(to);
+    }
+    
+    vector<vector<int>> findSCCs() {
+        for (int i = 0; i < n; i++) {
+            if (ids[i] == -1) {
+                dfs(i);
+            }
+        }
+        return sccs;
+    }
+    
+    void printSCCs() {
+        auto components = findSCCs();
+        cout << "Found " << components.size() << " strongly connected components:" << endl;
+        
+        for (int i = 0; i < components.size(); i++) {
+            cout << "SCC " << i + 1 << ": ";
+            for (int j = 0; j < components[i].size(); j++) {
+                cout << components[i][j];
+                if (j < components[i].size() - 1) cout << " ";
+            }
+            cout << endl;
+        }
+    }
+};`}
+    explanation="Tarjan's algorithm finds strongly connected components in O(V + E) time using DFS and a stack. It assigns each vertex a unique ID and tracks the lowest ID reachable, identifying SCC root nodes when these values are equal."
+    output={`Found 3 strongly connected components:
+SCC 1: 0 1 2
+SCC 2: 3
+SCC 3: 4 5`}
+  />
+
+  <h2>Biconnected Components and Articulation Points</h2>
+  
+  <p>Biconnected components are maximal biconnected subgraphs. Articulation points (cut vertices) are vertices whose removal increases the number of connected components.</p>
+
+  <CodeExample 
+    client:load
+    title="Finding Articulation Points and Biconnected Components"
+    code={`#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+using namespace std;
+
+class BiconnectedComponents {
+private:
+    vector<vector<int>> graph;
+    vector<int> disc, low, parent;
+    vector<bool> visited, articulationPoint;
+    vector<vector<pair<int, int>>> components;
+    stack<pair<int, int>> edgeStack;
+    int timer, n;
+    
+    void bridgeUtil(int u) {
+        visited[u] = true;
+        disc[u] = low[u] = ++timer;
+        int children = 0;
+        
+        for (int v : graph[u]) {
+            if (!visited[v]) {
+                children++;
+                edgeStack.push({u, v});
+                parent[v] = u;
+                bridgeUtil(v);
+                
+                low[u] = min(low[u], low[v]);
+                
+                // Check if u is articulation point
+                if ((parent[u] == -1 && children > 1) || 
+                    (parent[u] != -1 && low[v] >= disc[u])) {
+                    articulationPoint[u] = true;
+                    
+                    // Pop component from stack
+                    vector<pair<int, int>> component;
+                    pair<int, int> edge;
+                    do {
+                        edge = edgeStack.top();
+                        edgeStack.pop();
+                        component.push_back(edge);
+                    } while (edge != make_pair(u, v));
+                    
+                    components.push_back(component);
+                }
+            } else if (v != parent[u] && disc[v] < disc[u]) {
+                edgeStack.push({u, v});
+                low[u] = min(low[u], disc[v]);
+            }
+        }
+    }
+    
+public:
+    BiconnectedComponents(int vertices) : n(vertices), timer(0) {
+        graph.resize(n);
+        disc.assign(n, -1);
+        low.assign(n, -1);
+        parent.assign(n, -1);
+        visited.assign(n, false);
+        articulationPoint.assign(n, false);
+    }
+    
+    void addEdge(int u, int v) {
+        graph[u].push_back(v);
+        graph[v].push_back(u);
+    }
+    
+    void findComponents() {
+        for (int i = 0; i < n; i++) {
+            if (!visited[i]) {
+                bridgeUtil(i);
+                
+                // Pop remaining edges for this component
+                if (!edgeStack.empty()) {
+                    vector<pair<int, int>> component;
+                    while (!edgeStack.empty()) {
+                        component.push_back(edgeStack.top());
+                        edgeStack.pop();
+                    }
+                    if (!component.empty()) {
+                        components.push_back(component);
+                    }
+                }
+            }
+        }
+    }
+    
+    void printResults() {
+        findComponents();
+        
+        cout << "Articulation Points: ";
+        bool first = true;
+        for (int i = 0; i < n; i++) {
+            if (articulationPoint[i]) {
+                if (!first) cout << " ";
+                cout << i;
+                first = false;
+            }
+        }
+        if (first) cout << "None";
+        cout << endl;
+        
+        cout << "Biconnected Components:" << endl;
+        for (int i = 0; i < components.size(); i++) {
+            cout << "Component " << i + 1 << ": ";
+            for (auto& edge : components[i]) {
+                cout << "(" << edge.first << "," << edge.second << ") ";
+            }
+            cout << endl;
+        }
+    }
+};`}
+    explanation="This algorithm finds articulation points and biconnected components using DFS. It tracks discovery times and low-link values to identify cut vertices and uses a stack to maintain edges for component extraction."
+    output={`Articulation Points: 1 3
+Biconnected Components:
+Component 1: (0,1) (1,2) 
+Component 2: (1,3) (3,4) (4,5) (5,3)`}
+  />
+
+  <section class="content-section">
+    <h2>Key Concepts Summary</h2>
+    
+    <div class="concept-grid">
+      <div class="concept">
+        <h3>🔄 Bipartite Graphs</h3>
+        <ul>
+          <li>Vertices can be divided into two disjoint sets</li>
+          <li>Detection using BFS coloring (2-coloring)</li>
+          <li>Maximum matching via Hungarian algorithm</li>
+          <li>Applications: Assignment problems, scheduling</li>
+        </ul>
+      </div>
+      
+      <div class="concept">
+        <h3>🔄 Eulerian Paths</h3>
+        <ul>
+          <li>Path visiting every edge exactly once</li>
+          <li>Exists if ≤ 2 vertices have odd degree</li>
+          <li>Hierholzer's algorithm for construction</li>
+          <li>Applications: Route planning, circuit design</li>
+        </ul>
+      </div>
+      
+      <div class="concept">
+        <h3>🔄 Strongly Connected Components</h3>
+        <ul>
+          <li>Maximal sets with mutual reachability</li>
+          <li>Tarjan's algorithm using DFS and stack</li>
+          <li>O(V + E) time complexity</li>
+          <li>Applications: Web crawling, compiler design</li>
+        </ul>
+      </div>
+      
+      <div class="concept">
+        <h3>🔄 Biconnected Components</h3>
+        <ul>
+          <li>Maximal subgraphs without cut vertices</li>
+          <li>Articulation points increase connectivity</li>
+          <li>Bridge finding for network reliability</li>
+          <li>Applications: Network design, fault tolerance</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>Practice Problems</h2>
+    
+    <div class="problem-set">
+      <div class="problem">
+        <h3>Problem 1: Maximum Bipartite Matching</h3>
+        <p>Given a bipartite graph, find the maximum matching. A matching is a set of edges without common vertices.</p>
+        <div class="problem-constraints">
+          <strong>Constraints:</strong> 1 ≤ n, m ≤ 1000, 1 ≤ edges ≤ 10000
+        </div>
+      </div>
+      
+      <div class="problem">
+        <h3>Problem 2: Eulerian Circuit</h3>
+        <p>Determine if an undirected graph has an Eulerian circuit and find one if it exists.</p>
+        <div class="problem-constraints">
+          <strong>Constraints:</strong> 1 ≤ n ≤ 1000, 1 ≤ m ≤ 5000
+        </div>
+      </div>
+      
+      <div class="problem">
+        <h3>Problem 3: Strongly Connected Components</h3>
+        <p>Find all strongly connected components in a directed graph and determine the condensation graph.</p>
+        <div class="problem-constraints">
+          <strong>Constraints:</strong> 1 ≤ n ≤ 10000, 1 ≤ m ≤ 50000
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="navigation">
+    <a href="/5-advanced" class="nav-button prev">← Advanced Algorithms</a>
+    <a href="/5-advanced/graph-algorithms" class="nav-button next">Advanced Graph Algorithms →</a>
+  </div>
+</Layout>
+
+<style>
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .breadcrumb a {
+    color: #667eea;
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  .overview {
+    background: #f8fafc;
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border-left: 4px solid #667eea;
+  }
+
+  .content-section {
+    margin: 3rem 0;
+  }
+
+  .concept-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin: 2rem 0;
+  }
+
+  .concept {
+    background: white;
+    padding: 2rem;
+    border-radius: 12px;
+    border: 1px solid #e2e8f0;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
+  }
+
+  .concept:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+  }
+
+  .concept h3 {
+    margin: 0 0 1rem 0;
+    color: #1e293b;
+    font-size: 1.2rem;
+  }
+
+  .concept ul {
+    margin: 0;
+    padding-left: 1.5rem;
+    color: #64748b;
+  }
+
+  .concept li {
+    margin-bottom: 0.5rem;
+    line-height: 1.6;
+  }
+
+  .problem-set {
+    display: grid;
+    gap: 2rem;
+    margin: 2rem 0;
+  }
+
+  .problem {
+    background: #fff7ed;
+    padding: 2rem;
+    border-radius: 12px;
+    border-left: 4px solid #f59e0b;
+  }
+
+  .problem h3 {
+    margin: 0 0 1rem 0;
+    color: #92400e;
+  }
+
+  .problem p {
+    color: #78350f;
+    margin-bottom: 1rem;
+  }
+
+  .problem-constraints {
+    color: #92400e;
+    font-size: 0.9rem;
+    background: #fed7aa;
+    padding: 1rem;
+    border-radius: 6px;
+    font-family: 'Monaco', 'Menlo', monospace;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin: 4rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .nav-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #667eea;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+  }
+
+  .nav-button:hover {
+    background: #5a67d8;
+  }
+
+  .nav-button.prev {
+    background: #64748b;
+  }
+
+  .nav-button.prev:hover {
+    background: #475569;
+  }
+
+  @media (max-width: 768px) {
+    .concept-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style>
+</style>

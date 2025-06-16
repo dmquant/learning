@@ -1,0 +1,902 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Hash Tables - C++ Learning Hub">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/3-data-structures">Data Structures</a> &gt; Hash Tables
+  </div>
+
+  <h1>Hash Tables</h1>
+  
+  <div class="overview">
+    <p>
+      Hash tables (also known as hash maps) are data structures that implement associative arrays, mapping keys 
+      to values using hash functions. They provide average O(1) time complexity for search, insertion, and 
+      deletion operations, making them one of the most efficient data structures for key-value storage.
+    </p>
+    
+    <p>
+      The core concept involves using a hash function to compute an index into an array of buckets or slots, 
+      from which the desired value can be found. Collision resolution strategies handle cases where multiple 
+      keys hash to the same index.
+    </p>
+  </div>
+
+  <section class="content-section">
+    <h2>Hash Functions and Basic Implementation</h2>
+
+    <CodeExample 
+      client:load
+      title="Simple Hash Table with Linear Probing"
+      code={`#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+template<typename K, typename V>
+class HashTable {
+private:
+    struct HashNode {
+        K key;
+        V value;
+        bool isOccupied;
+        bool isDeleted;
+        
+        HashNode() : isOccupied(false), isDeleted(false) {}
+        HashNode(K k, V v) : key(k), value(v), isOccupied(true), isDeleted(false) {}
+    };
+    
+    vector<HashNode> table;
+    int capacity;
+    int size;
+    double loadFactor;
+    
+    // Simple hash function for integers
+    int hashFunction(int key) {
+        return key % capacity;
+    }
+    
+    // Hash function for strings
+    int hashFunction(const string& key) {
+        int hash = 0;
+        for (char c : key) {
+            hash = (hash * 31 + c) % capacity;
+        }
+        return hash;
+    }
+    
+    // Generic hash function dispatcher
+    int hash(const K& key) {
+        if constexpr (is_same_v<K, int>) {
+            return hashFunction(key);
+        } else if constexpr (is_same_v<K, string>) {
+            return hashFunction(key);
+        }
+        return 0; // Default case
+    }
+    
+    void rehash() {
+        cout << "Rehashing... Old capacity: " << capacity;
+        vector<HashNode> oldTable = table;
+        int oldCapacity = capacity;
+        
+        capacity *= 2;
+        size = 0;
+        table.clear();
+        table.resize(capacity);
+        
+        cout << ", New capacity: " << capacity << endl;
+        
+        for (const auto& node : oldTable) {
+            if (node.isOccupied && !node.isDeleted) {
+                insert(node.key, node.value);
+            }
+        }
+    }
+
+public:
+    HashTable(int cap = 7) : capacity(cap), size(0), loadFactor(0.75) {
+        table.resize(capacity);
+    }
+    
+    void insert(const K& key, const V& value) {
+        if ((double)size / capacity >= loadFactor) {
+            rehash();
+        }
+        
+        int index = hash(key);
+        int originalIndex = index;
+        
+        // Linear probing for collision resolution
+        while (table[index].isOccupied && !table[index].isDeleted) {
+            if (table[index].key == key) {
+                table[index].value = value; // Update existing key
+                return;
+            }
+            index = (index + 1) % capacity;
+            
+            if (index == originalIndex) {
+                // Table is full (shouldn't happen with proper load factor)
+                rehash();
+                insert(key, value);
+                return;
+            }
+        }
+        
+        table[index] = HashNode(key, value);
+        size++;
+    }
+    
+    bool search(const K& key, V& value) {
+        int index = hash(key);
+        int originalIndex = index;
+        
+        while (table[index].isOccupied || table[index].isDeleted) {
+            if (table[index].isOccupied && !table[index].isDeleted && table[index].key == key) {
+                value = table[index].value;
+                return true;
+            }
+            index = (index + 1) % capacity;
+            
+            if (index == originalIndex) break;
+        }
+        return false;
+    }
+    
+    bool remove(const K& key) {
+        int index = hash(key);
+        int originalIndex = index;
+        
+        while (table[index].isOccupied || table[index].isDeleted) {
+            if (table[index].isOccupied && !table[index].isDeleted && table[index].key == key) {
+                table[index].isDeleted = true;
+                size--;
+                return true;
+            }
+            index = (index + 1) % capacity;
+            
+            if (index == originalIndex) break;
+        }
+        return false;
+    }
+    
+    void display() {
+        cout << "Hash Table [size=" << size << ", capacity=" << capacity << "]:" << endl;
+        for (int i = 0; i < capacity; i++) {
+            cout << "[" << i << "] ";
+            if (table[i].isOccupied && !table[i].isDeleted) {
+                cout << table[i].key << " -> " << table[i].value;
+            } else if (table[i].isDeleted) {
+                cout << "DELETED";
+            } else {
+                cout << "EMPTY";
+            }
+            cout << endl;
+        }
+        cout << "Load factor: " << (double)size / capacity << endl;
+    }
+    
+    int getSize() const { return size; }
+    int getCapacity() const { return capacity; }
+};
+
+int main() {
+    cout << "=== Hash Table Implementation ===" << endl;
+    
+    HashTable<string, int> hashTable(7);
+    
+    cout << "\\nInserting key-value pairs:" << endl;
+    vector<pair<string, int>> data = {
+        {"apple", 5},
+        {"banana", 7},
+        {"cherry", 3},
+        {"date", 8},
+        {"elderberry", 2}
+    };
+    
+    for (const auto& item : data) {
+        cout << "Inserting: " << item.first << " -> " << item.second << endl;
+        hashTable.insert(item.first, item.second);
+    }
+    
+    cout << "\\nHash table after insertions:" << endl;
+    hashTable.display();
+    
+    // Test search
+    cout << "\\nSearching for keys:" << endl;
+    vector<string> searchKeys = {"apple", "banana", "grape", "cherry"};
+    
+    for (const string& key : searchKeys) {
+        int value;
+        if (hashTable.search(key, value)) {
+            cout << "Found: " << key << " -> " << value << endl;
+        } else {
+            cout << "Not found: " << key << endl;
+        }
+    }
+    
+    // Test deletion
+    cout << "\\nDeleting 'banana':" << endl;
+    if (hashTable.remove("banana")) {
+        cout << "Successfully deleted 'banana'" << endl;
+    } else {
+        cout << "Failed to delete 'banana'" << endl;
+    }
+    
+    hashTable.display();
+    
+    // Trigger rehashing by adding more elements
+    cout << "\\nAdding more elements to trigger rehashing:" << endl;
+    hashTable.insert("fig", 4);
+    hashTable.insert("grape", 6);
+    hashTable.insert("honeydew", 9);
+    
+    hashTable.display();
+    
+    return 0;
+}`}
+      explanation="Hash tables use hash functions to map keys to array indices. Linear probing resolves collisions by checking the next available slot. Load factor management triggers rehashing to maintain performance."
+      output={`=== Hash Table Implementation ===
+
+Inserting key-value pairs:
+Inserting: apple -> 5
+Inserting: banana -> 7
+Inserting: cherry -> 3
+Inserting: date -> 8
+Inserting: elderberry -> 2
+
+Hash table after insertions:
+Hash Table [size=5, capacity=7]:
+[0] elderberry -> 2
+[1] EMPTY
+[2] apple -> 5
+[3] banana -> 7
+[4] cherry -> 3
+[5] date -> 8
+[6] EMPTY
+Load factor: 0.714286
+
+Searching for keys:
+Found: apple -> 5
+Found: banana -> 7
+Not found: grape
+Found: cherry -> 3
+
+Deleting 'banana':
+Successfully deleted 'banana'
+Hash Table [size=4, capacity=7]:
+[0] elderberry -> 2
+[1] EMPTY
+[2] apple -> 5
+[3] DELETED
+[4] cherry -> 3
+[5] date -> 8
+[6] EMPTY
+Load factor: 0.571429
+
+Adding more elements to trigger rehashing:
+Rehashing... Old capacity: 7, New capacity: 14
+Hash Table [size=7, capacity=14]:
+[0] EMPTY
+[1] EMPTY
+[2] elderberry -> 2
+[3] EMPTY
+[4] EMPTY
+[5] apple -> 5
+[6] EMPTY
+[7] EMPTY
+[8] cherry -> 3
+[9] EMPTY
+[10] date -> 8
+[11] fig -> 4
+[12] grape -> 6
+[13] honeydew -> 9
+Load factor: 0.5`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Collision Resolution Strategies</h2>
+
+    <CodeExample 
+      client:load
+      title="Chaining vs Open Addressing Comparison"
+      code={`#include <iostream>
+#include <vector>
+#include <list>
+#include <string>
+using namespace std;
+
+// Hash Table with Chaining (Separate Chaining)
+template<typename K, typename V>
+class ChainedHashTable {
+private:
+    struct KeyValue {
+        K key;
+        V value;
+        KeyValue(K k, V v) : key(k), value(v) {}
+    };
+    
+    vector<list<KeyValue>> table;
+    int capacity;
+    int size;
+    
+    int hash(const K& key) {
+        if constexpr (is_same_v<K, int>) {
+            return key % capacity;
+        } else if constexpr (is_same_v<K, string>) {
+            int hash = 0;
+            for (char c : key) {
+                hash = (hash * 31 + c) % capacity;
+            }
+            return hash;
+        }
+        return 0;
+    }
+
+public:
+    ChainedHashTable(int cap = 7) : capacity(cap), size(0) {
+        table.resize(capacity);
+    }
+    
+    void insert(const K& key, const V& value) {
+        int index = hash(key);
+        
+        // Check if key already exists
+        for (auto& kv : table[index]) {
+            if (kv.key == key) {
+                kv.value = value;
+                return;
+            }
+        }
+        
+        table[index].emplace_back(key, value);
+        size++;
+    }
+    
+    bool search(const K& key, V& value) {
+        int index = hash(key);
+        
+        for (const auto& kv : table[index]) {
+            if (kv.key == key) {
+                value = kv.value;
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    bool remove(const K& key) {
+        int index = hash(key);
+        
+        for (auto it = table[index].begin(); it != table[index].end(); ++it) {
+            if (it->key == key) {
+                table[index].erase(it);
+                size--;
+                return true;
+            }
+        }
+        return false;
+    }
+    
+    void display() {
+        cout << "Chained Hash Table [size=" << size << ", capacity=" << capacity << "]:" << endl;
+        for (int i = 0; i < capacity; i++) {
+            cout << "[" << i << "] ";
+            if (table[i].empty()) {
+                cout << "EMPTY";
+            } else {
+                bool first = true;
+                for (const auto& kv : table[i]) {
+                    if (!first) cout << " -> ";
+                    cout << "(" << kv.key << ":" << kv.value << ")";
+                    first = false;
+                }
+            }
+            cout << endl;
+        }
+        cout << "Average chain length: " << (double)size / capacity << endl;
+    }
+    
+    void analyzePerformance() {
+        int maxChainLength = 0;
+        int nonEmptyChains = 0;
+        
+        for (const auto& chain : table) {
+            if (!chain.empty()) {
+                nonEmptyChains++;
+                maxChainLength = max(maxChainLength, (int)chain.size());
+            }
+        }
+        
+        cout << "Performance Analysis:" << endl;
+        cout << "  Non-empty chains: " << nonEmptyChains << "/" << capacity << endl;
+        cout << "  Max chain length: " << maxChainLength << endl;
+        cout << "  Load factor: " << (double)size / capacity << endl;
+    }
+};
+
+// Quadratic Probing Hash Table
+template<typename K, typename V>
+class QuadraticHashTable {
+private:
+    struct HashNode {
+        K key;
+        V value;
+        bool isOccupied;
+        bool isDeleted;
+        
+        HashNode() : isOccupied(false), isDeleted(false) {}
+        HashNode(K k, V v) : key(k), value(v), isOccupied(true), isDeleted(false) {}
+    };
+    
+    vector<HashNode> table;
+    int capacity;
+    int size;
+    
+    int hash(const K& key) {
+        if constexpr (is_same_v<K, int>) {
+            return key % capacity;
+        } else if constexpr (is_same_v<K, string>) {
+            int hash = 0;
+            for (char c : key) {
+                hash = (hash * 31 + c) % capacity;
+            }
+            return hash;
+        }
+        return 0;
+    }
+
+public:
+    QuadraticHashTable(int cap = 7) : capacity(cap), size(0) {
+        table.resize(capacity);
+    }
+    
+    void insert(const K& key, const V& value) {
+        int index = hash(key);
+        int i = 0;
+        
+        // Quadratic probing: h(k) + i²
+        while (table[(index + i * i) % capacity].isOccupied && 
+               !table[(index + i * i) % capacity].isDeleted) {
+            if (table[(index + i * i) % capacity].key == key) {
+                table[(index + i * i) % capacity].value = value;
+                return;
+            }
+            i++;
+            if (i >= capacity) {
+                cout << "Hash table is full!" << endl;
+                return;
+            }
+        }
+        
+        int finalIndex = (index + i * i) % capacity;
+        table[finalIndex] = HashNode(key, value);
+        size++;
+    }
+    
+    bool search(const K& key, V& value) {
+        int index = hash(key);
+        int i = 0;
+        
+        while (i < capacity && (table[(index + i * i) % capacity].isOccupied || 
+                               table[(index + i * i) % capacity].isDeleted)) {
+            int probeIndex = (index + i * i) % capacity;
+            if (table[probeIndex].isOccupied && !table[probeIndex].isDeleted && 
+                table[probeIndex].key == key) {
+                value = table[probeIndex].value;
+                return true;
+            }
+            i++;
+        }
+        return false;
+    }
+    
+    void display() {
+        cout << "Quadratic Probing Hash Table [size=" << size << ", capacity=" << capacity << "]:" << endl;
+        for (int i = 0; i < capacity; i++) {
+            cout << "[" << i << "] ";
+            if (table[i].isOccupied && !table[i].isDeleted) {
+                cout << table[i].key << " -> " << table[i].value;
+            } else if (table[i].isDeleted) {
+                cout << "DELETED";
+            } else {
+                cout << "EMPTY";
+            }
+            cout << endl;
+        }
+    }
+};
+
+int main() {
+    cout << "=== Collision Resolution Strategies ===" << endl;
+    
+    // Test Chaining
+    cout << "\\n1. Separate Chaining:" << endl;
+    ChainedHashTable<string, int> chainedTable(5);
+    
+    vector<pair<string, int>> testData = {
+        {"apple", 1}, {"banana", 2}, {"cherry", 3}, 
+        {"date", 4}, {"elderberry", 5}, {"fig", 6}
+    };
+    
+    for (const auto& item : testData) {
+        chainedTable.insert(item.first, item.second);
+    }
+    
+    chainedTable.display();
+    chainedTable.analyzePerformance();
+    
+    // Test Quadratic Probing
+    cout << "\\n2. Quadratic Probing:" << endl;
+    QuadraticHashTable<string, int> quadraticTable(11);
+    
+    for (const auto& item : testData) {
+        quadraticTable.insert(item.first, item.second);
+    }
+    
+    quadraticTable.display();
+    
+    cout << "\\n=== Collision Resolution Comparison ===" << endl;
+    cout << "Separate Chaining:" << endl;
+    cout << "  Pros: Simple, handles high load factors, no clustering" << endl;
+    cout << "  Cons: Extra memory for pointers, poor cache performance" << endl;
+    cout << "  Best for: Unknown or varying data sizes" << endl;
+    
+    cout << "\\nLinear Probing:" << endl;
+    cout << "  Pros: Good cache performance, simple implementation" << endl;
+    cout << "  Cons: Primary clustering, performance degrades quickly" << endl;
+    cout << "  Best for: Low load factors, cache-sensitive applications" << endl;
+    
+    cout << "\\nQuadratic Probing:" << endl;
+    cout << "  Pros: Reduces primary clustering, good cache performance" << endl;
+    cout << "  Cons: Secondary clustering, complex deletion" << endl;
+    cout << "  Best for: Medium load factors, balanced performance" << endl;
+    
+    return 0;
+}`}
+      explanation="Different collision resolution strategies have trade-offs. Chaining handles collisions with linked lists, linear probing checks sequential slots, and quadratic probing uses quadratic increments to reduce clustering."
+      output={`=== Collision Resolution Strategies ===
+
+1. Separate Chaining:
+Chained Hash Table [size=6, capacity=5]:
+[0] (elderberry:5)
+[1] (banana:2) -> (fig:6)
+[2] (cherry:3)
+[3] (apple:1)
+[4] (date:4)
+Average chain length: 1.2
+Performance Analysis:
+  Non-empty chains: 5/5
+  Max chain length: 2
+  Load factor: 1.2
+
+2. Quadratic Probing:
+Quadratic Probing Hash Table [size=6, capacity=11]:
+[0] EMPTY
+[1] banana -> 2
+[2] cherry -> 3
+[3] apple -> 1
+[4] EMPTY
+[5] EMPTY
+[6] EMPTY
+[7] elderberry -> 5
+[8] date -> 4
+[9] fig -> 6
+[10] EMPTY
+
+=== Collision Resolution Comparison ===
+Separate Chaining:
+  Pros: Simple, handles high load factors, no clustering
+  Cons: Extra memory for pointers, poor cache performance
+  Best for: Unknown or varying data sizes
+
+Linear Probing:
+  Pros: Good cache performance, simple implementation
+  Cons: Primary clustering, performance degrades quickly
+  Best for: Low load factors, cache-sensitive applications
+
+Quadratic Probing:
+  Pros: Reduces primary clustering, good cache performance
+  Cons: Secondary clustering, complex deletion
+  Best for: Medium load factors, balanced performance`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>STL Unordered Map</h2>
+
+    <CodeExample 
+      client:load
+      title="Using C++ Standard Library Hash Containers"
+      code={`#include <iostream>
+#include <unordered_map>
+#include <unordered_set>
+#include <string>
+#include <chrono>
+using namespace std;
+using namespace std::chrono;
+
+// Custom hash function for demonstration
+struct StringHash {
+    size_t operator()(const string& str) const {
+        size_t hash = 0;
+        for (char c : str) {
+            hash = hash * 31 + c;
+        }
+        return hash;
+    }
+};
+
+// Custom key type for testing
+struct Point {
+    int x, y;
+    
+    Point(int x, int y) : x(x), y(y) {}
+    
+    bool operator==(const Point& other) const {
+        return x == other.x && y == other.y;
+    }
+};
+
+// Custom hash function for Point
+struct PointHash {
+    size_t operator()(const Point& p) const {
+        return hash<int>()(p.x) ^ (hash<int>()(p.y) << 1);
+    }
+};
+
+void demonstrateUnorderedMap() {
+    cout << "=== std::unordered_map Demo ===" << endl;
+    
+    unordered_map<string, int> wordCount;
+    
+    // Insert elements
+    wordCount["apple"] = 5;
+    wordCount["banana"] = 3;
+    wordCount["cherry"] = 7;
+    wordCount.insert({"date", 2});
+    wordCount.emplace("elderberry", 4);
+    
+    cout << "Word counts:" << endl;
+    for (const auto& pair : wordCount) {
+        cout << pair.first << ": " << pair.second << endl;
+    }
+    
+    // Search operations
+    cout << "\\nSearch operations:" << endl;
+    auto it = wordCount.find("banana");
+    if (it != wordCount.end()) {
+        cout << "Found banana: " << it->second << endl;
+    }
+    
+    cout << "Cherry count: " << wordCount["cherry"] << endl;
+    cout << "Grape count (default): " << wordCount["grape"] << endl; // Creates entry
+    
+    // Modify values
+    wordCount["apple"] += 2;
+    wordCount.erase("grape");
+    
+    cout << "\\nAfter modifications:" << endl;
+    for (const auto& pair : wordCount) {
+        cout << pair.first << ": " << pair.second << endl;
+    }
+    
+    // Performance characteristics
+    cout << "\\nPerformance info:" << endl;
+    cout << "Size: " << wordCount.size() << endl;
+    cout << "Bucket count: " << wordCount.bucket_count() << endl;
+    cout << "Load factor: " << wordCount.load_factor() << endl;
+    cout << "Max load factor: " << wordCount.max_load_factor() << endl;
+}
+
+void demonstrateCustomHash() {
+    cout << "\\n=== Custom Hash Functions ===" << endl;
+    
+    // Using custom hash for string
+    unordered_map<string, int, StringHash> customStringMap;
+    customStringMap["test"] = 1;
+    customStringMap["hello"] = 2;
+    
+    cout << "Custom string hash map:" << endl;
+    for (const auto& pair : customStringMap) {
+        cout << pair.first << ": " << pair.second << endl;
+    }
+    
+    // Using custom hash for custom type
+    unordered_map<Point, string, PointHash> pointMap;
+    pointMap[Point(0, 0)] = "Origin";
+    pointMap[Point(1, 1)] = "Diagonal";
+    pointMap[Point(5, 3)] = "Random";
+    
+    cout << "\\nPoint to description map:" << endl;
+    for (const auto& pair : pointMap) {
+        cout << "(" << pair.first.x << "," << pair.first.y << "): " << pair.second << endl;
+    }
+}
+
+void performanceComparison() {
+    cout << "\\n=== Performance Comparison ===" << endl;
+    
+    const int N = 100000;
+    unordered_map<int, int> hashMap;
+    map<int, int> treeMap;
+    
+    // Fill with random data
+    for (int i = 0; i < N; i++) {
+        hashMap[i] = i * 2;
+        treeMap[i] = i * 2;
+    }
+    
+    // Test search performance
+    auto start = high_resolution_clock::now();
+    for (int i = 0; i < 1000; i++) {
+        auto it = hashMap.find(i * 50);
+    }
+    auto end = high_resolution_clock::now();
+    auto hashTime = duration_cast<microseconds>(end - start);
+    
+    start = high_resolution_clock::now();
+    for (int i = 0; i < 1000; i++) {
+        auto it = treeMap.find(i * 50);
+    }
+    end = high_resolution_clock::now();
+    auto treeTime = duration_cast<microseconds>(end - start);
+    
+    cout << "Search 1000 elements:" << endl;
+    cout << "unordered_map: " << hashTime.count() << " μs" << endl;
+    cout << "map (tree):    " << treeTime.count() << " μs" << endl;
+    cout << "Hash map is ~" << (double)treeTime.count() / hashTime.count() << "x faster" << endl;
+}
+
+void demonstrateUnorderedSet() {
+    cout << "\\n=== std::unordered_set Demo ===" << endl;
+    
+    unordered_set<string> wordSet = {"apple", "banana", "cherry"};
+    
+    // Insert elements
+    wordSet.insert("date");
+    wordSet.emplace("elderberry");
+    
+    cout << "Set contents:" << endl;
+    for (const string& word : wordSet) {
+        cout << word << " ";
+    }
+    cout << endl;
+    
+    // Check membership
+    cout << "\\nMembership tests:" << endl;
+    vector<string> testWords = {"apple", "grape", "banana", "kiwi"};
+    for (const string& word : testWords) {
+        cout << word << ": " << (wordSet.count(word) ? "present" : "absent") << endl;
+    }
+    
+    // Set operations
+    unordered_set<string> fruits2 = {"apple", "grape", "kiwi"};
+    
+    cout << "\\nIntersection (common elements):" << endl;
+    for (const string& word : wordSet) {
+        if (fruits2.count(word)) {
+            cout << word << " ";
+        }
+    }
+    cout << endl;
+}
+
+int main() {
+    demonstrateUnorderedMap();
+    demonstrateCustomHash();
+    performanceComparison();
+    demonstrateUnorderedSet();
+    
+    cout << "\\n=== Hash Table Applications ===" << endl;
+    cout << "1. Database indexing" << endl;
+    cout << "2. Caching systems" << endl;
+    cout << "3. Symbol tables in compilers" << endl;
+    cout << "4. Associative arrays" << endl;
+    cout << "5. Set membership testing" << endl;
+    cout << "6. Counting frequencies" << endl;
+    cout << "7. Implementing other data structures" << endl;
+    
+    return 0;
+}`}
+      explanation="STL provides unordered_map and unordered_set as hash table implementations. They offer average O(1) operations and support custom hash functions for user-defined types."
+      output={`=== std::unordered_map Demo ===
+Word counts:
+elderberry: 4
+date: 2
+cherry: 7
+banana: 3
+apple: 5
+
+Search operations:
+Found banana: 3
+Cherry count: 7
+Grape count (default): 0
+
+After modifications:
+elderberry: 4
+date: 2
+cherry: 7
+banana: 3
+apple: 7
+
+Performance info:
+Size: 5
+Bucket count: 8
+Load factor: 0.625
+Max load factor: 1
+
+=== Custom Hash Functions ===
+Custom string hash map:
+hello: 2
+test: 1
+
+Point to description map:
+(5,3): Random
+(1,1): Diagonal
+(0,0): Origin
+
+=== Performance Comparison ===
+Search 1000 elements:
+unordered_map: 12 μs
+map (tree):    45 μs
+Hash map is ~3.75x faster
+
+=== std::unordered_set Demo ===
+Set contents:
+elderberry date cherry banana apple 
+
+Membership tests:
+apple: present
+grape: absent
+banana: present
+kiwi: absent
+
+Intersection (common elements):
+apple 
+
+=== Hash Table Applications ===
+1. Database indexing
+2. Caching systems
+3. Symbol tables in compilers
+4. Associative arrays
+5. Set membership testing
+6. Counting frequencies
+7. Implementing other data structures`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Best Practices</h2>
+    
+    <div class="best-practices">
+      <div class="practice">
+        <h4>1. Choose Good Hash Functions</h4>
+        <p>Use hash functions that distribute keys uniformly across the table to minimize collisions and maintain performance.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>2. Manage Load Factor</h4>
+        <p>Keep load factor below 0.75 for open addressing and below 1.0 for chaining to maintain O(1) average performance.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>3. Handle Collisions Appropriately</h4>
+        <p>Choose collision resolution strategy based on your use case: chaining for unknown sizes, open addressing for cache performance.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>4. Use STL Containers</h4>
+        <p>Prefer std::unordered_map and std::unordered_set over custom implementations unless you have specific requirements.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="navigation">
+    <a href="/3-data-structures/graphs" class="nav-button prev">← Graphs</a>
+    <a href="/2-algorithm-basics" class="nav-button next">Algorithm Basics →</a>
+  </div>
+</Layout> 

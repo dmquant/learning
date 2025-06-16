@@ -1,0 +1,1377 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Linked Lists - C++ Learning Hub">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/3-data-structures">Data Structures</a> &gt; Linked Lists
+  </div>
+
+  <h1>Linked Lists</h1>
+  
+  <div class="overview">
+    <p>
+      Linked lists are linear data structures where elements (nodes) are stored in sequence, but unlike arrays, 
+      they are not stored in contiguous memory locations. Each node contains data and a pointer/reference to the next node, 
+      forming a chain-like structure.
+    </p>
+    
+    <p>
+      Linked lists excel at dynamic memory allocation and efficient insertion/deletion operations, making them ideal when 
+      you frequently modify the structure. However, they lack random access capabilities and require more memory due to 
+      storing pointers.
+    </p>
+  </div>
+
+  <section class="content-section">
+    <h2>Basic Node Structure</h2>
+
+    <CodeExample 
+      client:load
+      title="Node Definition and Basic Operations"
+      code={`#include <iostream>
+using namespace std;
+
+// Node structure for singly linked list
+struct Node {
+    int data;
+    Node* next;
+    
+    // Constructor
+    Node(int value) : data(value), next(nullptr) {}
+};
+
+// Function to print the linked list
+void printList(Node* head) {
+    cout << "List: ";
+    Node* current = head;
+    while (current != nullptr) {
+        cout << current->data;
+        if (current->next != nullptr) {
+            cout << " -> ";
+        }
+        current = current->next;
+    }
+    cout << " -> NULL" << endl;
+}
+
+// Function to get list length
+int getLength(Node* head) {
+    int count = 0;
+    Node* current = head;
+    while (current != nullptr) {
+        count++;
+        current = current->next;
+    }
+    return count;
+}
+
+int main() {
+    cout << "=== Creating Linked List ===" << endl;
+    
+    // Create nodes manually
+    Node* head = new Node(10);
+    head->next = new Node(20);
+    head->next->next = new Node(30);
+    head->next->next->next = new Node(40);
+    
+    printList(head);
+    cout << "Length: " << getLength(head) << endl;
+    
+    cout << "\\n=== Traversing the List ===" << endl;
+    Node* current = head;
+    int position = 0;
+    while (current != nullptr) {
+        cout << "Node " << position << ": " << current->data 
+             << " (Address: " << current << ", Next: " << current->next << ")" << endl;
+        current = current->next;
+        position++;
+    }
+    
+    // Clean up memory (we'll create proper functions for this later)
+    current = head;
+    while (current != nullptr) {
+        Node* temp = current;
+        current = current->next;
+        delete temp;
+    }
+    
+    cout << "\\n=== Memory Management ===" << endl;
+    cout << "Memory allocated on heap for each node" << endl;
+    cout << "Each node stores data + pointer to next node" << endl;
+    cout << "Must manually delete nodes to prevent memory leaks" << endl;
+    
+    return 0;
+}`}
+      explanation="A linked list node contains data and a pointer to the next node. Nodes are created dynamically on the heap, and we must traverse the list sequentially since there's no random access like arrays."
+      output={`=== Creating Linked List ===
+List: 10 -> 20 -> 30 -> 40 -> NULL
+Length: 4
+
+=== Traversing the List ===
+Node 0: 10 (Address: 0x600000004000, Next: 0x600000004010)
+Node 1: 20 (Address: 0x600000004010, Next: 0x600000004020)
+Node 2: 30 (Address: 0x600000004020, Next: 0x600000004030)
+Node 3: 40 (Address: 0x600000004030, Next: 0x600000000000)
+
+=== Memory Management ===
+Memory allocated on heap for each node
+Each node stores data + pointer to next node
+Must manually delete nodes to prevent memory leaks`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Linked List Class Implementation</h2>
+
+    <CodeExample 
+      client:load
+      title="Complete Singly Linked List Class"
+      code={`#include <iostream>
+using namespace std;
+
+class LinkedList {
+private:
+    struct Node {
+        int data;
+        Node* next;
+        Node(int value) : data(value), next(nullptr) {}
+    };
+    
+    Node* head;
+    int size;
+
+public:
+    // Constructor
+    LinkedList() : head(nullptr), size(0) {}
+    
+    // Destructor
+    ~LinkedList() {
+        clear();
+    }
+    
+    // Insert at beginning
+    void insertFront(int value) {
+        Node* newNode = new Node(value);
+        newNode->next = head;
+        head = newNode;
+        size++;
+    }
+    
+    // Insert at end
+    void insertBack(int value) {
+        Node* newNode = new Node(value);
+        
+        if (head == nullptr) {
+            head = newNode;
+        } else {
+            Node* current = head;
+            while (current->next != nullptr) {
+                current = current->next;
+            }
+            current->next = newNode;
+        }
+        size++;
+    }
+    
+    // Insert at specific position
+    void insertAt(int position, int value) {
+        if (position < 0 || position > size) {
+            cout << "Invalid position!" << endl;
+            return;
+        }
+        
+        if (position == 0) {
+            insertFront(value);
+            return;
+        }
+        
+        Node* newNode = new Node(value);
+        Node* current = head;
+        
+        // Move to position - 1
+        for (int i = 0; i < position - 1; i++) {
+            current = current->next;
+        }
+        
+        newNode->next = current->next;
+        current->next = newNode;
+        size++;
+    }
+    
+    // Delete from front
+    bool deleteFront() {
+        if (head == nullptr) return false;
+        
+        Node* temp = head;
+        head = head->next;
+        delete temp;
+        size--;
+        return true;
+    }
+    
+    // Delete from back
+    bool deleteBack() {
+        if (head == nullptr) return false;
+        
+        if (head->next == nullptr) {
+            delete head;
+            head = nullptr;
+        } else {
+            Node* current = head;
+            while (current->next->next != nullptr) {
+                current = current->next;
+            }
+            delete current->next;
+            current->next = nullptr;
+        }
+        size--;
+        return true;
+    }
+    
+    // Delete at specific position
+    bool deleteAt(int position) {
+        if (position < 0 || position >= size) return false;
+        
+        if (position == 0) {
+            return deleteFront();
+        }
+        
+        Node* current = head;
+        for (int i = 0; i < position - 1; i++) {
+            current = current->next;
+        }
+        
+        Node* nodeToDelete = current->next;
+        current->next = nodeToDelete->next;
+        delete nodeToDelete;
+        size--;
+        return true;
+    }
+    
+    // Search for value
+    int find(int value) {
+        Node* current = head;
+        int position = 0;
+        
+        while (current != nullptr) {
+            if (current->data == value) {
+                return position;
+            }
+            current = current->next;
+            position++;
+        }
+        return -1; // Not found
+    }
+    
+    // Get value at position
+    int get(int position) {
+        if (position < 0 || position >= size) {
+            throw out_of_range("Invalid position");
+        }
+        
+        Node* current = head;
+        for (int i = 0; i < position; i++) {
+            current = current->next;
+        }
+        return current->data;
+    }
+    
+    // Get size
+    int getSize() const {
+        return size;
+    }
+    
+    // Check if empty
+    bool isEmpty() const {
+        return head == nullptr;
+    }
+    
+    // Clear all nodes
+    void clear() {
+        while (head != nullptr) {
+            Node* temp = head;
+            head = head->next;
+            delete temp;
+        }
+        size = 0;
+    }
+    
+    // Print list
+    void print() const {
+        cout << "List [" << size << "]: ";
+        Node* current = head;
+        while (current != nullptr) {
+            cout << current->data;
+            if (current->next != nullptr) {
+                cout << " -> ";
+            }
+            current = current->next;
+        }
+        cout << " -> NULL" << endl;
+    }
+};
+
+int main() {
+    LinkedList list;
+    
+    cout << "=== Testing Linked List Operations ===" << endl;
+    
+    // Test insertions
+    cout << "\\nInserting elements:" << endl;
+    list.insertBack(10);
+    list.print();
+    
+    list.insertBack(20);
+    list.insertBack(30);
+    list.print();
+    
+    list.insertFront(5);
+    list.print();
+    
+    list.insertAt(2, 15);
+    list.print();
+    
+    // Test searches
+    cout << "\\nSearching for elements:" << endl;
+    cout << "Position of 15: " << list.find(15) << endl;
+    cout << "Position of 100: " << list.find(100) << endl;
+    
+    // Test access
+    cout << "\\nAccessing elements:" << endl;
+    cout << "Element at position 0: " << list.get(0) << endl;
+    cout << "Element at position 3: " << list.get(3) << endl;
+    
+    // Test deletions
+    cout << "\\nDeleting elements:" << endl;
+    cout << "Delete front: " << (list.deleteFront() ? "Success" : "Failed") << endl;
+    list.print();
+    
+    cout << "Delete back: " << (list.deleteBack() ? "Success" : "Failed") << endl;
+    list.print();
+    
+    cout << "Delete at position 1: " << (list.deleteAt(1) ? "Success" : "Failed") << endl;
+    list.print();
+    
+    // Test properties
+    cout << "\\nList properties:" << endl;
+    cout << "Size: " << list.getSize() << endl;
+    cout << "Is empty: " << (list.isEmpty() ? "Yes" : "No") << endl;
+    
+    return 0;
+}`}
+      explanation="A complete linked list implementation with proper memory management, insertion/deletion at any position, search functionality, and bounds checking. The destructor automatically cleans up memory to prevent leaks."
+      output={`=== Testing Linked List Operations ===
+
+Inserting elements:
+List [1]: 10 -> NULL
+List [3]: 10 -> 20 -> 30 -> NULL
+List [4]: 5 -> 10 -> 20 -> 30 -> NULL
+List [5]: 5 -> 10 -> 15 -> 20 -> 30 -> NULL
+
+Searching for elements:
+Position of 15: 2
+Position of 100: -1
+
+Accessing elements:
+Element at position 0: 5
+Element at position 3: 20
+
+Deleting elements:
+Delete front: Success
+List [4]: 10 -> 15 -> 20 -> 30 -> NULL
+Delete back: Success
+List [3]: 10 -> 15 -> 20 -> NULL
+Delete at position 1: Success
+List [2]: 10 -> 20 -> NULL
+
+List properties:
+Size: 2
+Is empty: No`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Doubly Linked List</h2>
+
+    <CodeExample 
+      client:load
+      title="Doubly Linked List Implementation"
+      code={`#include <iostream>
+using namespace std;
+
+class DoublyLinkedList {
+private:
+    struct Node {
+        int data;
+        Node* next;
+        Node* prev;
+        Node(int value) : data(value), next(nullptr), prev(nullptr) {}
+    };
+    
+    Node* head;
+    Node* tail;
+    int size;
+
+public:
+    DoublyLinkedList() : head(nullptr), tail(nullptr), size(0) {}
+    
+    ~DoublyLinkedList() {
+        clear();
+    }
+    
+    // Insert at front
+    void insertFront(int value) {
+        Node* newNode = new Node(value);
+        
+        if (head == nullptr) {
+            head = tail = newNode;
+        } else {
+            newNode->next = head;
+            head->prev = newNode;
+            head = newNode;
+        }
+        size++;
+    }
+    
+    // Insert at back
+    void insertBack(int value) {
+        Node* newNode = new Node(value);
+        
+        if (tail == nullptr) {
+            head = tail = newNode;
+        } else {
+            tail->next = newNode;
+            newNode->prev = tail;
+            tail = newNode;
+        }
+        size++;
+    }
+    
+    // Delete from front
+    bool deleteFront() {
+        if (head == nullptr) return false;
+        
+        Node* temp = head;
+        
+        if (head == tail) {
+            head = tail = nullptr;
+        } else {
+            head = head->next;
+            head->prev = nullptr;
+        }
+        
+        delete temp;
+        size--;
+        return true;
+    }
+    
+    // Delete from back
+    bool deleteBack() {
+        if (tail == nullptr) return false;
+        
+        Node* temp = tail;
+        
+        if (head == tail) {
+            head = tail = nullptr;
+        } else {
+            tail = tail->prev;
+            tail->next = nullptr;
+        }
+        
+        delete temp;
+        size--;
+        return true;
+    }
+    
+    // Print forward
+    void printForward() const {
+        cout << "Forward [" << size << "]: ";
+        Node* current = head;
+        while (current != nullptr) {
+            cout << current->data;
+            if (current->next != nullptr) {
+                cout << " <-> ";
+            }
+            current = current->next;
+        }
+        cout << " -> NULL" << endl;
+    }
+    
+    // Print backward
+    void printBackward() const {
+        cout << "Backward [" << size << "]: ";
+        Node* current = tail;
+        while (current != nullptr) {
+            cout << current->data;
+            if (current->prev != nullptr) {
+                cout << " <-> ";
+            }
+            current = current->prev;
+        }
+        cout << " -> NULL" << endl;
+    }
+    
+    // Clear all nodes
+    void clear() {
+        while (head != nullptr) {
+            Node* temp = head;
+            head = head->next;
+            delete temp;
+        }
+        head = tail = nullptr;
+        size = 0;
+    }
+    
+    int getSize() const { return size; }
+    bool isEmpty() const { return head == nullptr; }
+};
+
+int main() {
+    DoublyLinkedList dll;
+    
+    cout << "=== Doubly Linked List Operations ===" << endl;
+    
+    // Test insertions
+    cout << "\\nInserting elements:" << endl;
+    dll.insertBack(10);
+    dll.insertBack(20);
+    dll.insertBack(30);
+    dll.printForward();
+    dll.printBackward();
+    
+    dll.insertFront(5);
+    dll.insertFront(1);
+    dll.printForward();
+    dll.printBackward();
+    
+    // Test deletions
+    cout << "\\nDeleting elements:" << endl;
+    dll.deleteFront();
+    dll.printForward();
+    
+    dll.deleteBack();
+    dll.printForward();
+    
+    cout << "\\n=== Advantages of Doubly Linked Lists ===" << endl;
+    cout << "1. Bidirectional traversal" << endl;
+    cout << "2. Efficient deletion when you have node reference" << endl;
+    cout << "3. Better for certain algorithms (like LRU cache)" << endl;
+    cout << "4. Can traverse backwards from any node" << endl;
+    
+    cout << "\\n=== Disadvantages ===" << endl;
+    cout << "1. Extra memory for prev pointer" << endl;
+    cout << "2. More complex insertion/deletion logic" << endl;
+    cout << "3. Two pointers to maintain consistency" << endl;
+    
+    return 0;
+}`}
+      explanation="Doubly linked lists have pointers to both next and previous nodes, allowing bidirectional traversal. They're more complex but offer greater flexibility for certain operations, especially when you need to traverse backwards."
+      output={`=== Doubly Linked List Operations ===
+
+Inserting elements:
+Forward [3]: 10 <-> 20 <-> 30 -> NULL
+Backward [3]: 30 <-> 20 <-> 10 -> NULL
+Forward [5]: 1 <-> 5 <-> 10 <-> 20 <-> 30 -> NULL
+Backward [5]: 30 <-> 20 <-> 10 <-> 5 <-> 1 -> NULL
+
+Deleting elements:
+Forward [4]: 5 <-> 10 <-> 20 <-> 30 -> NULL
+Forward [3]: 5 <-> 10 <-> 20 -> NULL
+
+=== Advantages of Doubly Linked Lists ===
+1. Bidirectional traversal
+2. Efficient deletion when you have node reference
+3. Better for certain algorithms (like LRU cache)
+4. Can traverse backwards from any node
+
+=== Disadvantages ===
+1. Extra memory for prev pointer
+2. More complex insertion/deletion logic
+3. Two pointers to maintain consistency`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Circular Linked List</h2>
+
+    <CodeExample 
+      client:load
+      title="Circular Linked List Implementation"
+      code={`#include <iostream>
+using namespace std;
+
+class CircularLinkedList {
+private:
+    struct Node {
+        int data;
+        Node* next;
+        Node(int value) : data(value), next(nullptr) {}
+    };
+    
+    Node* tail;  // We keep track of tail, head is tail->next
+    int size;
+
+public:
+    CircularLinkedList() : tail(nullptr), size(0) {}
+    
+    ~CircularLinkedList() {
+        clear();
+    }
+    
+    // Insert at beginning
+    void insertFront(int value) {
+        Node* newNode = new Node(value);
+        
+        if (tail == nullptr) {
+            tail = newNode;
+            tail->next = tail;  // Points to itself
+        } else {
+            newNode->next = tail->next;  // New node points to head
+            tail->next = newNode;        // Tail points to new node (new head)
+        }
+        size++;
+    }
+    
+    // Insert at end
+    void insertBack(int value) {
+        Node* newNode = new Node(value);
+        
+        if (tail == nullptr) {
+            tail = newNode;
+            tail->next = tail;
+        } else {
+            newNode->next = tail->next;  // New node points to head
+            tail->next = newNode;        // Current tail points to new node
+            tail = newNode;              // Update tail to new node
+        }
+        size++;
+    }
+    
+    // Delete from front
+    bool deleteFront() {
+        if (tail == nullptr) return false;
+        
+        Node* head = tail->next;
+        
+        if (head == tail) {  // Only one node
+            delete tail;
+            tail = nullptr;
+        } else {
+            tail->next = head->next;  // Tail points to new head
+            delete head;
+        }
+        size--;
+        return true;
+    }
+    
+    // Print the circular list (with cycle detection to avoid infinite loop)
+    void print() const {
+        if (tail == nullptr) {
+            cout << "List [0]: Empty" << endl;
+            return;
+        }
+        
+        cout << "List [" << size << "]: ";
+        Node* current = tail->next;  // Start from head
+        Node* head = current;
+        
+        do {
+            cout << current->data;
+            current = current->next;
+            if (current != head) {
+                cout << " -> ";
+            }
+        } while (current != head);
+        
+        cout << " -> (cycles back to " << head->data << ")" << endl;
+    }
+    
+    // Demonstrate circular nature
+    void demonstrateCircular() const {
+        if (tail == nullptr) return;
+        
+        cout << "Demonstrating circular nature (showing 2 full cycles):" << endl;
+        Node* current = tail->next;
+        
+        for (int i = 0; i < size * 2; i++) {
+            cout << current->data;
+            if (i < size * 2 - 1) cout << " -> ";
+            current = current->next;
+        }
+        cout << " -> ..." << endl;
+    }
+    
+    // Search with cycle awareness
+    int find(int value) const {
+        if (tail == nullptr) return -1;
+        
+        Node* current = tail->next;
+        Node* head = current;
+        int position = 0;
+        
+        do {
+            if (current->data == value) {
+                return position;
+            }
+            current = current->next;
+            position++;
+        } while (current != head);
+        
+        return -1;
+    }
+    
+    void clear() {
+        if (tail == nullptr) return;
+        
+        Node* current = tail->next;
+        while (current != tail) {
+            Node* temp = current;
+            current = current->next;
+            delete temp;
+        }
+        delete tail;
+        tail = nullptr;
+        size = 0;
+    }
+    
+    int getSize() const { return size; }
+    bool isEmpty() const { return tail == nullptr; }
+};
+
+int main() {
+    CircularLinkedList cll;
+    
+    cout << "=== Circular Linked List Operations ===" << endl;
+    
+    // Test insertions
+    cout << "\\nInserting elements:" << endl;
+    cll.insertBack(10);
+    cll.print();
+    
+    cll.insertBack(20);
+    cll.insertBack(30);
+    cll.print();
+    
+    cll.insertFront(5);
+    cll.print();
+    
+    // Demonstrate circular nature
+    cout << endl;
+    cll.demonstrateCircular();
+    
+    // Test search
+    cout << "\\nSearching:" << endl;
+    cout << "Position of 20: " << cll.find(20) << endl;
+    cout << "Position of 100: " << cll.find(100) << endl;
+    
+    // Test deletions
+    cout << "\\nDeleting from front:" << endl;
+    cll.deleteFront();
+    cll.print();
+    
+    cout << "\\n=== Applications of Circular Linked Lists ===" << endl;
+    cout << "1. Round-robin scheduling in operating systems" << endl;
+    cout << "2. Implementing circular buffers" << endl;
+    cout << "3. Games with players taking turns" << endl;
+    cout << "4. Music playlist with repeat mode" << endl;
+    cout << "5. Undo functionality with circular buffer" << endl;
+    
+    return 0;
+}`}
+      explanation="Circular linked lists have the last node pointing back to the first node, forming a cycle. They're useful for applications that need continuous cycling through elements, like round-robin scheduling or playlist management."
+      output={`=== Circular Linked List Operations ===
+
+Inserting elements:
+List [1]: 10 -> (cycles back to 10)
+List [3]: 10 -> 20 -> 30 -> (cycles back to 10)
+List [4]: 5 -> 10 -> 20 -> 30 -> (cycles back to 5)
+
+Demonstrating circular nature (showing 2 full cycles):
+5 -> 10 -> 20 -> 30 -> 5 -> 10 -> 20 -> 30 -> ...
+
+Searching:
+Position of 20: 2
+Position of 100: -1
+
+Deleting from front:
+List [3]: 10 -> 20 -> 30 -> (cycles back to 10)
+
+=== Applications of Circular Linked Lists ===
+1. Round-robin scheduling in operating systems
+2. Implementing circular buffers
+3. Games with players taking turns
+4. Music playlist with repeat mode
+5. Undo functionality with circular buffer`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Advanced Operations</h2>
+
+    <CodeExample 
+      client:load
+      title="Advanced Linked List Algorithms"
+      code={`#include <iostream>
+using namespace std;
+
+struct ListNode {
+    int val;
+    ListNode* next;
+    ListNode(int x) : val(x), next(nullptr) {}
+};
+
+class LinkedListAlgorithms {
+public:
+    // Reverse a linked list iteratively
+    static ListNode* reverseIterative(ListNode* head) {
+        ListNode* prev = nullptr;
+        ListNode* current = head;
+        
+        while (current != nullptr) {
+            ListNode* nextTemp = current->next;
+            current->next = prev;
+            prev = current;
+            current = nextTemp;
+        }
+        
+        return prev;  // prev is the new head
+    }
+    
+    // Reverse a linked list recursively
+    static ListNode* reverseRecursive(ListNode* head) {
+        if (head == nullptr || head->next == nullptr) {
+            return head;
+        }
+        
+        ListNode* newHead = reverseRecursive(head->next);
+        head->next->next = head;
+        head->next = nullptr;
+        
+        return newHead;
+    }
+    
+    // Find middle node using two pointers (Floyd's algorithm)
+    static ListNode* findMiddle(ListNode* head) {
+        if (head == nullptr) return nullptr;
+        
+        ListNode* slow = head;
+        ListNode* fast = head;
+        
+        while (fast != nullptr && fast->next != nullptr) {
+            slow = slow->next;
+            fast = fast->next->next;
+        }
+        
+        return slow;
+    }
+    
+    // Detect cycle in linked list (Floyd's cycle detection)
+    static bool hasCycle(ListNode* head) {
+        if (head == nullptr || head->next == nullptr) return false;
+        
+        ListNode* slow = head;
+        ListNode* fast = head;
+        
+        while (fast != nullptr && fast->next != nullptr) {
+            slow = slow->next;
+            fast = fast->next->next;
+            
+            if (slow == fast) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    // Merge two sorted linked lists
+    static ListNode* mergeSorted(ListNode* l1, ListNode* l2) {
+        ListNode dummy(0);
+        ListNode* current = &dummy;
+        
+        while (l1 != nullptr && l2 != nullptr) {
+            if (l1->val <= l2->val) {
+                current->next = l1;
+                l1 = l1->next;
+            } else {
+                current->next = l2;
+                l2 = l2->next;
+            }
+            current = current->next;
+        }
+        
+        // Attach remaining elements
+        current->next = (l1 != nullptr) ? l1 : l2;
+        
+        return dummy.next;
+    }
+    
+    // Remove duplicates from sorted linked list
+    static ListNode* removeDuplicates(ListNode* head) {
+        if (head == nullptr) return head;
+        
+        ListNode* current = head;
+        
+        while (current->next != nullptr) {
+            if (current->val == current->next->val) {
+                ListNode* duplicate = current->next;
+                current->next = current->next->next;
+                delete duplicate;
+            } else {
+                current = current->next;
+            }
+        }
+        
+        return head;
+    }
+    
+    // Print list helper function
+    static void printList(ListNode* head, const string& label) {
+        cout << label << ": ";
+        while (head != nullptr) {
+            cout << head->val;
+            if (head->next != nullptr) cout << " -> ";
+            head = head->next;
+        }
+        cout << " -> NULL" << endl;
+    }
+    
+    // Create list from array helper
+    static ListNode* createList(const vector<int>& values) {
+        if (values.empty()) return nullptr;
+        
+        ListNode* head = new ListNode(values[0]);
+        ListNode* current = head;
+        
+        for (size_t i = 1; i < values.size(); i++) {
+            current->next = new ListNode(values[i]);
+            current = current->next;
+        }
+        
+        return head;
+    }
+    
+    // Delete entire list
+    static void deleteList(ListNode* head) {
+        while (head != nullptr) {
+            ListNode* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
+};
+
+int main() {
+    cout << "=== Advanced Linked List Algorithms ===" << endl;
+    
+    // Test reverse
+    cout << "\\n=== Reversing Lists ===" << endl;
+    ListNode* list1 = LinkedListAlgorithms::createList({1, 2, 3, 4, 5});
+    LinkedListAlgorithms::printList(list1, "Original");
+    
+    ListNode* reversed = LinkedListAlgorithms::reverseIterative(list1);
+    LinkedListAlgorithms::printList(reversed, "Reversed (iterative)");
+    
+    ListNode* backToOriginal = LinkedListAlgorithms::reverseRecursive(reversed);
+    LinkedListAlgorithms::printList(backToOriginal, "Reversed back (recursive)");
+    
+    // Test find middle
+    cout << "\\n=== Finding Middle Node ===" << endl;
+    ListNode* middle = LinkedListAlgorithms::findMiddle(backToOriginal);
+    cout << "Middle node value: " << middle->val << endl;
+    
+    // Test merge sorted lists
+    cout << "\\n=== Merging Sorted Lists ===" << endl;
+    ListNode* list2 = LinkedListAlgorithms::createList({1, 3, 5});
+    ListNode* list3 = LinkedListAlgorithms::createList({2, 4, 6});
+    
+    LinkedListAlgorithms::printList(list2, "List 1");
+    LinkedListAlgorithms::printList(list3, "List 2");
+    
+    ListNode* merged = LinkedListAlgorithms::mergeSorted(list2, list3);
+    LinkedListAlgorithms::printList(merged, "Merged");
+    
+    // Test remove duplicates
+    cout << "\\n=== Removing Duplicates ===" << endl;
+    ListNode* list4 = LinkedListAlgorithms::createList({1, 1, 2, 3, 3, 4});
+    LinkedListAlgorithms::printList(list4, "With duplicates");
+    
+    ListNode* noDuplicates = LinkedListAlgorithms::removeDuplicates(list4);
+    LinkedListAlgorithms::printList(noDuplicates, "Without duplicates");
+    
+    // Test cycle detection
+    cout << "\\n=== Cycle Detection ===" << endl;
+    ListNode* list5 = LinkedListAlgorithms::createList({1, 2, 3, 4});
+    cout << "List without cycle: " << (LinkedListAlgorithms::hasCycle(list5) ? "Has cycle" : "No cycle") << endl;
+    
+    // Create a cycle for testing (don't do this in practice without proper cleanup)
+    list5->next->next->next->next = list5->next;  // Create cycle: 4 -> 2
+    cout << "List with cycle: " << (LinkedListAlgorithms::hasCycle(list5) ? "Has cycle" : "No cycle") << endl;
+    
+    // Break the cycle before cleanup
+    list5->next->next->next->next = nullptr;
+    
+    // Cleanup
+    LinkedListAlgorithms::deleteList(backToOriginal);
+    LinkedListAlgorithms::deleteList(merged);
+    LinkedListAlgorithms::deleteList(noDuplicates);
+    LinkedListAlgorithms::deleteList(list5);
+    
+    cout << "\\n=== Algorithm Complexities ===" << endl;
+    cout << "Reverse: O(n) time, O(1) space (iterative)" << endl;
+    cout << "Find Middle: O(n) time, O(1) space" << endl;
+    cout << "Cycle Detection: O(n) time, O(1) space" << endl;
+    cout << "Merge Sorted: O(n+m) time, O(1) space" << endl;
+    cout << "Remove Duplicates: O(n) time, O(1) space" << endl;
+    
+    return 0;
+}`}
+      explanation="Advanced linked list algorithms showcase important techniques: two-pointer method for finding middle and detecting cycles, iterative vs recursive reversal, merging sorted lists, and duplicate removal. These are common interview questions."
+      output={`=== Advanced Linked List Algorithms ===
+
+=== Reversing Lists ===
+Original: 1 -> 2 -> 3 -> 4 -> 5 -> NULL
+Reversed (iterative): 5 -> 4 -> 3 -> 2 -> 1 -> NULL
+Reversed back (recursive): 1 -> 2 -> 3 -> 4 -> 5 -> NULL
+
+=== Finding Middle Node ===
+Middle node value: 3
+
+=== Merging Sorted Lists ===
+List 1: 1 -> 3 -> 5 -> NULL
+List 2: 2 -> 4 -> 6 -> NULL
+Merged: 1 -> 2 -> 3 -> 4 -> 5 -> 6 -> NULL
+
+=== Removing Duplicates ===
+With duplicates: 1 -> 1 -> 2 -> 3 -> 3 -> 4 -> NULL
+Without duplicates: 1 -> 2 -> 3 -> 4 -> NULL
+
+=== Cycle Detection ===
+List without cycle: No cycle
+List with cycle: Has cycle
+
+=== Algorithm Complexities ===
+Reverse: O(n) time, O(1) space (iterative)
+Find Middle: O(n) time, O(1) space
+Cycle Detection: O(n) time, O(1) space
+Merge Sorted: O(n+m) time, O(1) space
+Remove Duplicates: O(n) time, O(1) space`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Comparison: Linked Lists vs Arrays</h2>
+    
+    <div class="comparison-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Aspect</th>
+            <th>Linked Lists</th>
+            <th>Arrays</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Memory Layout</td>
+            <td>Non-contiguous, scattered in heap</td>
+            <td>Contiguous memory blocks</td>
+          </tr>
+          <tr>
+            <td>Random Access</td>
+            <td>O(n) - must traverse from head</td>
+            <td>O(1) - direct index access</td>
+          </tr>
+          <tr>
+            <td>Insertion at Beginning</td>
+            <td>O(1) - just update head pointer</td>
+            <td>O(n) - must shift all elements</td>
+          </tr>
+          <tr>
+            <td>Insertion at End</td>
+            <td>O(n) - traverse to end (O(1) with tail pointer)</td>
+            <td>O(1) - if space available</td>
+          </tr>
+          <tr>
+            <td>Deletion</td>
+            <td>O(1) - if node reference available</td>
+            <td>O(n) - may need to shift elements</td>
+          </tr>
+          <tr>
+            <td>Memory Overhead</td>
+            <td>Extra memory for pointers</td>
+            <td>No overhead, just data</td>
+          </tr>
+          <tr>
+            <td>Cache Performance</td>
+            <td>Poor - scattered memory locations</td>
+            <td>Excellent - contiguous memory</td>
+          </tr>
+          <tr>
+            <td>Dynamic Size</td>
+            <td>Yes - grows/shrinks at runtime</td>
+            <td>Fixed size (unless using dynamic arrays)</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>Best Practices</h2>
+    
+    <div class="best-practices">
+      <div class="practice">
+        <h4>1. Always Check for NULL Pointers</h4>
+        <p>Before dereferencing any pointer, check if it's nullptr to avoid segmentation faults and undefined behavior.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>2. Implement Proper Memory Management</h4>
+        <p>Always delete allocated nodes in destructors or clear functions. Use smart pointers when possible to avoid memory leaks.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>3. Maintain Size Counter</h4>
+        <p>Keep track of list size instead of counting nodes each time. This makes size queries O(1) instead of O(n).</p>
+      </div>
+      
+      <div class="practice">
+        <h4>4. Use Dummy Head Nodes</h4>
+        <p>For complex operations, dummy head nodes can simplify edge case handling and make code more readable.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>5. Consider STL Containers</h4>
+        <p>For production code, consider using std::list (doubly linked) or std::forward_list (singly linked) instead of custom implementations.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>Time Complexity Summary</h2>
+    
+    <div class="complexity-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Operation</th>
+            <th>Singly Linked</th>
+            <th>Doubly Linked</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Insert at Head</td>
+            <td>O(1)</td>
+            <td>O(1)</td>
+            <td>Just update head pointer</td>
+          </tr>
+          <tr>
+            <td>Insert at Tail</td>
+            <td>O(n) or O(1)*</td>
+            <td>O(1)</td>
+            <td>*O(1) if tail pointer maintained</td>
+          </tr>
+          <tr>
+            <td>Delete at Head</td>
+            <td>O(1)</td>
+            <td>O(1)</td>
+            <td>Update head pointer</td>
+          </tr>
+          <tr>
+            <td>Delete at Tail</td>
+            <td>O(n)</td>
+            <td>O(1)</td>
+            <td>Need to find previous node in singly</td>
+          </tr>
+          <tr>
+            <td>Search</td>
+            <td>O(n)</td>
+            <td>O(n)</td>
+            <td>Must traverse sequentially</td>
+          </tr>
+          <tr>
+            <td>Access by Index</td>
+            <td>O(n)</td>
+            <td>O(n)</td>
+            <td>No random access</td>
+          </tr>
+          <tr>
+            <td>Reverse</td>
+            <td>O(n)</td>
+            <td>O(n)</td>
+            <td>Must visit each node once</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>Practice Exercises</h2>
+    
+    <div class="exercise">
+      <h3>Exercise 1: Palindrome Checker</h3>
+      <p>Implement a function to check if a linked list represents a palindrome. Try both O(n) space and O(1) space solutions.</p>
+    </div>
+    
+    <div class="exercise">
+      <h3>Exercise 2: LRU Cache</h3>
+      <p>Implement an LRU (Least Recently Used) cache using a doubly linked list and hash map combination.</p>
+    </div>
+    
+    <div class="exercise">
+      <h3>Exercise 3: Skip List</h3>
+      <p>Implement a skip list data structure that provides O(log n) search, insertion, and deletion operations.</p>
+    </div>
+  </section>
+
+  <div class="navigation">
+    <a href="/3-data-structures/vectors" class="nav-button prev">← Vectors</a>
+    <a href="/3-data-structures/stacks" class="nav-button next">Stacks →</a>
+  </div>
+</Layout>
+
+<style>
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .breadcrumb a {
+    color: #667eea;
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  .overview {
+    background: #f0f9ff;
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border-left: 4px solid #0ea5e9;
+  }
+
+  .content-section {
+    margin: 3rem 0;
+  }
+
+  .comparison-table, .complexity-table {
+    overflow-x: auto;
+    margin: 2rem 0;
+  }
+
+  .comparison-table table, .complexity-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  }
+
+  .comparison-table th, .complexity-table th {
+    background: #f8fafc;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #1e293b;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .comparison-table td, .complexity-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    color: #475569;
+  }
+
+  .comparison-table tr:last-child td, .complexity-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .best-practices {
+    display: grid;
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .practice {
+    background: #f0fdf4;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #22c55e;
+  }
+
+  .practice h4 {
+    margin: 0 0 0.5rem 0;
+    color: #166534;
+  }
+
+  .practice p {
+    margin: 0;
+    color: #166534;
+  }
+
+  .exercise {
+    background: #fff7ed;
+    padding: 2rem;
+    border-radius: 8px;
+    border-left: 4px solid #f59e0b;
+    margin: 2rem 0;
+  }
+
+  .exercise h3 {
+    margin: 0 0 1rem 0;
+    color: #92400e;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin: 4rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .nav-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #667eea;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+  }
+
+  .nav-button:hover {
+    background: #5a67d8;
+  }
+
+  .nav-button.prev {
+    background: #64748b;
+  }
+
+  .nav-button.prev:hover {
+    background: #475569;
+  }
+
+  @media (max-width: 768px) {
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style> 

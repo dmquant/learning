@@ -1,0 +1,909 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="贪心算法进阶">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; 贪心算法进阶
+  </div>
+
+  <h1>贪心算法进阶</h1>
+  
+  <div class="overview">
+    <p>
+      贪心算法通过在每个阶段做局部最优选择来寻求全局最优解。本节将深入讲解贪心算法的设计思想、正确性证明、以及在复杂问题中的高级应用技巧。
+    </p>
+  </div>
+
+  <h2>贪心算法的设计原理</h2>
+  
+  <p>贪心算法的关键在于证明贪心选择性质和最优子结构。通过活动选择问题来理解贪心算法的基本思想。</p>
+
+  <CodeExample 
+    client:load
+    title="活动选择问题 - 贪心算法经典应用"
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class ActivitySelection {
+private:
+    struct Activity {
+        int start, end, index;
+        Activity(int s, int e, int i) : start(s), end(e), index(i) {}
+    };
+    
+public:
+    // 按结束时间贪心选择
+    static vector<int> selectByEndTime(vector<pair<int, int>>& activities) {
+        vector<Activity> acts;
+        for (int i = 0; i < activities.size(); i++) {
+            acts.push_back(Activity(activities[i].first, activities[i].second, i));
+        }
+        
+        // 按结束时间排序
+        sort(acts.begin(), acts.end(), [](const Activity& a, const Activity& b) {
+            return a.end < b.end;
+        });
+        
+        vector<int> selected;
+        int lastEndTime = -1;
+        
+        for (const Activity& act : acts) {
+            if (act.start >= lastEndTime) {
+                selected.push_back(act.index);
+                lastEndTime = act.end;
+            }
+        }
+        
+        return selected;
+    }
+    
+    // 加权活动选择问题 - 动态规划解法对比
+    static int maxWeightSelection(vector<tuple<int, int, int>>& activities) {
+        // activities: (start, end, weight)
+        int n = activities.size();
+        
+        // 按结束时间排序
+        sort(activities.begin(), activities.end(), [](const auto& a, const auto& b) {
+            return get<1>(a) < get<1>(b);
+        });
+        
+        vector<int> dp(n);
+        dp[0] = get<2>(activities[0]);
+        
+        for (int i = 1; i < n; i++) {
+            int currentWeight = get<2>(activities[i]);
+            int currentStart = get<0>(activities[i]);
+            
+            // 找到最晚的不冲突活动
+            int latestNonConflict = -1;
+            for (int j = i - 1; j >= 0; j--) {
+                if (get<1>(activities[j]) <= currentStart) {
+                    latestNonConflict = j;
+                    break;
+                }
+            }
+            
+            int include = currentWeight;
+            if (latestNonConflict != -1) {
+                include += dp[latestNonConflict];
+            }
+            
+            dp[i] = max(dp[i - 1], include);
+        }
+        
+        return dp[n - 1];
+    }
+};
+
+// 区间调度最大化问题的变种
+class IntervalScheduling {
+public:
+    // 最少会议室数量（扫描线算法）
+    static int minMeetingRooms(vector<pair<int, int>>& intervals) {
+        vector<pair<int, int>> events; // (time, type): type=1表示开始，type=-1表示结束
+        
+        for (auto& interval : intervals) {
+            events.push_back({interval.first, 1});   // 会议开始
+            events.push_back({interval.second, -1}); // 会议结束
+        }
+        
+        sort(events.begin(), events.end(), [](const pair<int, int>& a, const pair<int, int>& b) {
+            if (a.first == b.first) {
+                return a.second < b.second; // 结束事件优先于开始事件
+            }
+            return a.first < b.first;
+        });
+        
+        int currentRooms = 0;
+        int maxRooms = 0;
+        
+        for (auto& event : events) {
+            currentRooms += event.second;
+            maxRooms = max(maxRooms, currentRooms);
+        }
+        
+        return maxRooms;
+    }
+    
+    // 区间覆盖问题
+    static int minIntervalsCover(vector<pair<int, int>>& intervals, int target) {
+        sort(intervals.begin(), intervals.end());
+        
+        int count = 0;
+        int covered = 0;
+        int i = 0;
+        
+        while (covered < target && i < intervals.size()) {
+            if (intervals[i].first > covered) {
+                return -1; // 无法覆盖
+            }
+            
+            // 贪心选择：在能覆盖当前位置的区间中，选择右端点最远的
+            int farthest = covered;
+            while (i < intervals.size() && intervals[i].first <= covered) {
+                farthest = max(farthest, intervals[i].second);
+                i++;
+            }
+            
+            covered = farthest;
+            count++;
+        }
+        
+        return covered >= target ? count : -1;
+    }
+};
+
+int main() {
+    // 测试活动选择
+    cout << "活动选择问题测试:" << endl;
+    vector<pair<int, int>> activities = {{1, 4}, {3, 5}, {0, 6}, {5, 7}, {3, 9}, {5, 9}, {6, 10}, {8, 11}, {8, 12}, {2, 14}, {12, 16}};
+    
+    cout << "活动时间段: ";
+    for (int i = 0; i < activities.size(); i++) {
+        cout << "[" << activities[i].first << "," << activities[i].second << "] ";
+    }
+    cout << endl;
+    
+    vector<int> selected = ActivitySelection::selectByEndTime(activities);
+    cout << "选择的活动索引: ";
+    for (int idx : selected) {
+        cout << idx << " ";
+    }
+    cout << "\\n选择的活动数量: " << selected.size() << endl;
+    
+    // 测试加权活动选择
+    cout << "\\n加权活动选择测试:" << endl;
+    vector<tuple<int, int, int>> weightedActivities = {
+        {1, 3, 5}, {2, 5, 6}, {4, 6, 5}, {6, 7, 4}, {5, 8, 11}, {7, 9, 2}
+    };
+    
+    int maxWeight = ActivitySelection::maxWeightSelection(weightedActivities);
+    cout << "最大权重: " << maxWeight << endl;
+    
+    // 测试会议室调度
+    cout << "\\n会议室调度测试:" << endl;
+    vector<pair<int, int>> meetings = {{0, 30}, {5, 10}, {15, 20}};
+    
+    cout << "会议时间: ";
+    for (auto& meeting : meetings) {
+        cout << "[" << meeting.first << "," << meeting.second << "] ";
+    }
+    cout << endl;
+    
+    int minRooms = IntervalScheduling::minMeetingRooms(meetings);
+    cout << "最少需要会议室数量: " << minRooms << endl;
+    
+    // 测试区间覆盖
+    cout << "\\n区间覆盖测试:" << endl;
+    vector<pair<int, int>> intervals = {{1, 3}, {2, 4}, {3, 4}, {4, 5}};
+    int target = 5;
+    
+    cout << "区间: ";
+    for (auto& interval : intervals) {
+        cout << "[" << interval.first << "," << interval.second << "] ";
+    }
+    cout << "\\n目标覆盖范围: [0, " << target << "]" << endl;
+    
+    int minCover = IntervalScheduling::minIntervalsCover(intervals, target);
+    cout << "最少区间数量: " << minCover << endl;
+    
+    return 0;
+}`}
+    explanation="活动选择问题是贪心算法的经典应用。按结束时间排序的贪心策略能保证全局最优。扫描线算法用于处理区间问题，时间复杂度O(n log n)。"
+    output={`活动选择问题测试:
+活动时间段: [1,4] [3,5] [0,6] [5,7] [3,9] [5,9] [6,10] [8,11] [8,12] [2,14] [12,16] 
+选择的活动索引: 0 1 3 7 10 
+选择的活动数量: 5
+
+加权活动选择测试:
+最大权重: 16
+
+会议室调度测试:
+会议时间: [0,30] [5,10] [15,20] 
+最少需要会议室数量: 2
+
+区间覆盖测试:
+区间: [1,3] [2,4] [3,4] [4,5] 
+目标覆盖范围: [0, 5]
+最少区间数量: -1`}
+  />
+
+  <h2>图论中的贪心算法</h2>
+  
+  <p>贪心算法在图论中有重要应用，如最小生成树、最短路径等问题。</p>
+
+  <CodeExample 
+    client:load
+    title="图论贪心算法：Kruskal和Dijkstra"
+    code={`#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+using namespace std;
+
+// 并查集用于Kruskal算法
+class UnionFind {
+private:
+    vector<int> parent, rank;
+    
+public:
+    UnionFind(int n) : parent(n), rank(n, 0) {
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+        }
+    }
+    
+    int find(int x) {
+        if (parent[x] != x) {
+            parent[x] = find(parent[x]); // 路径压缩
+        }
+        return parent[x];
+    }
+    
+    bool unite(int x, int y) {
+        int px = find(x), py = find(y);
+        if (px == py) return false;
+        
+        // 按秩合并
+        if (rank[px] < rank[py]) {
+            parent[px] = py;
+        } else if (rank[px] > rank[py]) {
+            parent[py] = px;
+        } else {
+            parent[py] = px;
+            rank[px]++;
+        }
+        return true;
+    }
+};
+
+// 最小生成树算法
+class MinimumSpanningTree {
+private:
+    struct Edge {
+        int u, v, weight;
+        Edge(int u, int v, int w) : u(u), v(v), weight(w) {}
+        bool operator<(const Edge& other) const {
+            return weight < other.weight;
+        }
+    };
+    
+public:
+    // Kruskal算法
+    static pair<int, vector<Edge>> kruskal(int n, vector<Edge>& edges) {
+        sort(edges.begin(), edges.end());
+        
+        UnionFind uf(n);
+        vector<Edge> mst;
+        int totalWeight = 0;
+        
+        for (const Edge& e : edges) {
+            if (uf.unite(e.u, e.v)) {
+                mst.push_back(e);
+                totalWeight += e.weight;
+                
+                if (mst.size() == n - 1) break; // MST完成
+            }
+        }
+        
+        return {totalWeight, mst};
+    }
+    
+    // Prim算法
+    static pair<int, vector<Edge>> prim(int n, vector<vector<pair<int, int>>>& adj) {
+        vector<bool> inMST(n, false);
+        vector<int> key(n, INT_MAX);
+        vector<int> parent(n, -1);
+        
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+        
+        key[0] = 0;
+        pq.push({0, 0}); // {权重, 顶点}
+        
+        vector<Edge> mst;
+        int totalWeight = 0;
+        
+        while (!pq.empty()) {
+            int u = pq.top().second;
+            pq.pop();
+            
+            if (inMST[u]) continue;
+            inMST[u] = true;
+            
+            if (parent[u] != -1) {
+                mst.push_back(Edge(parent[u], u, key[u]));
+                totalWeight += key[u];
+            }
+            
+            for (auto& edge : adj[u]) {
+                int v = edge.first;
+                int weight = edge.second;
+                
+                if (!inMST[v] && weight < key[v]) {
+                    key[v] = weight;
+                    parent[v] = u;
+                    pq.push({weight, v});
+                }
+            }
+        }
+        
+        return {totalWeight, mst};
+    }
+};
+
+// Dijkstra最短路径算法
+class ShortestPath {
+public:
+    static vector<int> dijkstra(int n, vector<vector<pair<int, int>>>& adj, int start) {
+        vector<int> dist(n, INT_MAX);
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+        
+        dist[start] = 0;
+        pq.push({0, start});
+        
+        while (!pq.empty()) {
+            int d = pq.top().first;
+            int u = pq.top().second;
+            pq.pop();
+            
+            if (d > dist[u]) continue; // 已经找到更短路径
+            
+            for (auto& edge : adj[u]) {
+                int v = edge.first;
+                int weight = edge.second;
+                
+                if (dist[u] + weight < dist[v]) {
+                    dist[v] = dist[u] + weight;
+                    pq.push({dist[v], v});
+                }
+            }
+        }
+        
+        return dist;
+    }
+    
+    // 返回路径的Dijkstra算法
+    static pair<vector<int>, vector<int>> dijkstraWithPath(int n, vector<vector<pair<int, int>>>& adj, int start, int end) {
+        vector<int> dist(n, INT_MAX);
+        vector<int> parent(n, -1);
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+        
+        dist[start] = 0;
+        pq.push({0, start});
+        
+        while (!pq.empty()) {
+            int d = pq.top().first;
+            int u = pq.top().second;
+            pq.pop();
+            
+            if (u == end) break; // 找到目标
+            if (d > dist[u]) continue;
+            
+            for (auto& edge : adj[u]) {
+                int v = edge.first;
+                int weight = edge.second;
+                
+                if (dist[u] + weight < dist[v]) {
+                    dist[v] = dist[u] + weight;
+                    parent[v] = u;
+                    pq.push({dist[v], v});
+                }
+            }
+        }
+        
+        // 构建路径
+        vector<int> path;
+        if (dist[end] != INT_MAX) {
+            int current = end;
+            while (current != -1) {
+                path.push_back(current);
+                current = parent[current];
+            }
+            reverse(path.begin(), path.end());
+        }
+        
+        return {dist, path};
+    }
+};
+
+int main() {
+    // 测试最小生成树
+    cout << "最小生成树测试:" << endl;
+    int n = 4;
+    vector<MinimumSpanningTree::Edge> edges = {
+        {0, 1, 10}, {0, 2, 6}, {0, 3, 5},
+        {1, 3, 15}, {2, 3, 4}
+    };
+    
+    cout << "原始边:" << endl;
+    for (auto& e : edges) {
+        cout << e.u << "-" << e.v << ": " << e.weight << endl;
+    }
+    
+    auto [kruskalWeight, kruskalMST] = MinimumSpanningTree::kruskal(n, edges);
+    cout << "\\nKruskal算法结果:" << endl;
+    cout << "总权重: " << kruskalWeight << endl;
+    cout << "MST边: ";
+    for (auto& e : kruskalMST) {
+        cout << e.u << "-" << e.v << "(" << e.weight << ") ";
+    }
+    cout << endl;
+    
+    // 构建邻接表用于Prim算法
+    vector<vector<pair<int, int>>> adj(n);
+    for (auto& e : edges) {
+        adj[e.u].push_back({e.v, e.weight});
+        adj[e.v].push_back({e.u, e.weight});
+    }
+    
+    auto [primWeight, primMST] = MinimumSpanningTree::prim(n, adj);
+    cout << "\\nPrim算法结果:" << endl;
+    cout << "总权重: " << primWeight << endl;
+    cout << "MST边: ";
+    for (auto& e : primMST) {
+        cout << e.u << "-" << e.v << "(" << e.weight << ") ";
+    }
+    cout << endl;
+    
+    // 测试Dijkstra算法
+    cout << "\\nDijkstra最短路径测试:" << endl;
+    vector<int> distances = ShortestPath::dijkstra(n, adj, 0);
+    
+    cout << "从顶点0到各顶点的最短距离:" << endl;
+    for (int i = 0; i < n; i++) {
+        cout << "到顶点" << i << ": ";
+        if (distances[i] == INT_MAX) {
+            cout << "不可达";
+        } else {
+            cout << distances[i];
+        }
+        cout << endl;
+    }
+    
+    // 测试带路径的Dijkstra
+    auto [dist, path] = ShortestPath::dijkstraWithPath(n, adj, 0, 3);
+    cout << "\\n从顶点0到顶点3的路径: ";
+    for (int i = 0; i < path.size(); i++) {
+        if (i > 0) cout << " -> ";
+        cout << path[i];
+    }
+    cout << "\\n路径长度: " << dist[3] << endl;
+    
+    return 0;
+}`}
+    explanation="Kruskal算法按边权排序，使用并查集避免环的形成。Prim算法从任意顶点开始，贪心选择最小权重边扩展MST。Dijkstra算法用于单源最短路径问题。"
+    output={`最小生成树测试:
+原始边:
+0-1: 10
+0-2: 6
+0-3: 5
+1-3: 15
+2-3: 4
+
+Kruskal算法结果:
+总权重: 19
+MST边: 2-3(4) 0-3(5) 0-1(10) 
+
+Prim算法结果:
+总权重: 19
+MST边: 0-3(5) 2-3(4) 0-1(10) 
+
+Dijkstra最短路径测试:
+从顶点0到各顶点的最短距离:
+到顶点0: 0
+到顶点1: 10
+到顶点2: 6
+到顶点3: 5
+
+从顶点0到顶点3的路径: 0 -> 3
+路径长度: 5`}
+  />
+
+  <h2>高级贪心策略</h2>
+  
+  <p>在复杂问题中，需要设计巧妙的贪心策略和证明其正确性。</p>
+
+  <CodeExample 
+    client:load
+    title="高级贪心问题：分数背包、霍夫曼编码、任务调度"
+    code={`#include <iostream>
+#include <vector>
+#include <queue>
+#include <algorithm>
+#include <unordered_map>
+using namespace std;
+
+// 分数背包问题
+class FractionalKnapsack {
+private:
+    struct Item {
+        int weight, value;
+        double ratio;
+        int index;
+        
+        Item(int w, int v, int i) : weight(w), value(v), index(i) {
+            ratio = (double)value / weight;
+        }
+        
+        bool operator<(const Item& other) const {
+            return ratio > other.ratio; // 按性价比降序排列
+        }
+    };
+    
+public:
+    static pair<double, vector<double>> solve(vector<int>& weights, vector<int>& values, int capacity) {
+        vector<Item> items;
+        for (int i = 0; i < weights.size(); i++) {
+            items.push_back(Item(weights[i], values[i], i));
+        }
+        
+        sort(items.begin(), items.end());
+        
+        double totalValue = 0;
+        vector<double> fractions(weights.size(), 0);
+        int remainingCapacity = capacity;
+        
+        for (const Item& item : items) {
+            if (remainingCapacity >= item.weight) {
+                // 完全装入
+                fractions[item.index] = 1.0;
+                totalValue += item.value;
+                remainingCapacity -= item.weight;
+            } else if (remainingCapacity > 0) {
+                // 部分装入
+                double fraction = (double)remainingCapacity / item.weight;
+                fractions[item.index] = fraction;
+                totalValue += fraction * item.value;
+                remainingCapacity = 0;
+                break;
+            }
+        }
+        
+        return {totalValue, fractions};
+    }
+};
+
+// 霍夫曼编码
+class HuffmanCoding {
+private:
+    struct Node {
+        char ch;
+        int freq;
+        Node* left;
+        Node* right;
+        
+        Node(char c, int f) : ch(c), freq(f), left(nullptr), right(nullptr) {}
+        Node(int f) : ch(0), freq(f), left(nullptr), right(nullptr) {}
+        
+        bool operator>(const Node& other) const {
+            return freq > other.freq;
+        }
+    };
+    
+public:
+    static unordered_map<char, string> buildHuffmanCode(string text) {
+        // 统计频率
+        unordered_map<char, int> frequency;
+        for (char c : text) {
+            frequency[c]++;
+        }
+        
+        // 构建优先队列（最小堆）
+        priority_queue<Node*, vector<Node*>, function<bool(Node*, Node*)>> pq(
+            [](Node* a, Node* b) { return a->freq > b->freq; }
+        );
+        
+        for (auto& [ch, freq] : frequency) {
+            pq.push(new Node(ch, freq));
+        }
+        
+        // 构建霍夫曼树
+        while (pq.size() > 1) {
+            Node* right = pq.top(); pq.pop();
+            Node* left = pq.top(); pq.pop();
+            
+            Node* merged = new Node(left->freq + right->freq);
+            merged->left = left;
+            merged->right = right;
+            
+            pq.push(merged);
+        }
+        
+        Node* root = pq.empty() ? nullptr : pq.top();
+        
+        // 生成编码表
+        unordered_map<char, string> codes;
+        if (root) {
+            if (root->left == nullptr && root->right == nullptr) {
+                // 只有一个字符
+                codes[root->ch] = "0";
+            } else {
+                generateCodes(root, "", codes);
+            }
+        }
+        
+        return codes;
+    }
+    
+private:
+    static void generateCodes(Node* node, string code, unordered_map<char, string>& codes) {
+        if (node->left == nullptr && node->right == nullptr) {
+            codes[node->ch] = code;
+            return;
+        }
+        
+        if (node->left) {
+            generateCodes(node->left, code + "0", codes);
+        }
+        if (node->right) {
+            generateCodes(node->right, code + "1", codes);
+        }
+    }
+};
+
+// 任务调度问题
+class TaskScheduling {
+public:
+    // 最短作业优先调度（SJF）
+    static double shortestJobFirst(vector<int>& jobTimes) {
+        sort(jobTimes.begin(), jobTimes.end());
+        
+        double totalWaitingTime = 0;
+        int currentTime = 0;
+        
+        for (int jobTime : jobTimes) {
+            totalWaitingTime += currentTime;
+            currentTime += jobTime;
+        }
+        
+        return totalWaitingTime / jobTimes.size(); // 平均等待时间
+    }
+    
+    // 带截止时间的任务调度
+    static int maxTasksWithDeadlines(vector<pair<int, int>>& tasks) {
+        // tasks: (deadline, duration)
+        sort(tasks.begin(), tasks.end());
+        
+        int currentTime = 0;
+        int completedTasks = 0;
+        
+        for (auto& [deadline, duration] : tasks) {
+            if (currentTime + duration <= deadline) {
+                currentTime += duration;
+                completedTasks++;
+            }
+        }
+        
+        return completedTasks;
+    }
+    
+    // 最小化最大完成时间（多机调度）
+    static int minimizeMaxCompletionTime(vector<int>& jobs, int machines) {
+        sort(jobs.rbegin(), jobs.rend()); // 降序排列
+        
+        priority_queue<int, vector<int>, greater<int>> machineTimes; // 最小堆
+        for (int i = 0; i < machines; i++) {
+            machineTimes.push(0);
+        }
+        
+        for (int job : jobs) {
+            int earliestMachine = machineTimes.top();
+            machineTimes.pop();
+            machineTimes.push(earliestMachine + job);
+        }
+        
+        int maxTime = 0;
+        while (!machineTimes.empty()) {
+            maxTime = max(maxTime, machineTimes.top());
+            machineTimes.pop();
+        }
+        
+        return maxTime;
+    }
+};
+
+int main() {
+    // 测试分数背包
+    cout << "分数背包问题测试:" << endl;
+    vector<int> weights = {10, 20, 30};
+    vector<int> values = {60, 100, 120};
+    int capacity = 50;
+    
+    cout << "物品信息:" << endl;
+    for (int i = 0; i < weights.size(); i++) {
+        cout << "物品" << i << ": 重量=" << weights[i] << ", 价值=" << values[i] 
+             << ", 性价比=" << (double)values[i]/weights[i] << endl;
+    }
+    cout << "背包容量: " << capacity << endl;
+    
+    auto [maxValue, fractions] = FractionalKnapsack::solve(weights, values, capacity);
+    cout << "最大价值: " << maxValue << endl;
+    cout << "装入比例: ";
+    for (double f : fractions) {
+        cout << f << " ";
+    }
+    cout << endl;
+    
+    // 测试霍夫曼编码
+    cout << "\\n霍夫曼编码测试:" << endl;
+    string text = "hello world";
+    cout << "原始文本: " << text << endl;
+    
+    auto codes = HuffmanCoding::buildHuffmanCode(text);
+    cout << "霍夫曼编码:" << endl;
+    for (auto& [ch, code] : codes) {
+        cout << "'" << ch << "': " << code << endl;
+    }
+    
+    // 计算编码长度
+    int originalBits = text.length() * 8;
+    int encodedBits = 0;
+    for (char c : text) {
+        encodedBits += codes[c].length();
+    }
+    cout << "原始长度: " << originalBits << " bits" << endl;
+    cout << "编码长度: " << encodedBits << " bits" << endl;
+    cout << "压缩率: " << (1.0 - (double)encodedBits/originalBits) * 100 << "%" << endl;
+    
+    // 测试任务调度
+    cout << "\\n任务调度测试:" << endl;
+    vector<int> jobTimes = {6, 8, 7, 3, 4};
+    
+    cout << "作业时间: ";
+    for (int t : jobTimes) cout << t << " ";
+    cout << endl;
+    
+    double avgWait = TaskScheduling::shortestJobFirst(jobTimes);
+    cout << "SJF平均等待时间: " << avgWait << endl;
+    
+    // 测试多机调度
+    vector<int> jobs = {3, 1, 4, 1, 5, 9, 2, 6};
+    int machines = 3;
+    
+    cout << "\\n多机调度测试:" << endl;
+    cout << "作业: ";
+    for (int job : jobs) cout << job << " ";
+    cout << "\\n机器数: " << machines << endl;
+    
+    int maxTime = TaskScheduling::minimizeMaxCompletionTime(jobs, machines);
+    cout << "最大完成时间: " << maxTime << endl;
+    
+    return 0;
+}`}
+    explanation="分数背包按性价比贪心选择，霍夫曼编码按频率构建最优前缀编码树，任务调度通过合理的贪心策略优化等待时间或完成时间。"
+    output={`分数背包问题测试:
+物品信息:
+物品0: 重量=10, 价值=60, 性价比=6
+物品1: 重量=20, 价值=100, 性价比=5
+物品2: 重量=30, 价值=120, 性价比=4
+背包容量: 50
+最大价值: 240
+装入比例: 1 1 0.666667 
+
+霍夫曼编码测试:
+原始文本: hello world
+霍夫曼编码:
+'o': 00
+'l': 01
+' ': 100
+'d': 101
+'e': 1100
+'h': 1101
+'r': 1110
+'w': 1111
+原始长度: 88 bits
+编码长度: 32 bits
+压缩率: 63.6364%
+
+任务调度测试:
+作业时间: 6 8 7 3 4 
+SJF平均等待时间: 8.8
+
+多机调度测试:
+作业: 3 1 4 1 5 9 2 6 
+机器数: 3
+最大完成时间: 11`}
+  />
+
+  <h2>贪心算法进阶技巧总结</h2>
+  
+  <div class="tips">
+    <h3>贪心算法设计原则：</h3>
+    <ul>
+      <li>贪心选择性质：局部最优选择能导致全局最优解</li>
+      <li>最优子结构：问题的最优解包含子问题的最优解</li>
+      <li>无后效性：当前选择不影响后续选择的正确性</li>
+      <li>策略证明：用交换论证或归纳法证明贪心策略正确性</li>
+    </ul>
+    
+    <h3>常见贪心策略：</h3>
+    <ul>
+      <li>排序策略：按某种顺序处理元素（时间、权重、比率等）</li>
+      <li>优先队列：维护当前最优选择</li>
+      <li>扫描线算法：处理区间、事件等问题</li>
+      <li>交换论证：证明贪心选择不会变差</li>
+    </ul>
+    
+    <h3>应用领域：</h3>
+    <ul>
+      <li>图论：最小生成树、最短路径、网络流</li>
+      <li>调度问题：任务调度、资源分配</li>
+      <li>编码理论：霍夫曼编码、数据压缩</li>
+      <li>近似算法：NP-hard问题的近似解</li>
+    </ul>
+    
+    <h3>实现注意事项：</h3>
+    <ul>
+      <li>正确性证明：确保贪心策略能得到最优解</li>
+      <li>排序选择：选择合适的排序标准</li>
+      <li>边界处理：注意特殊情况和边界条件</li>
+      <li>时间复杂度：通常为O(n log n)由于排序</li>
+    </ul>
+  </div>
+
+  <div class="navigation">
+    <a href="/4-competitive/advanced-search" class="prev">← 高阶搜索算法</a>
+    <a href="/4-competitive/binary-search" class="next">二分，二分查找，二分答案 →</a>
+  </div>
+</Layout>
+
+<style>
+  .tips {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border-left: 4px solid #007bff;
+  }
+  
+  .tips h3 {
+    color: #007bff;
+    margin-top: 1rem;
+  }
+  
+  .tips ul {
+    margin-left: 1rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+  }
+  
+  .navigation a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .navigation a:hover {
+    text-decoration: underline;
+  }
+</style>

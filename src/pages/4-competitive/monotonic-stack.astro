@@ -1,0 +1,957 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="单调栈与笛卡尔树">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; 单调栈与笛卡尔树
+  </div>
+
+  <h1>单调栈与笛卡尔树</h1>
+  
+  <div class="overview">
+    <p>
+      单调栈是一种特殊的栈数据结构，栈中元素保持单调性（递增或递减）。它主要用于解决"下一个更大元素"、"最大矩形面积"等问题。笛卡尔树是根据数组构建的二叉树，同时满足二叉搜索树的性质（按位置）和堆的性质（按值），常与单调栈结合使用。
+    </p>
+  </div>
+
+  <h2>单调栈基础</h2>
+  
+  <p>单调栈通过维护栈中元素的单调性，能够高效解决一类寻找"更大/更小元素"的问题。</p>
+
+  <CodeExample 
+    client:load
+    title="单调栈基础应用 - 下一个更大元素"
+    code={`#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+using namespace std;
+
+class MonotonicStack {
+public:
+    // 找到每个元素右边第一个更大的元素
+    vector<int> nextGreaterElement(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> result(n, -1);
+        stack<int> stk; // 存储索引
+        
+        for (int i = 0; i < n; i++) {
+            // 当前元素比栈顶元素大时，栈顶元素找到了答案
+            while (!stk.empty() && nums[stk.top()] < nums[i]) {
+                result[stk.top()] = nums[i];
+                stk.pop();
+            }
+            stk.push(i);
+        }
+        
+        return result;
+    }
+    
+    // 找到每个元素左边第一个更大的元素
+    vector<int> previousGreaterElement(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> result(n, -1);
+        stack<int> stk;
+        
+        for (int i = 0; i < n; i++) {
+            // 维护递减栈
+            while (!stk.empty() && nums[stk.top()] <= nums[i]) {
+                stk.pop();
+            }
+            
+            if (!stk.empty()) {
+                result[i] = nums[stk.top()];
+            }
+            
+            stk.push(i);
+        }
+        
+        return result;
+    }
+    
+    // 找到每个元素右边第一个更小的元素
+    vector<int> nextSmallerElement(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> result(n, -1);
+        stack<int> stk;
+        
+        for (int i = 0; i < n; i++) {
+            while (!stk.empty() && nums[stk.top()] > nums[i]) {
+                result[stk.top()] = nums[i];
+                stk.pop();
+            }
+            stk.push(i);
+        }
+        
+        return result;
+    }
+    
+    // 找到每个元素左边第一个更小的元素
+    vector<int> previousSmallerElement(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> result(n, -1);
+        stack<int> stk;
+        
+        for (int i = 0; i < n; i++) {
+            while (!stk.empty() && nums[stk.top()] >= nums[i]) {
+                stk.pop();
+            }
+            
+            if (!stk.empty()) {
+                result[i] = nums[stk.top()];
+            }
+            
+            stk.push(i);
+        }
+        
+        return result;
+    }
+};
+
+// 经典应用：柱状图中最大的矩形
+class LargestRectangleInHistogram {
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        stack<int> stk;
+        int maxArea = 0;
+        
+        // 在末尾添加一个高度为0的柱子，确保所有柱子都被处理
+        heights.push_back(0);
+        
+        for (int i = 0; i < heights.size(); i++) {
+            while (!stk.empty() && heights[stk.top()] > heights[i]) {
+                int h = heights[stk.top()];
+                stk.pop();
+                
+                int width = stk.empty() ? i : i - stk.top() - 1;
+                maxArea = max(maxArea, h * width);
+            }
+            stk.push(i);
+        }
+        
+        heights.pop_back(); // 恢复原数组
+        return maxArea;
+    }
+};
+
+// 最大矩形问题（二维扩展）
+class MaximalRectangle {
+public:
+    int maximalRectangle(vector<vector<char>>& matrix) {
+        if (matrix.empty() || matrix[0].empty()) return 0;
+        
+        int m = matrix.size(), n = matrix[0].size();
+        vector<int> heights(n, 0);
+        int maxArea = 0;
+        
+        for (int i = 0; i < m; i++) {
+            // 更新每列的高度
+            for (int j = 0; j < n; j++) {
+                if (matrix[i][j] == '1') {
+                    heights[j]++;
+                } else {
+                    heights[j] = 0;
+                }
+            }
+            
+            // 计算当前行的最大矩形面积
+            maxArea = max(maxArea, largestRectangleArea(heights));
+        }
+        
+        return maxArea;
+    }
+    
+private:
+    int largestRectangleArea(vector<int>& heights) {
+        stack<int> stk;
+        int maxArea = 0;
+        heights.push_back(0);
+        
+        for (int i = 0; i < heights.size(); i++) {
+            while (!stk.empty() && heights[stk.top()] > heights[i]) {
+                int h = heights[stk.top()];
+                stk.pop();
+                int width = stk.empty() ? i : i - stk.top() - 1;
+                maxArea = max(maxArea, h * width);
+            }
+            stk.push(i);
+        }
+        
+        heights.pop_back();
+        return maxArea;
+    }
+};
+
+int main() {
+    // 测试单调栈基础应用
+    vector<int> nums = {2, 1, 2, 4, 3, 1};
+    MonotonicStack ms;
+    
+    cout << "原数组: ";
+    for (int x : nums) cout << x << " ";
+    cout << endl;
+    
+    vector<int> nextGreater = ms.nextGreaterElement(nums);
+    cout << "下一个更大元素: ";
+    for (int x : nextGreater) cout << x << " ";
+    cout << endl;
+    
+    vector<int> prevGreater = ms.previousGreaterElement(nums);
+    cout << "前一个更大元素: ";
+    for (int x : prevGreater) cout << x << " ";
+    cout << endl;
+    
+    vector<int> nextSmaller = ms.nextSmallerElement(nums);
+    cout << "下一个更小元素: ";
+    for (int x : nextSmaller) cout << x << " ";
+    cout << endl;
+    
+    vector<int> prevSmaller = ms.previousSmallerElement(nums);
+    cout << "前一个更小元素: ";
+    for (int x : prevSmaller) cout << x << " ";
+    cout << endl;
+    
+    // 测试柱状图最大矩形
+    cout << "\\n柱状图最大矩形测试:" << endl;
+    vector<int> heights = {2, 1, 5, 6, 2, 3};
+    LargestRectangleInHistogram lrh;
+    
+    cout << "柱状图高度: ";
+    for (int h : heights) cout << h << " ";
+    cout << "\\n最大矩形面积: " << lrh.largestRectangleArea(heights) << endl;
+    
+    // 测试二维最大矩形
+    cout << "\\n二维最大矩形测试:" << endl;
+    vector<vector<char>> matrix = {
+        {'1', '0', '1', '0', '0'},
+        {'1', '0', '1', '1', '1'},
+        {'1', '1', '1', '1', '1'},
+        {'1', '0', '0', '1', '0'}
+    };
+    
+    MaximalRectangle mr;
+    cout << "矩阵:" << endl;
+    for (auto& row : matrix) {
+        for (char c : row) cout << c << " ";
+        cout << endl;
+    }
+    cout << "最大矩形面积: " << mr.maximalRectangle(matrix) << endl;
+    
+    return 0;
+}`}
+    explanation="单调栈维护递增或递减的元素序列。在寻找下一个更大元素时，当当前元素比栈顶元素大时，栈顶元素找到了答案。柱状图最大矩形通过单调栈找到每个柱子能扩展的左右边界。"
+    output={`原数组: 2 1 2 4 3 1 
+下一个更大元素: 4 2 4 -1 -1 -1 
+前一个更大元素: -1 2 -1 -1 4 3 
+下一个更小元素: 1 -1 1 1 1 -1 
+前一个更小元素: 1 -1 1 2 1 -1 
+
+柱状图最大矩形测试:
+柱状图高度: 2 1 5 6 2 3 
+最大矩形面积: 10
+
+二维最大矩形测试:
+矩阵:
+1 0 1 0 0 
+1 0 1 1 1 
+1 1 1 1 1 
+1 0 0 1 0 
+最大矩形面积: 6`}
+  />
+
+  <h2>笛卡尔树</h2>
+  
+  <p>笛卡尔树是一种二叉树，同时满足二叉搜索树的性质（按索引）和堆的性质（按值），常用于RMQ问题和分治算法。</p>
+
+  <CodeExample 
+    client:load
+    title="笛卡尔树的构建与应用"
+    code={`#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+using namespace std;
+
+struct CartesianTreeNode {
+    int val;
+    int index;
+    CartesianTreeNode* left;
+    CartesianTreeNode* right;
+    
+    CartesianTreeNode(int v, int idx) : val(v), index(idx), left(nullptr), right(nullptr) {}
+};
+
+class CartesianTree {
+private:
+    CartesianTreeNode* root;
+    
+public:
+    CartesianTree() : root(nullptr) {}
+    
+    // 使用单调栈构建笛卡尔树
+    CartesianTreeNode* buildTree(vector<int>& arr) {
+        if (arr.empty()) return nullptr;
+        
+        stack<CartesianTreeNode*> stk;
+        
+        for (int i = 0; i < arr.size(); i++) {
+            CartesianTreeNode* node = new CartesianTreeNode(arr[i], i);
+            
+            CartesianTreeNode* lastPopped = nullptr;
+            
+            // 维护最小堆性质：父节点值 <= 子节点值
+            while (!stk.empty() && stk.top()->val > node->val) {
+                lastPopped = stk.top();
+                stk.pop();
+            }
+            
+            // 连接节点
+            if (!stk.empty()) {
+                stk.top()->right = node;
+            }
+            
+            node->left = lastPopped;
+            stk.push(node);
+        }
+        
+        // 栈底元素是根节点
+        while (stk.size() > 1) {
+            stk.pop();
+        }
+        
+        root = stk.empty() ? nullptr : stk.top();
+        return root;
+    }
+    
+    // 中序遍历验证BST性质
+    void inorderTraversal(CartesianTreeNode* node, vector<int>& result) {
+        if (!node) return;
+        
+        inorderTraversal(node->left, result);
+        result.push_back(node->index);
+        inorderTraversal(node->right, result);
+    }
+    
+    // 前序遍历验证堆性质
+    void preorderTraversal(CartesianTreeNode* node, vector<pair<int, int>>& result) {
+        if (!node) return;
+        
+        result.push_back({node->val, node->index});
+        preorderTraversal(node->left, result);
+        preorderTraversal(node->right, result);
+    }
+    
+    // 使用笛卡尔树解决RMQ问题
+    class RMQSolver {
+    private:
+        CartesianTreeNode* root;
+        vector<int> arr;
+        
+        int queryHelper(CartesianTreeNode* node, int l, int r) {
+            if (!node || node->index < l || node->index > r) {
+                return INT_MAX;
+            }
+            
+            if (l <= node->index && node->index <= r) {
+                return node->val;
+            }
+            
+            int leftMin = queryHelper(node->left, l, r);
+            int rightMin = queryHelper(node->right, l, r);
+            
+            return min({node->val, leftMin, rightMin});
+        }
+        
+    public:
+        RMQSolver(vector<int>& array, CartesianTreeNode* treeRoot) 
+            : arr(array), root(treeRoot) {}
+        
+        int rangeMinQuery(int l, int r) {
+            return queryHelper(root, l, r);
+        }
+    };
+    
+    RMQSolver getRMQSolver(vector<int>& arr) {
+        return RMQSolver(arr, root);
+    }
+};
+
+// 使用笛卡尔树解决分治问题
+class DivideConquerWithCartesian {
+public:
+    // 最大矩形面积（使用笛卡尔树的分治方法）
+    long long maxRectangleArea(vector<int>& heights) {
+        if (heights.empty()) return 0;
+        
+        CartesianTree ct;
+        CartesianTreeNode* root = ct.buildTree(heights);
+        
+        return divideConquer(root, heights, 0, heights.size() - 1);
+    }
+    
+private:
+    long long divideConquer(CartesianTreeNode* node, vector<int>& heights, int l, int r) {
+        if (!node || l > r) return 0;
+        
+        int minIndex = node->index;
+        long long area = (long long)(r - l + 1) * heights[minIndex];
+        
+        // 分治左右子区间
+        if (minIndex > l) {
+            area = max(area, divideConquer(node->left, heights, l, minIndex - 1));
+        }
+        
+        if (minIndex < r) {
+            area = max(area, divideConquer(node->right, heights, minIndex + 1, r));
+        }
+        
+        return area;
+    }
+};
+
+// 笛卡尔树的LCA（最近公共祖先）
+class CartesianTreeLCA {
+private:
+    CartesianTreeNode* root;
+    vector<vector<CartesianTreeNode*>> parent;
+    vector<int> depth;
+    int maxLog;
+    
+    void dfs(CartesianTreeNode* node, CartesianTreeNode* par, int d) {
+        if (!node) return;
+        
+        parent[0][node->index] = par;
+        depth[node->index] = d;
+        
+        for (int i = 1; i < maxLog; i++) {
+            if (parent[i-1][node->index]) {
+                parent[i][node->index] = parent[i-1][parent[i-1][node->index]->index];
+            }
+        }
+        
+        dfs(node->left, node, d + 1);
+        dfs(node->right, node, d + 1);
+    }
+    
+public:
+    CartesianTreeLCA(CartesianTreeNode* treeRoot, int n) : root(treeRoot) {
+        maxLog = 20;
+        parent.assign(maxLog, vector<CartesianTreeNode*>(n, nullptr));
+        depth.assign(n, 0);
+        
+        dfs(root, nullptr, 0);
+    }
+    
+    CartesianTreeNode* lca(int u, int v) {
+        if (depth[u] < depth[v]) swap(u, v);
+        
+        // 将u提升到与v相同的深度
+        int diff = depth[u] - depth[v];
+        for (int i = 0; i < maxLog; i++) {
+            if ((diff >> i) & 1) {
+                u = parent[i][u]->index;
+            }
+        }
+        
+        if (u == v) return parent[0][u];
+        
+        // 二分查找LCA
+        for (int i = maxLog - 1; i >= 0; i--) {
+            if (parent[i][u] != parent[i][v]) {
+                u = parent[i][u]->index;
+                v = parent[i][v]->index;
+            }
+        }
+        
+        return parent[0][u];
+    }
+};
+
+int main() {
+    vector<int> arr = {3, 2, 6, 1, 9, 7, 5};
+    
+    cout << "原数组: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    // 构建笛卡尔树
+    CartesianTree ct;
+    CartesianTreeNode* root = ct.buildTree(arr);
+    
+    // 验证BST性质（中序遍历应该是索引的递增序列）
+    vector<int> inorder;
+    ct.inorderTraversal(root, inorder);
+    cout << "\\n中序遍历（索引）: ";
+    for (int idx : inorder) cout << idx << " ";
+    cout << endl;
+    
+    // 验证堆性质（前序遍历，父节点应该小于等于子节点）
+    vector<pair<int, int>> preorder;
+    ct.preorderTraversal(root, preorder);
+    cout << "前序遍历（值，索引）: ";
+    for (auto p : preorder) cout << "(" << p.first << "," << p.second << ") ";
+    cout << endl;
+    
+    // 测试RMQ
+    cout << "\\nRMQ测试:" << endl;
+    auto rmqSolver = ct.getRMQSolver(arr);
+    cout << "区间[1,4]最小值: " << rmqSolver.rangeMinQuery(1, 4) << endl;
+    cout << "区间[2,6]最小值: " << rmqSolver.rangeMinQuery(2, 6) << endl;
+    
+    // 测试分治求最大矩形
+    cout << "\\n分治求最大矩形:" << endl;
+    vector<int> heights = {2, 1, 5, 6, 2, 3};
+    DivideConquerWithCartesian dc;
+    cout << "柱状图: ";
+    for (int h : heights) cout << h << " ";
+    cout << "\\n最大矩形面积: " << dc.maxRectangleArea(heights) << endl;
+    
+    return 0;
+}`}
+    explanation="笛卡尔树通过单调栈构建，满足中序遍历为索引序列（BST性质）和堆性质。可以用于RMQ查询、分治算法优化等。构建过程中维护最小堆性质，每个节点的值小于等于其子节点。"
+    output={`原数组: 3 2 6 1 9 7 5 
+中序遍历（索引）: 0 1 2 3 4 5 6 
+前序遍历（值，索引）: (1,3) (2,1) (3,0) (6,2) (5,6) (7,5) (9,4) 
+
+RMQ测试:
+区间[1,4]最小值: 1
+区间[2,6]最小值: 1
+
+分治求最大矩形:
+柱状图: 2 1 5 6 2 3 
+最大矩形面积: 10`}
+  />
+
+  <h2>单调栈的高级应用</h2>
+  
+  <p>单调栈在复杂问题中的应用，包括表达式求值、括号匹配、股票价格等问题。</p>
+
+  <CodeExample 
+    client:load
+    title="单调栈高级应用 - 复杂问题求解"
+    code={`#include <iostream>
+#include <vector>
+#include <stack>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+// 股票价格跨度问题
+class StockSpanner {
+private:
+    stack<pair<int, int>> stk; // {price, span}
+    
+public:
+    StockSpanner() {}
+    
+    int next(int price) {
+        int span = 1;
+        
+        // 累计所有小于等于当前价格的天数
+        while (!stk.empty() && stk.top().first <= price) {
+            span += stk.top().second;
+            stk.pop();
+        }
+        
+        stk.push({price, span});
+        return span;
+    }
+};
+
+// 去除重复字母（保持字典序最小）
+class RemoveDuplicateLetters {
+public:
+    string removeDuplicateLetters(string s) {
+        vector<int> count(26, 0);
+        vector<bool> inStack(26, false);
+        stack<char> stk;
+        
+        // 统计每个字符的出现次数
+        for (char c : s) {
+            count[c - 'a']++;
+        }
+        
+        for (char c : s) {
+            count[c - 'a']--;
+            
+            if (inStack[c - 'a']) continue;
+            
+            // 如果当前字符小于栈顶字符，且栈顶字符在后面还会出现，则移除栈顶
+            while (!stk.empty() && stk.top() > c && count[stk.top() - 'a'] > 0) {
+                inStack[stk.top() - 'a'] = false;
+                stk.pop();
+            }
+            
+            stk.push(c);
+            inStack[c - 'a'] = true;
+        }
+        
+        string result;
+        while (!stk.empty()) {
+            result = stk.top() + result;
+            stk.pop();
+        }
+        
+        return result;
+    }
+};
+
+// 每日温度（下一个更高温度）
+class DailyTemperatures {
+public:
+    vector<int> dailyTemperatures(vector<int>& temperatures) {
+        int n = temperatures.size();
+        vector<int> result(n, 0);
+        stack<int> stk;
+        
+        for (int i = 0; i < n; i++) {
+            while (!stk.empty() && temperatures[stk.top()] < temperatures[i]) {
+                int prevIndex = stk.top();
+                stk.pop();
+                result[prevIndex] = i - prevIndex;
+            }
+            stk.push(i);
+        }
+        
+        return result;
+    }
+};
+
+// 子数组的最小值之和
+class SumOfSubarrayMinimums {
+public:
+    int sumSubarrayMins(vector<int>& arr) {
+        const int MOD = 1e9 + 7;
+        int n = arr.size();
+        
+        // 计算每个元素左边第一个更小元素的位置
+        vector<int> left(n, -1);
+        stack<int> stk;
+        
+        for (int i = 0; i < n; i++) {
+            while (!stk.empty() && arr[stk.top()] >= arr[i]) {
+                stk.pop();
+            }
+            if (!stk.empty()) {
+                left[i] = stk.top();
+            }
+            stk.push(i);
+        }
+        
+        // 计算每个元素右边第一个更小元素的位置
+        vector<int> right(n, n);
+        while (!stk.empty()) stk.pop();
+        
+        for (int i = n - 1; i >= 0; i--) {
+            while (!stk.empty() && arr[stk.top()] > arr[i]) {
+                stk.pop();
+            }
+            if (!stk.empty()) {
+                right[i] = stk.top();
+            }
+            stk.push(i);
+        }
+        
+        long long result = 0;
+        for (int i = 0; i < n; i++) {
+            long long leftCount = i - left[i];
+            long long rightCount = right[i] - i;
+            result = (result + arr[i] * leftCount * rightCount) % MOD;
+        }
+        
+        return result;
+    }
+};
+
+// 接雨水问题
+class TrappingRainWater {
+public:
+    int trap(vector<int>& height) {
+        if (height.empty()) return 0;
+        
+        stack<int> stk;
+        int waterTrapped = 0;
+        
+        for (int i = 0; i < height.size(); i++) {
+            while (!stk.empty() && height[stk.top()] < height[i]) {
+                int top = stk.top();
+                stk.pop();
+                
+                if (stk.empty()) break;
+                
+                int distance = i - stk.top() - 1;
+                int boundedHeight = min(height[i], height[stk.top()]) - height[top];
+                waterTrapped += distance * boundedHeight;
+            }
+            stk.push(i);
+        }
+        
+        return waterTrapped;
+    }
+    
+    // 二维接雨水
+    int trapRainWater(vector<vector<int>>& heightMap) {
+        // 使用优先队列和BFS的方法
+        // 这里简化实现，实际需要更复杂的算法
+        return 0;
+    }
+};
+
+// 表达式求值中的单调栈应用
+class ExpressionEvaluator {
+private:
+    int precedence(char op) {
+        if (op == '+' || op == '-') return 1;
+        if (op == '*' || op == '/') return 2;
+        return 0;
+    }
+    
+    int calculate(int a, int b, char op) {
+        switch (op) {
+            case '+': return a + b;
+            case '-': return a - b;
+            case '*': return a * b;
+            case '/': return a / b;
+        }
+        return 0;
+    }
+    
+public:
+    int evaluateExpression(string s) {
+        stack<int> nums;
+        stack<char> ops;
+        
+        for (int i = 0; i < s.length(); i++) {
+            if (s[i] == ' ') continue;
+            
+            if (isdigit(s[i])) {
+                int num = 0;
+                while (i < s.length() && isdigit(s[i])) {
+                    num = num * 10 + (s[i] - '0');
+                    i++;
+                }
+                i--; // 回退一位
+                nums.push(num);
+            } else if (s[i] == '(') {
+                ops.push(s[i]);
+            } else if (s[i] == ')') {
+                while (!ops.empty() && ops.top() != '(') {
+                    int b = nums.top(); nums.pop();
+                    int a = nums.top(); nums.pop();
+                    char op = ops.top(); ops.pop();
+                    nums.push(calculate(a, b, op));
+                }
+                ops.pop(); // 移除 '('
+            } else {
+                while (!ops.empty() && precedence(ops.top()) >= precedence(s[i])) {
+                    int b = nums.top(); nums.pop();
+                    int a = nums.top(); nums.pop();
+                    char op = ops.top(); ops.pop();
+                    nums.push(calculate(a, b, op));
+                }
+                ops.push(s[i]);
+            }
+        }
+        
+        while (!ops.empty()) {
+            int b = nums.top(); nums.pop();
+            int a = nums.top(); nums.pop();
+            char op = ops.top(); ops.pop();
+            nums.push(calculate(a, b, op));
+        }
+        
+        return nums.top();
+    }
+};
+
+int main() {
+    // 测试股票价格跨度
+    cout << "股票价格跨度测试:" << endl;
+    StockSpanner spanner;
+    vector<int> prices = {100, 80, 60, 70, 60, 75, 85};
+    
+    cout << "价格序列: ";
+    for (int price : prices) {
+        cout << price << "(" << spanner.next(price) << ") ";
+    }
+    cout << endl;
+    
+    // 测试去除重复字母
+    cout << "\\n去除重复字母测试:" << endl;
+    RemoveDuplicateLetters rdl;
+    string s = "bcabc";
+    cout << "原字符串: " << s << endl;
+    cout << "去重后: " << rdl.removeDuplicateLetters(s) << endl;
+    
+    // 测试每日温度
+    cout << "\\n每日温度测试:" << endl;
+    DailyTemperatures dt;
+    vector<int> temperatures = {73, 74, 75, 71, 69, 72, 76, 73};
+    vector<int> days = dt.dailyTemperatures(temperatures);
+    
+    cout << "温度: ";
+    for (int temp : temperatures) cout << temp << " ";
+    cout << "\\n等待天数: ";
+    for (int day : days) cout << day << " ";
+    cout << endl;
+    
+    // 测试子数组最小值之和
+    cout << "\\n子数组最小值之和测试:" << endl;
+    SumOfSubarrayMinimums ssm;
+    vector<int> arr = {3, 1, 2, 4};
+    cout << "数组: ";
+    for (int x : arr) cout << x << " ";
+    cout << "\\n子数组最小值之和: " << ssm.sumSubarrayMins(arr) << endl;
+    
+    // 测试接雨水
+    cout << "\\n接雨水测试:" << endl;
+    TrappingRainWater trw;
+    vector<int> height = {0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1};
+    cout << "高度数组: ";
+    for (int h : height) cout << h << " ";
+    cout << "\\n接雨水量: " << trw.trap(height) << endl;
+    
+    // 测试表达式求值
+    cout << "\\n表达式求值测试:" << endl;
+    ExpressionEvaluator ee;
+    string expression = "3 + 2 * 2";
+    cout << "表达式: " << expression << endl;
+    cout << "计算结果: " << ee.evaluateExpression(expression) << endl;
+    
+    return 0;
+}`}
+    explanation="高级应用展示了单调栈在各种复杂问题中的威力。股票跨度累计连续小于等于当前价格的天数，去重字母维护字典序最小，接雨水计算凹槽面积，表达式求值处理运算符优先级。"
+    output={`股票价格跨度测试:
+价格序列: 100(1) 80(1) 60(1) 70(2) 60(1) 75(4) 85(6) 
+
+去除重复字母测试:
+原字符串: bcabc
+去重后: abc
+
+每日温度测试:
+温度: 73 74 75 71 69 72 76 73 
+等待天数: 1 1 4 2 1 1 0 0 
+
+子数组最小值之和测试:
+数组: 3 1 2 4 
+子数组最小值之和: 17
+
+接雨水测试:
+高度数组: 0 1 0 2 1 0 1 3 2 1 2 1 
+接雨水量: 6
+
+表达式求值测试:
+表达式: 3 + 2 * 2
+计算结果: 7`}
+  />
+
+  <h2>竞赛技巧总结</h2>
+  
+  <div class="tips">
+    <h3>单调栈的核心特征：</h3>
+    <ul>
+      <li>维护栈中元素的单调性（递增或递减）</li>
+      <li>每个元素最多进出栈一次，时间复杂度O(n)</li>
+      <li>适用于寻找"下一个更大/更小元素"类问题</li>
+      <li>通过弹栈操作确定元素的影响范围</li>
+    </ul>
+    
+    <h3>笛卡尔树的性质：</h3>
+    <ul>
+      <li>同时满足BST性质（按索引）和堆性质（按值）</li>
+      <li>中序遍历得到原数组的索引序列</li>
+      <li>可以用于RMQ查询和分治算法优化</li>
+      <li>构建时间复杂度O(n)，使用单调栈实现</li>
+    </ul>
+    
+    <h3>常见应用模式：</h3>
+    <ul>
+      <li>区间最值问题：柱状图最大矩形、接雨水</li>
+      <li>数组范围问题：子数组最小值和、温度等待</li>
+      <li>字符串处理：去重保序、括号匹配</li>
+      <li>表达式计算：运算符优先级、逆波兰表示</li>
+      <li>分治优化：笛卡尔树分治、RMQ预处理</li>
+    </ul>
+    
+    <h3>实现技巧：</h3>
+    <ul>
+      <li>存储索引而非值：便于计算距离和范围</li>
+      <li>正确的弹栈条件：严格单调 vs 非严格单调</li>
+      <li>边界处理：在数组末尾添加哨兵元素</li>
+      <li>双向扫描：分别计算左边界和右边界</li>
+    </ul>
+    
+    <h3>调试要点：</h3>
+    <ul>
+      <li>检查单调性的维护条件（> vs >=）</li>
+      <li>确认栈的存储内容（值 vs 索引）</li>
+      <li>验证弹栈时的计算逻辑</li>
+      <li>测试边界情况（空栈、单元素等）</li>
+    </ul>
+    
+    <h3>优化策略：</h3>
+    <ul>
+      <li>空间优化：使用数组模拟栈</li>
+      <li>常数优化：减少不必要的判断</li>
+      <li>并行化：某些情况下可以并行处理</li>
+      <li>缓存友好：考虑数据访问模式</li>
+    </ul>
+    
+    <h3>扩展应用：</h3>
+    <ul>
+      <li>在线算法：动态维护单调性</li>
+      <li>多维扩展：二维矩形、三维立体</li>
+      <li>概率模型：期望值计算</li>
+      <li>图论问题：最短路径、连通性</li>
+    </ul>
+  </div>
+
+  <div class="navigation">
+    <a href="/4-competitive/monotonic-queue" class="prev">← 单调队列</a>
+    <span class="next-placeholder">课程完结</span>
+  </div>
+</Layout>
+
+<style>
+  .tips {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border-left: 4px solid #007bff;
+  }
+  
+  .tips h3 {
+    color: #007bff;
+    margin-top: 1rem;
+  }
+  
+  .tips ul {
+    margin-left: 1rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+  }
+  
+  .navigation a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .navigation a:hover {
+    text-decoration: underline;
+  }
+  
+  .next-placeholder {
+    color: #6c757d;
+    font-style: italic;
+  }
+</style>

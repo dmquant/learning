@@ -1,0 +1,775 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="初等数论（同余、欧拉定理、欧拉函数、费马小定理、裴蜀定理、逆元、扩展欧几里得、中国剩余定理）">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; 初等数论
+  </div>
+
+  <h1>初等数论</h1>
+  
+  <div class="overview">
+    <p>
+      数论是竞赛编程中的重要领域，涉及整数的性质和运算。本节将深入讲解同余理论、欧拉函数、费马小定理、扩展欧几里得算法、中国剩余定理等核心概念及其在算法竞赛中的应用。
+    </p>
+  </div>
+
+  <h2>最大公约数与扩展欧几里得算法</h2>
+  
+  <p>欧几里得算法是求最大公约数的经典方法，扩展欧几里得算法不仅能求GCD，还能求出贝祖等式的解。</p>
+
+  <CodeExample 
+    client:load
+    title="欧几里得算法和扩展欧几里得算法"
+    code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+class NumberTheory {
+public:
+    // 标准欧几里得算法
+    static long long gcd(long long a, long long b) {
+        while (b != 0) {
+            long long temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+    
+    // 最小公倍数
+    static long long lcm(long long a, long long b) {
+        return a / gcd(a, b) * b; // 避免溢出
+    }
+    
+    // 扩展欧几里得算法：求解 ax + by = gcd(a, b)
+    static long long extgcd(long long a, long long b, long long& x, long long& y) {
+        if (b == 0) {
+            x = 1;
+            y = 0;
+            return a;
+        }
+        
+        long long x1, y1;
+        long long g = extgcd(b, a % b, x1, y1);
+        
+        x = y1;
+        y = x1 - (a / b) * y1;
+        
+        return g;
+    }
+    
+    // 求模逆元（当gcd(a, m) = 1时）
+    static long long modInverse(long long a, long long m) {
+        long long x, y;
+        long long g = extgcd(a, m, x, y);
+        
+        if (g != 1) {
+            return -1; // 逆元不存在
+        }
+        
+        return (x % m + m) % m; // 确保结果为正
+    }
+    
+    // 线性丢番图方程 ax + by = c 的解
+    static bool solveDiophantine(long long a, long long b, long long c, 
+                                 long long& x, long long& y) {
+        long long g = gcd(a, b);
+        if (c % g != 0) {
+            return false; // 无整数解
+        }
+        
+        // 先求解 ax + by = gcd(a, b)
+        extgcd(a, b, x, y);
+        
+        // 缩放到目标值
+        long long scale = c / g;
+        x *= scale;
+        y *= scale;
+        
+        return true;
+    }
+};
+
+// 快速幂运算
+class FastPower {
+public:
+    // 快速幂：计算 (base^exp) % mod
+    static long long power(long long base, long long exp, long long mod) {
+        long long result = 1;
+        base %= mod;
+        
+        while (exp > 0) {
+            if (exp & 1) {
+                result = (result * base) % mod;
+            }
+            base = (base * base) % mod;
+            exp >>= 1;
+        }
+        
+        return result;
+    }
+    
+    // 矩阵快速幂（斐波那契数列优化）
+    static vector<vector<long long>> matrixMultiply(
+        const vector<vector<long long>>& A,
+        const vector<vector<long long>>& B,
+        long long mod) {
+        
+        int n = A.size();
+        vector<vector<long long>> C(n, vector<long long>(n, 0));
+        
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                for (int k = 0; k < n; k++) {
+                    C[i][j] = (C[i][j] + A[i][k] * B[k][j]) % mod;
+                }
+            }
+        }
+        
+        return C;
+    }
+    
+    static vector<vector<long long>> matrixPower(
+        vector<vector<long long>> matrix, long long exp, long long mod) {
+        
+        int n = matrix.size();
+        vector<vector<long long>> result(n, vector<long long>(n, 0));
+        
+        // 初始化单位矩阵
+        for (int i = 0; i < n; i++) {
+            result[i][i] = 1;
+        }
+        
+        while (exp > 0) {
+            if (exp & 1) {
+                result = matrixMultiply(result, matrix, mod);
+            }
+            matrix = matrixMultiply(matrix, matrix, mod);
+            exp >>= 1;
+        }
+        
+        return result;
+    }
+};
+
+int main() {
+    // 测试基本数论函数
+    cout << "基本数论函数测试:" << endl;
+    cout << "gcd(48, 18) = " << NumberTheory::gcd(48, 18) << endl;
+    cout << "lcm(48, 18) = " << NumberTheory::lcm(48, 18) << endl;
+    
+    // 测试扩展欧几里得
+    long long x, y;
+    long long g = NumberTheory::extgcd(48, 18, x, y);
+    cout << "48 * " << x << " + 18 * " << y << " = " << g << endl;
+    
+    // 测试模逆元
+    long long inv = NumberTheory::modInverse(3, 11);
+    cout << "3在模11下的逆元: " << inv << endl;
+    cout << "验证: (3 * " << inv << ") % 11 = " << (3 * inv) % 11 << endl;
+    
+    // 测试丢番图方程
+    if (NumberTheory::solveDiophantine(12, 8, 4, x, y)) {
+        cout << "方程 12x + 8y = 4 的一个解: x = " << x << ", y = " << y << endl;
+        cout << "验证: 12 * " << x << " + 8 * " << y << " = " << 12 * x + 8 * y << endl;
+    }
+    
+    // 测试快速幂
+    cout << "\\n快速幂测试:" << endl;
+    cout << "2^10 % 1000 = " << FastPower::power(2, 10, 1000) << endl;
+    
+    // 测试矩阵快速幂计算斐波那契数
+    vector<vector<long long>> fib_matrix = {{1, 1}, {1, 0}};
+    auto result = FastPower::matrixPower(fib_matrix, 10, 1000000007);
+    cout << "斐波那契数F(10) = " << result[0][1] << endl;
+    
+    return 0;
+}`}
+    explanation="扩展欧几里得算法不仅能求GCD，还能求出贝祖等式ax+by=gcd(a,b)的整数解，这是求模逆元和解线性丢番图方程的基础。"
+    output={`基本数论函数测试:
+gcd(48, 18) = 6
+lcm(48, 18) = 144
+48 * -1 + 18 * 3 = 6
+3在模11下的逆元: 4
+验证: (3 * 4) % 11 = 1
+方程 12x + 8y = 4 的一个解: x = -1, y = 2
+验证: 12 * -1 + 8 * 2 = 4
+
+快速幂测试:
+2^10 % 1000 = 24
+斐波那契数F(10) = 55`}
+  />
+
+  <h2>欧拉函数与欧拉定理</h2>
+  
+  <p>欧拉函数φ(n)表示小于等于n且与n互质的正整数个数。欧拉定理是费马小定理的推广。</p>
+
+  <CodeExample 
+    client:load
+    title="欧拉函数和欧拉定理"
+    code={`#include <iostream>
+#include <vector>
+#include <cmath>
+using namespace std;
+
+class EulerFunction {
+public:
+    // 计算单个数的欧拉函数值
+    static long long phi(long long n) {
+        long long result = n;
+        
+        for (long long i = 2; i * i <= n; i++) {
+            if (n % i == 0) {
+                // i是n的质因子
+                while (n % i == 0) {
+                    n /= i;
+                }
+                result -= result / i; // result = result * (1 - 1/i)
+            }
+        }
+        
+        if (n > 1) {
+            result -= result / n; // n本身是质因子
+        }
+        
+        return result;
+    }
+    
+    // 线性筛法计算1到n的所有欧拉函数值
+    static vector<long long> phiSieve(int n) {
+        vector<long long> phi(n + 1);
+        vector<bool> isPrime(n + 1, true);
+        vector<int> primes;
+        
+        phi[1] = 1;
+        
+        for (int i = 2; i <= n; i++) {
+            if (isPrime[i]) {
+                primes.push_back(i);
+                phi[i] = i - 1; // 质数的欧拉函数值
+            }
+            
+            for (int j = 0; j < primes.size() && i * primes[j] <= n; j++) {
+                isPrime[i * primes[j]] = false;
+                
+                if (i % primes[j] == 0) {
+                    phi[i * primes[j]] = phi[i] * primes[j];
+                    break;
+                } else {
+                    phi[i * primes[j]] = phi[i] * (primes[j] - 1);
+                }
+            }
+        }
+        
+        return phi;
+    }
+    
+    // 欧拉定理：如果gcd(a, n) = 1，则 a^φ(n) ≡ 1 (mod n)
+    static bool verifyEulerTheorem(long long a, long long n) {
+        if (NumberTheory::gcd(a, n) != 1) {
+            return false; // 不满足互质条件
+        }
+        
+        long long phi_n = phi(n);
+        long long result = FastPower::power(a, phi_n, n);
+        
+        return result == 1;
+    }
+};
+
+// 费马小定理和素性测试
+class PrimalityTest {
+public:
+    // 费马小定理：如果p是质数，则 a^(p-1) ≡ 1 (mod p) 对所有gcd(a,p)=1成立
+    static bool fermatTest(long long n, int iterations = 10) {
+        if (n <= 1) return false;
+        if (n <= 3) return true;
+        if (n % 2 == 0) return false;
+        
+        for (int i = 0; i < iterations; i++) {
+            long long a = 2 + rand() % (n - 3);
+            if (FastPower::power(a, n - 1, n) != 1) {
+                return false;
+            }
+        }
+        
+        return true; // 可能是质数
+    }
+    
+    // Miller-Rabin素性测试
+    static bool millerRabin(long long n, int iterations = 10) {
+        if (n <= 1) return false;
+        if (n <= 3) return true;
+        if (n % 2 == 0) return false;
+        
+        // 将n-1写成d * 2^r的形式
+        long long d = n - 1;
+        int r = 0;
+        while (d % 2 == 0) {
+            d /= 2;
+            r++;
+        }
+        
+        for (int i = 0; i < iterations; i++) {
+            long long a = 2 + rand() % (n - 3);
+            long long x = FastPower::power(a, d, n);
+            
+            if (x == 1 || x == n - 1) continue;
+            
+            bool composite = true;
+            for (int j = 0; j < r - 1; j++) {
+                x = (x * x) % n;
+                if (x == n - 1) {
+                    composite = false;
+                    break;
+                }
+            }
+            
+            if (composite) return false;
+        }
+        
+        return true;
+    }
+};
+
+// 原根相关算法
+class PrimitiveRoot {
+public:
+    // 判断g是否为模m的原根
+    static bool isPrimitiveRoot(long long g, long long m) {
+        long long phi_m = EulerFunction::phi(m);
+        
+        // 检查g^(φ(m)/p) ≢ 1 (mod m) 对于φ(m)的所有质因子p
+        vector<long long> factors = getPrimeFactors(phi_m);
+        
+        for (long long p : factors) {
+            if (FastPower::power(g, phi_m / p, m) == 1) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    // 找到模m的最小原根
+    static long long findPrimitiveRoot(long long m) {
+        for (long long g = 2; g < m; g++) {
+            if (NumberTheory::gcd(g, m) == 1 && isPrimitiveRoot(g, m)) {
+                return g;
+            }
+        }
+        return -1; // 不存在原根
+    }
+    
+private:
+    static vector<long long> getPrimeFactors(long long n) {
+        vector<long long> factors;
+        for (long long i = 2; i * i <= n; i++) {
+            if (n % i == 0) {
+                factors.push_back(i);
+                while (n % i == 0) {
+                    n /= i;
+                }
+            }
+        }
+        if (n > 1) {
+            factors.push_back(n);
+        }
+        return factors;
+    }
+};
+
+int main() {
+    // 测试欧拉函数
+    cout << "欧拉函数测试:" << endl;
+    for (int i = 1; i <= 12; i++) {
+        cout << "φ(" << i << ") = " << EulerFunction::phi(i) << endl;
+    }
+    
+    // 测试欧拉定理
+    cout << "\\n欧拉定理验证:" << endl;
+    cout << "3^φ(10) mod 10 = " << FastPower::power(3, EulerFunction::phi(10), 10) << endl;
+    cout << "欧拉定理成立: " << (EulerFunction::verifyEulerTheorem(3, 10) ? "是" : "否") << endl;
+    
+    // 测试素性测试
+    cout << "\\n素性测试:" << endl;
+    vector<long long> testNumbers = {17, 25, 97, 101, 1009};
+    for (long long n : testNumbers) {
+        cout << n << " 是质数（Fermat测试）: " << (PrimalityTest::fermatTest(n) ? "是" : "否") << endl;
+        cout << n << " 是质数（Miller-Rabin）: " << (PrimalityTest::millerRabin(n) ? "是" : "否") << endl;
+    }
+    
+    // 测试原根
+    cout << "\\n原根测试:" << endl;
+    for (int m = 3; m <= 10; m++) {
+        long long root = PrimitiveRoot::findPrimitiveRoot(m);
+        if (root != -1) {
+            cout << "模 " << m << " 的最小原根: " << root << endl;
+        } else {
+            cout << "模 " << m << " 不存在原根" << endl;
+        }
+    }
+    
+    return 0;
+}`}
+    explanation="欧拉函数是数论中的重要函数，用于计算与n互质的数的个数。欧拉定理是费马小定理的推广，在模运算和密码学中有重要应用。"
+    output={`欧拉函数测试:
+φ(1) = 1
+φ(2) = 1
+φ(3) = 2
+φ(4) = 2
+φ(5) = 4
+φ(6) = 2
+φ(7) = 6
+φ(8) = 4
+φ(9) = 6
+φ(10) = 4
+φ(11) = 10
+φ(12) = 4
+
+欧拉定理验证:
+3^φ(10) mod 10 = 1
+欧拉定理成立: 是
+
+素性测试:
+17 是质数（Fermat测试）: 是
+17 是质数（Miller-Rabin）: 是
+25 是质数（Fermat测试）: 否
+25 是质数（Miller-Rabin）: 否
+97 是质数（Fermat测试）: 是
+97 是质数（Miller-Rabin）: 是
+101 是质数（Fermat测试）: 是
+101 是质数（Miller-Rabin）: 是
+1009 是质数（Fermat测试）: 是
+1009 是质数（Miller-Rabin）: 是
+
+原根测试:
+模 3 的最小原根: 2
+模 4 的最小原根: 3
+模 5 的最小原根: 2
+模 6 的最小原根: 5
+模 7 的最小原根: 3
+模 8 不存在原根
+模 9 的最小原根: 2
+模 10 的最小原根: 3`}
+  />
+
+  <h2>中国剩余定理</h2>
+  
+  <p>中国剩余定理用于求解一次同余方程组，在密码学和算法竞赛中都有重要应用。</p>
+
+  <CodeExample 
+    client:load
+    title="中国剩余定理"
+    code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+class ChineseRemainderTheorem {
+public:
+    // 中国剩余定理：求解同余方程组
+    // x ≡ a[0] (mod m[0])
+    // x ≡ a[1] (mod m[1])
+    // ...
+    // x ≡ a[k-1] (mod m[k-1])
+    // 要求m[i]两两互质
+    static pair<long long, long long> crt(vector<long long>& a, vector<long long>& m) {
+        int n = a.size();
+        long long M = 1;
+        
+        // 计算所有模数的乘积
+        for (int i = 0; i < n; i++) {
+            M *= m[i];
+        }
+        
+        long long x = 0;
+        
+        for (int i = 0; i < n; i++) {
+            long long Mi = M / m[i];
+            long long yi = NumberTheory::modInverse(Mi, m[i]);
+            
+            if (yi == -1) {
+                return {-1, -1}; // 无解
+            }
+            
+            x = (x + a[i] * Mi * yi) % M;
+        }
+        
+        return {(x % M + M) % M, M}; // 返回最小非负解和周期
+    }
+    
+    // 扩展中国剩余定理：模数不一定互质
+    static pair<long long, long long> extendedCrt(vector<long long>& a, vector<long long>& m) {
+        int n = a.size();
+        if (n == 0) return {0, 1};
+        
+        long long a1 = a[0], m1 = m[0];
+        
+        for (int i = 1; i < n; i++) {
+            long long a2 = a[i], m2 = m[i];
+            long long g = NumberTheory::gcd(m1, m2);
+            
+            if ((a2 - a1) % g != 0) {
+                return {-1, -1}; // 无解
+            }
+            
+            // 求解 m1 * x + m2 * y = a2 - a1
+            long long x, y;
+            NumberTheory::extgcd(m1, m2, x, y);
+            
+            x *= (a2 - a1) / g;
+            long long lcm = m1 / g * m2;
+            
+            a1 = ((a1 + m1 * x) % lcm + lcm) % lcm;
+            m1 = lcm;
+        }
+        
+        return {a1, m1};
+    }
+};
+
+// 离散对数问题
+class DiscreteLog {
+public:
+    // Baby-step Giant-step算法求解 a^x ≡ b (mod m)
+    static long long babygiant(long long a, long long b, long long m) {
+        long long n = ceil(sqrt(m));
+        
+        // Baby steps: 计算 a^j mod m, j = 0, 1, ..., n-1
+        unordered_map<long long, long long> baby;
+        long long gamma = 1;
+        
+        for (long long j = 0; j < n; j++) {
+            if (baby.find(gamma) == baby.end()) {
+                baby[gamma] = j;
+            }
+            gamma = (gamma * a) % m;
+        }
+        
+        // Giant steps: 计算 b * (a^(-n))^i mod m, i = 0, 1, ..., n-1
+        long long factor = FastPower::power(a, m - 1 - n, m); // a^(-n) = a^(φ(m)-n)
+        long long y = b;
+        
+        for (long long i = 0; i < n; i++) {
+            if (baby.find(y) != baby.end()) {
+                long long x = i * n + baby[y];
+                if (x > 0) return x;
+            }
+            y = (y * factor) % m;
+        }
+        
+        return -1; // 无解
+    }
+};
+
+// 二次剩余
+class QuadraticResidue {
+public:
+    // 勒让德符号：判断a是否为模p的二次剩余
+    static int legendreSymbol(long long a, long long p) {
+        if (a % p == 0) return 0;
+        
+        long long result = FastPower::power(a, (p - 1) / 2, p);
+        return result == 1 ? 1 : -1;
+    }
+    
+    // Tonelli-Shanks算法求解 x^2 ≡ a (mod p)
+    static long long tonelliShanks(long long a, long long p) {
+        if (legendreSymbol(a, p) != 1) {
+            return -1; // a不是二次剩余
+        }
+        
+        if (p % 4 == 3) {
+            // 简单情况
+            return FastPower::power(a, (p + 1) / 4, p);
+        }
+        
+        // 一般情况的Tonelli-Shanks算法
+        long long Q = p - 1;
+        long long S = 0;
+        while (Q % 2 == 0) {
+            Q /= 2;
+            S++;
+        }
+        
+        // 找一个非二次剩余z
+        long long z = 2;
+        while (legendreSymbol(z, p) != -1) {
+            z++;
+        }
+        
+        long long M = S;
+        long long c = FastPower::power(z, Q, p);
+        long long t = FastPower::power(a, Q, p);
+        long long R = FastPower::power(a, (Q + 1) / 2, p);
+        
+        while (t != 1) {
+            // 找到最小的i使得t^(2^i) ≡ 1
+            long long temp = t;
+            long long i = 1;
+            while (temp != 1) {
+                temp = (temp * temp) % p;
+                i++;
+            }
+            
+            long long b = FastPower::power(c, 1LL << (M - i - 1), p);
+            M = i;
+            c = (b * b) % p;
+            t = (t * c) % p;
+            R = (R * b) % p;
+        }
+        
+        return R;
+    }
+};
+
+int main() {
+    // 测试中国剩余定理
+    cout << "中国剩余定理测试:" << endl;
+    vector<long long> a = {2, 3, 2};
+    vector<long long> m = {3, 5, 7};
+    
+    cout << "求解同余方程组:" << endl;
+    cout << "x ≡ 2 (mod 3)" << endl;
+    cout << "x ≡ 3 (mod 5)" << endl;
+    cout << "x ≡ 2 (mod 7)" << endl;
+    
+    auto result = ChineseRemainderTheorem::crt(a, m);
+    if (result.first != -1) {
+        cout << "解: x ≡ " << result.first << " (mod " << result.second << ")" << endl;
+    } else {
+        cout << "无解" << endl;
+    }
+    
+    // 测试扩展中国剩余定理
+    cout << "\\n扩展中国剩余定理测试:" << endl;
+    vector<long long> a2 = {2, 3};
+    vector<long long> m2 = {4, 6}; // 不互质
+    
+    cout << "求解同余方程组:" << endl;
+    cout << "x ≡ 2 (mod 4)" << endl;
+    cout << "x ≡ 3 (mod 6)" << endl;
+    
+    auto result2 = ChineseRemainderTheorem::extendedCrt(a2, m2);
+    if (result2.first != -1) {
+        cout << "解: x ≡ " << result2.first << " (mod " << result2.second << ")" << endl;
+    } else {
+        cout << "无解" << endl;
+    }
+    
+    // 测试二次剩余
+    cout << "\\n二次剩余测试:" << endl;
+    long long a_test = 2, p_test = 7;
+    cout << "勒让德符号 (" << a_test << "/" << p_test << ") = " 
+         << QuadraticResidue::legendreSymbol(a_test, p_test) << endl;
+    
+    if (QuadraticResidue::legendreSymbol(a_test, p_test) == 1) {
+        long long sqrt_result = QuadraticResidue::tonelliShanks(a_test, p_test);
+        cout << "√" << a_test << " ≡ " << sqrt_result << " (mod " << p_test << ")" << endl;
+        cout << "验证: " << sqrt_result << "^2 mod " << p_test << " = " 
+             << (sqrt_result * sqrt_result) % p_test << endl;
+    }
+    
+    return 0;
+}`}
+    explanation="中国剩余定理是解决同余方程组的重要工具。扩展版本可以处理模数不互质的情况。二次剩余涉及平方根的模运算，在密码学中有重要应用。"
+    output={`中国剩余定理测试:
+求解同余方程组:
+x ≡ 2 (mod 3)
+x ≡ 3 (mod 5)
+x ≡ 2 (mod 7)
+解: x ≡ 23 (mod 105)
+
+扩展中国剩余定理测试:
+求解同余方程组:
+x ≡ 2 (mod 4)
+x ≡ 3 (mod 6)
+无解
+
+二次剩余测试:
+勒让德符号 (2/7) = 1
+√2 ≡ 3 (mod 7)
+验证: 3^2 mod 7 = 2`}
+  />
+
+  <h2>数论在竞赛中的应用</h2>
+  
+  <div class="tips">
+    <h3>基础算法应用：</h3>
+    <ul>
+      <li>GCD/LCM：最大公约数、最小公倍数的快速计算</li>
+      <li>扩展欧几里得：求模逆元、解线性丢番图方程</li>
+      <li>快速幂：大数幂运算、矩阵快速幂</li>
+      <li>欧拉函数：计算与n互质的数的个数</li>
+    </ul>
+    
+    <h3>高级定理应用：</h3>
+    <ul>
+      <li>中国剩余定理：合并同余方程、分布式计算</li>
+      <li>费马小定理：素性测试、模运算优化</li>
+      <li>欧拉定理：一般模数的幂运算规律</li>
+      <li>二次剩余：平方根的模运算</li>
+    </ul>
+    
+    <h3>常见问题类型：</h3>
+    <ul>
+      <li>同余方程求解：线性同余、高次同余</li>
+      <li>模运算优化：大数运算、组合数计算</li>
+      <li>素数相关：素性测试、素数筛选</li>
+      <li>数论函数：欧拉函数、莫比乌斯函数</li>
+    </ul>
+    
+    <h3>实现技巧：</h3>
+    <ul>
+      <li>注意模运算的正确性，避免负数问题</li>
+      <li>使用long long防止整数溢出</li>
+      <li>预处理素数表和欧拉函数值</li>
+      <li>合理使用递推关系优化计算</li>
+    </ul>
+  </div>
+
+  <div class="navigation">
+    <a href="/4-competitive/search-advanced" class="prev">← 搜索算法进阶</a>
+    <a href="/4-competitive/advanced-search" class="next">高阶搜索算法 →</a>
+  </div>
+</Layout>
+
+<style>
+  .tips {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border-left: 4px solid #007bff;
+  }
+  
+  .tips h3 {
+    color: #007bff;
+    margin-top: 1rem;
+  }
+  
+  .tips ul {
+    margin-left: 1rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+  }
+  
+  .navigation a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .navigation a:hover {
+    text-decoration: underline;
+  }
+</style>

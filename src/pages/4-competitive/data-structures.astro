@@ -1,0 +1,369 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Data Structures (Stack, Queue, Linked List, Priority Queue)">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; Data Structures
+  </div>
+
+  <h1>Data Structures (Stack, Queue, Linked List, Priority Queue)</h1>
+  
+  <div class="overview">
+    <p>
+      In competitive programming, mastering efficient implementations and flexible applications of basic data structures is crucial. This section will dive deep into the application techniques of stacks, queues, linked lists, and priority queues in algorithmic contests.
+    </p>
+  </div>
+
+  <h2>Stack Applications in Competitive Programming</h2>
+  
+  <p>Stack is a Last-In-First-Out (LIFO) data structure, commonly used in contests for expression evaluation, bracket matching, monotonic stack problems, etc.</p>
+
+  <CodeExample 
+    client:load
+    title="Monotonic Stack to Find Next Greater Element"
+    code={`#include <iostream>
+#include <stack>
+#include <vector>
+using namespace std;
+
+vector<int> nextGreaterElement(vector<int>& nums) {
+    int n = nums.size();
+    vector<int> result(n, -1);
+    stack<int> st; // Store indices
+    
+    for (int i = 0; i < n; i++) {
+        // Current element is greater than stack top, found next greater element
+        while (!st.empty() && nums[i] > nums[st.top()]) {
+            result[st.top()] = nums[i];
+            st.pop();
+        }
+        st.push(i);
+    }
+    
+    return result;
+}
+
+int main() {
+    vector<int> nums = {2, 1, 2, 4, 3, 1};
+    vector<int> result = nextGreaterElement(nums);
+    
+    cout << "Original array: ";
+    for (int x : nums) cout << x << " ";
+    cout << "\\nNext greater element: ";
+    for (int x : result) cout << x << " ";
+    cout << endl;
+    
+    return 0;
+}`}
+    explanation="Monotonic stack is an important technique in competitive programming, used to solve 'next greater/smaller element' type problems. Time complexity O(n), each element is pushed and popped at most once."
+    output={`Original array: 2 1 2 4 3 1 
+Next greater element: 4 2 4 -1 -1 -1`}
+  />
+
+  <h2>Queue and Deque</h2>
+  
+  <p>Queue is a First-In-First-Out (FIFO) data structure, deque allows insertion and deletion from both ends, widely used in BFS and sliding window problems.</p>
+
+  <CodeExample 
+    client:load
+    title="Deque Implementation for Sliding Window Maximum"
+    code={`#include <iostream>
+#include <deque>
+#include <vector>
+using namespace std;
+
+vector<int> maxSlidingWindow(vector<int>& nums, int k) {
+    deque<int> dq; // Store array indices
+    vector<int> result;
+    
+    for (int i = 0; i < nums.size(); i++) {
+        // Remove elements outside window range
+        while (!dq.empty() && dq.front() <= i - k) {
+            dq.pop_front();
+        }
+        
+        // Maintain monotonic decreasing deque
+        while (!dq.empty() && nums[dq.back()] <= nums[i]) {
+            dq.pop_back();
+        }
+        
+        dq.push_back(i);
+        
+        // Start recording results after window is formed
+        if (i >= k - 1) {
+            result.push_back(nums[dq.front()]);
+        }
+    }
+    
+    return result;
+}
+
+int main() {
+    vector<int> nums = {1, 3, -1, -3, 5, 3, 6, 7};
+    int k = 3;
+    vector<int> result = maxSlidingWindow(nums, k);
+    
+    cout << "Array: ";
+    for (int x : nums) cout << x << " ";
+    cout << "\\nWindow size: " << k << endl;
+    cout << "Sliding window maximum: ";
+    for (int x : result) cout << x << " ";
+    cout << endl;
+    
+    return 0;
+}`}
+    explanation="Using deque to maintain a monotonic decreasing sequence in the sliding window, the front is always the maximum value of current window. Time complexity O(n)."
+    output={`Array: 1 3 -1 -3 5 3 6 7 
+Window size: 3
+Sliding window maximum: 3 3 5 5 6 7`}
+  />
+
+  <h2>Priority Queue</h2>
+  
+  <p>Priority queue is implemented based on heap, frequently used in Dijkstra's algorithm, greedy algorithms, and other scenarios.</p>
+
+  <CodeExample 
+    client:load
+    title="Priority Queue for Finding K Smallest Elements"
+    code={`#include <iostream>
+#include <queue>
+#include <vector>
+using namespace std;
+
+// Simplified version of merging K sorted lists: find K smallest elements from K arrays
+vector<int> findKSmallest(vector<vector<int>>& arrays, int k) {
+    // Min heap storing {value, array index, element index}
+    priority_queue<tuple<int, int, int>, 
+                   vector<tuple<int, int, int>>, 
+                   greater<tuple<int, int, int>>> pq;
+    
+    // Add first element of each array to heap
+    for (int i = 0; i < arrays.size(); i++) {
+        if (!arrays[i].empty()) {
+            pq.push({arrays[i][0], i, 0});
+        }
+    }
+    
+    vector<int> result;
+    
+    while (!pq.empty() && result.size() < k) {
+        auto [val, arrIdx, elemIdx] = pq.top();
+        pq.pop();
+        
+        result.push_back(val);
+        
+        // If current array has next element, add to heap
+        if (elemIdx + 1 < arrays[arrIdx].size()) {
+            pq.push({arrays[arrIdx][elemIdx + 1], arrIdx, elemIdx + 1});
+        }
+    }
+    
+    return result;
+}
+
+int main() {
+    vector<vector<int>> arrays = {
+        {1, 4, 7},
+        {2, 5, 8},
+        {3, 6, 9}
+    };
+    int k = 5;
+    
+    vector<int> result = findKSmallest(arrays, k);
+    
+    cout << "Input arrays:" << endl;
+    for (int i = 0; i < arrays.size(); i++) {
+        cout << "Array " << i + 1 << ": ";
+        for (int x : arrays[i]) cout << x << " ";
+        cout << endl;
+    }
+    
+    cout << "Smallest " << k << " elements: ";
+    for (int x : result) cout << x << " ";
+    cout << endl;
+    
+    return 0;
+}`}
+    explanation="Using min heap to merge multiple sorted arrays, extracting minimum element each time. This is a variation of merge K sorted lists problem, time complexity O(k log m), where m is number of arrays."
+    output={`Input arrays:
+Array 1: 1 4 7 
+Array 2: 2 5 8 
+Array 3: 3 6 9 
+Smallest 5 elements: 1 2 3 4 5`}
+  />
+
+  <h2>Linked List Advanced Operations</h2>
+  
+  <p>In contests, linked lists often combine with fast and slow pointer, cycle detection, etc.</p>
+
+  <CodeExample 
+    client:load
+    title="Fast and Slow Pointer to Detect Linked List Cycle"
+    code={`#include <iostream>
+using namespace std;
+
+struct ListNode {
+    int val;
+    ListNode* next;
+    ListNode(int x) : val(x), next(nullptr) {}
+};
+
+class Solution {
+public:
+    // Detect if linked list has cycle
+    bool hasCycle(ListNode* head) {
+        if (!head || !head->next) return false;
+        
+        ListNode* slow = head;
+        ListNode* fast = head;
+        
+        while (fast && fast->next) {
+            slow = slow->next;
+            fast = fast->next->next;
+            
+            if (slow == fast) {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    // Find cycle entrance node
+    ListNode* detectCycle(ListNode* head) {
+        if (!head || !head->next) return nullptr;
+        
+        ListNode* slow = head;
+        ListNode* fast = head;
+        
+        // First step: detect if there is a cycle
+        while (fast && fast->next) {
+            slow = slow->next;
+            fast = fast->next->next;
+            
+            if (slow == fast) {
+                break;
+            }
+        }
+        
+        if (!fast || !fast->next) return nullptr;
+        
+        // Second step: find cycle entrance
+        slow = head;
+        while (slow != fast) {
+            slow = slow->next;
+            fast = fast->next;
+        }
+        
+        return slow;
+    }
+};
+
+int main() {
+    // Create test linked list: 1->2->3->4->2 (cycle)
+    ListNode* head = new ListNode(1);
+    ListNode* node2 = new ListNode(2);
+    ListNode* node3 = new ListNode(3);
+    ListNode* node4 = new ListNode(4);
+    
+    head->next = node2;
+    node2->next = node3;
+    node3->next = node4;
+    node4->next = node2; // form cycle
+    
+    Solution sol;
+    
+    cout << "Linked list has cycle: " << (sol.hasCycle(head) ? "Yes" : "No") << endl;
+    
+    ListNode* cycleStart = sol.detectCycle(head);
+    if (cycleStart) {
+        cout << "Cycle entrance node value: " << cycleStart->val << endl;
+    }
+    
+    return 0;
+}`}
+    explanation="Floyd's cycle detection algorithm (fast and slow pointer) is a classic method for detecting cycle in linked list. Fast pointer moves 2 steps each time, slow pointer moves 1 step each time, if there is a cycle, they must meet."
+    output={`Linked list has cycle: Yes
+Cycle entrance node value: 2`}
+  />
+
+  <h2>Competition Skills Summary</h2>
+  
+  <div class="tips">
+    <h3>Stack Applications:</h3>
+    <ul>
+      <li>Expression evaluation and bracket matching</li>
+      <li>Monotonic stack to solve next greater/smaller element problem</li>
+      <li>Simulation of function call stack</li>
+      <li>Iterative implementation of depth-first search</li>
+    </ul>
+    
+    <h3>Queue and Deque Applications:</h3>
+    <ul>
+      <li>Breadth-first search</li>
+      <li>Sliding window problem</li>
+      <li>Monotonic queue optimization for dynamic programming</li>
+      <li>Level order traversal</li>
+    </ul>
+    
+    <h3>Priority Queue Applications:</h3>
+    <ul>
+      <li>Dijkstra's shortest path algorithm</li>
+      <li>Huffman coding</li>
+      <li>TopK problem</li>
+      <li>Optimal choice in greedy algorithm</li>
+    </ul>
+    
+    <h3>Linked List Competition Skills:</h3>
+    <ul>
+      <li>Fast and slow pointer to detect cycle and find middle point</li>
+      <li>Iterative and recursive implementation of reversing linked list</li>
+      <li>Merging sorted linked lists</li>
+      <li>Divide and conquer algorithm for linked list</li>
+    </ul>
+  </div>
+
+  <div class="navigation">
+    <a href="/4-competitive" class="prev">← Return to L4 Directory</a>
+    <a href="/4-competitive/stl-templates" class="next">STL Templates →</a>
+  </div>
+</Layout>
+
+<style>
+  .tips {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border-left: 4px solid #007bff;
+  }
+  
+  .tips h3 {
+    color: #007bff;
+    margin-top: 1rem;
+  }
+  
+  .tips ul {
+    margin-left: 1rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+  }
+  
+  .navigation a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .navigation a:hover {
+    text-decoration: underline;
+  }
+</style>

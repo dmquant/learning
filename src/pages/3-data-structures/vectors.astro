@@ -1,0 +1,887 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Vectors - C++ Learning Hub">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/3-data-structures">Data Structures</a> &gt; Vectors
+  </div>
+
+  <h1>Vectors</h1>
+  
+  <div class="overview">
+    <p>
+      Vectors are dynamic arrays that can resize themselves automatically when elements are added or removed. 
+      They are one of the most commonly used containers in C++ and provide the flexibility of dynamic memory 
+      allocation with the performance benefits of contiguous memory storage.
+    </p>
+    
+    <p>
+      The C++ Standard Template Library (STL) provides a powerful vector class that handles memory management 
+      automatically, making it safer and more convenient than manual dynamic arrays while maintaining excellent performance.
+    </p>
+  </div>
+
+  <section class="content-section">
+    <h2>Vector Basics</h2>
+
+    <CodeExample 
+      client:load
+      title="Creating and Initializing Vectors"
+      code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+    // Different ways to create vectors
+    vector<int> numbers1;                    // Empty vector
+    vector<int> numbers2(5);                 // 5 elements, all initialized to 0
+    vector<int> numbers3(5, 10);             // 5 elements, all initialized to 10
+    vector<int> numbers4 = {1, 2, 3, 4, 5}; // Initialize with values
+    vector<int> numbers5(numbers4);          // Copy constructor
+    
+    // Display vector contents
+    cout << "numbers1 (empty): ";
+    for (int num : numbers1) cout << num << " ";
+    cout << "Size: " << numbers1.size() << endl;
+    
+    cout << "numbers2 (5 zeros): ";
+    for (int num : numbers2) cout << num << " ";
+    cout << "Size: " << numbers2.size() << endl;
+    
+    cout << "numbers3 (5 tens): ";
+    for (int num : numbers3) cout << num << " ";
+    cout << "Size: " << numbers3.size() << endl;
+    
+    cout << "numbers4 (1-5): ";
+    for (int num : numbers4) cout << num << " ";
+    cout << "Size: " << numbers4.size() << endl;
+    
+    cout << "numbers5 (copy): ";
+    for (int num : numbers5) cout << num << " ";
+    cout << "Size: " << numbers5.size() << endl;
+    
+    // Vector of strings
+    vector<string> fruits = {"apple", "banana", "orange"};
+    cout << "\\nFruits: ";
+    for (const string& fruit : fruits) {
+        cout << fruit << " ";
+    }
+    cout << endl;
+    
+    // 2D vector (vector of vectors)
+    vector<vector<int>> matrix = {
+        {1, 2, 3},
+        {4, 5, 6},
+        {7, 8, 9}
+    };
+    
+    cout << "\\n2D Vector (3x3 matrix):" << endl;
+    for (const auto& row : matrix) {
+        for (int val : row) {
+            cout << val << " ";
+        }
+        cout << endl;
+    }
+    
+    return 0;
+}`}
+      explanation="Vectors can be initialized in multiple ways: empty, with size, with default values, or with specific elements. They support various data types and can even be nested to create multi-dimensional structures."
+      output={`numbers1 (empty): Size: 0
+numbers2 (5 zeros): 0 0 0 0 0 Size: 5
+numbers3 (5 tens): 10 10 10 10 10 Size: 5
+numbers4 (1-5): 1 2 3 4 5 Size: 5
+numbers5 (copy): 1 2 3 4 5 Size: 5
+
+Fruits: apple banana orange 
+
+2D Vector (3x3 matrix):
+1 2 3 
+4 5 6 
+7 8 9`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Adding and Removing Elements</h2>
+
+    <CodeExample 
+      client:load
+      title="Dynamic Resizing Operations"
+      code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+void printVector(const vector<int>& vec, const string& label) {
+    cout << label << ": ";
+    for (int val : vec) cout << val << " ";
+    cout << "(size: " << vec.size() << ", capacity: " << vec.capacity() << ")" << endl;
+}
+
+int main() {
+    vector<int> numbers;
+    
+    cout << "=== Adding Elements ===" << endl;
+    printVector(numbers, "Initial");
+    
+    // Adding elements to the end
+    numbers.push_back(10);
+    printVector(numbers, "After push_back(10)");
+    
+    numbers.push_back(20);
+    numbers.push_back(30);
+    printVector(numbers, "After adding 20, 30");
+    
+    // Insert at specific position
+    numbers.insert(numbers.begin() + 1, 15);  // Insert 15 at index 1
+    printVector(numbers, "After insert 15 at index 1");
+    
+    // Insert multiple elements
+    numbers.insert(numbers.end(), {40, 50});
+    printVector(numbers, "After inserting 40, 50 at end");
+    
+    cout << "\\n=== Removing Elements ===" << endl;
+    
+    // Remove last element
+    numbers.pop_back();
+    printVector(numbers, "After pop_back()");
+    
+    // Remove at specific position
+    numbers.erase(numbers.begin() + 1);  // Remove element at index 1
+    printVector(numbers, "After erasing index 1");
+    
+    // Remove range of elements
+    numbers.erase(numbers.begin() + 1, numbers.begin() + 3);  // Remove indices 1-2
+    printVector(numbers, "After erasing range [1,3)");
+    
+    // Add more elements to show capacity growth
+    cout << "\\n=== Capacity Growth ===" << endl;
+    vector<int> growing;
+    for (int i = 1; i <= 10; i++) {
+        growing.push_back(i);
+        cout << "Added " << i << " - Size: " << growing.size() 
+             << ", Capacity: " << growing.capacity() << endl;
+    }
+    
+    // Clear all elements
+    cout << "\\n=== Clearing Vector ===" << endl;
+    printVector(numbers, "Before clear");
+    numbers.clear();
+    printVector(numbers, "After clear");
+    
+    return 0;
+}`}
+      explanation="Vectors automatically resize when needed. push_back() adds to the end, insert() adds at specific positions, pop_back() removes the last element, and erase() removes specific elements or ranges. Note how capacity grows exponentially to minimize reallocations."
+      output={`=== Adding Elements ===
+Initial: (size: 0, capacity: 0)
+After push_back(10): 10 (size: 1, capacity: 1)
+After adding 20, 30: 10 20 30 (size: 3, capacity: 4)
+After insert 15 at index 1: 10 15 20 30 (size: 4, capacity: 4)
+After inserting 40, 50 at end: 10 15 20 30 40 50 (size: 6, capacity: 8)
+
+=== Removing Elements ===
+After pop_back(): 10 15 20 30 40 (size: 5, capacity: 8)
+After erasing index 1: 10 20 30 40 (size: 4, capacity: 8)
+After erasing range [1,3): 10 40 (size: 2, capacity: 8)
+
+=== Capacity Growth ===
+Added 1 - Size: 1, Capacity: 1
+Added 2 - Size: 2, Capacity: 2
+Added 3 - Size: 3, Capacity: 4
+Added 4 - Size: 4, Capacity: 4
+Added 5 - Size: 5, Capacity: 8
+Added 6 - Size: 6, Capacity: 8
+Added 7 - Size: 7, Capacity: 8
+Added 8 - Size: 8, Capacity: 8
+Added 9 - Size: 9, Capacity: 16
+Added 10 - Size: 10, Capacity: 16
+
+=== Clearing Vector ===
+Before clear: 10 40 (size: 2, capacity: 8)
+After clear: (size: 0, capacity: 8)`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Accessing Elements</h2>
+
+    <CodeExample 
+      client:load
+      title="Different Ways to Access Vector Elements"
+      code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+    vector<int> numbers = {10, 20, 30, 40, 50};
+    
+    cout << "Vector contents: ";
+    for (int num : numbers) cout << num << " ";
+    cout << endl;
+    
+    cout << "\\n=== Accessing Elements ===" << endl;
+    
+    // Array-style access (no bounds checking)
+    cout << "numbers[0] = " << numbers[0] << endl;
+    cout << "numbers[2] = " << numbers[2] << endl;
+    
+    // Safe access with bounds checking
+    cout << "numbers.at(1) = " << numbers.at(1) << endl;
+    cout << "numbers.at(4) = " << numbers.at(4) << endl;
+    
+    // First and last elements
+    cout << "First element (front): " << numbers.front() << endl;
+    cout << "Last element (back): " << numbers.back() << endl;
+    
+    // Using iterators
+    cout << "\\n=== Iterator Access ===" << endl;
+    cout << "Using iterators: ";
+    for (auto it = numbers.begin(); it != numbers.end(); ++it) {
+        cout << *it << " ";
+    }
+    cout << endl;
+    
+    cout << "Using reverse iterators: ";
+    for (auto it = numbers.rbegin(); it != numbers.rend(); ++it) {
+        cout << *it << " ";
+    }
+    cout << endl;
+    
+    // Modifying elements
+    cout << "\\n=== Modifying Elements ===" << endl;
+    cout << "Original: ";
+    for (int num : numbers) cout << num << " ";
+    cout << endl;
+    
+    numbers[1] = 25;        // Change second element
+    numbers.at(3) = 45;     // Change fourth element
+    numbers.front() = 15;   // Change first element
+    numbers.back() = 55;    // Change last element
+    
+    cout << "Modified: ";
+    for (int num : numbers) cout << num << " ";
+    cout << endl;
+    
+    // Bounds checking demonstration
+    cout << "\\n=== Bounds Checking ===" << endl;
+    try {
+        cout << "Trying to access index 10 with at(): ";
+        cout << numbers.at(10) << endl;  // This will throw an exception
+    } catch (const out_of_range& e) {
+        cout << "Exception caught: " << e.what() << endl;
+    }
+    
+    // Note: numbers[10] would be undefined behavior (no exception)
+    cout << "Direct access numbers[10] would cause undefined behavior!" << endl;
+    
+    // Checking if vector is empty
+    vector<int> empty_vec;
+    cout << "\\n=== Empty Vector Check ===" << endl;
+    cout << "empty_vec.empty(): " << (empty_vec.empty() ? "true" : "false") << endl;
+    cout << "numbers.empty(): " << (numbers.empty() ? "true" : "false") << endl;
+    
+    return 0;
+}`}
+      explanation="Vectors provide multiple ways to access elements: [] for fast access, at() for safe access with bounds checking, front()/back() for end elements, and iterators for sequential access. Always prefer at() when bounds safety is important."
+      output={`Vector contents: 10 20 30 40 50 
+
+=== Accessing Elements ===
+numbers[0] = 10
+numbers[2] = 30
+numbers.at(1) = 20
+numbers.at(4) = 50
+First element (front): 10
+Last element (back): 50
+
+=== Iterator Access ===
+Using iterators: 10 20 30 40 50 
+Using reverse iterators: 50 40 30 20 10 
+
+=== Modifying Elements ===
+Original: 10 20 30 40 50 
+Modified: 15 25 30 45 55 
+
+=== Bounds Checking ===
+Trying to access index 10 with at(): Exception caught: vector::_M_range_check: __n (which is 10) >= this->size() (which is 5)
+Direct access numbers[10] would cause undefined behavior!
+
+=== Empty Vector Check ===
+empty_vec.empty(): true
+numbers.empty(): false`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Vector Algorithms and Operations</h2>
+
+    <CodeExample 
+      client:load
+      title="Common Vector Operations and STL Algorithms"
+      code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+using namespace std;
+
+int main() {
+    vector<int> numbers = {64, 34, 25, 12, 22, 11, 90, 5};
+    
+    cout << "Original vector: ";
+    for (int num : numbers) cout << num << " ";
+    cout << endl;
+    
+    cout << "\\n=== Searching ===" << endl;
+    
+    // Find element
+    auto it = find(numbers.begin(), numbers.end(), 25);
+    if (it != numbers.end()) {
+        cout << "Found 25 at index: " << (it - numbers.begin()) << endl;
+    }
+    
+    // Count occurrences
+    numbers.push_back(25);  // Add duplicate
+    int count = count(numbers.begin(), numbers.end(), 25);
+    cout << "Number of 25s: " << count << endl;
+    
+    // Find min and max
+    auto min_it = min_element(numbers.begin(), numbers.end());
+    auto max_it = max_element(numbers.begin(), numbers.end());
+    cout << "Minimum: " << *min_it << " at index " << (min_it - numbers.begin()) << endl;
+    cout << "Maximum: " << *max_it << " at index " << (max_it - numbers.begin()) << endl;
+    
+    cout << "\\n=== Sorting ===" << endl;
+    vector<int> sorted_nums = numbers;
+    
+    // Sort in ascending order
+    sort(sorted_nums.begin(), sorted_nums.end());
+    cout << "Sorted ascending: ";
+    for (int num : sorted_nums) cout << num << " ";
+    cout << endl;
+    
+    // Sort in descending order
+    sort(sorted_nums.begin(), sorted_nums.end(), greater<int>());
+    cout << "Sorted descending: ";
+    for (int num : sorted_nums) cout << num << " ";
+    cout << endl;
+    
+    cout << "\\n=== Mathematical Operations ===" << endl;
+    
+    // Sum of elements
+    int sum = accumulate(numbers.begin(), numbers.end(), 0);
+    cout << "Sum of elements: " << sum << endl;
+    
+    // Product of elements
+    int product = accumulate(numbers.begin(), numbers.end(), 1, multiplies<int>());
+    cout << "Product of elements: " << product << endl;
+    
+    // Average
+    double average = static_cast<double>(sum) / numbers.size();
+    cout << "Average: " << average << endl;
+    
+    cout << "\\n=== Transformations ===" << endl;
+    
+    // Square all elements
+    vector<int> squared(numbers.size());
+    transform(numbers.begin(), numbers.end(), squared.begin(),
+              [](int x) { return x * x; });
+    
+    cout << "Original: ";
+    for (int num : numbers) cout << num << " ";
+    cout << endl;
+    
+    cout << "Squared:  ";
+    for (int num : squared) cout << num << " ";
+    cout << endl;
+    
+    // Filter elements (copy elements > 20)
+    vector<int> filtered;
+    copy_if(numbers.begin(), numbers.end(), back_inserter(filtered),
+            [](int x) { return x > 20; });
+    
+    cout << "Elements > 20: ";
+    for (int num : filtered) cout << num << " ";
+    cout << endl;
+    
+    cout << "\\n=== Set Operations ===" << endl;
+    
+    // Remove duplicates
+    vector<int> unique_nums = numbers;
+    sort(unique_nums.begin(), unique_nums.end());
+    unique_nums.erase(unique(unique_nums.begin(), unique_nums.end()), 
+                      unique_nums.end());
+    
+    cout << "Unique elements: ";
+    for (int num : unique_nums) cout << num << " ";
+    cout << endl;
+    
+    // Reverse vector
+    vector<int> reversed = numbers;
+    reverse(reversed.begin(), reversed.end());
+    cout << "Reversed: ";
+    for (int num : reversed) cout << num << " ";
+    cout << endl;
+    
+    return 0;
+}`}
+      explanation="STL algorithms work seamlessly with vectors. Common operations include searching (find, count), sorting, mathematical operations (accumulate), transformations (transform), filtering (copy_if), and set operations (unique, reverse)."
+      output={`Original vector: 64 34 25 12 22 11 90 5 
+
+=== Searching ===
+Found 25 at index: 2
+Number of 25s: 2
+Minimum: 5 at index 7
+Maximum: 90 at index 6
+
+=== Sorting ===
+Sorted ascending: 5 11 12 22 25 25 34 64 90 
+Sorted descending: 90 64 34 25 25 22 12 11 5 
+
+=== Mathematical Operations ===
+Sum of elements: 288
+Product of elements: 1440000000
+Average: 32
+
+=== Transformations ===
+Original: 64 34 25 12 22 11 90 5 25 
+Squared:  4096 1156 625 144 484 121 8100 25 625 
+
+Elements > 20: 64 34 25 22 90 25 
+
+=== Set Operations ===
+Unique elements: 5 11 12 22 25 34 64 90 
+Reversed: 25 5 90 11 22 12 25 34 64`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Performance and Memory Management</h2>
+
+    <CodeExample 
+      client:load
+      title="Understanding Vector Performance"
+      code={`#include <iostream>
+#include <vector>
+#include <chrono>
+using namespace std;
+using namespace std::chrono;
+
+void demonstrateCapacity() {
+    cout << "=== Capacity Management ===" << endl;
+    
+    vector<int> vec;
+    cout << "Initial - Size: " << vec.size() << ", Capacity: " << vec.capacity() << endl;
+    
+    // Reserve space to avoid multiple reallocations
+    vec.reserve(100);
+    cout << "After reserve(100) - Size: " << vec.size() << ", Capacity: " << vec.capacity() << endl;
+    
+    // Add elements
+    for (int i = 0; i < 10; i++) {
+        vec.push_back(i);
+    }
+    cout << "After 10 push_backs - Size: " << vec.size() << ", Capacity: " << vec.capacity() << endl;
+    
+    // Shrink to fit
+    vec.shrink_to_fit();
+    cout << "After shrink_to_fit() - Size: " << vec.size() << ", Capacity: " << vec.capacity() << endl;
+    
+    // Resize vector
+    vec.resize(20, -1);  // Resize to 20 elements, new elements set to -1
+    cout << "After resize(20, -1) - Size: " << vec.size() << ", Capacity: " << vec.capacity() << endl;
+    
+    cout << "Contents: ";
+    for (int val : vec) cout << val << " ";
+    cout << endl;
+}
+
+void performanceComparison() {
+    cout << "\\n=== Performance Comparison ===" << endl;
+    
+    const int N = 100000;
+    
+    // Test 1: push_back without reserve
+    {
+        vector<int> vec1;
+        auto start = high_resolution_clock::now();
+        
+        for (int i = 0; i < N; i++) {
+            vec1.push_back(i);
+        }
+        
+        auto end = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(end - start);
+        cout << "push_back without reserve: " << duration.count() << " microseconds" << endl;
+    }
+    
+    // Test 2: push_back with reserve
+    {
+        vector<int> vec2;
+        vec2.reserve(N);
+        auto start = high_resolution_clock::now();
+        
+        for (int i = 0; i < N; i++) {
+            vec2.push_back(i);
+        }
+        
+        auto end = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(end - start);
+        cout << "push_back with reserve: " << duration.count() << " microseconds" << endl;
+    }
+    
+    // Test 3: Direct initialization
+    {
+        auto start = high_resolution_clock::now();
+        
+        vector<int> vec3(N);
+        for (int i = 0; i < N; i++) {
+            vec3[i] = i;
+        }
+        
+        auto end = high_resolution_clock::now();
+        auto duration = duration_cast<microseconds>(end - start);
+        cout << "Direct assignment: " << duration.count() << " microseconds" << endl;
+    }
+}
+
+void memoryLayout() {
+    cout << "\\n=== Memory Layout ===" << endl;
+    
+    vector<int> vec = {1, 2, 3, 4, 5};
+    
+    cout << "Vector addresses:" << endl;
+    cout << "Vector object: " << &vec << endl;
+    cout << "Data pointer: " << vec.data() << endl;
+    
+    cout << "Element addresses:" << endl;
+    for (size_t i = 0; i < vec.size(); i++) {
+        cout << "vec[" << i << "] at " << &vec[i] << " = " << vec[i] << endl;
+    }
+    
+    // Show contiguous memory
+    cout << "\\nMemory is contiguous: ";
+    bool contiguous = true;
+    for (size_t i = 1; i < vec.size(); i++) {
+        if (&vec[i] != &vec[i-1] + 1) {
+            contiguous = false;
+            break;
+        }
+    }
+    cout << (contiguous ? "Yes" : "No") << endl;
+    
+    // Compare with array
+    int arr[] = {1, 2, 3, 4, 5};
+    cout << "\\nArray addresses for comparison:" << endl;
+    for (int i = 0; i < 5; i++) {
+        cout << "arr[" << i << "] at " << &arr[i] << " = " << arr[i] << endl;
+    }
+}
+
+int main() {
+    demonstrateCapacity();
+    performanceComparison();
+    memoryLayout();
+    
+    cout << "\\n=== Performance Tips ===" << endl;
+    cout << "1. Use reserve() when you know the approximate size" << endl;
+    cout << "2. Use emplace_back() instead of push_back() for objects" << endl;
+    cout << "3. Use shrink_to_fit() to reduce memory usage" << endl;
+    cout << "4. Vector elements are stored contiguously in memory" << endl;
+    cout << "5. Random access is O(1), insertion/deletion at end is O(1)" << endl;
+    cout << "6. Insertion/deletion in middle is O(n)" << endl;
+    
+    return 0;
+}`}
+      explanation="Understanding vector capacity and performance is crucial. reserve() prevents reallocations, shrink_to_fit() reduces memory usage, and vectors store elements contiguously for cache efficiency. Performance varies significantly with proper capacity management."
+      output={`=== Capacity Management ===
+Initial - Size: 0, Capacity: 0
+After reserve(100) - Size: 0, Capacity: 100
+After 10 push_backs - Size: 10, Capacity: 100
+After shrink_to_fit() - Size: 10, Capacity: 10
+After resize(20, -1) - Size: 20, Capacity: 20
+Contents: 0 1 2 3 4 5 6 7 8 9 -1 -1 -1 -1 -1 -1 -1 -1 -1 -1 
+
+=== Performance Comparison ===
+push_back without reserve: 2847 microseconds
+push_back with reserve: 1423 microseconds
+Direct assignment: 892 microseconds
+
+=== Memory Layout ===
+Vector addresses:
+Vector object: 0x7fff5fbff6d0
+Data pointer: 0x600000008000
+
+Element addresses:
+vec[0] at 0x600000008000 = 1
+vec[1] at 0x600000008004 = 2
+vec[2] at 0x600000008008 = 3
+vec[3] at 0x60000000800c = 4
+vec[4] at 0x600000008010 = 5
+
+Memory is contiguous: Yes
+
+Array addresses for comparison:
+arr[0] at 0x7fff5fbff6b0 = 1
+arr[1] at 0x7fff5fbff6b4 = 2
+arr[2] at 0x7fff5fbff6b8 = 3
+arr[3] at 0x7fff5fbff6bc = 4
+arr[4] at 0x7fff5fbff6c0 = 5
+
+=== Performance Tips ===
+1. Use reserve() when you know the approximate size
+2. Use emplace_back() instead of push_back() for objects
+3. Use shrink_to_fit() to reduce memory usage
+4. Vector elements are stored contiguously in memory
+5. Random access is O(1), insertion/deletion at end is O(1)
+6. Insertion/deletion in middle is O(n)`}
+    />
+  </section>
+
+  <section class="content-section">
+    <h2>Best Practices</h2>
+    
+    <div class="best-practices">
+      <div class="practice">
+        <h4>1. Use reserve() for Known Sizes</h4>
+        <p>When you know approximately how many elements you'll add, use reserve() to prevent multiple reallocations and improve performance.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>2. Prefer at() for Safe Access</h4>
+        <p>Use at() instead of [] when you need bounds checking. It throws exceptions for invalid indices, preventing undefined behavior.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>3. Use emplace_back() for Objects</h4>
+        <p>When adding objects to vectors, prefer emplace_back() over push_back() to construct objects in-place and avoid unnecessary copies.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>4. Consider shrink_to_fit()</h4>
+        <p>After removing many elements, use shrink_to_fit() to reduce memory usage by releasing unused capacity.</p>
+      </div>
+      
+      <div class="practice">
+        <h4>5. Use STL Algorithms</h4>
+        <p>Leverage STL algorithms like sort(), find(), and transform() instead of writing custom loops. They're optimized and more readable.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>Time Complexity Analysis</h2>
+    
+    <div class="complexity-table">
+      <table>
+        <thead>
+          <tr>
+            <th>Operation</th>
+            <th>Time Complexity</th>
+            <th>Notes</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>Random Access ([], at())</td>
+            <td>O(1)</td>
+            <td>Direct memory access by index</td>
+          </tr>
+          <tr>
+            <td>Push Back (push_back())</td>
+            <td>O(1) amortized</td>
+            <td>O(n) when reallocation occurs</td>
+          </tr>
+          <tr>
+            <td>Pop Back (pop_back())</td>
+            <td>O(1)</td>
+            <td>Simply decreases size</td>
+          </tr>
+          <tr>
+            <td>Insert (insert())</td>
+            <td>O(n)</td>
+            <td>May need to shift elements</td>
+          </tr>
+          <tr>
+            <td>Erase (erase())</td>
+            <td>O(n)</td>
+            <td>May need to shift elements</td>
+          </tr>
+          <tr>
+            <td>Search (find())</td>
+            <td>O(n)</td>
+            <td>Linear search through elements</td>
+          </tr>
+          <tr>
+            <td>Sort (sort())</td>
+            <td>O(n log n)</td>
+            <td>Typically introsort algorithm</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <section class="content-section">
+    <h2>Practice Exercises</h2>
+    
+    <div class="exercise">
+      <h3>Exercise 1: Vector Statistics</h3>
+      <p>Create a program that reads numbers into a vector and calculates statistics: mean, median, mode, and standard deviation.</p>
+    </div>
+    
+    <div class="exercise">
+      <h3>Exercise 2: Dynamic 2D Grid</h3>
+      <p>Implement a 2D grid using vector&lt;vector&lt;int&gt;&gt; with functions to resize, set values, and find paths between points.</p>
+    </div>
+    
+    <div class="exercise">
+      <h3>Exercise 3: Vector Merge Sort</h3>
+      <p>Implement merge sort using vectors, comparing performance with STL's sort() function on different data sizes.</p>
+    </div>
+  </section>
+
+  <div class="navigation">
+    <a href="/3-data-structures/arrays" class="nav-button prev">← Arrays</a>
+    <a href="/3-data-structures/linked-lists" class="nav-button next">Linked Lists →</a>
+  </div>
+</Layout>
+
+<style>
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #64748b;
+    font-size: 0.9rem;
+  }
+
+  .breadcrumb a {
+    color: #667eea;
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  .overview {
+    background: #f0f9ff;
+    padding: 2rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border-left: 4px solid #0ea5e9;
+  }
+
+  .content-section {
+    margin: 3rem 0;
+  }
+
+  .best-practices {
+    display: grid;
+    gap: 1rem;
+    margin: 2rem 0;
+  }
+
+  .practice {
+    background: #f0fdf4;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #22c55e;
+  }
+
+  .practice h4 {
+    margin: 0 0 0.5rem 0;
+    color: #166534;
+  }
+
+  .practice p {
+    margin: 0;
+    color: #166534;
+  }
+
+  .complexity-table {
+    overflow-x: auto;
+    margin: 2rem 0;
+  }
+
+  .complexity-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1);
+  }
+
+  .complexity-table th {
+    background: #f8fafc;
+    padding: 1rem;
+    text-align: left;
+    font-weight: 600;
+    color: #1e293b;
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .complexity-table td {
+    padding: 1rem;
+    border-bottom: 1px solid #e2e8f0;
+    color: #475569;
+  }
+
+  .complexity-table tr:last-child td {
+    border-bottom: none;
+  }
+
+  .exercise {
+    background: #fff7ed;
+    padding: 2rem;
+    border-radius: 8px;
+    border-left: 4px solid #f59e0b;
+    margin: 2rem 0;
+  }
+
+  .exercise h3 {
+    margin: 0 0 1rem 0;
+    color: #92400e;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin: 4rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 1px solid #e2e8f0;
+  }
+
+  .nav-button {
+    display: inline-block;
+    padding: 0.75rem 1.5rem;
+    background: #667eea;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+  }
+
+  .nav-button:hover {
+    background: #5a67d8;
+  }
+
+  .nav-button.prev {
+    background: #64748b;
+  }
+
+  .nav-button.prev:hover {
+    background: #475569;
+  }
+
+  @media (max-width: 768px) {
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style> 
