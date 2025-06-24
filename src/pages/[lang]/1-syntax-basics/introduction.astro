@@ -1,0 +1,526 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('syntax.intro')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/1-syntax-basics`}>{t('nav.syntax-basics')}</a> > 
+      {t('syntax.intro')}
+    </div>
+    
+    <h1>{t('syntax.intro')}</h1>
+    
+    <section>
+      <h2>{lang === 'en' ? 'What is C++?' : '什么是 C++？'}</h2>
+      <p>
+        {lang === 'en' 
+          ? 'C++ is a general-purpose programming language developed by Bjarne Stroustrup at Bell Labs starting in 1979. It is an extension of the C programming language with object-oriented programming capabilities.'
+          : 'C++ 是由 Bjarne Stroustrup 于 1979 年在贝尔实验室开始开发的通用编程语言。它是 C 编程语言的扩展，具有面向对象编程功能。'
+        }
+      </p>
+      
+      <div class="features-grid">
+        <div class="feature-card">
+          <h3>{lang === 'en' ? 'High Performance' : '高性能'}</h3>
+          <p>
+            {lang === 'en'
+              ? 'C++ compiles to machine code, providing excellent runtime performance'
+              : 'C++ 编译为机器码，提供出色的运行时性能'
+            }
+          </p>
+        </div>
+        
+        <div class="feature-card">
+          <h3>{lang === 'en' ? 'Object-Oriented' : '面向对象'}</h3>
+          <p>
+            {lang === 'en'
+              ? 'Supports classes, objects, inheritance, and polymorphism'
+              : '支持类、对象、继承和多态'
+            }
+          </p>
+        </div>
+        
+        <div class="feature-card">
+          <h3>{lang === 'en' ? 'Memory Control' : '内存控制'}</h3>
+          <p>
+            {lang === 'en'
+              ? 'Direct memory management with pointers and references'
+              : '通过指针和引用进行直接内存管理'
+            }
+          </p>
+        </div>
+        
+        <div class="feature-card">
+          <h3>{lang === 'en' ? 'Standard Library' : '标准库'}</h3>
+          <p>
+            {lang === 'en'
+              ? 'Rich STL with containers, algorithms, and utilities'
+              : '丰富的 STL，包含容器、算法和实用工具'
+            }
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Your First C++ Program' : '你的第一个 C++ 程序'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Let\'s start with the traditional "Hello, World!" program:'
+          : '让我们从传统的"Hello, World!"程序开始：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Hello World Program' : 'Hello World 程序'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Hello, World!" << endl;
+    return 0;
+}`}
+        client:load
+      />
+      
+      <div class="explanation">
+        <h3>{lang === 'en' ? 'Code Explanation:' : '代码解释：'}</h3>
+        <ul>
+          <li>
+            <code>#include &lt;iostream&gt;</code> - 
+            {lang === 'en'
+              ? 'Includes the input/output stream library'
+              : '包含输入/输出流库'
+            }
+          </li>
+          <li>
+            <code>using namespace std;</code> - 
+            {lang === 'en'
+              ? 'Allows us to use standard library functions without std:: prefix'
+              : '允许我们使用标准库函数而无需 std:: 前缀'
+            }
+          </li>
+          <li>
+            <code>int main()</code> - 
+            {lang === 'en'
+              ? 'The main function where program execution begins'
+              : '程序执行开始的主函数'
+            }
+          </li>
+          <li>
+            <code>cout</code> - 
+            {lang === 'en'
+              ? 'Character output stream for printing to console'
+              : '用于向控制台打印的字符输出流'
+            }
+          </li>
+          <li>
+            <code>return 0;</code> - 
+            {lang === 'en'
+              ? 'Indicates successful program termination'
+              : '表示程序成功终止'
+            }
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Basic Input and Output' : '基本输入和输出'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'C++ uses streams for input and output operations:'
+          : 'C++ 使用流进行输入和输出操作：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Input and Output Example' : '输入输出示例'}
+        code={`#include <iostream>
+#include <string>
+using namespace std;
+
+int main() {
+    string name;
+    int age;
+    
+    // Output
+    cout << "Enter your name: ";
+    
+    // Input
+    getline(cin, name);  // Read entire line including spaces
+    
+    cout << "Enter your age: ";
+    cin >> age;  // Read integer
+    
+    // Output with variables
+    cout << "Hello, " << name << "!" << endl;
+    cout << "You are " << age << " years old." << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Comments' : '注释'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Comments help document your code and are ignored by the compiler:'
+          : '注释有助于记录代码，编译器会忽略它们：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Comment Types' : '注释类型'}
+        code={`#include <iostream>
+using namespace std;
+
+/*
+ * This is a multi-line comment
+ * Used for longer explanations
+ * Author: Your Name
+ * Date: Today
+ */
+
+int main() {
+    // This is a single-line comment
+    cout << "Hello, World!" << endl;  // Comment at end of line
+    
+    /* 
+       Multi-line comment can also be 
+       used inline like this 
+    */
+    cout << "Learning C++!" << endl;
+    
+    return 0;  // Program ends successfully
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Compilation Process' : '编译过程'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'C++ is a compiled language. Here\'s how to compile and run your programs:'
+          : 'C++ 是编译型语言。以下是编译和运行程序的方法：'
+        }
+      </p>
+      
+      <div class="compilation-steps">
+        <div class="step">
+          <h4>{lang === 'en' ? 'Step 1: Write Code' : '步骤 1：编写代码'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Create a .cpp file (e.g., hello.cpp)'
+              : '创建一个 .cpp 文件（例如：hello.cpp）'
+            }
+          </p>
+        </div>
+        
+        <div class="step">
+          <h4>{lang === 'en' ? 'Step 2: Compile' : '步骤 2：编译'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Use g++ compiler: g++ -o hello hello.cpp'
+              : '使用 g++ 编译器：g++ -o hello hello.cpp'
+            }
+          </p>
+        </div>
+        
+        <div class="step">
+          <h4>{lang === 'en' ? 'Step 3: Run' : '步骤 3：运行'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Execute: ./hello (Linux/Mac) or hello.exe (Windows)'
+              : '执行：./hello（Linux/Mac）或 hello.exe（Windows）'
+            }
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Common Beginner Mistakes' : '常见初学者错误'}</h2>
+      <div class="mistakes-list">
+        <div class="mistake">
+          <h4>{lang === 'en' ? 'Missing Semicolons' : '缺少分号'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Every statement in C++ must end with a semicolon ;'
+              : 'C++ 中的每个语句都必须以分号 ; 结尾'
+            }
+          </p>
+        </div>
+        
+        <div class="mistake">
+          <h4>{lang === 'en' ? 'Case Sensitivity' : '大小写敏感'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'C++ is case-sensitive: cout ≠ Cout ≠ COUT'
+              : 'C++ 区分大小写：cout ≠ Cout ≠ COUT'
+            }
+          </p>
+        </div>
+        
+        <div class="mistake">
+          <h4>{lang === 'en' ? 'Missing Headers' : '缺少头文件'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Don\'t forget to #include necessary headers'
+              : '不要忘记 #include 必要的头文件'
+            }
+          </p>
+        </div>
+        
+        <div class="mistake">
+          <h4>{lang === 'en' ? 'Unmatched Braces' : '括号不匹配'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Every opening brace { must have a closing brace }'
+              : '每个开括号 { 都必须有对应的闭括号 }'
+            }
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <div class="navigation">
+      <a href={`/${lang}/1-syntax-basics`} class="nav-button prev">
+        ← {lang === 'en' ? 'Back to Syntax Basics' : '返回语法基础'}
+      </a>
+      <a href={`/${lang}/1-syntax-basics/variables`} class="nav-button next">
+        {lang === 'en' ? 'Next: Variables & Operators' : '下一节：变量与运算符'} →
+      </a>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  p {
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+  
+  .features-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .feature-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .feature-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+  }
+  
+  .feature-card h3 {
+    color: #4f46e5;
+    margin: 0 0 1rem 0;
+    font-size: 1.1rem;
+  }
+  
+  .feature-card p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+  
+  .explanation {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .explanation h3 {
+    color: #1e293b;
+    margin: 0 0 1rem 0;
+  }
+  
+  .explanation ul {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+  
+  .explanation li {
+    margin-bottom: 0.5rem;
+    color: #4b5563;
+  }
+  
+  .explanation code {
+    background: #e2e8f0;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+  }
+  
+  .compilation-steps {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .step {
+    background: #f0f9ff;
+    border: 1px solid #bae6fd;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  
+  .step h4 {
+    color: #0369a1;
+    margin: 0 0 1rem 0;
+  }
+  
+  .step p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+  
+  .mistakes-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .mistake {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+  
+  .mistake h4 {
+    color: #dc2626;
+    margin: 0 0 1rem 0;
+  }
+  
+  .mistake p {
+    margin: 0;
+    font-size: 0.9rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: #4f46e5;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background: #3730a3;
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .features-grid,
+    .compilation-steps,
+    .mistakes-list {
+      grid-template-columns: 1fr;
+    }
+    
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style> 

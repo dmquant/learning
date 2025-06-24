@@ -1,0 +1,178 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={t('comp.title')}>
+  <main>
+    <h1>{t('comp.title')}</h1>
+    <p class="intro">{t('comp.description')}</p>
+    
+    <div class="lesson-grid">
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/4-competitive/stl-templates`}>{t('comp.stl')}</a></h2>
+        <p>Master C++ STL containers, algorithms, iterators, and template programming.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/4-competitive/data-structures`}>{t('comp.advanced-ds')}</a></h2>
+        <p>Learn advanced data structures for competitive programming challenges.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/4-competitive/hash-tables`}>{t('comp.advanced-hash')}</a></h2>
+        <p>Advanced hashing techniques, hash maps, and collision handling strategies.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/4-competitive/binary-search`}>{t('comp.binary-search')}</a></h2>
+        <p>Master binary search variations, optimization problems, and search spaces.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/4-competitive/advanced-search`}>{t('comp.advanced-search')}</a></h2>
+        <p>Advanced search techniques, pruning, and optimization strategies.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/4-competitive/kmp`}>{t('comp.kmp')}</a></h2>
+        <p>Learn KMP algorithm for efficient string pattern matching and searching.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/4-competitive/trie`}>{t('comp.trie')}</a></h2>
+        <p>Implement trie data structure for prefix matching and string operations.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/4-competitive/segment-tree`}>{t('comp.segment-tree')}</a></h2>
+        <p>Master segment trees for range queries and efficient data structure operations.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/4-competitive/monotonic-stack`}>{t('comp.monotonic-stack')}</a></h2>
+        <p>Learn monotonic stack patterns for solving optimization problems.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/4-competitive/monotonic-queue`}>{t('comp.monotonic-queue')}</a></h2>
+        <p>Understand monotonic queue applications in sliding window problems.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/4-competitive/tree-dp`}>{t('comp.tree-dp')}</a></h2>
+        <p>Master dynamic programming on trees and tree-based algorithms.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/4-competitive/divide-conquer`}>{t('comp.divide-conquer')}</a></h2>
+        <p>Learn divide and conquer strategies for complex problem solving.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/4-competitive/greedy-advanced`}>{t('comp.greedy-advanced')}</a></h2>
+        <p>Advanced greedy algorithms and optimization techniques.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/4-competitive/number-theory`}>{t('comp.number-theory')}</a></h2>
+        <p>Number theory concepts, modular arithmetic, and mathematical algorithms.</p>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    width: 1200px;
+    max-width: calc(100% - 2rem);
+    color: #1e293b;
+    line-height: 1.6;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .intro {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin-bottom: 3rem;
+  }
+  
+  .lesson-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .lesson-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .lesson-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    border-color: #4f46e5;
+  }
+  
+  .lesson-card h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+  }
+  
+  .lesson-card h2 a {
+    color: #1e293b;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+  }
+  
+  .lesson-card:hover h2 a {
+    color: #4f46e5;
+  }
+  
+  .lesson-card p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .lesson-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style> 

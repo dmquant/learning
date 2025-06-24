@@ -1,0 +1,625 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('syntax.functions')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/1-syntax-basics`}>{t('nav.syntax-basics')}</a> > 
+      {t('syntax.functions')}
+    </div>
+    
+    <h1>{t('syntax.functions')}</h1>
+    
+    <section>
+      <h2>{lang === 'en' ? 'What are Functions?' : '什么是函数？'}</h2>
+      <p>
+        {lang === 'en' 
+          ? 'Functions are reusable blocks of code that perform specific tasks. They help organize code, reduce repetition, and make programs more modular and maintainable.'
+          : '函数是执行特定任务的可重用代码块。它们有助于组织代码、减少重复，并使程序更加模块化和易于维护。'
+        }
+      </p>
+      
+      <div class="function-anatomy">
+        <h3>{lang === 'en' ? 'Function Anatomy' : '函数结构'}</h3>
+        <div class="anatomy-diagram">
+                                <code>
+             <span class="return-type">return_type</span> 
+             <span class="function-name">function_name</span>
+             (<span class="parameters">parameters</span>) {'{'}<br/>
+             {'    '}<span class="function-body">// function body</span><br/>
+             {'    '}<span class="return-statement">return value;</span><br/>
+             {'}'}
+           </code>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Basic Function Declaration' : '基本函数声明'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Here\'s how to declare and use basic functions:'
+          : '以下是如何声明和使用基本函数：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Simple Functions' : '简单函数'}
+        code={`#include <iostream>
+using namespace std;
+
+// Function declaration (prototype)
+void greet();
+int add(int a, int b);
+double calculateArea(double radius);
+
+int main() {
+    greet();
+    
+    int sum = add(5, 3);
+    cout << "Sum: " << sum << endl;
+    
+    double area = calculateArea(2.5);
+    cout << "Area: " << area << endl;
+    
+    return 0;
+}
+
+// Function definitions
+void greet() {
+    cout << "Hello, World!" << endl;
+}
+
+int add(int a, int b) {
+    return a + b;
+}
+
+double calculateArea(double radius) {
+    const double PI = 3.14159;
+    return PI * radius * radius;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Function Parameters' : '函数参数'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Functions can accept parameters in different ways:'
+          : '函数可以通过不同方式接受参数：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Parameter Passing' : '参数传递'}
+        code={`#include <iostream>
+using namespace std;
+
+// Pass by value
+void passByValue(int x) {
+    x = 100;  // Only changes local copy
+    cout << "Inside function: " << x << endl;
+}
+
+// Pass by reference
+void passByReference(int& x) {
+    x = 100;  // Changes original variable
+    cout << "Inside function: " << x << endl;
+}
+
+// Pass by pointer
+void passByPointer(int* x) {
+    *x = 100;  // Changes original variable
+    cout << "Inside function: " << *x << endl;
+}
+
+// Const parameters
+void printValue(const int& value) {
+    cout << "Value: " << value << endl;
+    // value = 50;  // Error: cannot modify const parameter
+}
+
+int main() {
+    int num = 10;
+    
+    cout << "Original value: " << num << endl;
+    
+    passByValue(num);
+    cout << "After pass by value: " << num << endl;
+    
+    passByReference(num);
+    cout << "After pass by reference: " << num << endl;
+    
+    num = 20;
+    passByPointer(&num);
+    cout << "After pass by pointer: " << num << endl;
+    
+    printValue(num);
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Function Overloading' : '函数重载'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'C++ allows multiple functions with the same name but different parameters:'
+          : 'C++ 允许多个同名但参数不同的函数：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Function Overloading Example' : '函数重载示例'}
+        code={`#include <iostream>
+using namespace std;
+
+// Overloaded functions
+int multiply(int a, int b) {
+    return a * b;
+}
+
+double multiply(double a, double b) {
+    return a * b;
+}
+
+int multiply(int a, int b, int c) {
+    return a * b * c;
+}
+
+// Display functions for different types
+void display(int value) {
+    cout << "Integer: " << value << endl;
+}
+
+void display(double value) {
+    cout << "Double: " << value << endl;
+}
+
+void display(const string& value) {
+    cout << "String: " << value << endl;
+}
+
+int main() {
+    // Compiler chooses the right function based on arguments
+    cout << multiply(3, 4) << endl;        // Calls int version
+    cout << multiply(3.5, 2.5) << endl;    // Calls double version
+    cout << multiply(2, 3, 4) << endl;     // Calls three-parameter version
+    
+    display(42);
+    display(3.14159);
+    display("Hello World");
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Default Parameters' : '默认参数'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Functions can have default parameter values:'
+          : '函数可以有默认参数值：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Default Parameters Example' : '默认参数示例'}
+        code={`#include <iostream>
+using namespace std;
+
+// Function with default parameters
+void printInfo(const string& name, int age = 18, const string& city = "Unknown") {
+    cout << "Name: " << name << endl;
+    cout << "Age: " << age << endl;
+    cout << "City: " << city << endl;
+    cout << "---" << endl;
+}
+
+// Calculate power with default exponent
+double power(double base, int exponent = 2) {
+    double result = 1;
+    for (int i = 0; i < exponent; i++) {
+        result *= base;
+    }
+    return result;
+}
+
+int main() {
+    // Different ways to call functions with default parameters
+    printInfo("Alice");                    // Uses default age and city
+    printInfo("Bob", 25);                  // Uses default city
+    printInfo("Charlie", 30, "New York");  // No defaults used
+    
+    cout << "2^2 = " << power(2) << endl;      // Uses default exponent (2)
+    cout << "2^3 = " << power(2, 3) << endl;   // Specifies exponent
+    cout << "5^4 = " << power(5, 4) << endl;   // Specifies exponent
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Recursive Functions' : '递归函数'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Functions can call themselves to solve problems recursively:'
+          : '函数可以调用自身来递归解决问题：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Recursion Examples' : '递归示例'}
+        code={`#include <iostream>
+using namespace std;
+
+// Calculate factorial recursively
+long long factorial(int n) {
+    if (n <= 1) {
+        return 1;  // Base case
+    }
+    return n * factorial(n - 1);  // Recursive case
+}
+
+// Calculate Fibonacci number recursively
+long long fibonacci(int n) {
+    if (n <= 1) {
+        return n;  // Base cases: fib(0) = 0, fib(1) = 1
+    }
+    return fibonacci(n - 1) + fibonacci(n - 2);  // Recursive case
+}
+
+// Calculate sum of digits recursively
+int sumOfDigits(int n) {
+    if (n == 0) {
+        return 0;  // Base case
+    }
+    return (n % 10) + sumOfDigits(n / 10);  // Recursive case
+}
+
+int main() {
+    cout << "Factorial of 5: " << factorial(5) << endl;
+    cout << "Factorial of 10: " << factorial(10) << endl;
+    
+    cout << "\\nFibonacci sequence:" << endl;
+    for (int i = 0; i < 10; i++) {
+        cout << fibonacci(i) << " ";
+    }
+    cout << endl;
+    
+    cout << "\\nSum of digits in 12345: " << sumOfDigits(12345) << endl;
+    cout << "Sum of digits in 987: " << sumOfDigits(987) << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Lambda Functions (C++11)' : 'Lambda 函数 (C++11)'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Lambda functions provide a concise way to define anonymous functions:'
+          : 'Lambda 函数提供了一种简洁的方式来定义匿名函数：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Lambda Functions' : 'Lambda 函数'}
+        code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    // Basic lambda function
+    auto greet = []() {
+        cout << "Hello from lambda!" << endl;
+    };
+    greet();
+    
+    // Lambda with parameters
+    auto add = [](int a, int b) {
+        return a + b;
+    };
+    cout << "Sum: " << add(5, 3) << endl;
+    
+    // Lambda with capture
+    int multiplier = 10;
+    auto multiply = [multiplier](int x) {
+        return x * multiplier;
+    };
+    cout << "5 * 10 = " << multiply(5) << endl;
+    
+    // Using lambda with STL algorithms
+    vector<int> numbers = {1, 2, 3, 4, 5, 6, 7, 8, 9, 10};
+    
+    // Count even numbers
+    int evenCount = count_if(numbers.begin(), numbers.end(), 
+                            [](int n) { return n % 2 == 0; });
+    cout << "Even numbers count: " << evenCount << endl;
+    
+    // Transform all numbers (multiply by 2)
+    transform(numbers.begin(), numbers.end(), numbers.begin(),
+              [](int n) { return n * 2; });
+    
+    cout << "Doubled numbers: ";
+    for (int n : numbers) {
+        cout << n << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Function Best Practices' : '函数最佳实践'}</h2>
+      <div class="best-practices">
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Single Responsibility' : '单一职责'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Each function should do one thing and do it well'
+              : '每个函数应该只做一件事，并且做好'
+            }
+          </p>
+        </div>
+        
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Meaningful Names' : '有意义的命名'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Use descriptive names that clearly indicate what the function does'
+              : '使用描述性名称，清楚地表明函数的功能'
+            }
+          </p>
+        </div>
+        
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Keep Functions Small' : '保持函数简短'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Aim for functions that fit on one screen (20-30 lines max)'
+              : '目标是函数能在一个屏幕内显示（最多20-30行）'
+            }
+          </p>
+        </div>
+        
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Use const Correctly' : '正确使用 const'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Mark parameters const when they shouldn\'t be modified'
+              : '当参数不应被修改时，将其标记为 const'
+            }
+          </p>
+        </div>
+        
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Avoid Global Variables' : '避免全局变量'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Pass data through parameters instead of using global variables'
+              : '通过参数传递数据，而不是使用全局变量'
+            }
+          </p>
+        </div>
+        
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Handle Edge Cases' : '处理边界情况'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Consider and handle invalid inputs and edge cases'
+              : '考虑并处理无效输入和边界情况'
+            }
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <div class="navigation">
+      <a href={`/${lang}/1-syntax-basics/control-structures`} class="nav-button prev">
+        ← {lang === 'en' ? 'Previous: Control Structures' : '上一节：控制结构'}
+      </a>
+      <a href={`/${lang}/1-syntax-basics/classes`} class="nav-button next">
+        {lang === 'en' ? 'Next: Classes & Objects' : '下一节：类与对象'} →
+      </a>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+    color: #374151;
+    margin: 1.5rem 0 1rem 0;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  p {
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+  
+  .function-anatomy {
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .anatomy-diagram {
+    background: #1e293b;
+    color: #f1f5f9;
+    padding: 1rem;
+    border-radius: 6px;
+    font-family: 'Courier New', monospace;
+    margin-top: 1rem;
+  }
+  
+  .anatomy-diagram .return-type {
+    color: #60a5fa;
+  }
+  
+  .anatomy-diagram .function-name {
+    color: #34d399;
+  }
+  
+  .anatomy-diagram .parameters {
+    color: #fbbf24;
+  }
+  
+  .anatomy-diagram .function-body {
+    color: #a78bfa;
+  }
+  
+  .anatomy-diagram .return-statement {
+    color: #fb7185;
+  }
+  
+  .best-practices {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .practice {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+  
+  .practice h4 {
+    color: #15803d;
+    margin: 0 0 1rem 0;
+  }
+  
+  .practice p {
+    margin: 0;
+    color: #15803d;
+    font-size: 0.9rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: #4f46e5;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background: #3730a3;
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .best-practices {
+      grid-template-columns: 1fr;
+    }
+    
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .nav-button {
+      text-align: center;
+    }
+    
+    .anatomy-diagram {
+      font-size: 0.9rem;
+    }
+  }
+</style> 

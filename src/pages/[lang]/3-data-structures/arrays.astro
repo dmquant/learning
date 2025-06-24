@@ -1,0 +1,502 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('ds.arrays')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/3-data-structures`}>{t('nav.data-structures')}</a> > 
+      {t('ds.arrays')}
+    </div>
+    
+    <h1>{t('ds.arrays')}</h1>
+    
+    <section>
+      <h2>{lang === 'en' ? 'Introduction to Arrays' : '数组简介'}</h2>
+      <p>
+        {lang === 'en' 
+          ? 'Arrays are collections of elements of the same data type stored in contiguous memory locations. They provide constant-time access to elements by index.'
+          : '数组是存储在连续内存位置的相同数据类型的元素集合。它们通过索引提供常数时间的元素访问。'
+        }
+      </p>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Array Declaration and Initialization' : '数组声明和初始化'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Arrays can be declared and initialized in several ways:'
+          : '数组可以通过多种方式声明和初始化：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Array Declaration' : '数组声明'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // Method 1: Declaration with size
+    int numbers[5];
+    
+    // Method 2: Declaration with initialization
+    int scores[5] = {95, 87, 92, 78, 85};
+    
+    // Method 3: Let compiler determine size
+    int grades[] = {90, 88, 95, 92, 87};
+    
+    // Method 4: Partial initialization (remaining elements are 0)
+    int values[10] = {1, 2, 3};  // Only first 3 elements initialized
+    
+    // Method 5: Initialize all elements to 0
+    int zeros[5] = {0};  // All elements become 0
+    
+    // Print scores array
+    cout << "Scores: ";
+    for (int i = 0; i < 5; i++) {
+        cout << scores[i] << " ";
+    }
+    cout << endl;
+    
+    // Print size of grades array
+    cout << "Size of grades array: " << sizeof(grades)/sizeof(grades[0]) << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Array Operations' : '数组操作'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Common array operations include accessing, modifying, and iterating through elements:'
+          : '常见的数组操作包括访问、修改和遍历元素：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Array Operations' : '数组操作'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    int arr[5] = {10, 20, 30, 40, 50};
+    int size = 5;
+    
+    // Accessing elements
+    cout << "First element: " << arr[0] << endl;
+    cout << "Last element: " << arr[size-1] << endl;
+    
+    // Modifying elements
+    arr[2] = 35;  // Change third element
+    cout << "Modified third element: " << arr[2] << endl;
+    
+    // Iterating through array
+    cout << "All elements: ";
+    for (int i = 0; i < size; i++) {
+        cout << arr[i] << " ";
+    }
+    cout << endl;
+    
+    // Range-based for loop (C++11)
+    cout << "Using range-based for: ";
+    for (int element : arr) {
+        cout << element << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Multidimensional Arrays' : '多维数组'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'C++ supports multidimensional arrays, commonly used for matrices and tables:'
+          : 'C++ 支持多维数组，通常用于矩阵和表格：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? '2D Array Example' : '二维数组示例'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // 2D array declaration and initialization
+    int matrix[3][4] = {
+        {1, 2, 3, 4},
+        {5, 6, 7, 8},
+        {9, 10, 11, 12}
+    };
+    
+    int rows = 3, cols = 4;
+    
+    // Print the matrix
+    cout << "Matrix:" << endl;
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            cout << matrix[i][j] << "\\t";
+        }
+        cout << endl;
+    }
+    
+    // Access specific element
+    cout << "Element at (1,2): " << matrix[1][2] << endl;
+    
+    // Modify element
+    matrix[0][0] = 100;
+    cout << "Modified element at (0,0): " << matrix[0][0] << endl;
+    
+    // Sum of all elements
+    int sum = 0;
+    for (int i = 0; i < rows; i++) {
+        for (int j = 0; j < cols; j++) {
+            sum += matrix[i][j];
+        }
+    }
+    cout << "Sum of all elements: " << sum << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Array Algorithms' : '数组算法'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Common algorithms performed on arrays include searching, sorting, and finding extremes:'
+          : '数组上常见的算法包括搜索、排序和寻找极值：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Array Algorithms' : '数组算法'}
+        code={`#include <iostream>
+#include <climits>
+using namespace std;
+
+// Linear search
+int linearSearch(int arr[], int size, int target) {
+    for (int i = 0; i < size; i++) {
+        if (arr[i] == target) {
+            return i;  // Return index if found
+        }
+    }
+    return -1;  // Return -1 if not found
+}
+
+// Find maximum element
+int findMax(int arr[], int size) {
+    int max = INT_MIN;
+    for (int i = 0; i < size; i++) {
+        if (arr[i] > max) {
+            max = arr[i];
+        }
+    }
+    return max;
+}
+
+// Reverse array
+void reverseArray(int arr[], int size) {
+    int start = 0, end = size - 1;
+    while (start < end) {
+        swap(arr[start], arr[end]);
+        start++;
+        end--;
+    }
+}
+
+int main() {
+    int arr[] = {64, 34, 25, 12, 22, 11, 90};
+    int size = sizeof(arr)/sizeof(arr[0]);
+    
+    cout << "Original array: ";
+    for (int i = 0; i < size; i++) {
+        cout << arr[i] << " ";
+    }
+    cout << endl;
+    
+    // Linear search
+    int target = 25;
+    int index = linearSearch(arr, size, target);
+    if (index != -1) {
+        cout << "Element " << target << " found at index: " << index << endl;
+    } else {
+        cout << "Element " << target << " not found" << endl;
+    }
+    
+    // Find maximum
+    int max = findMax(arr, size);
+    cout << "Maximum element: " << max << endl;
+    
+    // Reverse array
+    reverseArray(arr, size);
+    cout << "Reversed array: ";
+    for (int i = 0; i < size; i++) {
+        cout << arr[i] << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Array vs Other Data Structures' : '数组与其他数据结构对比'}</h2>
+      <div class="comparison-table">
+        <table>
+          <thead>
+            <tr>
+              <th>{lang === 'en' ? 'Operation' : '操作'}</th>
+              <th>{lang === 'en' ? 'Array' : '数组'}</th>
+              <th>{lang === 'en' ? 'Vector' : '向量'}</th>
+              <th>{lang === 'en' ? 'Linked List' : '链表'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{lang === 'en' ? 'Access by index' : '索引访问'}</td>
+              <td>O(1)</td>
+              <td>O(1)</td>
+              <td>O(n)</td>
+            </tr>
+            <tr>
+              <td>{lang === 'en' ? 'Insert at beginning' : '开头插入'}</td>
+              <td>O(n)</td>
+              <td>O(n)</td>
+              <td>O(1)</td>
+            </tr>
+            <tr>
+              <td>{lang === 'en' ? 'Insert at end' : '末尾插入'}</td>
+              <td>O(1)</td>
+              <td>O(1) amortized</td>
+              <td>O(n)</td>
+            </tr>
+            <tr>
+              <td>{lang === 'en' ? 'Delete element' : '删除元素'}</td>
+              <td>O(n)</td>
+              <td>O(n)</td>
+              <td>O(1)</td>
+            </tr>
+            <tr>
+              <td>{lang === 'en' ? 'Memory overhead' : '内存开销'}</td>
+              <td>{lang === 'en' ? 'Low' : '低'}</td>
+              <td>{lang === 'en' ? 'Medium' : '中'}</td>
+              <td>{lang === 'en' ? 'High' : '高'}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Best Practices' : '最佳实践'}</h2>
+      <ul>
+        <li>
+          {lang === 'en'
+            ? 'Always check array bounds to avoid buffer overflow'
+            : '始终检查数组边界以避免缓冲区溢出'
+          }
+        </li>
+        <li>
+          {lang === 'en'
+            ? 'Initialize arrays to avoid garbage values'
+            : '初始化数组以避免垃圾值'
+          }
+        </li>
+        <li>
+          {lang === 'en'
+            ? 'Use const for arrays that should not be modified'
+            : '对不应修改的数组使用 const'
+          }
+        </li>
+        <li>
+          {lang === 'en'
+            ? 'Consider using std::array or std::vector for better safety'
+            : '考虑使用 std::array 或 std::vector 获得更好的安全性'
+          }
+        </li>
+        <li>
+          {lang === 'en'
+            ? 'Use meaningful variable names for array indices'
+            : '为数组索引使用有意义的变量名'
+          }
+        </li>
+      </ul>
+    </section>
+
+    <div class="navigation">
+      <a href={`/${lang}/3-data-structures`} class="nav-button prev">
+        ← {lang === 'en' ? 'Back to Data Structures' : '返回数据结构'}
+      </a>
+      <a href={`/${lang}/3-data-structures/vectors`} class="nav-button next">
+        {lang === 'en' ? 'Next: Vectors' : '下一节：向量'} →
+      </a>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  p {
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+  
+  ul {
+    color: #4b5563;
+    margin-left: 1.5rem;
+  }
+  
+  li {
+    margin-bottom: 0.5rem;
+  }
+  
+  .comparison-table {
+    overflow-x: auto;
+    margin: 2rem 0;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #1e293b;
+  }
+  
+  tr:hover {
+    background: #f8fafc;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: #4f46e5;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background: #3730a3;
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .nav-button {
+      text-align: center;
+    }
+    
+    .comparison-table {
+      font-size: 0.9rem;
+    }
+    
+    th, td {
+      padding: 0.5rem;
+    }
+  }
+</style> 

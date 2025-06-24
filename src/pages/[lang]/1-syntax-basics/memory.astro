@@ -1,0 +1,527 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('syntax.memory')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/1-syntax-basics`}>{t('nav.syntax-basics')}</a> > 
+      {t('syntax.memory')}
+    </div>
+    
+    <h1>{t('syntax.memory')}</h1>
+    
+    <section>
+      <h2>{lang === 'en' ? 'Memory Layout' : '内存布局'}</h2>
+      <p>
+        {lang === 'en' 
+          ? 'Understanding how C++ manages memory is crucial for writing efficient programs. Memory is divided into different segments:'
+          : '理解 C++ 如何管理内存对于编写高效程序至关重要。内存分为不同的段：'
+        }
+      </p>
+      
+      <div class="memory-segments">
+        <div class="segment">
+          <h4>{lang === 'en' ? 'Stack' : '栈'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Local variables, function parameters, return addresses'
+              : '局部变量、函数参数、返回地址'
+            }
+          </p>
+        </div>
+        
+        <div class="segment">
+          <h4>{lang === 'en' ? 'Heap' : '堆'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Dynamically allocated memory (new/delete)'
+              : '动态分配的内存（new/delete）'
+            }
+          </p>
+        </div>
+        
+        <div class="segment">
+          <h4>{lang === 'en' ? 'Data Segment' : '数据段'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Global and static variables'
+              : '全局变量和静态变量'
+            }
+          </p>
+        </div>
+        
+        <div class="segment">
+          <h4>{lang === 'en' ? 'Code Segment' : '代码段'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Compiled program instructions'
+              : '编译后的程序指令'
+            }
+          </p>
+        </div>
+      </div>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Memory Allocation Example' : '内存分配示例'}
+        code={`#include <iostream>
+using namespace std;
+
+int globalVar = 100;        // Data segment
+static int staticVar = 200; // Data segment
+
+void demonstrateMemory() {
+    int localVar = 300;     // Stack
+    static int staticLocal = 400; // Data segment
+    
+    int* heapVar = new int(500); // Heap
+    
+    cout << "Global variable address: " << &globalVar << endl;
+    cout << "Static variable address: " << &staticVar << endl;
+    cout << "Local variable address: " << &localVar << endl;
+    cout << "Static local address: " << &staticLocal << endl;
+    cout << "Heap variable address: " << heapVar << endl;
+    
+    delete heapVar; // Clean up heap memory
+}
+
+int main() {
+    demonstrateMemory();
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Smart Pointers (C++11)' : '智能指针 (C++11)'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Smart pointers automatically manage memory and help prevent memory leaks:'
+          : '智能指针自动管理内存，有助于防止内存泄漏：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Smart Pointers Example' : '智能指针示例'}
+        code={`#include <iostream>
+#include <memory>
+using namespace std;
+
+class Resource {
+public:
+    Resource(int id) : id(id) {
+        cout << "Resource " << id << " created" << endl;
+    }
+    
+    ~Resource() {
+        cout << "Resource " << id << " destroyed" << endl;
+    }
+    
+    void use() {
+        cout << "Using resource " << id << endl;
+    }
+
+private:
+    int id;
+};
+
+int main() {
+    cout << "=== unique_ptr ===" << endl;
+    {
+        unique_ptr<Resource> ptr1 = make_unique<Resource>(1);
+        ptr1->use();
+        
+        // Transfer ownership
+        unique_ptr<Resource> ptr2 = move(ptr1);
+        if (!ptr1) {
+            cout << "ptr1 is now null" << endl;
+        }
+        ptr2->use();
+    } // ptr2 automatically deletes the resource
+    
+    cout << "\\n=== shared_ptr ===" << endl;
+    {
+        shared_ptr<Resource> ptr1 = make_shared<Resource>(2);
+        cout << "Reference count: " << ptr1.use_count() << endl;
+        
+        {
+            shared_ptr<Resource> ptr2 = ptr1; // Share ownership
+            cout << "Reference count: " << ptr1.use_count() << endl;
+            ptr2->use();
+        } // ptr2 goes out of scope
+        
+        cout << "Reference count: " << ptr1.use_count() << endl;
+        ptr1->use();
+    } // ptr1 goes out of scope, resource is deleted
+    
+    cout << "\\n=== weak_ptr ===" << endl;
+    {
+        shared_ptr<Resource> shared = make_shared<Resource>(3);
+        weak_ptr<Resource> weak = shared;
+        
+        cout << "Weak pointer expired: " << weak.expired() << endl;
+        
+        if (auto locked = weak.lock()) {
+            locked->use();
+        }
+        
+        shared.reset(); // Release shared ownership
+        cout << "Weak pointer expired: " << weak.expired() << endl;
+    }
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'RAII Principle' : 'RAII 原则'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Resource Acquisition Is Initialization - acquire resources in constructors and release them in destructors:'
+          : '资源获取即初始化 - 在构造函数中获取资源，在析构函数中释放资源：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'RAII Example' : 'RAII 示例'}
+        code={`#include <iostream>
+#include <fstream>
+#include <vector>
+using namespace std;
+
+class FileManager {
+private:
+    ofstream file;
+
+public:
+    FileManager(const string& filename) : file(filename) {
+        if (!file.is_open()) {
+            throw runtime_error("Could not open file");
+        }
+        cout << "File opened: " << filename << endl;
+    }
+    
+    ~FileManager() {
+        if (file.is_open()) {
+            file.close();
+            cout << "File closed automatically" << endl;
+        }
+    }
+    
+    void write(const string& data) {
+        file << data << endl;
+    }
+};
+
+class ArrayManager {
+private:
+    int* data;
+    size_t size;
+
+public:
+    ArrayManager(size_t s) : size(s) {
+        data = new int[size];
+        cout << "Array of size " << size << " allocated" << endl;
+    }
+    
+    ~ArrayManager() {
+        delete[] data;
+        cout << "Array deallocated" << endl;
+    }
+    
+    // Copy constructor (Rule of Three)
+    ArrayManager(const ArrayManager& other) : size(other.size) {
+        data = new int[size];
+        for (size_t i = 0; i < size; ++i) {
+            data[i] = other.data[i];
+        }
+    }
+    
+    // Assignment operator
+    ArrayManager& operator=(const ArrayManager& other) {
+        if (this != &other) {
+            delete[] data;
+            size = other.size;
+            data = new int[size];
+            for (size_t i = 0; i < size; ++i) {
+                data[i] = other.data[i];
+            }
+        }
+        return *this;
+    }
+    
+    int& operator[](size_t index) {
+        return data[index];
+    }
+};
+
+int main() {
+    cout << "=== RAII with File ===" << endl;
+    try {
+        FileManager fm("example.txt");
+        fm.write("Hello, RAII!");
+        fm.write("Automatic cleanup!");
+        // File automatically closed when fm goes out of scope
+    } catch (const exception& e) {
+        cout << "Error: " << e.what() << endl;
+    }
+    
+    cout << "\\n=== RAII with Array ===" << endl;
+    {
+        ArrayManager arr(5);
+        for (int i = 0; i < 5; ++i) {
+            arr[i] = i * 10;
+        }
+        
+        ArrayManager arr2 = arr; // Copy constructor
+        // Both arrays automatically cleaned up
+    }
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Memory Management Best Practices' : '内存管理最佳实践'}</h2>
+      <div class="best-practices">
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Prefer Stack Allocation' : '优先使用栈分配'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Use automatic storage duration when possible'
+              : '尽可能使用自动存储期'
+            }
+          </p>
+        </div>
+        
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Use Smart Pointers' : '使用智能指针'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Prefer smart pointers over raw pointers for dynamic allocation'
+              : '对于动态分配，优先使用智能指针而不是原始指针'
+            }
+          </p>
+        </div>
+        
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Follow RAII' : '遵循 RAII'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Tie resource lifetime to object lifetime'
+              : '将资源生命周期与对象生命周期绑定'
+            }
+          </p>
+        </div>
+        
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Rule of Three/Five' : '三/五法则'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'If you need destructor, copy constructor, or assignment operator, you likely need all'
+              : '如果需要析构函数、复制构造函数或赋值运算符，通常都需要'
+            }
+          </p>
+        </div>
+        
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Initialize Pointers' : '初始化指针'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Always initialize pointers to nullptr or valid addresses'
+              : '始终将指针初始化为 nullptr 或有效地址'
+            }
+          </p>
+        </div>
+        
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Check for Null' : '检查空指针'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Always check pointers before dereferencing'
+              : '在解引用之前始终检查指针'
+            }
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <div class="navigation">
+      <a href={`/${lang}/1-syntax-basics/pointers`} class="nav-button prev">
+        ← {lang === 'en' ? 'Previous: Pointers & References' : '上一节：指针与引用'}
+      </a>
+      <a href={`/${lang}/1-syntax-basics`} class="nav-button next">
+        {lang === 'en' ? 'Back to Syntax Basics' : '返回语法基础'} →
+      </a>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  p {
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+  
+  .memory-segments {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .segment {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  
+  .segment h4 {
+    color: #1e40af;
+    margin: 0 0 1rem 0;
+  }
+  
+  .segment p {
+    margin: 0;
+    color: #1e40af;
+    font-size: 0.9rem;
+  }
+  
+  .best-practices {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .practice {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+  
+  .practice h4 {
+    color: #15803d;
+    margin: 0 0 1rem 0;
+  }
+  
+  .practice p {
+    margin: 0;
+    color: #15803d;
+    font-size: 0.9rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: #4f46e5;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background: #3730a3;
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .memory-segments,
+    .best-practices {
+      grid-template-columns: 1fr;
+    }
+    
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style> 

@@ -1,0 +1,174 @@
+---
+import { languages } from '../i18n/ui';
+import { getLangFromUrl, getRouteFromUrl } from '../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const route = getRouteFromUrl(Astro.url);
+---
+
+<div class="language-picker">
+  <button class="language-toggle" id="language-toggle" aria-label="Select language">
+    <span class="current-lang">{languages[lang]}</span>
+    <span class="lang-icon">🌐</span>
+  </button>
+  <div class="language-dropdown" id="language-dropdown">
+    {Object.entries(languages).map(([langCode, label]) => (
+      <a 
+        href={`/${langCode}/${route || ''}`}
+        class={`language-option ${langCode === lang ? 'active' : ''}`}
+        data-lang={langCode}
+      >
+        <span class="lang-label">{label}</span>
+        {langCode === lang && <span class="check-icon">✓</span>}
+      </a>
+    ))}
+  </div>
+</div>
+
+<style>
+  .language-picker {
+    position: relative;
+    display: inline-block;
+  }
+
+  .language-toggle {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+    background: var(--color-bg-secondary, #f8f9fa);
+    border: 1px solid var(--color-border, #e1e5e9);
+    border-radius: 0.375rem;
+    cursor: pointer;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--color-text, #24292f);
+    transition: all 0.2s ease;
+  }
+
+  .language-toggle:hover {
+    background: var(--color-bg-hover, #f3f4f6);
+    border-color: var(--color-border-hover, #d0d7de);
+  }
+
+  .current-lang {
+    font-weight: 500;
+  }
+
+  .lang-icon {
+    font-size: 1rem;
+    opacity: 0.7;
+  }
+
+  .language-dropdown {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.25rem;
+    background: var(--color-bg, #ffffff);
+    border: 1px solid var(--color-border, #e1e5e9);
+    border-radius: 0.5rem;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 1000;
+    min-width: 120px;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-0.5rem);
+    transition: all 0.2s ease;
+  }
+
+  .language-dropdown.show {
+    opacity: 1;
+    visibility: visible;
+    transform: translateY(0);
+  }
+
+  .language-option {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.75rem 1rem;
+    color: var(--color-text, #24292f);
+    text-decoration: none;
+    font-size: 0.875rem;
+    transition: background-color 0.2s ease;
+    border-radius: 0.375rem;
+    margin: 0.25rem;
+  }
+
+  .language-option:hover {
+    background: var(--color-bg-secondary, #f8f9fa);
+  }
+
+  .language-option.active {
+    background: var(--color-accent-bg, #dbeafe);
+    color: var(--color-accent, #1e40af);
+    font-weight: 500;
+  }
+
+  .lang-label {
+    flex: 1;
+  }
+
+  .check-icon {
+    color: var(--color-accent, #1e40af);
+    font-weight: bold;
+    margin-left: 0.5rem;
+  }
+
+  /* Dark theme support */
+  @media (prefers-color-scheme: dark) {
+    .language-toggle {
+      background: var(--color-bg-secondary-dark, #21262d);
+      border-color: var(--color-border-dark, #30363d);
+      color: var(--color-text-dark, #f0f6fc);
+    }
+
+    .language-toggle:hover {
+      background: var(--color-bg-hover-dark, #30363d);
+      border-color: var(--color-border-hover-dark, #8b949e);
+    }
+
+    .language-dropdown {
+      background: var(--color-bg-dark, #0d1117);
+      border-color: var(--color-border-dark, #30363d);
+    }
+
+    .language-option {
+      color: var(--color-text-dark, #f0f6fc);
+    }
+
+    .language-option:hover {
+      background: var(--color-bg-secondary-dark, #21262d);
+    }
+
+    .language-option.active {
+      background: var(--color-accent-bg-dark, #1e3a8a);
+      color: var(--color-accent-dark, #60a5fa);
+    }
+  }
+</style>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const toggle = document.getElementById('language-toggle');
+    const dropdown = document.getElementById('language-dropdown');
+    
+    if (toggle && dropdown) {
+      toggle.addEventListener('click', function(e) {
+        e.stopPropagation();
+        dropdown.classList.toggle('show');
+      });
+
+      // Close dropdown when clicking outside
+      document.addEventListener('click', function() {
+        dropdown.classList.remove('show');
+      });
+
+      // Prevent dropdown from closing when clicking inside
+      dropdown.addEventListener('click', function(e) {
+        e.stopPropagation();
+      });
+    }
+  });
+</script> 

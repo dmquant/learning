@@ -1,0 +1,593 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('syntax.control')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/1-syntax-basics`}>{t('nav.syntax-basics')}</a> > 
+      {t('syntax.control')}
+    </div>
+    
+    <h1>{t('syntax.control')}</h1>
+    
+    <section>
+      <h2>{lang === 'en' ? 'Conditional Statements' : '条件语句'}</h2>
+      <p>
+        {lang === 'en' 
+          ? 'Conditional statements allow your program to make decisions based on different conditions.'
+          : '条件语句允许程序根据不同条件做出决策。'
+        }
+      </p>
+      
+      <h3>{lang === 'en' ? 'if Statement' : 'if 语句'}</h3>
+      <CodeExample
+        title={lang === 'en' ? 'Basic if Statement' : '基本 if 语句'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    int age = 18;
+    
+    if (age >= 18) {
+        cout << "You are an adult." << endl;
+    }
+    
+    if (age < 18) {
+        cout << "You are a minor." << endl;
+    }
+    
+    return 0;
+}`}
+        client:load
+      />
+
+      <h3>{lang === 'en' ? 'if-else Statement' : 'if-else 语句'}</h3>
+      <CodeExample
+        title={lang === 'en' ? 'if-else Example' : 'if-else 示例'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    int score = 85;
+    
+    if (score >= 90) {
+        cout << "Grade: A" << endl;
+    } else if (score >= 80) {
+        cout << "Grade: B" << endl;
+    } else if (score >= 70) {
+        cout << "Grade: C" << endl;
+    } else if (score >= 60) {
+        cout << "Grade: D" << endl;
+    } else {
+        cout << "Grade: F" << endl;
+    }
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Switch Statement' : 'switch 语句'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'The switch statement is useful when you need to compare a variable against many values.'
+          : 'switch 语句在需要将变量与多个值进行比较时很有用。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Switch Statement Example' : 'switch 语句示例'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    char grade = 'B';
+    
+    switch (grade) {
+        case 'A':
+            cout << "Excellent!" << endl;
+            break;
+        case 'B':
+            cout << "Good job!" << endl;
+            break;
+        case 'C':
+            cout << "Well done!" << endl;
+            break;
+        case 'D':
+            cout << "You passed!" << endl;
+            break;
+        case 'F':
+            cout << "Better try again!" << endl;
+            break;
+        default:
+            cout << "Invalid grade!" << endl;
+            break;
+    }
+    
+    return 0;
+}`}
+        client:load
+      />
+      
+      <div class="note">
+        <h4>{lang === 'en' ? 'Important Notes:' : '重要提示：'}</h4>
+        <ul>
+          <li>
+            {lang === 'en'
+              ? 'Always use break; to prevent fall-through behavior'
+              : '始终使用 break; 防止穿透行为'
+            }
+          </li>
+          <li>
+            {lang === 'en'
+              ? 'The default case is optional but recommended'
+              : 'default 情况是可选的，但建议使用'
+            }
+          </li>
+          <li>
+            {lang === 'en'
+              ? 'Switch works with integers, characters, and enums'
+              : 'switch 适用于整数、字符和枚举'
+            }
+          </li>
+        </ul>
+      </div>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Loops' : '循环'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Loops allow you to repeat code multiple times efficiently.'
+          : '循环允许你高效地重复执行代码。'
+        }
+      </p>
+      
+      <h3>{lang === 'en' ? 'for Loop' : 'for 循环'}</h3>
+      <CodeExample
+        title={lang === 'en' ? 'for Loop Example' : 'for 循环示例'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // Basic for loop
+    cout << "Counting from 1 to 5:" << endl;
+    for (int i = 1; i <= 5; i++) {
+        cout << i << " ";
+    }
+    cout << endl;
+    
+    // Loop with step of 2
+    cout << "Even numbers from 2 to 10:" << endl;
+    for (int i = 2; i <= 10; i += 2) {
+        cout << i << " ";
+    }
+    cout << endl;
+    
+    // Reverse loop
+    cout << "Countdown from 5 to 1:" << endl;
+    for (int i = 5; i >= 1; i--) {
+        cout << i << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+
+      <h3>{lang === 'en' ? 'while Loop' : 'while 循环'}</h3>
+      <CodeExample
+        title={lang === 'en' ? 'while Loop Example' : 'while 循环示例'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    int number = 1;
+    
+    cout << "Numbers from 1 to 5 using while:" << endl;
+    while (number <= 5) {
+        cout << number << " ";
+        number++;  // Important: increment to avoid infinite loop
+    }
+    cout << endl;
+    
+    // User input validation
+    int userInput;
+    cout << "Enter a number between 1 and 10: ";
+    cin >> userInput;
+    
+    while (userInput < 1 || userInput > 10) {
+        cout << "Invalid input! Please enter a number between 1 and 10: ";
+        cin >> userInput;
+    }
+    
+    cout << "Thank you! You entered: " << userInput << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+
+      <h3>{lang === 'en' ? 'do-while Loop' : 'do-while 循环'}</h3>
+      <CodeExample
+        title={lang === 'en' ? 'do-while Loop Example' : 'do-while 循环示例'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    int choice;
+    
+    do {
+        cout << "\\n=== Menu ===" << endl;
+        cout << "1. Say Hello" << endl;
+        cout << "2. Say Goodbye" << endl;
+        cout << "3. Exit" << endl;
+        cout << "Enter your choice: ";
+        cin >> choice;
+        
+        switch (choice) {
+            case 1:
+                cout << "Hello there!" << endl;
+                break;
+            case 2:
+                cout << "Goodbye!" << endl;
+                break;
+            case 3:
+                cout << "Exiting..." << endl;
+                break;
+            default:
+                cout << "Invalid choice!" << endl;
+                break;
+        }
+    } while (choice != 3);
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Loop Control Statements' : '循环控制语句'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'These statements allow you to control the flow of loops.'
+          : '这些语句允许你控制循环的流程。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'break and continue' : 'break 和 continue'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    cout << "Using break - stop at 7:" << endl;
+    for (int i = 1; i <= 10; i++) {
+        if (i == 7) {
+            break;  // Exit the loop when i equals 7
+        }
+        cout << i << " ";
+    }
+    cout << endl;
+    
+    cout << "Using continue - skip even numbers:" << endl;
+    for (int i = 1; i <= 10; i++) {
+        if (i % 2 == 0) {
+            continue;  // Skip the rest of this iteration
+        }
+        cout << i << " ";
+    }
+    cout << endl;
+    
+    // Nested loops with labeled break (using goto - not recommended)
+    cout << "Finding first pair that sums to 10:" << endl;
+    bool found = false;
+    for (int i = 1; i <= 5 && !found; i++) {
+        for (int j = 1; j <= 5; j++) {
+            if (i + j == 10) {
+                cout << "Found: " << i << " + " << j << " = 10" << endl;
+                found = true;
+                break;  // Break inner loop
+            }
+        }
+    }
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Nested Control Structures' : '嵌套控制结构'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'You can nest loops and conditional statements inside each other.'
+          : '你可以将循环和条件语句相互嵌套。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Multiplication Table' : '乘法表'}
+        code={`#include <iostream>
+#include <iomanip>
+using namespace std;
+
+int main() {
+    cout << "Multiplication Table (1-5):" << endl;
+    cout << "   ";
+    
+    // Print header
+    for (int i = 1; i <= 5; i++) {
+        cout << setw(4) << i;
+    }
+    cout << endl;
+    
+    // Print table
+    for (int i = 1; i <= 5; i++) {
+        cout << setw(2) << i << " ";
+        for (int j = 1; j <= 5; j++) {
+            cout << setw(4) << (i * j);
+        }
+        cout << endl;
+    }
+    
+    return 0;
+}`}
+        client:load
+      />
+      
+      <CodeExample
+        title={lang === 'en' ? 'Number Pattern' : '数字图案'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    int rows = 5;
+    
+    cout << "Number Triangle:" << endl;
+    for (int i = 1; i <= rows; i++) {
+        // Print spaces for alignment
+        for (int space = 1; space <= rows - i; space++) {
+            cout << " ";
+        }
+        
+        // Print numbers
+        for (int j = 1; j <= i; j++) {
+            cout << j << " ";
+        }
+        cout << endl;
+    }
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Best Practices' : '最佳实践'}</h2>
+      <div class="best-practices">
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Use Meaningful Conditions' : '使用有意义的条件'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Write clear, readable conditions that express intent'
+              : '编写清晰、可读的条件来表达意图'
+            }
+          </p>
+        </div>
+        
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Avoid Deep Nesting' : '避免深度嵌套'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Use early returns or break statements to reduce nesting levels'
+              : '使用早期返回或 break 语句来减少嵌套层级'
+            }
+          </p>
+        </div>
+        
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Initialize Loop Variables' : '初始化循环变量'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Always initialize loop counters to prevent undefined behavior'
+              : '始终初始化循环计数器以防止未定义行为'
+            }
+          </p>
+        </div>
+        
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Use const When Possible' : '尽可能使用 const'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Make loop variables const if they shouldn\'t change'
+              : '如果循环变量不应改变，将其设为 const'
+            }
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <div class="navigation">
+      <a href={`/${lang}/1-syntax-basics/variables`} class="nav-button prev">
+        ← {lang === 'en' ? 'Previous: Variables & Operators' : '上一节：变量与运算符'}
+      </a>
+      <a href={`/${lang}/1-syntax-basics/functions`} class="nav-button next">
+        {lang === 'en' ? 'Next: Functions' : '下一节：函数'} →
+      </a>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+    color: #374151;
+    margin: 1.5rem 0 1rem 0;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  p {
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+  
+  .note {
+    background: #eff6ff;
+    border: 1px solid #bfdbfe;
+    border-radius: 8px;
+    padding: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .note h4 {
+    color: #1e40af;
+    margin: 0 0 1rem 0;
+  }
+  
+  .note ul {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+  
+  .note li {
+    margin-bottom: 0.5rem;
+    color: #1e40af;
+  }
+  
+  .best-practices {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .practice {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+  
+  .practice h4 {
+    color: #15803d;
+    margin: 0 0 1rem 0;
+  }
+  
+  .practice p {
+    margin: 0;
+    color: #15803d;
+    font-size: 0.9rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: #4f46e5;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background: #3730a3;
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .best-practices {
+      grid-template-columns: 1fr;
+    }
+    
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style> 

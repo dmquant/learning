@@ -1,0 +1,841 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('syntax.classes')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/1-syntax-basics`}>{t('nav.syntax-basics')}</a> > 
+      {t('syntax.classes')}
+    </div>
+    
+    <h1>{t('syntax.classes')}</h1>
+    
+    <section>
+      <h2>{lang === 'en' ? 'Introduction to Classes' : '类的介绍'}</h2>
+      <p>
+        {lang === 'en' 
+          ? 'Classes are user-defined data types that encapsulate data and functions. They are the foundation of object-oriented programming in C++.'
+          : '类是用户定义的数据类型，封装数据和函数。它们是 C++ 面向对象编程的基础。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Simple Class Example' : '简单类示例'}
+        code={`#include <iostream>
+#include <string>
+using namespace std;
+
+class Student {
+private:
+    string name;
+    int age;
+    double gpa;
+
+public:
+    // Constructor
+    Student(const string& n, int a, double g) {
+        name = n;
+        age = a;
+        gpa = g;
+    }
+    
+    // Getter methods
+    string getName() const { return name; }
+    int getAge() const { return age; }
+    double getGPA() const { return gpa; }
+    
+    // Method to display information
+    void displayInfo() const {
+        cout << "Name: " << name << ", Age: " << age << ", GPA: " << gpa << endl;
+    }
+};
+
+int main() {
+    Student student1("Alice", 20, 3.8);
+    student1.displayInfo();
+    
+    return 0;
+}`}
+        client:load
+      />
+      <div class="oop-concepts">
+        <div class="concept">
+          <h4>{lang === 'en' ? 'Encapsulation' : '封装'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Bundling data and methods together, hiding internal details'
+              : '将数据和方法绑定在一起，隐藏内部细节'
+            }
+          </p>
+        </div>
+        
+        <div class="concept">
+          <h4>{lang === 'en' ? 'Abstraction' : '抽象'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Providing a simplified interface to complex functionality'
+              : '为复杂功能提供简化的接口'
+            }
+          </p>
+        </div>
+        
+        <div class="concept">
+          <h4>{lang === 'en' ? 'Inheritance' : '继承'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Creating new classes based on existing ones'
+              : '基于现有类创建新类'
+            }
+          </p>
+        </div>
+        
+        <div class="concept">
+          <h4>{lang === 'en' ? 'Polymorphism' : '多态'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Using one interface for different underlying forms'
+              : '使用一个接口处理不同的底层形式'
+            }
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Basic Class Definition' : '基本类定义'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Here\'s how to define a simple class:'
+          : '以下是如何定义一个简单的类：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Simple Class Example' : '简单类示例'}
+        code={`#include <iostream>
+#include <string>
+using namespace std;
+
+class Student {
+private:  // Private members (data hiding)
+    string name;
+    int age;
+    double gpa;
+
+public:   // Public members (interface)
+    // Constructor
+    Student(const string& n, int a, double g) {
+        name = n;
+        age = a;
+        gpa = g;
+    }
+    
+    // Getter methods
+    string getName() const {
+        return name;
+    }
+    
+    int getAge() const {
+        return age;
+    }
+    
+    double getGPA() const {
+        return gpa;
+    }
+    
+    // Setter methods
+    void setGPA(double newGPA) {
+        if (newGPA >= 0.0 && newGPA <= 4.0) {
+            gpa = newGPA;
+        }
+    }
+    
+    // Method to display information
+    void displayInfo() const {
+        cout << "Name: " << name << endl;
+        cout << "Age: " << age << endl;
+        cout << "GPA: " << gpa << endl;
+    }
+};
+
+int main() {
+    // Create objects
+    Student student1("Alice", 20, 3.8);
+    Student student2("Bob", 19, 3.5);
+    
+    // Use methods
+    student1.displayInfo();
+    cout << "---" << endl;
+    student2.displayInfo();
+    
+    // Modify using setter
+    student1.setGPA(3.9);
+    cout << "Updated GPA: " << student1.getGPA() << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Constructors and Destructors' : '构造函数和析构函数'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Constructors initialize objects, while destructors clean up resources:'
+          : '构造函数初始化对象，而析构函数清理资源：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Constructors and Destructors' : '构造函数和析构函数'}
+        code={`#include <iostream>
+#include <string>
+using namespace std;
+
+class Rectangle {
+private:
+    double width;
+    double height;
+
+public:
+    // Default constructor
+    Rectangle() {
+        width = 0.0;
+        height = 0.0;
+        cout << "Default constructor called" << endl;
+    }
+    
+    // Parameterized constructor
+    Rectangle(double w, double h) {
+        width = w;
+        height = h;
+        cout << "Parameterized constructor called" << endl;
+    }
+    
+    // Copy constructor
+    Rectangle(const Rectangle& other) {
+        width = other.width;
+        height = other.height;
+        cout << "Copy constructor called" << endl;
+    }
+    
+    // Destructor
+    ~Rectangle() {
+        cout << "Destructor called for rectangle " 
+             << width << "x" << height << endl;
+    }
+    
+    // Methods
+    double getArea() const {
+        return width * height;
+    }
+    
+    double getPerimeter() const {
+        return 2 * (width + height);
+    }
+    
+    void display() const {
+        cout << "Rectangle: " << width << " x " << height 
+             << " (Area: " << getArea() << ")" << endl;
+    }
+};
+
+int main() {
+    cout << "Creating rectangles:" << endl;
+    
+    Rectangle rect1;                    // Default constructor
+    Rectangle rect2(5.0, 3.0);         // Parameterized constructor
+    Rectangle rect3 = rect2;            // Copy constructor
+    
+    cout << "\\nRectangle information:" << endl;
+    rect1.display();
+    rect2.display();
+    rect3.display();
+    
+    cout << "\\nExiting main (destructors will be called):" << endl;
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Access Specifiers' : '访问修饰符'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'C++ provides three access levels for class members:'
+          : 'C++ 为类成员提供三种访问级别：'
+        }
+      </p>
+      
+      <div class="access-table">
+        <table>
+          <thead>
+            <tr>
+              <th>{lang === 'en' ? 'Access Level' : '访问级别'}</th>
+              <th>{lang === 'en' ? 'Same Class' : '同一类'}</th>
+              <th>{lang === 'en' ? 'Derived Class' : '派生类'}</th>
+              <th>{lang === 'en' ? 'Outside Class' : '类外部'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td><code>private</code></td>
+              <td>✅</td>
+              <td>❌</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td><code>protected</code></td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>❌</td>
+            </tr>
+            <tr>
+              <td><code>public</code></td>
+              <td>✅</td>
+              <td>✅</td>
+              <td>✅</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Access Specifiers Example' : '访问修饰符示例'}
+        code={`#include <iostream>
+using namespace std;
+
+class BankAccount {
+private:
+    double balance;        // Only accessible within the class
+    string accountNumber;  // Hidden from outside access
+
+protected:
+    int accountType;       // Accessible in derived classes
+
+public:
+    string ownerName;      // Accessible everywhere
+    
+    // Constructor
+    BankAccount(const string& owner, const string& accNum, double initialBalance) {
+        ownerName = owner;
+        accountNumber = accNum;
+        balance = initialBalance;
+        accountType = 1;  // Default type
+    }
+    
+    // Public methods to access private data
+    double getBalance() const {
+        return balance;
+    }
+    
+    void deposit(double amount) {
+        if (amount > 0) {
+            balance += amount;
+            cout << "Deposited $" << amount << endl;
+        }
+    }
+    
+    bool withdraw(double amount) {
+        if (amount > 0 && amount <= balance) {
+            balance -= amount;
+            cout << "Withdrew $" << amount << endl;
+            return true;
+        }
+        cout << "Insufficient funds or invalid amount" << endl;
+        return false;
+    }
+    
+    void displayInfo() const {
+        cout << "Owner: " << ownerName << endl;
+        cout << "Balance: $" << balance << endl;
+        // cout << "Account: " << accountNumber << endl;  // Can access private here
+    }
+};
+
+int main() {
+    BankAccount account("John Doe", "123456789", 1000.0);
+    
+    // Can access public members
+    cout << "Account holder: " << account.ownerName << endl;
+    
+    // Can use public methods
+    account.deposit(500.0);
+    account.withdraw(200.0);
+    account.displayInfo();
+    
+    // Cannot access private members directly
+    // cout << account.balance;        // Error!
+    // cout << account.accountNumber;  // Error!
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Static Members' : '静态成员'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Static members belong to the class rather than individual objects:'
+          : '静态成员属于类而不是单个对象：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Static Members Example' : '静态成员示例'}
+        code={`#include <iostream>
+using namespace std;
+
+class Counter {
+private:
+    int value;
+    static int totalObjects;  // Static data member
+
+public:
+    // Constructor
+    Counter(int val = 0) : value(val) {
+        totalObjects++;  // Increment when object is created
+    }
+    
+    // Destructor
+    ~Counter() {
+        totalObjects--;  // Decrement when object is destroyed
+    }
+    
+    // Regular member function
+    int getValue() const {
+        return value;
+    }
+    
+    void setValue(int val) {
+        value = val;
+    }
+    
+    // Static member function
+    static int getTotalObjects() {
+        return totalObjects;  // Can only access static members
+        // return value;      // Error! Cannot access non-static members
+    }
+    
+    // Static member function to display count
+    static void displayCount() {
+        cout << "Total Counter objects: " << totalObjects << endl;
+    }
+};
+
+// Definition of static member (required outside class)
+int Counter::totalObjects = 0;
+
+int main() {
+    cout << "Initial count: ";
+    Counter::displayCount();  // Call static function using class name
+    
+    Counter c1(10);
+    Counter c2(20);
+    
+    cout << "After creating 2 objects: ";
+    Counter::displayCount();
+    
+    {
+        Counter c3(30);
+        cout << "After creating 3rd object: ";
+        Counter::displayCount();
+    }  // c3 goes out of scope and is destroyed
+    
+    cout << "After c3 is destroyed: ";
+    Counter::displayCount();
+    
+    // Can also call static function through object
+    cout << "Total objects (via object): " << c1.getTotalObjects() << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Friend Functions' : '友元函数'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Friend functions can access private and protected members of a class:'
+          : '友元函数可以访问类的私有和保护成员：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Friend Functions Example' : '友元函数示例'}
+        code={`#include <iostream>
+#include <cmath>
+using namespace std;
+
+class Point {
+private:
+    double x, y;
+
+public:
+    Point(double xVal = 0, double yVal = 0) : x(xVal), y(yVal) {}
+    
+    void display() const {
+        cout << "(" << x << ", " << y << ")";
+    }
+    
+    // Declare friend function
+    friend double distance(const Point& p1, const Point& p2);
+    friend Point midpoint(const Point& p1, const Point& p2);
+    
+    // Friend class declaration (if needed)
+    friend class Line;
+};
+
+// Friend function definition
+double distance(const Point& p1, const Point& p2) {
+    // Can access private members x and y directly
+    double dx = p1.x - p2.x;
+    double dy = p1.y - p2.y;
+    return sqrt(dx * dx + dy * dy);
+}
+
+Point midpoint(const Point& p1, const Point& p2) {
+    // Can access private members directly
+    return Point((p1.x + p2.x) / 2, (p1.y + p2.y) / 2);
+}
+
+// Example of friend class
+class Line {
+private:
+    Point start, end;
+
+public:
+    Line(const Point& s, const Point& e) : start(s), end(e) {}
+    
+    void displayLine() const {
+        cout << "Line from ";
+        start.display();
+        cout << " to ";
+        end.display();
+        cout << endl;
+        
+        // Can access private members of Point because Line is a friend
+        cout << "Start coordinates: x=" << start.x << ", y=" << start.y << endl;
+        cout << "End coordinates: x=" << end.x << ", y=" << end.y << endl;
+    }
+};
+
+int main() {
+    Point p1(3, 4);
+    Point p2(7, 1);
+    
+    cout << "Point 1: ";
+    p1.display();
+    cout << endl;
+    
+    cout << "Point 2: ";
+    p2.display();
+    cout << endl;
+    
+    cout << "Distance: " << distance(p1, p2) << endl;
+    
+    Point mid = midpoint(p1, p2);
+    cout << "Midpoint: ";
+    mid.display();
+    cout << endl;
+    
+    Line line(p1, p2);
+    line.displayLine();
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Class Best Practices' : '类的最佳实践'}</h2>
+      <div class="best-practices">
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Encapsulation' : '封装原则'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Keep data members private and provide public methods for access'
+              : '保持数据成员私有，提供公共方法进行访问'
+            }
+          </p>
+        </div>
+        
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Constructor Initialization' : '构造函数初始化'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Use initialization lists for better performance and const members'
+              : '使用初始化列表以获得更好的性能和常量成员'
+            }
+          </p>
+        </div>
+        
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Const Correctness' : '常量正确性'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Mark methods const if they don\'t modify object state'
+              : '如果方法不修改对象状态，将其标记为 const'
+            }
+          </p>
+        </div>
+        
+        <div class="practice">
+          <h4>{lang === 'en' ? 'RAII Principle' : 'RAII 原则'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Resource Acquisition Is Initialization - manage resources in constructors/destructors'
+              : '资源获取即初始化 - 在构造函数/析构函数中管理资源'
+            }
+          </p>
+        </div>
+        
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Single Responsibility' : '单一职责'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Each class should have one reason to change'
+              : '每个类应该只有一个改变的理由'
+            }
+          </p>
+        </div>
+        
+        <div class="practice">
+          <h4>{lang === 'en' ? 'Meaningful Names' : '有意义的命名'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Use descriptive names for classes, methods, and members'
+              : '为类、方法和成员使用描述性名称'
+            }
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <div class="navigation">
+      <a href={`/${lang}/1-syntax-basics/functions`} class="nav-button prev">
+        ← {lang === 'en' ? 'Previous: Functions' : '上一节：函数'}
+      </a>
+      <a href={`/${lang}/1-syntax-basics/pointers`} class="nav-button next">
+        {lang === 'en' ? 'Next: Pointers & References' : '下一节：指针与引用'} →
+      </a>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  h3 {
+    font-size: 1.25rem;
+    color: #374151;
+    margin: 1.5rem 0 1rem 0;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  p {
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+  
+  .oop-concepts {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .concept {
+    background: #fef3c7;
+    border: 1px solid #fcd34d;
+    border-radius: 8px;
+    padding: 1.5rem;
+    text-align: center;
+  }
+  
+  .concept h4 {
+    color: #92400e;
+    margin: 0 0 1rem 0;
+  }
+  
+  .concept p {
+    margin: 0;
+    color: #92400e;
+    font-size: 0.9rem;
+  }
+  
+  .access-table {
+    margin: 2rem 0;
+    overflow-x: auto;
+  }
+  
+  .access-table table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  }
+  
+  .access-table th,
+  .access-table td {
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  .access-table th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #374151;
+  }
+  
+  .access-table code {
+    background: #e2e8f0;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+    font-size: 0.9rem;
+  }
+  
+  .best-practices {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .practice {
+    background: #f0fdf4;
+    border: 1px solid #bbf7d0;
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+  
+  .practice h4 {
+    color: #15803d;
+    margin: 0 0 1rem 0;
+  }
+  
+  .practice p {
+    margin: 0;
+    color: #15803d;
+    font-size: 0.9rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: #4f46e5;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background: #3730a3;
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .oop-concepts,
+    .best-practices {
+      grid-template-columns: 1fr;
+    }
+    
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .nav-button {
+      text-align: center;
+    }
+    
+    .access-table {
+      font-size: 0.9rem;
+    }
+  }
+</style> 

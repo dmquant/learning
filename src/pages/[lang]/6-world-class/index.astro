@@ -1,0 +1,158 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={t('world.title')}>
+  <main>
+    <h1>{t('world.title')}</h1>
+    <p class="intro">{t('world.description')}</p>
+    
+    <div class="lesson-grid">
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/6-world-class/advanced-dp`}>{t('world.advanced-dp')}</a></h2>
+        <p>Master advanced dynamic programming techniques and optimization strategies.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/6-world-class/dp-optimization`}>{t('world.dp-optimization')}</a></h2>
+        <p>Learn DP optimization techniques like convex hull trick and divide and conquer optimization.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/6-world-class/tree-advanced`}>{t('world.tree-advanced')}</a></h2>
+        <p>Advanced tree algorithms, tree decomposition, and complex tree problems.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/6-world-class/tree-problems`}>{t('world.tree-problems')}</a></h2>
+        <p>Solve challenging tree problems using advanced algorithmic techniques.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/6-world-class/heavy-light`}>{t('world.heavy-light')}</a></h2>
+        <p>Implement Heavy-Light Decomposition for efficient tree queries.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/6-world-class/segment-tree-advanced`}>{t('world.segment-tree-advanced')}</a></h2>
+        <p>Advanced segment tree applications and lazy propagation techniques.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/6-world-class/balanced-tree`}>{t('world.balanced-tree')}</a></h2>
+        <p>Learn balanced tree data structures like AVL trees and Red-Black trees.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/6-world-class/shortest-dag`}>{t('world.shortest-dag')}</a></h2>
+        <p>Shortest path algorithms in Directed Acyclic Graphs (DAGs).</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/6-world-class/linear-algebra`}>{t('world.linear-algebra')}</a></h2>
+        <p>Linear algebra applications in competitive programming and algorithms.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/6-world-class/combinatorics`}>{t('world.combinatorics')}</a></h2>
+        <p>Advanced combinatorics, counting problems, and mathematical algorithms.</p>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    width: 1200px;
+    max-width: calc(100% - 2rem);
+    color: #1e293b;
+    line-height: 1.6;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .intro {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin-bottom: 3rem;
+  }
+  
+  .lesson-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .lesson-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .lesson-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    border-color: #4f46e5;
+  }
+  
+  .lesson-card h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+  }
+  
+  .lesson-card h2 a {
+    color: #1e293b;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+  }
+  
+  .lesson-card:hover h2 a {
+    color: #4f46e5;
+  }
+  
+  .lesson-card p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .lesson-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style> 

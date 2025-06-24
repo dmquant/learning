@@ -1,0 +1,384 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('syntax.pointers')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/1-syntax-basics`}>{t('nav.syntax-basics')}</a> > 
+      {t('syntax.pointers')}
+    </div>
+    
+    <h1>{t('syntax.pointers')}</h1>
+    
+    <section>
+      <h2>{lang === 'en' ? 'What are Pointers?' : '什么是指针？'}</h2>
+      <p>
+        {lang === 'en' 
+          ? 'Pointers are variables that store memory addresses of other variables. They provide direct access to memory and enable dynamic memory allocation.'
+          : '指针是存储其他变量内存地址的变量。它们提供对内存的直接访问，并支持动态内存分配。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Basic Pointer Example' : '基本指针示例'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    int number = 42;
+    int* ptr = &number;  // ptr stores the address of number
+    
+    cout << "Value of number: " << number << endl;
+    cout << "Address of number: " << &number << endl;
+    cout << "Value stored in ptr: " << ptr << endl;
+    cout << "Value pointed to by ptr: " << *ptr << endl;
+    
+    // Modify value through pointer
+    *ptr = 100;
+    cout << "After modifying through pointer:" << endl;
+    cout << "Value of number: " << number << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Pointer Operations' : '指针操作'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Key pointer operations include declaration, assignment, dereferencing, and arithmetic:'
+          : '关键的指针操作包括声明、赋值、解引用和算术运算：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Pointer Operations' : '指针操作'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    int arr[] = {10, 20, 30, 40, 50};
+    int* ptr = arr;  // Points to first element
+    
+    cout << "Array traversal using pointer arithmetic:" << endl;
+    for (int i = 0; i < 5; i++) {
+        cout << "Element " << i << ": " << *(ptr + i) << endl;
+    }
+    
+    cout << "\\nUsing pointer increment:" << endl;
+    ptr = arr;  // Reset pointer
+    for (int i = 0; i < 5; i++) {
+        cout << "Element " << i << ": " << *ptr << endl;
+        ptr++;  // Move to next element
+    }
+    
+    // Pointer comparison
+    int* start = arr;
+    int* end = arr + 5;
+    
+    cout << "\\nPointer comparison:" << endl;
+    cout << "Distance between pointers: " << (end - start) << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'References' : '引用'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'References are aliases for existing variables. Unlike pointers, they cannot be null and must be initialized when declared.'
+          : '引用是现有变量的别名。与指针不同，它们不能为空，必须在声明时初始化。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'References vs Pointers' : '引用与指针'}
+        code={`#include <iostream>
+using namespace std;
+
+void swapWithPointers(int* a, int* b) {
+    int temp = *a;
+    *a = *b;
+    *b = temp;
+}
+
+void swapWithReferences(int& a, int& b) {
+    int temp = a;
+    a = b;
+    b = temp;
+}
+
+int main() {
+    int x = 10, y = 20;
+    
+    cout << "Original values: x = " << x << ", y = " << y << endl;
+    
+    // Using pointers
+    swapWithPointers(&x, &y);
+    cout << "After pointer swap: x = " << x << ", y = " << y << endl;
+    
+    // Using references
+    swapWithReferences(x, y);
+    cout << "After reference swap: x = " << x << ", y = " << y << endl;
+    
+    // Reference as alias
+    int number = 100;
+    int& ref = number;  // ref is an alias for number
+    
+    cout << "\\nReference example:" << endl;
+    cout << "number = " << number << ", ref = " << ref << endl;
+    
+    ref = 200;  // Modifying through reference
+    cout << "After modifying ref: number = " << number << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Dynamic Memory Allocation' : '动态内存分配'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Use new and delete operators for dynamic memory management:'
+          : '使用 new 和 delete 操作符进行动态内存管理：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Dynamic Memory Example' : '动态内存示例'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // Allocate single integer
+    int* ptr = new int(42);
+    cout << "Dynamically allocated integer: " << *ptr << endl;
+    delete ptr;  // Free memory
+    
+    // Allocate array
+    int size = 5;
+    int* arr = new int[size];
+    
+    // Initialize array
+    for (int i = 0; i < size; i++) {
+        arr[i] = (i + 1) * 10;
+    }
+    
+    cout << "Dynamically allocated array: ";
+    for (int i = 0; i < size; i++) {
+        cout << arr[i] << " ";
+    }
+    cout << endl;
+    
+    delete[] arr;  // Free array memory
+    
+    // Always set pointers to nullptr after deletion
+    ptr = nullptr;
+    arr = nullptr;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Common Pointer Pitfalls' : '常见指针陷阱'}</h2>
+      <div class="pitfalls">
+        <div class="pitfall">
+          <h4>{lang === 'en' ? 'Null Pointer Dereference' : '空指针解引用'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Always check if pointer is not null before dereferencing'
+              : '在解引用之前始终检查指针是否不为空'
+            }
+          </p>
+        </div>
+        
+        <div class="pitfall">
+          <h4>{lang === 'en' ? 'Memory Leaks' : '内存泄漏'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Every new must have a corresponding delete'
+              : '每个 new 都必须有对应的 delete'
+            }
+          </p>
+        </div>
+        
+        <div class="pitfall">
+          <h4>{lang === 'en' ? 'Dangling Pointers' : '悬空指针'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Don\'t use pointers after the memory has been freed'
+              : '不要在内存被释放后使用指针'
+            }
+          </p>
+        </div>
+        
+        <div class="pitfall">
+          <h4>{lang === 'en' ? 'Double Deletion' : '重复删除'}</h4>
+          <p>
+            {lang === 'en'
+              ? 'Don\'t delete the same memory twice'
+              : '不要重复删除同一块内存'
+            }
+          </p>
+        </div>
+      </div>
+    </section>
+
+    <div class="navigation">
+      <a href={`/${lang}/1-syntax-basics/classes`} class="nav-button prev">
+        ← {lang === 'en' ? 'Previous: Classes & Objects' : '上一节：类与对象'}
+      </a>
+      <a href={`/${lang}/1-syntax-basics/memory`} class="nav-button next">
+        {lang === 'en' ? 'Next: Memory Management' : '下一节：内存管理'} →
+      </a>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  p {
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+  
+  .pitfalls {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+    gap: 1.5rem;
+    margin: 2rem 0;
+  }
+  
+  .pitfall {
+    background: #fef2f2;
+    border: 1px solid #fecaca;
+    border-radius: 8px;
+    padding: 1.5rem;
+  }
+  
+  .pitfall h4 {
+    color: #dc2626;
+    margin: 0 0 1rem 0;
+  }
+  
+  .pitfall p {
+    margin: 0;
+    color: #dc2626;
+    font-size: 0.9rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: #4f46e5;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background: #3730a3;
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .pitfalls {
+      grid-template-columns: 1fr;
+    }
+    
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style> 

@@ -1,13 +1,18 @@
 ---
+import LanguagePicker from '../components/LanguagePicker.astro';
+import { getLangFromUrl, useTranslations } from '../i18n/utils';
+
 export interface Props {
 	title: string;
 }
 
 const { title } = Astro.props;
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
 ---
 
 <!DOCTYPE html>
-<html lang="en">
+<html lang={lang}>
 	<head>
 		<meta charset="UTF-8" />
 		<meta name="description" content="Learn C++ programming from basics to advanced concepts" />
@@ -32,9 +37,9 @@ const { title } = Astro.props;
 							<span></span>
 						</button>
 						<div class="topbar-brand">
-							<a href="/" class="brand-link">
+							<a href={`/${lang}/`} class="brand-link">
 								<span class="brand-icon">🚀</span>
-								<span class="brand-text">C++ Hub</span>
+								<span class="brand-text">{t('site.brand')}</span>
 							</a>
 						</div>
 						<div class="page-info">
@@ -43,18 +48,19 @@ const { title } = Astro.props;
 					</div>
 					<div class="topbar-right">
 						<nav class="breadcrumb">
-							<a href="/" class="breadcrumb-home">
+							<a href={`/${lang}/`} class="breadcrumb-home">
 								<span class="breadcrumb-icon">🏠</span>
-								Home
+								{t('nav.home')}
 							</a>
 							<span class="separator">›</span>
 							<span class="current">{title}</span>
 						</nav>
 						<div class="topbar-actions">
-							<button class="action-btn" id="theme-toggle" aria-label="Toggle theme">
+							<LanguagePicker />
+							<button class="action-btn" id="theme-toggle" aria-label={t('ui.toggle-theme')}>
 								<span class="theme-icon">🌙</span>
 							</button>
-							<button class="action-btn" id="toc-toggle" aria-label="Toggle table of contents">
+							<button class="action-btn" id="toc-toggle" aria-label={t('ui.toggle-toc')}>
 								<span class="toc-icon">📋</span>
 							</button>
 						</div>
@@ -65,95 +71,85 @@ const { title } = Astro.props;
 			<!-- Sidebar Navigation -->
 			<nav class="sidebar" id="sidebar">
 				<div class="sidebar-header">
-					<h2><a href="/">C++ Learning Hub</a></h2>
+					<h2><a href={`/${lang}/`}>{t('site.title')}</a></h2>
 				</div>
 				
 				<div class="nav-section">
-					<h3>Syntax Basics</h3>
+					<h3>{t('nav.syntax-basics')}</h3>
 					<ul>
-						<li><a href="/1-syntax-basics/introduction">Introduction to C++</a></li>
-						<li><a href="/1-syntax-basics/variables">Variables & Operations</a></li>
-						<li><a href="/1-syntax-basics/control-structures">Control Structures</a></li>
-						<li><a href="/1-syntax-basics/functions">Functions</a></li>
-						<li><a href="/1-syntax-basics/classes">Classes & Objects</a></li>
-						<li><a href="/1-syntax-basics/pointers">Pointers</a></li>
-						<li><a href="/1-syntax-basics/memory">Memory Management</a></li>
+						<li><a href={`/${lang}/1-syntax-basics/introduction`}>{t('syntax.intro')}</a></li>
+						<li><a href={`/${lang}/1-syntax-basics/variables`}>{t('syntax.variables')}</a></li>
+						<li><a href={`/${lang}/1-syntax-basics/control-structures`}>{t('syntax.control')}</a></li>
+						<li><a href={`/${lang}/1-syntax-basics/functions`}>{t('syntax.functions')}</a></li>
+						<li><a href={`/${lang}/1-syntax-basics/classes`}>{t('syntax.classes')}</a></li>
+						<li><a href={`/${lang}/1-syntax-basics/pointers`}>{t('syntax.pointers')}</a></li>
+						<li><a href={`/${lang}/1-syntax-basics/memory`}>{t('syntax.memory')}</a></li>
 					</ul>
 				</div>
 
 				<div class="nav-section">
-					<h3>Algorithm Basics</h3>
+					<h3>{t('nav.algorithm-basics')}</h3>
 					<ul>
-						<li><a href="/2-algorithm-basics/sorting">Sorting Algorithms</a></li>
-						<li><a href="/2-algorithm-basics/searching">Search & Backtracking</a></li>
-						<li><a href="/2-algorithm-basics/recursion">Recursion & Recurrence</a></li>
-						<li><a href="/2-algorithm-basics/dynamic-programming">Dynamic Programming</a></li>
-						<li><a href="/2-algorithm-basics/greedy-algorithms">Greedy Approach</a></li>
-						<li><a href="/2-algorithm-basics/graph-algorithms">Graph Algorithms</a></li>
-						<li><a href="/2-algorithm-basics/string-algorithms">String Algorithms</a></li>
+						<li><a href={`/${lang}/2-algorithm-basics/sorting`}>{t('algo.sorting')}</a></li>
+						<li><a href={`/${lang}/2-algorithm-basics/searching`}>{t('algo.searching')}</a></li>
+						<li><a href={`/${lang}/2-algorithm-basics/recursion`}>{t('algo.recursion')}</a></li>
+						<li><a href={`/${lang}/2-algorithm-basics/dynamic-programming`}>{t('algo.dp')}</a></li>
+						<li><a href={`/${lang}/2-algorithm-basics/greedy-algorithms`}>{t('algo.greedy')}</a></li>
+						<li><a href={`/${lang}/2-algorithm-basics/graph-algorithms`}>{t('algo.graph')}</a></li>
+						<li><a href={`/${lang}/2-algorithm-basics/string-algorithms`}>{t('algo.string')}</a></li>
 					</ul>
 				</div>
 
 				<div class="nav-section">
-					<h3>Data Structures</h3>
+					<h3>{t('nav.data-structures')}</h3>
 					<ul>
-						<li><a href="/3-data-structures/arrays">Arrays</a></li>
-						<li><a href="/3-data-structures/vectors">Vectors</a></li>
-						<li><a href="/3-data-structures/linked-lists">Linked Lists</a></li>
-						<li><a href="/3-data-structures/stacks">Stacks</a></li>
-						<li><a href="/3-data-structures/queues">Queues</a></li>
-						<li><a href="/3-data-structures/trees">Trees</a></li>
-						<li><a href="/3-data-structures/graphs">Graphs</a></li>
-						<li><a href="/3-data-structures/hash-tables">Hash Tables</a></li>
+						<li><a href={`/${lang}/3-data-structures/arrays`}>{t('ds.arrays')}</a></li>
+						<li><a href={`/${lang}/3-data-structures/vectors`}>{t('ds.vectors')}</a></li>
+						<li><a href={`/${lang}/3-data-structures/linked-lists`}>{t('ds.linked-lists')}</a></li>
+						<li><a href={`/${lang}/3-data-structures/stacks`}>{t('ds.stacks')}</a></li>
+						<li><a href={`/${lang}/3-data-structures/queues`}>{t('ds.queues')}</a></li>
+						<li><a href={`/${lang}/3-data-structures/trees`}>{t('ds.trees')}</a></li>
+						<li><a href={`/${lang}/3-data-structures/graphs`}>{t('ds.graphs')}</a></li>
+						<li><a href={`/${lang}/3-data-structures/hash-tables`}>{t('ds.hash-tables')}</a></li>
 					</ul>
 				</div>
 
 				<div class="nav-section">
-					<h3>Competitive Programming</h3>
+					<h3>{t('nav.competitive')}</h3>
 					<ul>
-						<li><a href="/4-competitive/stl-templates">STL & Templates</a></li>
-						<li><a href="/4-competitive/data-structures">Advanced Data Structures</a></li>
-						<li><a href="/4-competitive/hash-tables">Advanced Hashing</a></li>
-						<li><a href="/4-competitive/binary-search">Binary Search</a></li>
-						<li><a href="/4-competitive/advanced-search">Advanced Search</a></li>
-						<li><a href="/4-competitive/kmp">KMP String Matching</a></li>
-						<li><a href="/4-competitive/trie">Trie Trees</a></li>
-						<li><a href="/4-competitive/segment-tree">Segment Trees</a></li>
-						<li><a href="/4-competitive/monotonic-stack">Monotonic Stack</a></li>
-						<li><a href="/4-competitive/monotonic-queue">Monotonic Queue</a></li>
-						<li><a href="/4-competitive/tree-dp">Tree DP</a></li>
-						<li><a href="/4-competitive/divide-conquer">Divide & Conquer</a></li>
-						<li><a href="/4-competitive/greedy-advanced">Advanced Greedy</a></li>
-						<li><a href="/4-competitive/number-theory">Number Theory</a></li>
+						<li><a href={`/${lang}/4-competitive/stl-templates`}>{t('comp.stl')}</a></li>
+						<li><a href={`/${lang}/4-competitive/data-structures`}>{t('comp.advanced-ds')}</a></li>
+						<li><a href={`/${lang}/4-competitive/hash-tables`}>{t('comp.advanced-hash')}</a></li>
+						<li><a href={`/${lang}/4-competitive/binary-search`}>{t('comp.binary-search')}</a></li>
+						<li><a href={`/${lang}/4-competitive/advanced-search`}>{t('comp.advanced-search')}</a></li>
+						<li><a href={`/${lang}/4-competitive/kmp`}>{t('comp.kmp')}</a></li>
+						<li><a href={`/${lang}/4-competitive/trie`}>{t('comp.trie')}</a></li>
+						<li><a href={`/${lang}/4-competitive/segment-tree`}>{t('comp.segment-tree')}</a></li>
+						<li><a href={`/${lang}/4-competitive/monotonic-stack`}>{t('comp.monotonic-stack')}</a></li>
+						<li><a href={`/${lang}/4-competitive/monotonic-queue`}>{t('comp.monotonic-queue')}</a></li>
+						<li><a href={`/${lang}/4-competitive/tree-dp`}>{t('comp.tree-dp')}</a></li>
+						<li><a href={`/${lang}/4-competitive/divide-conquer`}>{t('comp.divide-conquer')}</a></li>
+						<li><a href={`/${lang}/4-competitive/greedy-advanced`}>{t('comp.greedy-advanced')}</a></li>
+						<li><a href={`/${lang}/4-competitive/number-theory`}>{t('comp.number-theory')}</a></li>
 					</ul>
 				</div>
 
 				<div class="nav-section">
-					<h3>Advanced Algorithms</h3>
+					<h3>{t('nav.advanced')}</h3>
 					<ul>
-						<li><a href="/5-advanced/graph-theory">Advanced Graph Theory</a></li>
-						<li><a href="/5-advanced/graph-algorithms">Advanced Graph Algorithms</a></li>
-						<li><a href="/5-advanced/difference-doubling">Difference Arrays & Doubling</a></li>
-						<li><a href="/5-advanced/union-find">Union-Find (Disjoint Set)</a></li>
-						<li><a href="/5-advanced/sweep-line">Sweep Line Algorithm</a></li>
-						<li><a href="/5-advanced/binary-trie">Binary Trie (01-Trie)</a></li>
-						<li><a href="/5-advanced/data-structure-dp">Data Structure Optimized DP</a></li>
+						<li><a href={`/${lang}/5-advanced/graph-theory`}>{t('adv.graph-theory')}</a></li>
+						<li><a href={`/${lang}/5-advanced/graph-algorithms`}>{t('adv.graph-algorithms')}</a></li>
+						<li><a href={`/${lang}/5-advanced/union-find`}>{t('adv.union-find')}</a></li>
 					</ul>
 				</div>
 
 				<div class="nav-section">
-					<h3>World-Class Level</h3>
+					<h3>{t('nav.world-class')}</h3>
 					<ul>
-						<li><a href="/6-world-class/combinatorics">Combinatorics</a></li>
-						<li><a href="/6-world-class/linear-algebra">Linear Algebra</a></li>
-						<li><a href="/6-world-class/advanced-dp">Advanced Dynamic Programming</a></li>
-						<li><a href="/6-world-class/tree-problems">Advanced Tree Problems</a></li>
-						<li><a href="/6-world-class/segment-tree-advanced">Advanced Segment Trees</a></li>
-						<li><a href="/6-world-class/balanced-tree">Balanced Trees</a></li>
-						<li><a href="/6-world-class/dp-optimization">Monotonic DP Optimization</a></li>
-						<li><a href="/6-world-class/heavy-light">Heavy-Light Decomposition</a></li>
-						<li><a href="/6-world-class/shortest-dag">Shortest Path DAG</a></li>
-						<li><a href="/6-world-class/tree-advanced">Advanced Tree Algorithms</a></li>
+						<li><a href={`/${lang}/6-world-class/combinatorics`}>{t('world.combinatorics')}</a></li>
+						<li><a href={`/${lang}/6-world-class/linear-algebra`}>{t('world.linear-algebra')}</a></li>
+						<li><a href={`/${lang}/6-world-class/advanced-dp`}>{t('world.advanced-dp')}</a></li>
+						<li><a href={`/${lang}/6-world-class/balanced-tree`}>{t('world.balanced-trees')}</a></li>
 					</ul>
 				</div>
 			</nav>
@@ -171,7 +167,7 @@ const { title } = Astro.props;
 					<div class="toc-header">
 						<h3>
 							<span class="toc-title-icon">📖</span>
-							Table of Contents
+							{t('ui.table-of-contents')}
 						</h3>
 						<button class="toc-close" id="toc-close" aria-label="Close table of contents">×</button>
 					</div>
@@ -180,7 +176,7 @@ const { title } = Astro.props;
 					</div>
 					<div class="toc-footer">
 						<div class="reading-progress">
-							<div class="progress-label">Reading Progress</div>
+							<div class="progress-label">{t('ui.reading-progress')}</div>
 							<div class="progress-bar">
 								<div class="progress-fill" id="reading-progress"></div>
 							</div>

@@ -1,0 +1,477 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('algo.sorting')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/2-algorithm-basics`}>{t('nav.algorithm-basics')}</a> > 
+      {t('algo.sorting')}
+    </div>
+    
+    <h1>{t('algo.sorting')}</h1>
+    
+    <section>
+      <h2>{lang === 'en' ? 'Introduction to Sorting' : '排序算法简介'}</h2>
+      <p>
+        {lang === 'en' 
+          ? 'Sorting algorithms arrange elements in a particular order, typically ascending or descending. Understanding sorting is fundamental to computer science and algorithm design.'
+          : '排序算法将元素按特定顺序排列，通常是升序或降序。理解排序是计算机科学和算法设计的基础。'
+        }
+      </p>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Bubble Sort' : '冒泡排序'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Bubble sort repeatedly steps through the list, compares adjacent elements and swaps them if they are in the wrong order. Time complexity: O(n²)'
+          : '冒泡排序反复遍历列表，比较相邻元素，如果顺序错误就交换它们。时间复杂度：O(n²)'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Bubble Sort Implementation' : '冒泡排序实现'}
+        code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+void bubbleSort(vector<int>& arr) {
+    int n = arr.size();
+    
+    for (int i = 0; i < n - 1; i++) {
+        bool swapped = false;
+        
+        // Last i elements are already sorted
+        for (int j = 0; j < n - i - 1; j++) {
+            if (arr[j] > arr[j + 1]) {
+                swap(arr[j], arr[j + 1]);
+                swapped = true;
+            }
+        }
+        
+        // If no swapping occurred, array is sorted
+        if (!swapped) break;
+    }
+}
+
+int main() {
+    vector<int> arr = {64, 34, 25, 12, 22, 11, 90};
+    
+    cout << "Original array: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    bubbleSort(arr);
+    
+    cout << "Sorted array: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Selection Sort' : '选择排序'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Selection sort finds the minimum element and places it at the beginning, then finds the second minimum, and so on. Time complexity: O(n²)'
+          : '选择排序找到最小元素并将其放在开头，然后找到第二小的元素，依此类推。时间复杂度：O(n²)'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Selection Sort Implementation' : '选择排序实现'}
+        code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+void selectionSort(vector<int>& arr) {
+    int n = arr.size();
+    
+    for (int i = 0; i < n - 1; i++) {
+        int minIndex = i;
+        
+        // Find minimum element in remaining array
+        for (int j = i + 1; j < n; j++) {
+            if (arr[j] < arr[minIndex]) {
+                minIndex = j;
+            }
+        }
+        
+        // Swap minimum element with first element
+        if (minIndex != i) {
+            swap(arr[i], arr[minIndex]);
+        }
+    }
+}
+
+int main() {
+    vector<int> arr = {64, 34, 25, 12, 22, 11, 90};
+    
+    cout << "Original array: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    selectionSort(arr);
+    
+    cout << "Sorted array: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Quick Sort' : '快速排序'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Quick sort uses divide-and-conquer to pick a pivot element and partition the array. Average time complexity: O(n log n), worst case: O(n²)'
+          : '快速排序使用分治法选择一个基准元素并对数组进行分区。平均时间复杂度：O(n log n)，最坏情况：O(n²)'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Quick Sort Implementation' : '快速排序实现'}
+        code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+int partition(vector<int>& arr, int low, int high) {
+    int pivot = arr[high];  // Choose last element as pivot
+    int i = low - 1;        // Index of smaller element
+    
+    for (int j = low; j < high; j++) {
+        if (arr[j] <= pivot) {
+            i++;
+            swap(arr[i], arr[j]);
+        }
+    }
+    
+    swap(arr[i + 1], arr[high]);
+    return i + 1;
+}
+
+void quickSort(vector<int>& arr, int low, int high) {
+    if (low < high) {
+        int pi = partition(arr, low, high);
+        
+        // Recursively sort elements before and after partition
+        quickSort(arr, low, pi - 1);
+        quickSort(arr, pi + 1, high);
+    }
+}
+
+int main() {
+    vector<int> arr = {64, 34, 25, 12, 22, 11, 90};
+    
+    cout << "Original array: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    quickSort(arr, 0, arr.size() - 1);
+    
+    cout << "Sorted array: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Merge Sort' : '归并排序'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Merge sort divides the array into halves, sorts them recursively, and then merges the sorted halves. Time complexity: O(n log n) - stable and predictable.'
+          : '归并排序将数组分成两半，递归地对它们排序，然后合并已排序的两半。时间复杂度：O(n log n) - 稳定且可预测。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Merge Sort Implementation' : '归并排序实现'}
+        code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+void merge(vector<int>& arr, int left, int mid, int right) {
+    int n1 = mid - left + 1;
+    int n2 = right - mid;
+    
+    // Create temporary arrays
+    vector<int> L(n1), R(n2);
+    
+    // Copy data to temporary arrays
+    for (int i = 0; i < n1; i++)
+        L[i] = arr[left + i];
+    for (int j = 0; j < n2; j++)
+        R[j] = arr[mid + 1 + j];
+    
+    // Merge the temporary arrays back
+    int i = 0, j = 0, k = left;
+    
+    while (i < n1 && j < n2) {
+        if (L[i] <= R[j]) {
+            arr[k] = L[i];
+            i++;
+        } else {
+            arr[k] = R[j];
+            j++;
+        }
+        k++;
+    }
+    
+    // Copy remaining elements
+    while (i < n1) {
+        arr[k] = L[i];
+        i++;
+        k++;
+    }
+    
+    while (j < n2) {
+        arr[k] = R[j];
+        j++;
+        k++;
+    }
+}
+
+void mergeSort(vector<int>& arr, int left, int right) {
+    if (left < right) {
+        int mid = left + (right - left) / 2;
+        
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+        merge(arr, left, mid, right);
+    }
+}
+
+int main() {
+    vector<int> arr = {64, 34, 25, 12, 22, 11, 90};
+    
+    cout << "Original array: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    mergeSort(arr, 0, arr.size() - 1);
+    
+    cout << "Sorted array: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Complexity Comparison' : '复杂度比较'}</h2>
+      <div class="complexity-table">
+        <table>
+          <thead>
+            <tr>
+              <th>{lang === 'en' ? 'Algorithm' : '算法'}</th>
+              <th>{lang === 'en' ? 'Best Case' : '最佳情况'}</th>
+              <th>{lang === 'en' ? 'Average Case' : '平均情况'}</th>
+              <th>{lang === 'en' ? 'Worst Case' : '最坏情况'}</th>
+              <th>{lang === 'en' ? 'Space Complexity' : '空间复杂度'}</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>{lang === 'en' ? 'Bubble Sort' : '冒泡排序'}</td>
+              <td>O(n)</td>
+              <td>O(n²)</td>
+              <td>O(n²)</td>
+              <td>O(1)</td>
+            </tr>
+            <tr>
+              <td>{lang === 'en' ? 'Selection Sort' : '选择排序'}</td>
+              <td>O(n²)</td>
+              <td>O(n²)</td>
+              <td>O(n²)</td>
+              <td>O(1)</td>
+            </tr>
+            <tr>
+              <td>{lang === 'en' ? 'Quick Sort' : '快速排序'}</td>
+              <td>O(n log n)</td>
+              <td>O(n log n)</td>
+              <td>O(n²)</td>
+              <td>O(log n)</td>
+            </tr>
+            <tr>
+              <td>{lang === 'en' ? 'Merge Sort' : '归并排序'}</td>
+              <td>O(n log n)</td>
+              <td>O(n log n)</td>
+              <td>O(n log n)</td>
+              <td>O(n)</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <div class="navigation">
+      <a href={`/${lang}/2-algorithm-basics`} class="nav-button prev">
+        ← {lang === 'en' ? 'Back to Algorithm Basics' : '返回算法基础'}
+      </a>
+      <a href={`/${lang}/2-algorithm-basics/searching`} class="nav-button next">
+        {lang === 'en' ? 'Next: Searching Algorithms' : '下一节：搜索算法'} →
+      </a>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  p {
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+  
+  .complexity-table {
+    overflow-x: auto;
+    margin: 2rem 0;
+  }
+  
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  }
+  
+  th, td {
+    padding: 1rem;
+    text-align: left;
+    border-bottom: 1px solid #e2e8f0;
+  }
+  
+  th {
+    background: #f8fafc;
+    font-weight: 600;
+    color: #1e293b;
+  }
+  
+  tr:hover {
+    background: #f8fafc;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: #4f46e5;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background: #3730a3;
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .nav-button {
+      text-align: center;
+    }
+    
+    .complexity-table {
+      font-size: 0.9rem;
+    }
+    
+    th, td {
+      padding: 0.5rem;
+    }
+  }
+</style> 

@@ -1,0 +1,334 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('syntax.variables')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/1-syntax-basics`}>{t('nav.syntax-basics')}</a> > 
+      {t('syntax.variables')}
+    </div>
+    
+    <h1>{t('syntax.variables')}</h1>
+    
+    <section>
+      <h2>{lang === 'en' ? 'Variable Declaration' : '变量声明'}</h2>
+      <p>
+        {lang === 'en' 
+          ? 'Variables in C++ must be declared with a specific data type before use. Here are the fundamental data types:'
+          : 'C++ 中的变量在使用前必须声明特定的数据类型。以下是基本数据类型：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Basic Variable Declaration' : '基本变量声明'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // Integer types
+    int age = 25;
+    long population = 1000000L;
+    short score = 95;
+    
+    // Floating point types
+    float price = 19.99f;
+    double pi = 3.14159265359;
+    
+    // Character types
+    char grade = 'A';
+    string name = "John Doe";
+    
+    // Boolean type
+    bool isActive = true;
+    
+    cout << "Age: " << age << endl;
+    cout << "Name: " << name << endl;
+    cout << "Grade: " << grade << endl;
+    cout << "Active: " << isActive << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Variable Initialization' : '变量初始化'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'C++ supports multiple ways to initialize variables:'
+          : 'C++ 支持多种变量初始化方式：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Initialization Methods' : '初始化方法'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // Copy initialization
+    int a = 10;
+    
+    // Direct initialization
+    int b(20);
+    
+    // List initialization (C++11)
+    int c{30};
+    int d = {40};
+    
+    // Default initialization
+    int e;  // Uninitialized (contains garbage value)
+    
+    // Multiple variable declaration
+    int x = 1, y = 2, z = 3;
+    
+    cout << "a: " << a << ", b: " << b << ", c: " << c << ", d: " << d << endl;
+    cout << "x: " << x << ", y: " << y << ", z: " << z << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Arithmetic Operators' : '算术运算符'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'C++ provides various arithmetic operators for mathematical computations:'
+          : 'C++ 提供各种算术运算符进行数学计算：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Arithmetic Operations' : '算术运算'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    int a = 15, b = 4;
+    
+    cout << "a = " << a << ", b = " << b << endl;
+    cout << "Addition: a + b = " << (a + b) << endl;
+    cout << "Subtraction: a - b = " << (a - b) << endl;
+    cout << "Multiplication: a * b = " << (a * b) << endl;
+    cout << "Division: a / b = " << (a / b) << endl;
+    cout << "Modulus: a % b = " << (a % b) << endl;
+    
+    // Increment and decrement
+    cout << "\\nIncrement/Decrement:" << endl;
+    cout << "a++ = " << a++ << " (post-increment)" << endl;
+    cout << "a = " << a << " (after post-increment)" << endl;
+    cout << "++a = " << ++a << " (pre-increment)" << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Assignment Operators' : '赋值运算符'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Assignment operators are used to assign values to variables:'
+          : '赋值运算符用于给变量赋值：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Assignment Operations' : '赋值运算'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    int x = 10;
+    
+    cout << "Initial value: x = " << x << endl;
+    
+    x += 5;  // x = x + 5
+    cout << "After x += 5: x = " << x << endl;
+    
+    x -= 3;  // x = x - 3
+    cout << "After x -= 3: x = " << x << endl;
+    
+    x *= 2;  // x = x * 2
+    cout << "After x *= 2: x = " << x << endl;
+    
+    x /= 4;  // x = x / 4
+    cout << "After x /= 4: x = " << x << endl;
+    
+    x %= 3;  // x = x % 3
+    cout << "After x %= 3: x = " << x << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Constants' : '常量'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Constants are values that cannot be modified after initialization:'
+          : '常量是初始化后不能修改的值：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Constant Declaration' : '常量声明'}
+        code={`#include <iostream>
+using namespace std;
+
+int main() {
+    // Using const keyword
+    const int MAX_SIZE = 100;
+    const double PI = 3.14159;
+    const char GRADE = 'A';
+    
+    // Using #define preprocessor
+    #define SPEED_OF_LIGHT 299792458
+    
+    cout << "Max size: " << MAX_SIZE << endl;
+    cout << "PI: " << PI << endl;
+    cout << "Grade: " << GRADE << endl;
+    cout << "Speed of light: " << SPEED_OF_LIGHT << " m/s" << endl;
+    
+    // This would cause a compilation error:
+    // MAX_SIZE = 200;  // Error: cannot modify const variable
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <div class="navigation">
+      <a href={`/${lang}/1-syntax-basics/introduction`} class="nav-button prev">
+        ← {lang === 'en' ? 'Previous: Introduction' : '上一节：C++ 简介'}
+      </a>
+      <a href={`/${lang}/1-syntax-basics/control-structures`} class="nav-button next">
+        {lang === 'en' ? 'Next: Control Structures' : '下一节：控制结构'} →
+      </a>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  p {
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: #4f46e5;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background: #3730a3;
+    transform: translateY(-2px);
+  }
+  
+  .nav-button.prev {
+    margin-right: auto;
+  }
+  
+  .nav-button.next {
+    margin-left: auto;
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style> 

@@ -1,0 +1,143 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={t('algo.title')}>
+  <main>
+    <h1>{t('algo.title')}</h1>
+    <p class="intro">{t('algo.description')}</p>
+    
+    <div class="lesson-grid">
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/2-algorithm-basics/sorting`}>{t('algo.sorting')}</a></h2>
+        <p>Learn fundamental sorting algorithms like bubble sort, merge sort, quick sort, and their time complexities.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/2-algorithm-basics/searching`}>{t('algo.searching')}</a></h2>
+        <p>Master search algorithms including linear search, binary search, and backtracking techniques.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/2-algorithm-basics/recursion`}>{t('algo.recursion')}</a></h2>
+        <p>Understand recursive thinking, recurrence relations, and solving problems with recursive approaches.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/2-algorithm-basics/dynamic-programming`}>{t('algo.dp')}</a></h2>
+        <p>Introduction to dynamic programming concepts, memoization, and optimization techniques.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/2-algorithm-basics/greedy-algorithms`}>{t('algo.greedy')}</a></h2>
+        <p>Learn greedy algorithm design, optimization strategies, and real-world applications.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/2-algorithm-basics/graph-algorithms`}>{t('algo.graph')}</a></h2>
+        <p>Explore graph traversal algorithms like DFS, BFS, and shortest path algorithms.</p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/2-algorithm-basics/string-algorithms`}>{t('algo.string')}</a></h2>
+        <p>Master string manipulation algorithms, pattern matching, and text processing techniques.</p>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    width: 1200px;
+    max-width: calc(100% - 2rem);
+    color: #1e293b;
+    line-height: 1.6;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .intro {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin-bottom: 3rem;
+  }
+  
+  .lesson-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .lesson-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .lesson-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    border-color: #4f46e5;
+  }
+  
+  .lesson-card h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+  }
+  
+  .lesson-card h2 a {
+    color: #1e293b;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+  }
+  
+  .lesson-card:hover h2 a {
+    color: #4f46e5;
+  }
+  
+  .lesson-card p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .lesson-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style> 

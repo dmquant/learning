@@ -1,0 +1,178 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={t('syntax.title')}>
+  <main>
+    <h1>{t('syntax.title')}</h1>
+    <p class="intro">{t('syntax.description')}</p>
+    
+    <div class="lesson-grid">
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/1-syntax-basics/introduction`}>{t('syntax.intro')}</a></h2>
+        <p>
+          {lang === 'en' 
+            ? 'Learn the fundamentals of C++ programming language, its history, and basic structure.'
+            : '学习 C++ 编程语言的基础知识、历史和基本结构。'
+          }
+        </p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/1-syntax-basics/variables`}>{t('syntax.variables')}</a></h2>
+        <p>
+          {lang === 'en'
+            ? 'Master variables, data types, and basic operations in C++.'
+            : '掌握 C++ 中的变量、数据类型和基本操作。'
+          }
+        </p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/1-syntax-basics/control-structures`}>{t('syntax.control')}</a></h2>
+        <p>
+          {lang === 'en'
+            ? 'Understand loops, conditionals, and control flow in C++ programs.'
+            : '理解 C++ 程序中的循环、条件语句和控制流。'
+          }
+        </p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/1-syntax-basics/functions`}>{t('syntax.functions')}</a></h2>
+        <p>
+          {lang === 'en'
+            ? 'Learn to create and use functions for modular programming.'
+            : '学习创建和使用函数进行模块化编程。'
+          }
+        </p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/1-syntax-basics/classes`}>{t('syntax.classes')}</a></h2>
+        <p>
+          {lang === 'en'
+            ? 'Introduction to object-oriented programming with classes and objects.'
+            : '面向对象编程的介绍：类和对象。'
+          }
+        </p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/1-syntax-basics/pointers`}>{t('syntax.pointers')}</a></h2>
+        <p>
+          {lang === 'en'
+            ? 'Understand pointer concepts and memory addressing in C++.'
+            : '理解 C++ 中的指针概念和内存寻址。'
+          }
+        </p>
+      </div>
+      
+      <div class="lesson-card">
+        <h2><a href={`/${lang}/1-syntax-basics/memory`}>{t('syntax.memory')}</a></h2>
+        <p>
+          {lang === 'en'
+            ? 'Learn dynamic memory allocation and management techniques.'
+            : '学习动态内存分配和管理技术。'
+          }
+        </p>
+      </div>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    width: 1200px;
+    max-width: calc(100% - 2rem);
+    color: #1e293b;
+    line-height: 1.6;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .intro {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin-bottom: 3rem;
+  }
+  
+  .lesson-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1.5rem;
+  }
+  
+  .lesson-card {
+    background: white;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 1.5rem;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+  }
+  
+  .lesson-card:hover {
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+    border-color: #4f46e5;
+  }
+  
+  .lesson-card h2 {
+    margin: 0 0 1rem 0;
+    font-size: 1.25rem;
+  }
+  
+  .lesson-card h2 a {
+    color: #1e293b;
+    text-decoration: none;
+    font-weight: 600;
+    transition: color 0.3s ease;
+  }
+  
+  .lesson-card:hover h2 a {
+    color: #4f46e5;
+  }
+  
+  .lesson-card p {
+    margin: 0;
+    color: #6b7280;
+    font-size: 0.95rem;
+    line-height: 1.6;
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .lesson-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+</style> 
