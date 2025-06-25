@@ -1,0 +1,579 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('algo.dp')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/2-algorithm-basics`}>{t('nav.algorithm-basics')}</a> > 
+      {t('algo.dp')}
+    </div>
+    
+    <h1>{t('algo.dp')}</h1>
+    
+    <section>
+      <h2>{lang === 'en' ? 'Introduction to Dynamic Programming' : '动态规划简介'}</h2>
+      <p>
+        {lang === 'en' 
+          ? 'Dynamic Programming (DP) is an algorithmic technique that solves complex problems by breaking them down into simpler subproblems. It stores the results of subproblems to avoid redundant calculations, making it much more efficient than naive recursive approaches.'
+          : '动态规划（DP）是一种通过将复杂问题分解为更简单的子问题来解决复杂问题的算法技术。它存储子问题的结果以避免重复计算，使其比朴素的递归方法更高效。'
+        }
+      </p>
+      <p>
+        {lang === 'en'
+          ? 'DP problems have two key properties: optimal substructure (optimal solution contains optimal solutions to subproblems) and overlapping subproblems (same subproblems are solved multiple times).'
+          : 'DP问题有两个关键属性：最优子结构（最优解包含子问题的最优解）和重叠子问题（相同的子问题被多次求解）。'
+        }
+      </p>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Basic DP: Fibonacci with Memoization' : '基础DP：斐波那契记忆化'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'The Fibonacci sequence is a perfect introduction to DP. Compare the naive recursive approach with memoized and bottom-up solutions.'
+          : '斐波那契数列是DP的完美入门。比较朴素递归方法与记忆化和自底向上解决方案。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Fibonacci: Recursion vs DP' : '斐波那契：递归 vs DP'}
+        code={`#include <iostream>
+#include <vector>
+#include <chrono>
+using namespace std;
+using namespace std::chrono;
+
+class Fibonacci {
+public:
+    // Naive recursion - O(2^n)
+    long long fibRecursive(int n) {
+        if (n <= 1) return n;
+        return fibRecursive(n - 1) + fibRecursive(n - 2);
+    }
+    
+    // Top-down DP (Memoization) - O(n)
+    long long fibMemo(int n, vector<long long>& memo) {
+        if (n <= 1) return n;
+        
+        if (memo[n] != -1) {
+            return memo[n];
+        }
+        
+        memo[n] = fibMemo(n - 1, memo) + fibMemo(n - 2, memo);
+        return memo[n];
+    }
+    
+    // Bottom-up DP (Tabulation) - O(n)
+    long long fibDP(int n) {
+        if (n <= 1) return n;
+        
+        vector<long long> dp(n + 1);
+        dp[0] = 0;
+        dp[1] = 1;
+        
+        for (int i = 2; i <= n; i++) {
+            dp[i] = dp[i - 1] + dp[i - 2];
+        }
+        
+        return dp[n];
+    }
+    
+    // Space-optimized DP - O(1) space
+    long long fibOptimized(int n) {
+        if (n <= 1) return n;
+        
+        long long prev2 = 0, prev1 = 1, current;
+        
+        for (int i = 2; i <= n; i++) {
+            current = prev1 + prev2;
+            prev2 = prev1;
+            prev1 = current;
+        }
+        
+        return current;
+    }
+    
+    void comparePerformance(int n) {
+        cout << "Computing Fibonacci(" << n << "):" << endl;
+        
+        // Test memoization
+        vector<long long> memo(n + 1, -1);
+        auto start = high_resolution_clock::now();
+        long long result1 = fibMemo(n, memo);
+        auto end = high_resolution_clock::now();
+        auto duration1 = duration_cast<microseconds>(end - start);
+        cout << "Memoization: " << result1 << " (Time: " << duration1.count() << " μs)" << endl;
+        
+        // Test bottom-up DP
+        start = high_resolution_clock::now();
+        long long result2 = fibDP(n);
+        end = high_resolution_clock::now();
+        auto duration2 = duration_cast<microseconds>(end - start);
+        cout << "Bottom-up DP: " << result2 << " (Time: " << duration2.count() << " μs)" << endl;
+        
+        // Test optimized
+        start = high_resolution_clock::now();
+        long long result3 = fibOptimized(n);
+        end = high_resolution_clock::now();
+        auto duration3 = duration_cast<microseconds>(end - start);
+        cout << "Optimized: " << result3 << " (Time: " << duration3.count() << " μs)" << endl;
+    }
+};
+
+int main() {
+    Fibonacci fib;
+    fib.comparePerformance(40);
+    
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'Memoization and tabulation dramatically improve performance by avoiding redundant calculations.' : '记忆化和制表法通过避免重复计算显著提高性能。'}
+        output={`Computing Fibonacci(40):
+Memoization: 102334155 (Time: 45 μs)
+Bottom-up DP: 102334155 (Time: 23 μs)
+Optimized: 102334155 (Time: 15 μs)`}
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Classic DP: 0/1 Knapsack Problem' : '经典DP：0/1背包问题'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'The knapsack problem is fundamental in DP. Given items with weights and values, find the maximum value that can fit in a knapsack of given capacity.'
+          : '背包问题是DP的基础。给定具有重量和价值的物品，找出能够装入给定容量背包中的最大价值。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? '0/1 Knapsack Implementation' : '0/1背包实现'}
+        code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class Knapsack {
+public:
+    // Recursive solution with memoization
+    int knapsackMemo(int capacity, vector<int>& weights, vector<int>& values, 
+                     int n, vector<vector<int>>& memo) {
+        // Base case
+        if (n == 0 || capacity == 0) {
+            return 0;
+        }
+        
+        // Check if already computed
+        if (memo[n][capacity] != -1) {
+            return memo[n][capacity];
+        }
+        
+        // If weight of nth item is more than capacity, it cannot be included
+        if (weights[n - 1] > capacity) {
+            memo[n][capacity] = knapsackMemo(capacity, weights, values, n - 1, memo);
+        } else {
+            // Return maximum of two cases:
+            // 1. nth item included
+            // 2. nth item not included
+            int include = values[n - 1] + knapsackMemo(capacity - weights[n - 1], 
+                                                       weights, values, n - 1, memo);
+            int exclude = knapsackMemo(capacity, weights, values, n - 1, memo);
+            memo[n][capacity] = max(include, exclude);
+        }
+        
+        return memo[n][capacity];
+    }
+    
+    // Bottom-up DP solution
+    int knapsackDP(int capacity, vector<int>& weights, vector<int>& values, int n) {
+        // Create DP table
+        vector<vector<int>> dp(n + 1, vector<int>(capacity + 1, 0));
+        
+        // Build table dp[][] in bottom-up manner
+        for (int i = 1; i <= n; i++) {
+            for (int w = 1; w <= capacity; w++) {
+                if (weights[i - 1] <= w) {
+                    // Take maximum of including or excluding current item
+                    dp[i][w] = max(values[i - 1] + dp[i - 1][w - weights[i - 1]], 
+                                   dp[i - 1][w]);
+                } else {
+                    // Cannot include current item
+                    dp[i][w] = dp[i - 1][w];
+                }
+            }
+        }
+        
+        return dp[n][capacity];
+    }
+    
+    // Space-optimized version
+    int knapsackOptimized(int capacity, vector<int>& weights, vector<int>& values, int n) {
+        vector<int> dp(capacity + 1, 0);
+        
+        for (int i = 0; i < n; i++) {
+            // Traverse in reverse to avoid using updated values
+            for (int w = capacity; w >= weights[i]; w--) {
+                dp[w] = max(dp[w], dp[w - weights[i]] + values[i]);
+            }
+        }
+        
+        return dp[capacity];
+    }
+    
+    // Function to print which items are selected
+    void printSelectedItems(int capacity, vector<int>& weights, vector<int>& values, int n) {
+        vector<vector<int>> dp(n + 1, vector<int>(capacity + 1, 0));
+        
+        // Build DP table
+        for (int i = 1; i <= n; i++) {
+            for (int w = 1; w <= capacity; w++) {
+                if (weights[i - 1] <= w) {
+                    dp[i][w] = max(values[i - 1] + dp[i - 1][w - weights[i - 1]], 
+                                   dp[i - 1][w]);
+                } else {
+                    dp[i][w] = dp[i - 1][w];
+                }
+            }
+        }
+        
+        // Backtrack to find selected items
+        int res = dp[n][capacity];
+        int w = capacity;
+        
+        cout << "Selected items: ";
+        for (int i = n; i > 0 && res > 0; i--) {
+            if (res != dp[i - 1][w]) {
+                cout << "Item " << i << " (weight: " << weights[i - 1] 
+                     << ", value: " << values[i - 1] << ") ";
+                res -= values[i - 1];
+                w -= weights[i - 1];
+            }
+        }
+        cout << endl;
+    }
+};
+
+int main() {
+    vector<int> values = {60, 100, 120};
+    vector<int> weights = {10, 20, 30};
+    int capacity = 50;
+    int n = values.size();
+    
+    Knapsack ks;
+    
+    // Test memoization approach
+    vector<vector<int>> memo(n + 1, vector<int>(capacity + 1, -1));
+    cout << "Maximum value (Memoization): " 
+         << ks.knapsackMemo(capacity, weights, values, n, memo) << endl;
+    
+    // Test bottom-up DP
+    cout << "Maximum value (Bottom-up DP): " 
+         << ks.knapsackDP(capacity, weights, values, n) << endl;
+    
+    // Test optimized version
+    cout << "Maximum value (Optimized): " 
+         << ks.knapsackOptimized(capacity, weights, values, n) << endl;
+    
+    // Print selected items
+    ks.printSelectedItems(capacity, weights, values, n);
+    
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'The knapsack DP table stores maximum values for different capacities and item subsets.' : '背包DP表存储不同容量和物品子集的最大值。'}
+        output={`Maximum value (Memoization): 220
+Maximum value (Bottom-up DP): 220
+Maximum value (Optimized): 220
+Selected items: Item 3 (weight: 30, value: 120) Item 2 (weight: 20, value: 100)`}
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Longest Common Subsequence (LCS)' : '最长公共子序列 (LCS)'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'LCS finds the longest subsequence common to two sequences. It\'s used in diff algorithms, DNA analysis, and plagiarism detection.'
+          : 'LCS找到两个序列共同的最长子序列。它用于diff算法、DNA分析和抄袭检测。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Longest Common Subsequence' : '最长公共子序列'}
+        code={`#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+class LCS {
+public:
+    // Find length of LCS
+    int lcsLength(string text1, string text2) {
+        int m = text1.length();
+        int n = text2.length();
+        
+        // Create DP table
+        vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
+        
+        // Build the DP table
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (text1[i - 1] == text2[j - 1]) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                } else {
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        
+        return dp[m][n];
+    }
+    
+    // Find actual LCS string
+    string lcsString(string text1, string text2) {
+        int m = text1.length();
+        int n = text2.length();
+        
+        vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
+        
+        // Build the DP table
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (text1[i - 1] == text2[j - 1]) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                } else {
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        
+        // Backtrack to construct LCS
+        string lcs = "";
+        int i = m, j = n;
+        
+        while (i > 0 && j > 0) {
+            if (text1[i - 1] == text2[j - 1]) {
+                lcs = text1[i - 1] + lcs;
+                i--;
+                j--;
+            } else if (dp[i - 1][j] > dp[i][j - 1]) {
+                i--;
+            } else {
+                j--;
+            }
+        }
+        
+        return lcs;
+    }
+    
+    // Space-optimized LCS (only length)
+    int lcsOptimized(string text1, string text2) {
+        int m = text1.length();
+        int n = text2.length();
+        
+        // Use only two rows
+        vector<int> prev(n + 1, 0);
+        vector<int> curr(n + 1, 0);
+        
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (text1[i - 1] == text2[j - 1]) {
+                    curr[j] = prev[j - 1] + 1;
+                } else {
+                    curr[j] = max(prev[j], curr[j - 1]);
+                }
+            }
+            prev = curr;
+        }
+        
+        return curr[n];
+    }
+    
+    void printDPTable(string text1, string text2) {
+        int m = text1.length();
+        int n = text2.length();
+        
+        vector<vector<int>> dp(m + 1, vector<int>(n + 1, 0));
+        
+        for (int i = 1; i <= m; i++) {
+            for (int j = 1; j <= n; j++) {
+                if (text1[i - 1] == text2[j - 1]) {
+                    dp[i][j] = dp[i - 1][j - 1] + 1;
+                } else {
+                    dp[i][j] = max(dp[i - 1][j], dp[i][j - 1]);
+                }
+            }
+        }
+        
+        cout << "DP Table:" << endl;
+        cout << "    ";
+        for (char c : text2) cout << "  " << c;
+        cout << endl;
+        
+        for (int i = 0; i <= m; i++) {
+            if (i == 0) cout << "  ";
+            else cout << text1[i - 1] << " ";
+            
+            for (int j = 0; j <= n; j++) {
+                cout << "  " << dp[i][j];
+            }
+            cout << endl;
+        }
+    }
+};
+
+int main() {
+    LCS lcs;
+    string text1 = "ABCDGH";
+    string text2 = "AEDFHR";
+    
+    cout << "Text 1: " << text1 << endl;
+    cout << "Text 2: " << text2 << endl;
+    cout << endl;
+    
+    cout << "LCS Length: " << lcs.lcsLength(text1, text2) << endl;
+    cout << "LCS String: " << lcs.lcsString(text1, text2) << endl;
+    cout << "LCS Length (Optimized): " << lcs.lcsOptimized(text1, text2) << endl;
+    cout << endl;
+    
+    lcs.printDPTable(text1, text2);
+    
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'LCS builds a table where dp[i][j] represents LCS length of first i chars of text1 and first j chars of text2.' : 'LCS构建一个表，其中dp[i][j]表示text1的前i个字符和text2的前j个字符的LCS长度。'}
+        output={`Text 1: ABCDGH
+Text 2: AEDFHR
+
+LCS Length: 3
+LCS String: ADH
+LCS Length (Optimized): 3
+
+DP Table:
+      A  E  D  F  H  R
+    0  0  0  0  0  0  0
+A   0  1  1  1  1  1  1
+B   0  1  1  1  1  1  1
+C   0  1  1  1  1  1  1
+D   0  1  1  2  2  2  2
+G   0  1  1  2  2  2  2
+H   0  1  1  2  2  3  3`}
+      />
+    </section>
+
+    <div class="navigation">
+      <a href={`/${lang}/2-algorithm-basics/recursion`} class="nav-button prev">
+        ← {lang === 'en' ? 'Previous: Recursion & Recurrence' : '上一节：递归与递推'}
+      </a>
+      <a href={`/${lang}/2-algorithm-basics/greedy-algorithms`} class="nav-button next">
+        {lang === 'en' ? 'Next: Greedy Algorithms' : '下一节：贪心算法'} →
+      </a>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  p {
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: #4f46e5;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background: #3730a3;
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style>

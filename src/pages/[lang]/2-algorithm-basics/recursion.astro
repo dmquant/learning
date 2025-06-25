@@ -1,0 +1,538 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('algo.recursion')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/2-algorithm-basics`}>{t('nav.algorithm-basics')}</a> > 
+      {t('algo.recursion')}
+    </div>
+    
+    <h1>{t('algo.recursion')}</h1>
+    
+    <section>
+      <h2>{lang === 'en' ? 'Understanding Recursion' : '理解递归'}</h2>
+      <p>
+        {lang === 'en' 
+          ? 'Recursion is a programming technique where a function calls itself to solve smaller instances of the same problem. Every recursive solution needs a base case to stop the recursion and a recursive case that breaks down the problem.'
+          : '递归是一种编程技术，函数调用自身来解决同一问题的较小实例。每个递归解决方案都需要一个基本情况来停止递归和一个递归情况来分解问题。'
+        }
+      </p>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Basic Recursion Examples' : '基本递归示例'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Let\'s start with simple examples to understand how recursion works: factorial calculation and Fibonacci sequence.'
+          : '让我们从简单的例子开始理解递归的工作原理：阶乘计算和斐波那契数列。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Factorial and Fibonacci' : '阶乘和斐波那契'}
+        code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+// Factorial: n! = n * (n-1)!
+long long factorial(int n) {
+    // Base case
+    if (n <= 1) {
+        return 1;
+    }
+    // Recursive case
+    return n * factorial(n - 1);
+}
+
+// Fibonacci: F(n) = F(n-1) + F(n-2)
+long long fibonacci(int n) {
+    // Base cases
+    if (n <= 1) {
+        return n;
+    }
+    // Recursive case
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+// Optimized Fibonacci with memoization
+long long fibonacciMemo(int n, vector<long long>& memo) {
+    if (n <= 1) {
+        return n;
+    }
+    
+    if (memo[n] != -1) {
+        return memo[n];
+    }
+    
+    memo[n] = fibonacciMemo(n - 1, memo) + fibonacciMemo(n - 2, memo);
+    return memo[n];
+}
+
+int main() {
+    cout << "Factorial of 5: " << factorial(5) << endl;
+    cout << "Fibonacci of 10: " << fibonacci(10) << endl;
+    
+    // Using memoization for efficiency
+    vector<long long> memo(11, -1);
+    cout << "Fibonacci with memoization: " << fibonacciMemo(10, memo) << endl;
+    
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'Memoization stores previously computed results to avoid redundant calculations.' : '记忆化存储先前计算的结果以避免重复计算。'}
+        output={`Factorial of 5: 120
+Fibonacci of 10: 55
+Fibonacci with memoization: 55`}
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Tree Traversal' : '树遍历'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Recursion is naturally suited for tree operations. Tree traversal algorithms like preorder, inorder, and postorder are elegantly implemented using recursion.'
+          : '递归天然适合树操作。像前序、中序和后序这样的树遍历算法使用递归优雅地实现。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Binary Tree Traversal' : '二叉树遍历'}
+        code={`#include <iostream>
+using namespace std;
+
+struct TreeNode {
+    int val;
+    TreeNode* left;
+    TreeNode* right;
+    
+    TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+};
+
+class BinaryTree {
+public:
+    // Preorder: Root -> Left -> Right
+    void preorderTraversal(TreeNode* root) {
+        if (root == nullptr) {
+            return;
+        }
+        
+        cout << root->val << " ";
+        preorderTraversal(root->left);
+        preorderTraversal(root->right);
+    }
+    
+    // Inorder: Left -> Root -> Right
+    void inorderTraversal(TreeNode* root) {
+        if (root == nullptr) {
+            return;
+        }
+        
+        inorderTraversal(root->left);
+        cout << root->val << " ";
+        inorderTraversal(root->right);
+    }
+    
+    // Postorder: Left -> Right -> Root
+    void postorderTraversal(TreeNode* root) {
+        if (root == nullptr) {
+            return;
+        }
+        
+        postorderTraversal(root->left);
+        postorderTraversal(root->right);
+        cout << root->val << " ";
+    }
+    
+    // Calculate tree height
+    int height(TreeNode* root) {
+        if (root == nullptr) {
+            return 0;
+        }
+        
+        int leftHeight = height(root->left);
+        int rightHeight = height(root->right);
+        
+        return 1 + max(leftHeight, rightHeight);
+    }
+    
+    // Count total nodes
+    int countNodes(TreeNode* root) {
+        if (root == nullptr) {
+            return 0;
+        }
+        
+        return 1 + countNodes(root->left) + countNodes(root->right);
+    }
+};
+
+int main() {
+    // Create a sample tree:     1
+    //                         /   \\
+    //                        2     3
+    //                       / \\
+    //                      4   5
+    
+    TreeNode* root = new TreeNode(1);
+    root->left = new TreeNode(2);
+    root->right = new TreeNode(3);
+    root->left->left = new TreeNode(4);
+    root->left->right = new TreeNode(5);
+    
+    BinaryTree tree;
+    
+    cout << "Preorder traversal: ";
+    tree.preorderTraversal(root);
+    cout << endl;
+    
+    cout << "Inorder traversal: ";
+    tree.inorderTraversal(root);
+    cout << endl;
+    
+    cout << "Postorder traversal: ";
+    tree.postorderTraversal(root);
+    cout << endl;
+    
+    cout << "Tree height: " << tree.height(root) << endl;
+    cout << "Total nodes: " << tree.countNodes(root) << endl;
+    
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'Each traversal method visits nodes in a different order, useful for different applications.' : '每种遍历方法以不同的顺序访问节点，适用于不同的应用。'}
+        output={`Preorder traversal: 1 2 4 5 3 
+Inorder traversal: 4 2 5 1 3 
+Postorder traversal: 4 5 2 3 1 
+Tree height: 3
+Total nodes: 5`}
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Backtracking' : '回溯算法'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Backtracking is a form of recursion that tries different solutions and "backtracks" when a solution doesn\'t work. It\'s perfect for solving puzzles, generating permutations, and exploring all possible solutions.'
+          : '回溯是递归的一种形式，它尝试不同的解决方案，当解决方案不起作用时"回溯"。它非常适合解决谜题、生成排列和探索所有可能的解决方案。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'N-Queens Problem' : 'N皇后问题'}
+        code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+class NQueens {
+private:
+    vector<vector<string>> solutions;
+    
+    bool isSafe(vector<string>& board, int row, int col, int n) {
+        // Check this column on upper rows
+        for (int i = 0; i < row; i++) {
+            if (board[i][col] == 'Q') {
+                return false;
+            }
+        }
+        
+        // Check upper diagonal on left side
+        for (int i = row - 1, j = col - 1; i >= 0 && j >= 0; i--, j--) {
+            if (board[i][j] == 'Q') {
+                return false;
+            }
+        }
+        
+        // Check upper diagonal on right side
+        for (int i = row - 1, j = col + 1; i >= 0 && j < n; i--, j++) {
+            if (board[i][j] == 'Q') {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    void solve(vector<string>& board, int row, int n) {
+        // Base case: all queens are placed
+        if (row == n) {
+            solutions.push_back(board);
+            return;
+        }
+        
+        // Try placing queen in each column of current row
+        for (int col = 0; col < n; col++) {
+            if (isSafe(board, row, col, n)) {
+                board[row][col] = 'Q';  // Place queen
+                solve(board, row + 1, n);  // Recursively place remaining queens
+                board[row][col] = '.';  // Backtrack
+            }
+        }
+    }
+    
+public:
+    vector<vector<string>> solveNQueens(int n) {
+        solutions.clear();
+        vector<string> board(n, string(n, '.'));
+        solve(board, 0, n);
+        return solutions;
+    }
+    
+    void printSolution(const vector<string>& board) {
+        for (const string& row : board) {
+            cout << row << endl;
+        }
+        cout << endl;
+    }
+};
+
+int main() {
+    NQueens nqueens;
+    vector<vector<string>> solutions = nqueens.solveNQueens(4);
+    
+    cout << "Solutions for 4-Queens problem:" << endl;
+    for (int i = 0; i < solutions.size(); i++) {
+        cout << "Solution " << (i + 1) << ":" << endl;
+        nqueens.printSolution(solutions[i]);
+    }
+    
+    cout << "Total solutions found: " << solutions.size() << endl;
+    
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'Backtracking tries placing queens one by one, removing them if conflicts arise.' : '回溯逐个尝试放置皇后，如果出现冲突则移除它们。'}
+        output={`Solutions for 4-Queens problem:
+Solution 1:
+.Q..
+...Q
+Q...
+..Q.
+
+Solution 2:
+..Q.
+Q...
+...Q
+.Q..
+
+Total solutions found: 2`}
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Divide and Conquer' : '分治算法'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Divide and conquer breaks a problem into smaller subproblems, solves them recursively, and combines the results. Merge sort and quick sort are classic examples.'
+          : '分治将问题分解为较小的子问题，递归地解决它们，然后组合结果。归并排序和快速排序是经典的例子。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Merge Sort - Divide and Conquer' : '归并排序 - 分治算法'}
+        code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+class MergeSort {
+public:
+    void merge(vector<int>& arr, int left, int mid, int right) {
+        int n1 = mid - left + 1;
+        int n2 = right - mid;
+        
+        vector<int> L(n1), R(n2);
+        
+        // Copy data to temporary arrays
+        for (int i = 0; i < n1; i++)
+            L[i] = arr[left + i];
+        for (int j = 0; j < n2; j++)
+            R[j] = arr[mid + 1 + j];
+        
+        // Merge the temporary arrays back
+        int i = 0, j = 0, k = left;
+        
+        while (i < n1 && j < n2) {
+            if (L[i] <= R[j]) {
+                arr[k] = L[i];
+                i++;
+            } else {
+                arr[k] = R[j];
+                j++;
+            }
+            k++;
+        }
+        
+        // Copy remaining elements
+        while (i < n1) {
+            arr[k] = L[i];
+            i++;
+            k++;
+        }
+        
+        while (j < n2) {
+            arr[k] = R[j];
+            j++;
+            k++;
+        }
+    }
+    
+    void mergeSort(vector<int>& arr, int left, int right) {
+        if (left < right) {
+            int mid = left + (right - left) / 2;
+            
+            // Divide: Sort first and second halves
+            mergeSort(arr, left, mid);
+            mergeSort(arr, mid + 1, right);
+            
+            // Conquer: Merge the sorted halves
+            merge(arr, left, mid, right);
+        }
+    }
+    
+    void printArray(const vector<int>& arr) {
+        for (int x : arr) {
+            cout << x << " ";
+        }
+        cout << endl;
+    }
+};
+
+int main() {
+    vector<int> arr = {38, 27, 43, 3, 9, 82, 10};
+    MergeSort sorter;
+    
+    cout << "Original array: ";
+    sorter.printArray(arr);
+    
+    sorter.mergeSort(arr, 0, arr.size() - 1);
+    
+    cout << "Sorted array: ";
+    sorter.printArray(arr);
+    
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'Merge sort consistently achieves O(n log n) time complexity by dividing and merging.' : '归并排序通过分割和合并始终保持O(n log n)时间复杂度。'}
+        output={`Original array: 38 27 43 3 9 82 10 
+Sorted array: 3 9 10 27 38 43 82`}
+      />
+    </section>
+
+    <div class="navigation">
+      <a href={`/${lang}/2-algorithm-basics/searching`} class="nav-button prev">
+        ← {lang === 'en' ? 'Previous: Searching Algorithms' : '上一节：搜索算法'}
+      </a>
+      <a href={`/${lang}/2-algorithm-basics/dynamic-programming`} class="nav-button next">
+        {lang === 'en' ? 'Next: Dynamic Programming' : '下一节：动态规划'} →
+      </a>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  p {
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: #4f46e5;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background: #3730a3;
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style>

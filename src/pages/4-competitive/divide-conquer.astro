@@ -3,26 +3,26 @@ import Layout from '../../layouts/Layout.astro';
 import CodeExample from '../../components/CodeExample.tsx';
 ---
 
-<Layout title="分治算法">
+<Layout title="Divide and Conquer - Competitive Programming">
   <div class="breadcrumb">
-    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; 分治算法
+    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; Divide and Conquer
   </div>
 
-  <h1>分治算法</h1>
+  <h1>Divide and Conquer</h1>
   
   <div class="overview">
     <p>
-      分治算法通过将问题分解为更小的子问题来解决，是算法设计的重要思想。在竞赛编程中，分治算法常用于解决排序、搜索、数值计算等问题，具有优美的递归结构和高效的时间复杂度。
+      Divide and conquer algorithms solve problems by breaking them down into smaller subproblems, representing an important algorithmic design paradigm. In competitive programming, divide and conquer algorithms are commonly used for sorting, searching, numerical computation, and other problems, featuring elegant recursive structures and efficient time complexity.
     </p>
   </div>
 
-  <h2>分治算法的基本思想</h2>
+  <h2>Basic Principles of Divide and Conquer</h2>
   
-  <p>分治算法包含三个步骤：分解（Divide）、解决（Conquer）、合并（Combine）。经典的归并排序就是分治思想的完美体现。</p>
+  <p>Divide and conquer algorithms involve three steps: Divide, Conquer, and Combine. Classic merge sort is a perfect example of the divide and conquer approach.</p>
 
   <CodeExample 
     client:load
-    title="归并排序 - 分治算法的经典应用"
+    title="Merge Sort - Classic Application of Divide and Conquer"
     code={`#include <iostream>
 #include <vector>
 using namespace std;
@@ -34,11 +34,11 @@ public:
         
         int mid = left + (right - left) / 2;
         
-        // 分解：递归排序左右两部分
+        // Divide: recursively sort left and right parts
         mergeSort(arr, left, mid);
         mergeSort(arr, mid + 1, right);
         
-        // 合并：将两个有序部分合并
+        // Conquer: merge two sorted parts
         merge(arr, left, mid, right);
     }
     
@@ -47,7 +47,7 @@ private:
         vector<int> temp(right - left + 1);
         int i = left, j = mid + 1, k = 0;
         
-        // 合并两个有序数组
+        // Merge two sorted arrays
         while (i <= mid && j <= right) {
             if (arr[i] <= arr[j]) {
                 temp[k++] = arr[i++];
@@ -56,11 +56,11 @@ private:
             }
         }
         
-        // 复制剩余元素
+        // Copy remaining elements
         while (i <= mid) temp[k++] = arr[i++];
         while (j <= right) temp[k++] = arr[j++];
         
-        // 将排序结果复制回原数组
+        // Copy sorted result back to original array
         for (int i = 0; i < k; i++) {
             arr[left + i] = temp[i];
         }
@@ -70,27 +70,27 @@ private:
 int main() {
     vector<int> arr = {64, 34, 25, 12, 22, 11, 90, 88, 76, 50, 42};
     
-    cout << "原数组: ";
+    cout << "Original array: ";
     for (int x : arr) cout << x << " ";
     cout << endl;
     
     MergeSort ms;
     ms.mergeSort(arr, 0, arr.size() - 1);
     
-    cout << "排序后: ";
+    cout << "After sorting: ";
     for (int x : arr) cout << x << " ";
     cout << endl;
     
     return 0;
 }`}
-    explanation="归并排序的时间复杂度为O(n log n)，空间复杂度O(n)。它是稳定排序算法，在链表排序中特别有用。"
-    output={`原数组: 64 34 25 12 22 11 90 88 76 50 42 
-排序后: 11 12 22 25 34 42 50 64 76 88 90`}
+    explanation="Merge sort has time complexity O(n log n) and space complexity O(n). It's a stable sorting algorithm, particularly useful for linked list sorting."
+    output={`Original array: 64 34 25 12 22 11 90 88 76 50 42 
+After sorting: 11 12 22 25 34 42 50 64 76 88 90`}
   />
 
-  <h2>快速排序 - 分治的另一种形式</h2>
+  <h2>Quick Sort - Another Form of Divide and Conquer</h2>
   
-  <p>快速排序通过选择基准元素将数组分为两部分，每部分独立排序。</p>
+  <p>Quick sort divides the array into two parts by selecting a pivot element, with each part sorted independently.</p>
 
   <CodeExample 
     client:load
@@ -188,9 +188,9 @@ int main() {
 第6小的元素: 42`}
   />
 
-  <h2>分治解决数组问题</h2>
+  <h2>Divide and Conquer for Array Problems</h2>
   
-  <p>分治算法在解决数组相关问题时非常有效，如最大子数组和、逆序对计数等。</p>
+  <p>Divide and conquer algorithms are very effective in solving array-related problems, such as maximum subarray sum, inversion counting, etc.</p>
 
   <CodeExample 
     client:load
@@ -208,11 +208,11 @@ public:
         
         int mid = left + (right - left) / 2;
         
-        // 递归求解左半部分和右半部分的最大子数组和
+        // Recursively solve left and right parts for maximum subarray sum
         int leftSum = maxSubarraySum(arr, left, mid);
         int rightSum = maxSubarraySum(arr, mid + 1, right);
         
-        // 求跨越中点的最大子数组和
+        // Find maximum subarray sum crossing the midpoint
         int crossSum = maxCrossingSum(arr, left, mid, right);
         
         return max({leftSum, rightSum, crossSum});
@@ -223,7 +223,7 @@ private:
         int leftSum = INT_MIN;
         int sum = 0;
         
-        // 从中点向左扫描
+        // Scan from midpoint to left
         for (int i = mid; i >= left; i--) {
             sum += arr[i];
             leftSum = max(leftSum, sum);
@@ -232,7 +232,7 @@ private:
         int rightSum = INT_MIN;
         sum = 0;
         
-        // 从中点+1向右扫描
+        // Scan from midpoint+1 to right
         for (int i = mid + 1; i <= right; i++) {
             sum += arr[i];
             rightSum = max(rightSum, sum);
@@ -242,7 +242,7 @@ private:
     }
 };
 
-// 逆序对计数
+// Inversion count
 class InversionCount {
 public:
     int mergeAndCount(vector<int>& arr, int left, int mid, int right) {
@@ -255,7 +255,7 @@ public:
                 temp[k++] = arr[i++];
             } else {
                 temp[k++] = arr[j++];
-                invCount += (mid - i + 1); // 关键：计算逆序对
+                invCount += (mid - i + 1); // Key: count inversions
             }
         }
         
@@ -284,41 +284,41 @@ public:
 };
 
 int main() {
-    // 测试最大子数组和
+    // Test maximum subarray sum
     vector<int> arr1 = {-2, -3, 4, -1, -2, 1, 5, -3};
     MaxSubarraySum mss;
     
-    cout << "数组: ";
+    cout << "Array: ";
     for (int x : arr1) cout << x << " ";
     cout << endl;
     
     int maxSum = mss.maxSubarraySum(arr1, 0, arr1.size() - 1);
-    cout << "最大子数组和: " << maxSum << endl;
+    cout << "Maximum subarray sum: " << maxSum << endl;
     
-    // 测试逆序对计数
+    // Test inversion count
     vector<int> arr2 = {8, 4, 2, 1};
     InversionCount ic;
     
-    cout << "\\n数组: ";
+    cout << "\\nArray: ";
     for (int x : arr2) cout << x << " ";
     cout << endl;
     
     int invCount = ic.mergeSortAndCount(arr2, 0, arr2.size() - 1);
-    cout << "逆序对数量: " << invCount << endl;
+    cout << "Inversion count: " << invCount << endl;
     
     return 0;
 }`}
-    explanation="最大子数组和的分治解法时间复杂度O(n log n)。逆序对计数在归并过程中统计左半部分大于右半部分的情况。"
-    output={`数组: -2 -3 4 -1 -2 1 5 -3 
-最大子数组和: 7
+    explanation="The divide and conquer approach for maximum subarray sum has time complexity O(n log n). Inversion count statistics are collected during the merge process when left part is greater than right part."
+    output={`Array: -2 -3 4 -1 -2 1 5 -3 
+Maximum subarray sum: 7
 
-数组: 8 4 2 1 
-逆序对数量: 6`}
+Array: 8 4 2 1 
+Inversion count: 6`}
   />
 
-  <h2>分治解决几何问题</h2>
+  <h2>Divide and Conquer for Geometric Problems</h2>
   
-  <p>分治算法在计算几何中也有重要应用，如最近点对问题。</p>
+  <p>Divide and conquer algorithms also have important applications in computational geometry, such as the closest pair of points problem.</p>
 
   <CodeExample 
     client:load

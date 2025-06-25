@@ -20,43 +20,195 @@ export async function getStaticPaths() {
     
     <div class="lesson-grid">
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">📚</div>
+          <div class="lesson-meta">
+            <span class="difficulty beginner">{lang === 'en' ? 'Beginner' : '初级'}</span>
+            <span class="duration">80 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/3-data-structures/arrays`}>{t('ds.arrays')}</a></h2>
-        <p>Master array fundamentals, multi-dimensional arrays, and array manipulation techniques.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Master array fundamentals, multi-dimensional arrays, and array manipulation techniques.'
+            : '掌握数组基础知识、多维数组和数组操作技术。学习一维和多维数组的使用方法。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? '1D Arrays' : '一维数组'}</span>
+            <span class="topic">{lang === 'en' ? 'Multi-dimensional' : '多维数组'}</span>
+            <span class="topic">{lang === 'en' ? 'Array Operations' : '数组操作'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">📋</div>
+          <div class="lesson-meta">
+            <span class="difficulty intermediate">{lang === 'en' ? 'Intermediate' : '中级'}</span>
+            <span class="duration">85 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/3-data-structures/vectors`}>{t('ds.vectors')}</a></h2>
-        <p>Learn dynamic arrays, vector operations, and STL vector container usage.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Learn dynamic arrays, vector operations, and STL vector container usage.'
+            : '学习动态数组、向量操作和 STL 向量容器的使用。掌握自动调整大小的数组结构。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'Dynamic Arrays' : '动态数组'}</span>
+            <span class="topic">{lang === 'en' ? 'STL Vector' : 'STL 向量'}</span>
+            <span class="topic">{lang === 'en' ? 'Iterators' : '迭代器'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">🔗</div>
+          <div class="lesson-meta">
+            <span class="difficulty intermediate">{lang === 'en' ? 'Intermediate' : '中级'}</span>
+            <span class="duration">95 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/3-data-structures/linked-lists`}>{t('ds.linked-lists')}</a></h2>
-        <p>Understand singly, doubly linked lists, and circular linked list implementations.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Understand singly, doubly linked lists, and circular linked list implementations.'
+            : '理解单向链表、双向链表和循环链表的实现。掌握动态内存分配和指针操作。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'Singly Linked' : '单向链表'}</span>
+            <span class="topic">{lang === 'en' ? 'Doubly Linked' : '双向链表'}</span>
+            <span class="topic">{lang === 'en' ? 'Circular Lists' : '循环链表'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">📦</div>
+          <div class="lesson-meta">
+            <span class="difficulty beginner">{lang === 'en' ? 'Beginner' : '初级'}</span>
+            <span class="duration">70 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/3-data-structures/stacks`}>{t('ds.stacks')}</a></h2>
-        <p>Learn stack data structure, LIFO principle, and stack-based problem solving.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Learn stack data structure, LIFO principle, and stack-based problem solving.'
+            : '学习栈数据结构、后进先出（LIFO）原理和基于栈的问题解决方法。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'LIFO Principle' : 'LIFO 原理'}</span>
+            <span class="topic">{lang === 'en' ? 'Expression Eval' : '表达式求值'}</span>
+            <span class="topic">{lang === 'en' ? 'STL Stack' : 'STL 栈'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">🚪</div>
+          <div class="lesson-meta">
+            <span class="difficulty beginner">{lang === 'en' ? 'Beginner' : '初级'}</span>
+            <span class="duration">75 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/3-data-structures/queues`}>{t('ds.queues')}</a></h2>
-        <p>Master queue operations, FIFO principle, priority queues, and circular queues.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Master queue operations, FIFO principle, priority queues, and circular queues.'
+            : '掌握队列操作、先进先出（FIFO）原理、优先队列和循环队列的使用。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'FIFO Principle' : 'FIFO 原理'}</span>
+            <span class="topic">{lang === 'en' ? 'Priority Queue' : '优先队列'}</span>
+            <span class="topic">{lang === 'en' ? 'Circular Queue' : '循环队列'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">🌳</div>
+          <div class="lesson-meta">
+            <span class="difficulty advanced">{lang === 'en' ? 'Advanced' : '高级'}</span>
+            <span class="duration">120 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/3-data-structures/trees`}>{t('ds.trees')}</a></h2>
-        <p>Explore binary trees, BST operations, tree traversals, and balanced trees.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Explore binary trees, BST operations, tree traversals, and balanced trees.'
+            : '探索二叉树、二叉搜索树操作、树遍历算法和平衡树的概念与实现。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'Binary Trees' : '二叉树'}</span>
+            <span class="topic">{lang === 'en' ? 'BST' : '二叉搜索树'}</span>
+            <span class="topic">{lang === 'en' ? 'Tree Traversal' : '树遍历'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">🌐</div>
+          <div class="lesson-meta">
+            <span class="difficulty advanced">{lang === 'en' ? 'Advanced' : '高级'}</span>
+            <span class="duration">110 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/3-data-structures/graphs`}>{t('ds.graphs')}</a></h2>
-        <p>Learn graph representations, adjacency lists, matrices, and graph algorithms.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Learn graph representations, adjacency lists, matrices, and graph algorithms.'
+            : '学习图的表示方法、邻接表、邻接矩阵和图算法。掌握 DFS、BFS 等遍历算法。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'Adjacency Matrix' : '邻接矩阵'}</span>
+            <span class="topic">{lang === 'en' ? 'Graph Traversal' : '图遍历'}</span>
+            <span class="topic">{lang === 'en' ? 'Shortest Path' : '最短路径'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">#️⃣</div>
+          <div class="lesson-meta">
+            <span class="difficulty advanced">{lang === 'en' ? 'Advanced' : '高级'}</span>
+            <span class="duration">100 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/3-data-structures/hash-tables`}>{t('ds.hash-tables')}</a></h2>
-        <p>Understand hash functions, collision handling, and hash table implementations.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Understand hash functions, collision handling, and hash table implementations.'
+            : '理解哈希函数、冲突处理和哈希表的实现。学习开放寻址和链式处理等技术。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'Hash Functions' : '哈希函数'}</span>
+            <span class="topic">{lang === 'en' ? 'Collision Resolution' : '冲突解决'}</span>
+            <span class="topic">{lang === 'en' ? 'STL Containers' : 'STL 容器'}</span>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -126,10 +278,72 @@ export async function getStaticPaths() {
   }
   
   .lesson-card p {
-    margin: 0;
+    margin: 0 0 1rem 0;
     color: #6b7280;
     font-size: 0.95rem;
     line-height: 1.6;
+  }
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .lesson-icon {
+    font-size: 1.5rem;
+  }
+  
+  .lesson-meta {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .difficulty {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+  
+  .difficulty.beginner {
+    background: #dcfce7;
+    color: #166534;
+  }
+  
+  .difficulty.intermediate {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  
+  .difficulty.advanced {
+    background: #fecaca;
+    color: #991b1b;
+  }
+  
+  .duration {
+    color: #6b7280;
+    font-weight: 500;
+  }
+  
+  .card-footer {
+    margin-top: auto;
+  }
+  
+  .topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .topic {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
   }
   
   @media (max-width: 768px) {
@@ -143,6 +357,16 @@ export async function getStaticPaths() {
     
     .lesson-grid {
       grid-template-columns: 1fr;
+    }
+    
+    .card-header {
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: flex-start;
+    }
+    
+    .lesson-meta {
+      align-self: flex-end;
     }
   }
 </style> 

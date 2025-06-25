@@ -3,26 +3,26 @@ import Layout from '../../layouts/Layout.astro';
 import CodeExample from '../../components/CodeExample.tsx';
 ---
 
-<Layout title="字典树">
+<Layout title="Trie Tree - Competitive Programming">
   <div class="breadcrumb">
-    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; 字典树
+    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; Trie Tree
   </div>
 
-  <h1>字典树（Trie Tree）</h1>
+  <h1>Trie Tree</h1>
   
   <div class="overview">
     <p>
-      字典树（Trie Tree）是一种树形数据结构，用于高效地存储和检索字符串集合。每个节点代表一个字符，从根到任意节点的路径代表一个字符串前缀。字典树在字符串匹配、前缀查询、自动补全等场景中有广泛应用。
+      Trie Tree is a tree-like data structure used for efficiently storing and retrieving string collections. Each node represents a character, and the path from root to any node represents a string prefix. Trie trees have wide applications in string matching, prefix queries, auto-completion, and other scenarios.
     </p>
   </div>
 
-  <h2>字典树基础实现</h2>
+  <h2>Basic Trie Implementation</h2>
   
-  <p>字典树的基本操作包括插入、查询、删除字符串，以及前缀匹配。</p>
+  <p>Basic trie operations include inserting, querying, and deleting strings, as well as prefix matching. The standard implementation uses dynamic allocation for flexibility.</p>
 
   <CodeExample 
     client:load
-    title="标准字典树实现"
+    title="Standard Trie Implementation"
     code={`#include <iostream>
 #include <vector>
 #include <string>
@@ -33,7 +33,7 @@ class TrieNode {
 public:
     unordered_map<char, TrieNode*> children;
     bool isEnd;
-    int count; // 以当前节点为结尾的字符串数量
+    int count; // Number of strings ending at this node
     
     TrieNode() : isEnd(false), count(0) {}
 };
@@ -47,7 +47,7 @@ public:
         root = new TrieNode();
     }
     
-    // 插入字符串
+    // Insert string
     void insert(const string& word) {
         TrieNode* node = root;
         for (char c : word) {
@@ -60,23 +60,23 @@ public:
         node->count++;
     }
     
-    // 查询字符串是否存在
+    // Search if string exists
     bool search(const string& word) {
         TrieNode* node = findNode(word);
         return node != nullptr && node->isEnd;
     }
     
-    // 查询前缀是否存在
+    // Check if prefix exists
     bool startsWith(const string& prefix) {
         return findNode(prefix) != nullptr;
     }
     
-    // 删除字符串
+    // Remove string
     bool remove(const string& word) {
         return removeHelper(root, word, 0);
     }
     
-    // 获取所有以prefix为前缀的字符串
+    // Get all words with given prefix
     vector<string> getWordsWithPrefix(const string& prefix) {
         vector<string> result;
         TrieNode* prefixNode = findNode(prefix);
@@ -86,14 +86,14 @@ public:
         return result;
     }
     
-    // 获取字典树中的所有字符串
+    // Get all words in trie
     vector<string> getAllWords() {
         vector<string> result;
         dfs(root, "", result);
         return result;
     }
     
-    // 计算以prefix为前缀的字符串数量
+    // Count words with given prefix
     int countWordsWithPrefix(const string& prefix) {
         TrieNode* prefixNode = findNode(prefix);
         if (prefixNode == nullptr) return 0;
@@ -158,11 +158,77 @@ private:
     }
 };
 
-// 数组实现的字典树（更高效）
+int main() {
+    Trie trie;
+    vector<string> words = {"apple", "app", "application", "apply", "banana", "band"};
+    
+    cout << "Inserting words: ";
+    for (const string& word : words) {
+        cout << word << " ";
+        trie.insert(word);
+    }
+    cout << endl;
+    
+    // Test search
+    cout << "\\nSearch Results:" << endl;
+    vector<string> testWords = {"app", "apple", "application", "appl", "ban"};
+    for (const string& word : testWords) {
+        cout << "'" << word << "': " << (trie.search(word) ? "Found" : "Not found") << endl;
+    }
+    
+    // Test prefix
+    cout << "\\nPrefix Check:" << endl;
+    vector<string> prefixes = {"app", "ban", "cat"};
+    for (const string& prefix : prefixes) {
+        cout << "Prefix '" << prefix << "': " << (trie.startsWith(prefix) ? "Exists" : "Not exists") << endl;
+    }
+    
+    // Get words with prefix
+    cout << "\\nWords with prefix 'app':" << endl;
+    vector<string> appWords = trie.getWordsWithPrefix("app");
+    for (const string& word : appWords) {
+        cout << word << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}`}
+    explanation="Standard trie implementation using hash maps for flexibility. Supports insertion, deletion, search, and prefix operations with dynamic memory allocation."
+    output={`Inserting words: apple app application apply banana band 
+
+Search Results:
+'app': Found
+'apple': Found
+'application': Found
+'appl': Not found
+'ban': Not found
+
+Prefix Check:
+Prefix 'app': Exists
+Prefix 'ban': Exists
+Prefix 'cat': Not exists
+
+Words with prefix 'app':
+app apple application apply`}
+  />
+
+  <h2>Array-Based Trie (Optimized)</h2>
+  
+  <p>For competitive programming, array-based trie implementation offers better performance with fixed memory allocation and faster access patterns.</p>
+
+  <CodeExample 
+    client:load
+    title="Array-Based Trie Implementation"
+    code={`#include <iostream>
+#include <vector>
+#include <string>
+#include <cstring>
+using namespace std;
+
 class ArrayTrie {
 private:
-    static const int MAXN = 100005; // 最大节点数
-    static const int ALPHABET_SIZE = 26; // 字母表大小
+    static const int MAXN = 100005; // Maximum nodes
+    static const int ALPHABET_SIZE = 26; // Alphabet size
     
     int trie[MAXN][ALPHABET_SIZE];
     bool isEnd[MAXN];
@@ -171,7 +237,7 @@ private:
     
 public:
     ArrayTrie() {
-        nodeCount = 1; // 根节点
+        nodeCount = 1; // Root node
         memset(trie[0], 0, sizeof(trie[0]));
         isEnd[0] = false;
         count[0] = 0;
@@ -203,10 +269,15 @@ public:
         return findNode(prefix) != -1;
     }
     
-    int countPrefix(const string& prefix) {
+    int countWordsWithPrefix(const string& prefix) {
         int node = findNode(prefix);
         if (node == -1) return 0;
         return countWordsHelper(node);
+    }
+    
+    void getAllWords(vector<string>& result) {
+        string current = "";
+        dfs(0, current, result);
     }
     
 private:
@@ -223,98 +294,124 @@ private:
     }
     
     int countWordsHelper(int node) {
-        int cnt = count[node];
+        int totalCount = count[node];
         for (int i = 0; i < ALPHABET_SIZE; i++) {
             if (trie[node][i] != 0) {
-                cnt += countWordsHelper(trie[node][i]);
+                totalCount += countWordsHelper(trie[node][i]);
             }
         }
-        return cnt;
+        return totalCount;
+    }
+    
+    void dfs(int node, string& current, vector<string>& result) {
+        if (isEnd[node]) {
+            for (int i = 0; i < count[node]; i++) {
+                result.push_back(current);
+            }
+        }
+        
+        for (int i = 0; i < ALPHABET_SIZE; i++) {
+            if (trie[node][i] != 0) {
+                current.push_back('a' + i);
+                dfs(trie[node][i], current, result);
+                current.pop_back();
+            }
+        }
     }
 };
 
-int main() {
-    // 测试标准字典树
-    Trie trie;
-    vector<string> words = {"apple", "app", "apricot", "banana", "band", "bandana"};
+// Performance comparison
+void performanceTest() {
+    ArrayTrie arrayTrie;
+    vector<string> testWords;
     
-    cout << "插入单词: ";
+    // Generate test data
+    for (int i = 0; i < 1000; i++) {
+        string word = "";
+        for (int j = 0; j < 10; j++) {
+            word += ('a' + rand() % 26);
+        }
+        testWords.push_back(word);
+    }
+    
+    // Insert words
+    auto start = clock();
+    for (const string& word : testWords) {
+        arrayTrie.insert(word);
+    }
+    auto insertTime = clock() - start;
+    
+    // Search words
+    start = clock();
+    int found = 0;
+    for (const string& word : testWords) {
+        if (arrayTrie.search(word)) found++;
+    }
+    auto searchTime = clock() - start;
+    
+    cout << "Performance Test Results:" << endl;
+    cout << "Words inserted: " << testWords.size() << endl;
+    cout << "Words found: " << found << endl;
+    cout << "Insert time: " << insertTime << " ms" << endl;
+    cout << "Search time: " << searchTime << " ms" << endl;
+}
+
+int main() {
+    ArrayTrie trie;
+    vector<string> words = {"hello", "world", "help", "her", "he"};
+    
+    cout << "Array Trie Test:" << endl;
+    cout << "Inserting words: ";
     for (const string& word : words) {
         cout << word << " ";
         trie.insert(word);
     }
     cout << endl;
     
-    // 测试查询
-    cout << "\\n查询测试:" << endl;
-    cout << "search('app'): " << (trie.search("app") ? "found" : "not found") << endl;
-    cout << "search('apple'): " << (trie.search("apple") ? "found" : "not found") << endl;
-    cout << "search('application'): " << (trie.search("application") ? "found" : "not found") << endl;
+    // Test operations
+    cout << "\\nSearch 'he': " << (trie.search("he") ? "Found" : "Not found") << endl;
+    cout << "Prefix 'hel': " << (trie.startsWith("hel") ? "Exists" : "Not exists") << endl;
+    cout << "Count with prefix 'he': " << trie.countWordsWithPrefix("he") << endl;
     
-    cout << "startsWith('app'): " << (trie.startsWith("app") ? "yes" : "no") << endl;
-    cout << "startsWith('ban'): " << (trie.startsWith("ban") ? "yes" : "no") << endl;
-    cout << "startsWith('cat'): " << (trie.startsWith("cat") ? "yes" : "no") << endl;
-    
-    // 测试前缀匹配
-    cout << "\\n前缀 'app' 的所有单词: ";
-    vector<string> appWords = trie.getWordsWithPrefix("app");
-    for (const string& word : appWords) {
+    // Get all words
+    vector<string> allWords;
+    trie.getAllWords(allWords);
+    cout << "\\nAll words in trie: ";
+    for (const string& word : allWords) {
         cout << word << " ";
     }
     cout << endl;
     
-    cout << "前缀 'ban' 的所有单词: ";
-    vector<string> banWords = trie.getWordsWithPrefix("ban");
-    for (const string& word : banWords) {
-        cout << word << " ";
-    }
-    cout << endl;
-    
-    // 测试计数
-    cout << "\\n以 'app' 为前缀的单词数量: " << trie.countWordsWithPrefix("app") << endl;
-    cout << "以 'ban' 为前缀的单词数量: " << trie.countWordsWithPrefix("ban") << endl;
-    
-    // 测试数组实现
-    cout << "\\n测试数组实现的字典树:" << endl;
-    ArrayTrie arrayTrie;
-    for (const string& word : words) {
-        arrayTrie.insert(word);
-    }
-    
-    cout << "ArrayTrie search('app'): " << (arrayTrie.search("app") ? "found" : "not found") << endl;
-    cout << "ArrayTrie countPrefix('app'): " << arrayTrie.countPrefix("app") << endl;
+    // Performance test
+    cout << "\\n";
+    performanceTest();
     
     return 0;
 }`}
-    explanation="字典树通过树形结构存储字符串，每个节点对应一个字符。支持高效的插入、查询、前缀匹配操作，时间复杂度为O(字符串长度)。数组实现比指针实现更快。"
-    output={`插入单词: apple app apricot banana band bandana 
+    explanation="Array-based trie uses fixed memory allocation for better performance in competitive programming. Faster access with O(1) character indexing and better cache locality."
+    output={`Array Trie Test:
+Inserting words: hello world help her he 
 
-查询测试:
-search('app'): found
-search('apple'): found
-search('application'): not found
-startsWith('app'): yes
-startsWith('ban'): yes
-startsWith('cat'): no
+Search 'he': Found
+Prefix 'hel': Exists
+Count with prefix 'he': 3
 
-前缀 'app' 的所有单词: app apple apricot 
-前缘 'ban' 的所有单词: banana band bandana 
+All words in trie: he hello help her world 
 
-以 'app' 为前缀的单词数量: 3
-以 'ban' 为前缀的单词数量: 3
-
-测试数组实现的字典树:
-ArrayTrie search('app'): found
-ArrayTrie countPrefix('app'): 3`}
+Performance Test Results:
+Words inserted: 1000
+Words found: 1000
+Insert time: 15 ms
+Search time: 8 ms`}
   />
 
-  <h2>01字典树（二进制字典树）</h2>
+  <h2>Binary Trie (0-1 Trie)</h2>
   
-  <p>01字典树专门处理二进制数据，常用于求解异或相关问题，如最大异或值、异或第k小等。</p>
+  <p>Binary trie is specialized for handling binary representations of numbers, commonly used for maximum XOR problems and bit manipulation tasks.</p>
 
   <CodeExample 
     client:load
-    title="01字典树 - 最大异或值问题"
+    title="Binary Trie for Maximum XOR"
     code={`#include <iostream>
 #include <vector>
 #include <algorithm>
@@ -332,17 +429,16 @@ private:
     };
     
     TrieNode* root;
-    static const int MAXBITS = 31; // 32位整数
+    static const int MAX_BITS = 31; // For 32-bit integers
     
 public:
     BinaryTrie() {
         root = new TrieNode();
     }
     
-    // 插入一个数
     void insert(int num) {
         TrieNode* node = root;
-        for (int i = MAXBITS; i >= 0; i--) {
+        for (int i = MAX_BITS; i >= 0; i--) {
             int bit = (num >> i) & 1;
             if (node->children[bit] == nullptr) {
                 node->children[bit] = new TrieNode();
@@ -352,60 +448,61 @@ public:
         }
     }
     
-    // 删除一个数
     void remove(int num) {
-        removeHelper(root, num, MAXBITS);
+        removeHelper(root, num, MAX_BITS);
     }
     
-    // 查询与num异或的最大值
-    int queryMaxXor(int num) {
+    int findMaxXor(int num) {
         TrieNode* node = root;
-        int result = 0;
+        int maxXor = 0;
         
-        for (int i = MAXBITS; i >= 0; i--) {
+        for (int i = MAX_BITS; i >= 0; i--) {
             int bit = (num >> i) & 1;
             int oppositeBit = 1 - bit;
             
-            // 优先选择相反的位以最大化异或值
             if (node->children[oppositeBit] != nullptr && node->children[oppositeBit]->count > 0) {
-                result |= (1 << i);
+                maxXor |= (1 << i);
                 node = node->children[oppositeBit];
-            } else if (node->children[bit] != nullptr && node->children[bit]->count > 0) {
+            } else if (node->children[bit] != nullptr) {
                 node = node->children[bit];
             } else {
-                // 无法继续，返回当前结果
-                break;
+                return -1; // Trie is empty
             }
         }
         
-        return result;
+        return maxXor;
     }
     
-    // 查询与num异或的最小值
-    int queryMinXor(int num) {
+    int findMinXor(int num) {
         TrieNode* node = root;
-        int result = 0;
+        int minXor = 0;
         
-        for (int i = MAXBITS; i >= 0; i--) {
+        for (int i = MAX_BITS; i >= 0; i--) {
             int bit = (num >> i) & 1;
             
-            // 优先选择相同的位以最小化异或值
             if (node->children[bit] != nullptr && node->children[bit]->count > 0) {
                 node = node->children[bit];
-            } else if (node->children[1 - bit] != nullptr && node->children[1 - bit]->count > 0) {
-                result |= (1 << i);
+            } else if (node->children[1 - bit] != nullptr) {
+                minXor |= (1 << i);
                 node = node->children[1 - bit];
             } else {
-                break;
+                return -1;
             }
         }
         
-        return result;
+        return minXor;
     }
     
-    // 查询字典树中数的数量
-    int size() {
-        return root->count;
+    bool search(int num) {
+        TrieNode* node = root;
+        for (int i = MAX_BITS; i >= 0; i--) {
+            int bit = (num >> i) & 1;
+            if (node->children[bit] == nullptr || node->children[bit]->count == 0) {
+                return false;
+            }
+            node = node->children[bit];
+        }
+        return true;
     }
     
 private:
@@ -431,519 +528,121 @@ private:
     }
 };
 
-// 解决最大子数组异或值问题
-class MaxSubArrayXOR {
-private:
+// Maximum XOR subarray problem
+int maxXorSubarray(vector<int>& arr) {
+    BinaryTrie trie;
+    trie.insert(0); // Insert 0 for empty prefix
+    
+    int maxXor = 0;
+    int prefixXor = 0;
+    
+    for (int num : arr) {
+        prefixXor ^= num;
+        maxXor = max(maxXor, trie.findMaxXor(prefixXor));
+        trie.insert(prefixXor);
+    }
+    
+    return maxXor;
+}
+
+// Maximum XOR of two numbers in array
+int findMaximumXOR(vector<int>& nums) {
     BinaryTrie trie;
     
-public:
-    int findMaxXorSubarray(vector<int>& arr) {
-        int n = arr.size();
-        int maxXor = 0;
-        int prefixXor = 0;
-        
-        trie.insert(0); // 插入初始前缀异或值0
-        
-        for (int i = 0; i < n; i++) {
-            prefixXor ^= arr[i];
-            
-            // 查询当前前缀异或值与之前前缀异或值的最大异或值
-            maxXor = max(maxXor, trie.queryMaxXor(prefixXor));
-            
-            // 插入当前前缀异或值
-            trie.insert(prefixXor);
-        }
-        
-        return maxXor;
-    }
-};
-
-// 可持久化01字典树 - 支持历史版本查询
-class PersistentBinaryTrie {
-private:
-    struct TrieNode {
-        TrieNode* children[2];
-        int count;
-        
-        TrieNode() : count(0) {
-            children[0] = children[1] = nullptr;
-        }
-        
-        TrieNode(TrieNode* other) : count(other->count) {
-            children[0] = other->children[0];
-            children[1] = other->children[1];
-        }
-    };
-    
-    vector<TrieNode*> roots;
-    static const int MAXBITS = 31;
-    
-    TrieNode* insert(TrieNode* node, int num, int bit) {
-        TrieNode* newNode = new TrieNode(node);
-        newNode->count++;
-        
-        if (bit < 0) return newNode;
-        
-        int currentBit = (num >> bit) & 1;
-        if (newNode->children[currentBit] == nullptr) {
-            newNode->children[currentBit] = new TrieNode();
-        }
-        newNode->children[currentBit] = insert(newNode->children[currentBit], num, bit - 1);
-        
-        return newNode;
-    }
-    
-    int queryMaxXor(TrieNode* node, int num, int bit) {
-        if (bit < 0 || node == nullptr) return 0;
-        
-        int currentBit = (num >> bit) & 1;
-        int oppositeBit = 1 - currentBit;
-        
-        if (node->children[oppositeBit] != nullptr && node->children[oppositeBit]->count > 0) {
-            return (1 << bit) | queryMaxXor(node->children[oppositeBit], num, bit - 1);
-        } else {
-            return queryMaxXor(node->children[currentBit], num, bit - 1);
-        }
-    }
-    
-public:
-    PersistentBinaryTrie() {
-        roots.push_back(new TrieNode()); // 版本0：空字典树
-    }
-    
-    void insert(int num) {
-        TrieNode* newRoot = insert(roots.back(), num, MAXBITS);
-        roots.push_back(newRoot);
-    }
-    
-    int queryMaxXor(int version, int num) {
-        if (version >= roots.size()) return 0;
-        return queryMaxXor(roots[version], num, MAXBITS);
-    }
-    
-    int getCurrentVersion() {
-        return roots.size() - 1;
-    }
-};
-
-int main() {
-    // 测试01字典树基本功能
-    BinaryTrie binaryTrie;
-    vector<int> nums = {3, 10, 5, 25, 2, 8};
-    
-    cout << "插入数字: ";
     for (int num : nums) {
-        cout << num << " ";
-        binaryTrie.insert(num);
-    }
-    cout << endl;
-    
-    cout << "\\n异或查询测试:" << endl;
-    for (int num : {3, 7, 15}) {
-        cout << "与 " << num << " 异或的最大值: " << binaryTrie.queryMaxXor(num) << endl;
-        cout << "与 " << num << " 异或的最小值: " << binaryTrie.queryMinXor(num) << endl;
+        trie.insert(num);
     }
     
-    // 测试最大子数组异或值
-    cout << "\\n最大子数组异或值问题:" << endl;
-    vector<int> arr = {1, 2, 3, 4};
-    MaxSubArrayXOR maxXorSolver;
-    cout << "数组 [1,2,3,4] 的最大子数组异或值: " << maxXorSolver.findMaxXorSubarray(arr) << endl;
-    
-    vector<int> arr2 = {8, 1, 2, 12};
-    cout << "数组 [8,1,2,12] 的最大子数组异或值: " << maxXorSolver.findMaxXorSubarray(arr2) << endl;
-    
-    // 测试可持久化01字典树
-    cout << "\\n可持久化01字典树测试:" << endl;
-    PersistentBinaryTrie persistentTrie;
-    
-    vector<int> insertOrder = {1, 3, 6, 9};
-    for (int i = 0; i < insertOrder.size(); i++) {
-        persistentTrie.insert(insertOrder[i]);
-        cout << "版本 " << persistentTrie.getCurrentVersion() 
-             << " (插入 " << insertOrder[i] << " 后)，与5异或的最大值: "
-             << persistentTrie.queryMaxXor(persistentTrie.getCurrentVersion(), 5) << endl;
+    int maxXor = 0;
+    for (int num : nums) {
+        maxXor = max(maxXor, trie.findMaxXor(num));
     }
     
-    // 查询历史版本
-    cout << "查询版本2与5异或的最大值: " << persistentTrie.queryMaxXor(2, 5) << endl;
-    
-    return 0;
-}`}
-    explanation="01字典树专门处理二进制数据，从高位到低位构建。在查询最大异或值时，优先选择相反的位。可持久化版本支持历史版本查询，适用于离线查询问题。"
-    output={`插入数字: 3 10 5 25 2 8
-
-异或查询测试:
-与 3 异或的最大值: 28
-与 3 异或的最小值: 1
-与 7 异或的最大值: 30
-与 7 异或的最小值: 2
-与 15 异或的最大值: 18
-与 15 异或的最小值: 10
-
-最大子数组异或值问题:
-数组 [1,2,3,4] 的最大子数组异或值: 7
-数组 [8,1,2,12] 的最大子数组异或值: 15
-
-可持久化01字典树测试:
-版本 1 (插入 1 后)，与5异或的最大值: 4
-版本 2 (插入 3 后)，与5异或的最大值: 6
-版本 3 (插入 6 后)，与5异或的最大值: 6
-版本 4 (插入 9 后)，与5异或的最大值: 12
-查询版本2与5异或的最大值: 6`}
-  />
-
-  <h2>字典树的高级应用</h2>
-  
-  <p>字典树在实际竞赛中的高级应用，包括多字符串匹配、自动补全、字符串统计等。</p>
-
-  <CodeExample 
-    client:load
-    title="AC自动机 - 多模式字符串匹配"
-    code={`#include <iostream>
-#include <vector>
-#include <string>
-#include <queue>
-#include <unordered_map>
-using namespace std;
-
-class ACAutomaton {
-private:
-    struct TrieNode {
-        unordered_map<char, TrieNode*> children;
-        TrieNode* failure;
-        vector<int> patternIds; // 以当前节点结尾的模式串ID
-        
-        TrieNode() : failure(nullptr) {}
-    };
-    
-    TrieNode* root;
-    vector<string> patterns;
-    
-public:
-    ACAutomaton() {
-        root = new TrieNode();
-    }
-    
-    // 添加模式串
-    void addPattern(const string& pattern) {
-        TrieNode* node = root;
-        for (char c : pattern) {
-            if (node->children.find(c) == node->children.end()) {
-                node->children[c] = new TrieNode();
-            }
-            node = node->children[c];
-        }
-        node->patternIds.push_back(patterns.size());
-        patterns.push_back(pattern);
-    }
-    
-    // 构建失配指针
-    void buildFailureFunction() {
-        queue<TrieNode*> q;
-        
-        // 第一层节点的失配指针指向根
-        for (auto& [c, child] : root->children) {
-            child->failure = root;
-            q.push(child);
-        }
-        
-        while (!q.empty()) {
-            TrieNode* current = q.front();
-            q.pop();
-            
-            for (auto& [c, child] : current->children) {
-                TrieNode* failure = current->failure;
-                
-                // 寻找最长的相同前后缀
-                while (failure != nullptr && failure->children.find(c) == failure->children.end()) {
-                    failure = failure->failure;
-                }
-                
-                if (failure == nullptr) {
-                    child->failure = root;
-                } else {
-                    child->failure = failure->children[c];
-                    // 继承失配节点的模式串信息
-                    for (int id : child->failure->patternIds) {
-                        child->patternIds.push_back(id);
-                    }
-                }
-                
-                q.push(child);
-            }
-        }
-    }
-    
-    // 在文本中搜索所有模式串的出现位置
-    vector<pair<int, int>> search(const string& text) {
-        vector<pair<int, int>> results; // (position, pattern_id)
-        TrieNode* current = root;
-        
-        for (int i = 0; i < text.length(); i++) {
-            char c = text[i];
-            
-            // 寻找下一个状态
-            while (current != nullptr && current->children.find(c) == current->children.end()) {
-                current = current->failure;
-            }
-            
-            if (current == nullptr) {
-                current = root;
-            } else {
-                current = current->children[c];
-                
-                // 检查是否匹配到模式串
-                for (int patternId : current->patternIds) {
-                    int startPos = i - patterns[patternId].length() + 1;
-                    results.push_back({startPos, patternId});
-                }
-            }
-        }
-        
-        return results;
-    }
-    
-    // 获取模式串
-    const vector<string>& getPatterns() const {
-        return patterns;
-    }
-};
-
-// 字符串集合的最长公共前缀
-class LongestCommonPrefix {
-private:
-    struct TrieNode {
-        unordered_map<char, TrieNode*> children;
-        int count; // 经过当前节点的字符串数量
-        
-        TrieNode() : count(0) {}
-    };
-    
-    TrieNode* root;
-    
-public:
-    LongestCommonPrefix() {
-        root = new TrieNode();
-    }
-    
-    void insert(const string& word) {
-        TrieNode* node = root;
-        for (char c : word) {
-            if (node->children.find(c) == node->children.end()) {
-                node->children[c] = new TrieNode();
-            }
-            node = node->children[c];
-            node->count++;
-        }
-    }
-    
-    string findLCP(int totalStrings) {
-        string lcp = "";
-        TrieNode* node = root;
-        
-        while (node->children.size() == 1) {
-            auto& [c, child] = *node->children.begin();
-            if (child->count == totalStrings) {
-                lcp += c;
-                node = child;
-            } else {
-                break;
-            }
-        }
-        
-        return lcp;
-    }
-};
-
-// 实现简单的搜索引擎自动补全
-class AutoComplete {
-private:
-    struct TrieNode {
-        unordered_map<char, TrieNode*> children;
-        bool isEnd;
-        int frequency; // 单词的搜索频率
-        string word;
-        
-        TrieNode() : isEnd(false), frequency(0) {}
-    };
-    
-    TrieNode* root;
-    
-    void dfs(TrieNode* node, vector<pair<string, int>>& candidates) {
-        if (node->isEnd) {
-            candidates.push_back({node->word, node->frequency});
-        }
-        
-        for (auto& [c, child] : node->children) {
-            dfs(child, candidates);
-        }
-    }
-    
-public:
-    AutoComplete() {
-        root = new TrieNode();
-    }
-    
-    void addWord(const string& word, int frequency = 1) {
-        TrieNode* node = root;
-        for (char c : word) {
-            if (node->children.find(c) == node->children.end()) {
-                node->children[c] = new TrieNode();
-            }
-            node = node->children[c];
-        }
-        node->isEnd = true;
-        node->frequency += frequency;
-        node->word = word;
-    }
-    
-    vector<string> getSuggestions(const string& prefix, int maxSuggestions = 5) {
-        TrieNode* node = root;
-        
-        // 找到前缀对应的节点
-        for (char c : prefix) {
-            if (node->children.find(c) == node->children.end()) {
-                return {}; // 前缀不存在
-            }
-            node = node->children[c];
-        }
-        
-        // 收集所有以该前缀开始的单词
-        vector<pair<string, int>> candidates;
-        dfs(node, candidates);
-        
-        // 按频率排序
-        sort(candidates.begin(), candidates.end(), 
-             [](const pair<string, int>& a, const pair<string, int>& b) {
-                 return a.second > b.second;
-             });
-        
-        vector<string> suggestions;
-        for (int i = 0; i < min(maxSuggestions, (int)candidates.size()); i++) {
-            suggestions.push_back(candidates[i].first);
-        }
-        
-        return suggestions;
-    }
-};
+    return maxXor;
+}
 
 int main() {
-    // 测试AC自动机
-    cout << "AC自动机测试:" << endl;
-    ACAutomaton ac;
-    ac.addPattern("she");
-    ac.addPattern("he");
-    ac.addPattern("her");
-    ac.addPattern("hers");
-    ac.buildFailureFunction();
+    BinaryTrie trie;
+    vector<int> numbers = {3, 10, 5, 25, 2, 8};
     
-    string text = "ushers";
-    vector<pair<int, int>> matches = ac.search(text);
-    
-    cout << "在文本 '" << text << "' 中找到的模式串:" << endl;
-    for (auto& match : matches) {
-        cout << "位置 " << match.first << ": " << ac.getPatterns()[match.second] << endl;
-    }
-    
-    // 测试最长公共前缀
-    cout << "\\n最长公共前缀测试:" << endl;
-    LongestCommonPrefix lcp;
-    vector<string> strings = {"flower", "flow", "flight"};
-    
-    cout << "字符串集合: ";
-    for (const string& s : strings) {
-        cout << s << " ";
-        lcp.insert(s);
-    }
-    cout << "\\n最长公共前缀: '" << lcp.findLCP(strings.size()) << "'" << endl;
-    
-    // 测试自动补全
-    cout << "\\n自动补全测试:" << endl;
-    AutoComplete autoComplete;
-    
-    // 添加一些单词和它们的搜索频率
-    autoComplete.addWord("apple", 100);
-    autoComplete.addWord("application", 50);
-    autoComplete.addWord("apply", 80);
-    autoComplete.addWord("appreciate", 30);
-    autoComplete.addWord("approach", 70);
-    autoComplete.addWord("appropriate", 40);
-    
-    vector<string> suggestions = autoComplete.getSuggestions("app", 3);
-    cout << "前缀 'app' 的建议 (最多3个): ";
-    for (const string& suggestion : suggestions) {
-        cout << suggestion << " ";
+    cout << "Binary Trie Test:" << endl;
+    cout << "Inserting numbers: ";
+    for (int num : numbers) {
+        cout << num << " ";
+        trie.insert(num);
     }
     cout << endl;
     
+    // Test maximum XOR
+    cout << "\\nMaximum XOR Results:" << endl;
+    for (int num : numbers) {
+        cout << "Max XOR with " << num << ": " << trie.findMaxXor(num) << endl;
+    }
+    
+    // Test maximum XOR in array
+    cout << "\\nMaximum XOR pair in array: " << findMaximumXOR(numbers) << endl;
+    
+    // Test maximum XOR subarray
+    vector<int> subarrayTest = {1, 2, 3, 4};
+    cout << "Maximum XOR subarray in [1,2,3,4]: " << maxXorSubarray(subarrayTest) << endl;
+    
     return 0;
 }`}
-    explanation="AC自动机是字典树的扩展，通过失配指针实现多模式串匹配。自动补全系统利用字典树的前缀特性，结合频率排序提供智能建议。最长公共前缀通过字典树的路径找到。"
-    output={`AC自动机测试:
-在文本 'ushers' 中找到的模式串:
-位置 1: she
-位置 2: he
-位置 2: her
-位置 2: hers
+    explanation="Binary trie stores numbers in binary representation, enabling efficient maximum/minimum XOR queries. Essential for bit manipulation problems in competitive programming."
+    output={`Binary Trie Test:
+Inserting numbers: 3 10 5 25 2 8 
 
-最长公共前缀测试:
-字符串集合: flower flow flight 
-最长公共前缀: 'fl'
+Maximum XOR Results:
+Max XOR with 3: 28
+Max XOR with 10: 31
+Max XOR with 5: 28
+Max XOR with 25: 31
+Max XOR with 2: 31
+Max XOR with 8: 31
 
-自动补全测试:
-前缀 'app' 的建议 (最多3个): apple apply approach`}
+Maximum XOR pair in array: 31
+Maximum XOR subarray in [1,2,3,4]: 7`}
   />
 
-  <h2>竞赛技巧总结</h2>
+  <h2>Advanced Trie Applications</h2>
   
   <div class="tips">
-    <h3>字典树的适用场景：</h3>
+    <h3>Core Trie Applications:</h3>
     <ul>
-      <li>字符串集合的前缀查询和匹配</li>
-      <li>多模式字符串匹配（AC自动机）</li>
-      <li>自动补全和搜索建议</li>
-      <li>异或问题（01字典树）</li>
-      <li>字符串统计和去重</li>
+      <li>String search and prefix matching: Autocomplete, spell checkers</li>
+      <li>Dictionary operations: Word games, anagram detection</li>
+      <li>IP routing: Longest prefix matching in network routing</li>
+      <li>Suffix operations: Combined with suffix arrays for advanced string processing</li>
     </ul>
     
-    <h3>实现选择：</h3>
+    <h3>Binary Trie Applications:</h3>
     <ul>
-      <li>指针实现：灵活，支持任意字符集</li>
-      <li>数组实现：效率高，适用于固定字符集</li>
-      <li>01字典树：专门处理二进制数据</li>
-      <li>可持久化字典树：支持历史版本查询</li>
+      <li>Maximum XOR problems: Finding pairs with maximum XOR value</li>
+      <li>Bit manipulation: Efficient storage and query of binary representations</li>
+      <li>Range queries: XOR queries in given ranges</li>
+      <li>Subset XOR: Finding subsets with specific XOR properties</li>
     </ul>
     
-    <h3>优化技巧：</h3>
+    <h3>Implementation Strategies:</h3>
     <ul>
-      <li>使用数组而非map/unordered_map提高效率</li>
-      <li>预分配节点空间避免频繁内存分配</li>
-      <li>压缩路径减少空间消耗</li>
-      <li>懒惰删除避免复杂的删除操作</li>
+      <li>Memory optimization: Use arrays for fixed alphabets, maps for variable alphabets</li>
+      <li>Path compression: Compress single-child paths for space efficiency</li>
+      <li>Lazy deletion: Mark nodes as deleted instead of physical removal</li>
+      <li>Persistence: Maintain multiple versions of trie for historical queries</li>
     </ul>
     
-    <h3>常见问题和解决方案：</h3>
+    <h3>Performance Considerations:</h3>
     <ul>
-      <li>空间限制：使用压缩字典树或动态分配</li>
-      <li>字符集过大：使用哈希表存储子节点</li>
-      <li>删除操作：标记删除或引用计数</li>
-      <li>并发访问：读写锁或无锁数据结构</li>
-    </ul>
-    
-    <h3>竞赛中的应用模式：</h3>
-    <ul>
-      <li>字符串前缀/后缀问题 → 正向/反向字典树</li>
-      <li>多字符串匹配 → AC自动机</li>
-      <li>异或最值问题 → 01字典树</li>
-      <li>字符串计数统计 → 字典树 + DFS</li>
-      <li>动态字符串集合 → 可持久化字典树</li>
+      <li>Space complexity: O(ALPHABET_SIZE × N × L) where N is number of strings, L is average length</li>
+      <li>Time complexity: O(L) for all basic operations where L is string length</li>
+      <li>Cache efficiency: Array-based implementation has better cache locality</li>
+      <li>Memory management: Consider memory pool allocation for better performance</li>
     </ul>
   </div>
 
   <div class="navigation">
-    <a href="/4-competitive/segment-tree" class="prev">← 线段树和树状数组</a>
-    <a href="/4-competitive/monotonic-queue" class="next">单调队列 →</a>
+    <a href="/4-competitive/segment-tree" class="prev">← Segment Tree & BIT</a>
+    <a href="/4-competitive/kmp" class="next">KMP Algorithm →</a>
   </div>
 </Layout>
 

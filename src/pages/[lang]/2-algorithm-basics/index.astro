@@ -14,130 +14,319 @@ export async function getStaticPaths() {
 ---
 
 <Layout title={t('algo.title')}>
-  <main>
-    <h1>{t('algo.title')}</h1>
-    <p class="intro">{t('algo.description')}</p>
-    
-    <div class="lesson-grid">
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/2-algorithm-basics/sorting`}>{t('algo.sorting')}</a></h2>
-        <p>Learn fundamental sorting algorithms like bubble sort, merge sort, quick sort, and their time complexities.</p>
-      </div>
-      
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/2-algorithm-basics/searching`}>{t('algo.searching')}</a></h2>
-        <p>Master search algorithms including linear search, binary search, and backtracking techniques.</p>
-      </div>
-      
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/2-algorithm-basics/recursion`}>{t('algo.recursion')}</a></h2>
-        <p>Understand recursive thinking, recurrence relations, and solving problems with recursive approaches.</p>
-      </div>
-      
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/2-algorithm-basics/dynamic-programming`}>{t('algo.dp')}</a></h2>
-        <p>Introduction to dynamic programming concepts, memoization, and optimization techniques.</p>
-      </div>
-      
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/2-algorithm-basics/greedy-algorithms`}>{t('algo.greedy')}</a></h2>
-        <p>Learn greedy algorithm design, optimization strategies, and real-world applications.</p>
-      </div>
-      
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/2-algorithm-basics/graph-algorithms`}>{t('algo.graph')}</a></h2>
-        <p>Explore graph traversal algorithms like DFS, BFS, and shortest path algorithms.</p>
-      </div>
-      
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/2-algorithm-basics/string-algorithms`}>{t('algo.string')}</a></h2>
-        <p>Master string manipulation algorithms, pattern matching, and text processing techniques.</p>
-      </div>
-    </div>
-  </main>
+	<h1>{t('algo.title')}</h1>
+	<p class="section-description">{t('algo.description')}</p>
+	
+	<h2>{lang === 'en' ? 'Course Content' : '课程内容'}</h2>
+	
+	<div class="lesson-grid">
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">🔄</div>
+				<div class="lesson-meta">
+					<span class="difficulty beginner">{lang === 'en' ? 'Beginner' : '初学者'}</span>
+					<span class="duration">90 min</span>
+				</div>
+			</div>
+			<h3><a href={`/${lang}/2-algorithm-basics/sorting`}>1. {t('algo.sorting')}</a></h3>
+			<p>{lang === 'en' ? 'Bubble sort, selection sort, insertion sort, quicksort, merge sort and time complexity analysis' : '冒泡排序、选择排序、插入排序、快速排序、归并排序及时间复杂度分析'}</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">{lang === 'en' ? 'Bubble Sort' : '冒泡排序'}</span>
+					<span class="topic">{lang === 'en' ? 'Quick Sort' : '快速排序'}</span>
+					<span class="topic">{lang === 'en' ? 'Merge Sort' : '归并排序'}</span>
+					<span class="topic">{lang === 'en' ? 'Time Complexity' : '时间复杂度'}</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">🔍</div>
+				<div class="lesson-meta">
+					<span class="difficulty intermediate">{lang === 'en' ? 'Intermediate' : '中级'}</span>
+					<span class="duration">105 min</span>
+				</div>
+			</div>
+			<h3><a href={`/${lang}/2-algorithm-basics/searching`}>2. {t('algo.searching')}</a></h3>
+			<p>{lang === 'en' ? 'Depth-first search, breadth-first search, backtracking algorithms and pruning optimization' : '深度优先搜索、广度优先搜索、回溯算法及剪枝优化'}</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">DFS</span>
+					<span class="topic">BFS</span>
+					<span class="topic">{lang === 'en' ? 'Backtracking' : '回溯'}</span>
+					<span class="topic">{lang === 'en' ? 'Pruning' : '剪枝'}</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">🌀</div>
+				<div class="lesson-meta">
+					<span class="difficulty intermediate">{lang === 'en' ? 'Intermediate' : '中级'}</span>
+					<span class="duration">95 min</span>
+				</div>
+			</div>
+			<h3><a href={`/${lang}/2-algorithm-basics/recursion`}>3. {t('algo.recursion')}</a></h3>
+			<p>{lang === 'en' ? 'Recurrence relations, recursive function design, memoization and recursion optimization' : '递推关系、递归函数设计、记忆化及递归优化'}</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">{lang === 'en' ? 'Recurrence Relations' : '递推关系'}</span>
+					<span class="topic">{lang === 'en' ? 'Recursive Design' : '递归设计'}</span>
+					<span class="topic">{lang === 'en' ? 'Memoization' : '记忆化'}</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">💎</div>
+				<div class="lesson-meta">
+					<span class="difficulty advanced">{lang === 'en' ? 'Advanced' : '高级'}</span>
+					<span class="duration">120 min</span>
+				</div>
+			</div>
+			<h3><a href={`/${lang}/2-algorithm-basics/dynamic-programming`}>4. {t('algo.dp')}</a></h3>
+			<p>{lang === 'en' ? 'State transition equations, optimal substructure, overlapping subproblems and classic DP problems' : '状态转移方程、最优子结构、重叠子问题及经典DP问题'}</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">{lang === 'en' ? 'State Transition' : '状态转移'}</span>
+					<span class="topic">{lang === 'en' ? 'Optimal Substructure' : '最优子结构'}</span>
+					<span class="topic">{lang === 'en' ? 'Knapsack Problem' : '背包问题'}</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">🎯</div>
+				<div class="lesson-meta">
+					<span class="difficulty intermediate">{lang === 'en' ? 'Intermediate' : '中级'}</span>
+					<span class="duration">85 min</span>
+				</div>
+			</div>
+			<h3><a href={`/${lang}/2-algorithm-basics/greedy-algorithms`}>5. {t('algo.greedy')}</a></h3>
+			<p>{lang === 'en' ? 'Greedy strategies, local optimal solutions, global optimal solutions and correctness proofs' : '贪心策略、局部最优解、全局最优解及正确性证明'}</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">{lang === 'en' ? 'Greedy Strategy' : '贪心策略'}</span>
+					<span class="topic">{lang === 'en' ? 'Optimal Solutions' : '最优解'}</span>
+					<span class="topic">{lang === 'en' ? 'Correctness Proof' : '正确性证明'}</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">🌐</div>
+				<div class="lesson-meta">
+					<span class="difficulty advanced">{lang === 'en' ? 'Advanced' : '高级'}</span>
+					<span class="duration">110 min</span>
+				</div>
+			</div>
+			<h3><a href={`/${lang}/2-algorithm-basics/graph-algorithms`}>6. {t('algo.graph')}</a></h3>
+			<p>{lang === 'en' ? 'Graph representation, traversal algorithms, shortest path algorithms, topological sorting and strongly connected components' : '图的表示、遍历算法、最短路径算法、拓扑排序及强连通分量'}</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">{lang === 'en' ? 'Graph Traversal' : '图遍历'}</span>
+					<span class="topic">{lang === 'en' ? 'Shortest Path' : '最短路径'}</span>
+					<span class="topic">{lang === 'en' ? 'Topological Sort' : '拓扑排序'}</span>
+				</div>
+			</div>
+		</div>
+		
+		<div class="lesson-card">
+			<div class="card-header">
+				<div class="lesson-icon">🔤</div>
+				<div class="lesson-meta">
+					<span class="difficulty advanced">{lang === 'en' ? 'Advanced' : '高级'}</span>
+					<span class="duration">100 min</span>
+				</div>
+			</div>
+			<h3><a href={`/${lang}/2-algorithm-basics/string-algorithms`}>7. {t('algo.string')}</a></h3>
+			<p>{lang === 'en' ? 'String matching, KMP algorithm, string hashing and advanced string processing techniques' : '字符串匹配、KMP算法、字符串哈希及高级字符串处理技术'}</p>
+			<div class="card-footer">
+				<div class="topics">
+					<span class="topic">{lang === 'en' ? 'String Matching' : '字符串匹配'}</span>
+					<span class="topic">{lang === 'en' ? 'KMP Algorithm' : 'KMP算法'}</span>
+					<span class="topic">{lang === 'en' ? 'String Hashing' : '字符串哈希'}</span>
+				</div>
+			</div>
+		</div>
+	</div>
 </Layout>
 
 <style>
-  main {
-    margin: auto;
-    padding: 2rem;
-    width: 1200px;
-    max-width: calc(100% - 2rem);
-    color: #1e293b;
-    line-height: 1.6;
-  }
-  
-  h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
-    margin-bottom: 1rem;
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
-    -webkit-background-clip: text;
-    -webkit-text-fill-color: transparent;
-    background-clip: text;
-  }
-  
-  .intro {
-    font-size: 1.125rem;
-    color: #6b7280;
-    margin-bottom: 3rem;
-  }
-  
-  .lesson-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-  }
-  
-  .lesson-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-  }
-  
-  .lesson-card:hover {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
-    border-color: #4f46e5;
-  }
-  
-  .lesson-card h2 {
-    margin: 0 0 1rem 0;
-    font-size: 1.25rem;
-  }
-  
-  .lesson-card h2 a {
-    color: #1e293b;
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.3s ease;
-  }
-  
-  .lesson-card:hover h2 a {
-    color: #4f46e5;
-  }
-  
-  .lesson-card p {
-    margin: 0;
-    color: #6b7280;
-    font-size: 0.95rem;
-    line-height: 1.6;
-  }
-  
-  @media (max-width: 768px) {
-    main {
-      padding: 1rem;
-    }
-    
-    h1 {
-      font-size: 2rem;
-    }
-    
-    .lesson-grid {
-      grid-template-columns: 1fr;
-    }
-  }
+	.section-description {
+		font-size: 1.1rem;
+		color: #6b7280;
+		margin-bottom: 2rem;
+		text-align: center;
+	}
+
+	.lesson-grid {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+		gap: 2rem;
+		margin-top: 2rem;
+	}
+	
+	.lesson-card {
+		background: white;
+		border: 1px solid #e2e8f0;
+		border-radius: 12px;
+		padding: 0;
+		box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+		transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+		overflow: hidden;
+		position: relative;
+	}
+	
+	.lesson-card:hover {
+		box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+		transform: translateY(-4px);
+		border-color: #4f46e5;
+	}
+
+	.lesson-card:hover .lesson-icon {
+		transform: scale(1.2) rotate(5deg);
+	}
+
+	.card-header {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		padding: 1.5rem 1.5rem 1rem 1.5rem;
+		background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+		border-bottom: 1px solid #e2e8f0;
+	}
+
+	.lesson-icon {
+		font-size: 2rem;
+		transition: all 0.3s ease;
+	}
+
+	.lesson-meta {
+		display: flex;
+		gap: 0.75rem;
+		align-items: center;
+	}
+
+	.difficulty {
+		padding: 0.25rem 0.75rem;
+		border-radius: 20px;
+		font-size: 0.75rem;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.5px;
+	}
+
+	.difficulty.beginner {
+		background: #dcfce7;
+		color: #166534;
+	}
+
+	.difficulty.intermediate {
+		background: #fef3c7;
+		color: #92400e;
+	}
+
+	.difficulty.advanced {
+		background: #fecaca;
+		color: #991b1b;
+	}
+
+	.duration {
+		background: #e0e7ff;
+		color: #3730a3;
+		padding: 0.25rem 0.75rem;
+		border-radius: 20px;
+		font-size: 0.75rem;
+		font-weight: 500;
+	}
+
+	.lesson-card h3 {
+		margin: 0 0 0.75rem 0;
+		font-size: 1.25rem;
+		padding: 0 1.5rem;
+	}
+	
+	.lesson-card h3 a {
+		color: #1e293b;
+		text-decoration: none;
+		font-weight: 600;
+		transition: color 0.3s ease;
+	}
+	
+	.lesson-card:hover h3 a {
+		color: #4f46e5;
+	}
+	
+	.lesson-card p {
+		margin: 0 0 1.5rem 0;
+		color: #6b7280;
+		font-size: 0.9rem;
+		line-height: 1.6;
+		padding: 0 1.5rem;
+	}
+
+	.card-footer {
+		padding: 1rem 1.5rem 1.5rem 1.5rem;
+		background: #fafbfc;
+		border-top: 1px solid #f1f5f9;
+	}
+
+	.topics {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 0.5rem;
+	}
+
+	.topic {
+		background: white;
+		border: 1px solid #e2e8f0;
+		color: #64748b;
+		padding: 0.375rem 0.75rem;
+		border-radius: 6px;
+		font-size: 0.8rem;
+		font-weight: 500;
+		transition: all 0.2s ease;
+	}
+
+	.lesson-card:hover .topic {
+		border-color: #c7d2fe;
+		background: #f0f4ff;
+		color: #4338ca;
+	}
+
+	/* Progress indicator */
+	.lesson-card::before {
+		content: '';
+		position: absolute;
+		top: 0;
+		left: 0;
+		width: 100%;
+		height: 3px;
+		background: linear-gradient(90deg, #4f46e5, #7c3aed);
+		transform: scaleX(0);
+		transform-origin: left;
+		transition: transform 0.3s ease;
+	}
+
+	.lesson-card:hover::before {
+		transform: scaleX(1);
+	}
+
+	@media (max-width: 768px) {
+		.lesson-grid {
+			grid-template-columns: 1fr;
+			gap: 1.5rem;
+		}
+
+		.lesson-meta {
+			flex-direction: column;
+			gap: 0.5rem;
+		}
+	}
 </style> 

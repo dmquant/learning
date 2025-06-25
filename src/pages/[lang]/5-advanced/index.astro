@@ -13,40 +13,226 @@ export async function getStaticPaths() {
 }
 ---
 
-<Layout title={t('adv.title')}>
-  <main>
-    <h1>{t('adv.title')}</h1>
-    <p class="intro">{t('adv.description')}</p>
-    
-    <div class="lesson-grid">
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/5-advanced/graph-theory`}>{t('adv.graph-theory')}</a></h2>
-        <p>Advanced graph theory concepts, complex graph algorithms, and optimization techniques.</p>
+<Layout title={lang === 'en' ? 'Advanced Algorithms' : '高级算法'}>
+  <div class="breadcrumb">
+    <a href={`/${lang}`}>
+      {lang === 'en' ? 'Home' : '首页'}
+    </a> &gt; 
+    {lang === 'en' ? 'Advanced Algorithms' : '高级算法'}
+  </div>
+
+  <h1>{lang === 'en' ? 'Advanced Algorithms' : '高级算法'}</h1>
+  <p class="section-description">
+    {lang === 'en' 
+      ? 'Explore cutting-edge algorithms and advanced computational techniques' 
+      : '探索前沿算法和高级计算技术'
+    }
+  </p>
+  
+  <h2>{lang === 'en' ? 'Course Content' : '课程内容'}</h2>
+  
+  <div class="lesson-grid">
+    <div class="lesson-card">
+      <div class="card-header">
+        <div class="lesson-icon">🌐</div>
+        <div class="lesson-meta">
+          <span class="difficulty expert">{lang === 'en' ? 'Expert' : '专家'}</span>
+          <span class="duration">180 min</span>
+        </div>
       </div>
-      
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/5-advanced/graph-algorithms`}>{t('adv.graph-algorithms')}</a></h2>
-        <p>Implement advanced graph algorithms for complex computational problems.</p>
-      </div>
-      
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/5-advanced/union-find`}>{t('adv.union-find')}</a></h2>
-        <p>Master Union-Find data structure with path compression and union by rank.</p>
+      <h3><a href={`/${lang}/5-advanced/graph-theory`}>
+        {lang === 'en' ? '1. Advanced Graph Theory' : '1. 高级图论'}
+      </a></h3>
+      <p>
+        {lang === 'en' 
+          ? 'Bipartite graphs, Eulerian graphs, biconnected components and strongly connected components'
+          : '二分图、欧拉图、双连通分量和强连通分量'
+        }
+      </p>
+      <div class="card-footer">
+        <div class="topics">
+          <span class="topic">{lang === 'en' ? 'Bipartite Graphs' : '二分图'}</span>
+          <span class="topic">{lang === 'en' ? 'Eulerian Graphs' : '欧拉图'}</span>
+          <span class="topic">SCC</span>
+        </div>
       </div>
     </div>
-  </main>
+    
+    <div class="lesson-card">
+      <div class="card-header">
+        <div class="lesson-icon">🛤️</div>
+        <div class="lesson-meta">
+          <span class="difficulty expert">{lang === 'en' ? 'Expert' : '专家'}</span>
+          <span class="duration">200 min</span>
+        </div>
+      </div>
+      <h3><a href={`/${lang}/5-advanced/graph-algorithms`}>
+        {lang === 'en' ? '2. Advanced Graph Algorithms' : '2. 高级图算法'}
+      </a></h3>
+      <p>
+        {lang === 'en' 
+          ? 'Minimum spanning tree, second MST, single-source shortest paths, k-shortest paths, differential constraints, layered graphs'
+          : '最小生成树、次小生成树、单源最短路径、k短路、差分约束、分层图'
+        }
+      </p>
+      <div class="card-footer">
+        <div class="topics">
+          <span class="topic">MST</span>
+          <span class="topic">{lang === 'en' ? 'Shortest Paths' : '最短路径'}</span>
+          <span class="topic">{lang === 'en' ? 'Differential Constraints' : '差分约束'}</span>
+          <span class="topic">{lang === 'en' ? 'Layered Graphs' : '分层图'}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="lesson-card">
+      <div class="card-header">
+        <div class="lesson-icon">📊</div>
+        <div class="lesson-meta">
+          <span class="difficulty expert">{lang === 'en' ? 'Expert' : '专家'}</span>
+          <span class="duration">170 min</span>
+        </div>
+      </div>
+      <h3><a href={`/${lang}/5-advanced/difference-doubling`}>
+        {lang === 'en' ? '3. Difference Arrays & Doubling' : '3. 差分数组与倍增'}
+      </a></h3>
+      <p>
+        {lang === 'en' 
+          ? '1D/multi-dimensional/tree difference arrays, advanced doubling algorithms (ST table, LCA)'
+          : '一维/多维/树上差分数组，高级倍增算法（ST表、LCA）'
+        }
+      </p>
+      <div class="card-footer">
+        <div class="topics">
+          <span class="topic">{lang === 'en' ? 'Difference Arrays' : '差分数组'}</span>
+          <span class="topic">{lang === 'en' ? 'ST Table' : 'ST表'}</span>
+          <span class="topic">LCA</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="lesson-card">
+      <div class="card-header">
+        <div class="lesson-icon">🔗</div>
+        <div class="lesson-meta">
+          <span class="difficulty expert">{lang === 'en' ? 'Expert' : '专家'}</span>
+          <span class="duration">150 min</span>
+        </div>
+      </div>
+      <h3><a href={`/${lang}/5-advanced/union-find`}>
+        {lang === 'en' ? '4. Union-Find (Disjoint Set)' : '4. 并查集'}
+      </a></h3>
+      <p>
+        {lang === 'en' 
+          ? 'Advanced union-find data structure with path compression and union by rank optimizations'
+          : '带路径压缩和按秩合并优化的高级并查集数据结构'
+        }
+      </p>
+      <div class="card-footer">
+        <div class="topics">
+          <span class="topic">{lang === 'en' ? 'Path Compression' : '路径压缩'}</span>
+          <span class="topic">{lang === 'en' ? 'Union by Rank' : '按秩合并'}</span>
+          <span class="topic">{lang === 'en' ? 'Applications' : '应用'}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="lesson-card">
+      <div class="card-header">
+        <div class="lesson-icon">📏</div>
+        <div class="lesson-meta">
+          <span class="difficulty expert">{lang === 'en' ? 'Expert' : '专家'}</span>
+          <span class="duration">160 min</span>
+        </div>
+      </div>
+      <h3><a href={`/${lang}/5-advanced/sweep-line`}>
+        {lang === 'en' ? '5. Sweep Line Algorithm' : '5. 扫描线算法'}
+      </a></h3>
+      <p>
+        {lang === 'en' 
+          ? 'Line sweep techniques for computational geometry and interval problems'
+          : '用于计算几何和区间问题的扫描线技术'
+        }
+      </p>
+      <div class="card-footer">
+        <div class="topics">
+          <span class="topic">{lang === 'en' ? 'Line Sweep' : '扫描线'}</span>
+          <span class="topic">{lang === 'en' ? 'Computational Geometry' : '计算几何'}</span>
+          <span class="topic">{lang === 'en' ? 'Interval Problems' : '区间问题'}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="lesson-card">
+      <div class="card-header">
+        <div class="lesson-icon">🌳</div>
+        <div class="lesson-meta">
+          <span class="difficulty expert">{lang === 'en' ? 'Expert' : '专家'}</span>
+          <span class="duration">140 min</span>
+        </div>
+      </div>
+      <h3><a href={`/${lang}/5-advanced/binary-trie`}>
+        {lang === 'en' ? '6. Binary Trie (01-Trie)' : '6. 二进制字典树 (01-Trie)'}
+      </a></h3>
+      <p>
+        {lang === 'en' 
+          ? 'Binary trie data structure for XOR operations and bit manipulation problems'
+          : '用于异或运算和位操作问题的二进制字典树数据结构'
+        }
+      </p>
+      <div class="card-footer">
+        <div class="topics">
+          <span class="topic">{lang === 'en' ? 'Binary Trie' : '二进制Trie'}</span>
+          <span class="topic">{lang === 'en' ? 'XOR Operations' : '异或运算'}</span>
+          <span class="topic">{lang === 'en' ? 'Bit Manipulation' : '位操作'}</span>
+        </div>
+      </div>
+    </div>
+    
+    <div class="lesson-card">
+      <div class="card-header">
+        <div class="lesson-icon">⚡</div>
+        <div class="lesson-meta">
+          <span class="difficulty expert">{lang === 'en' ? 'Expert' : '专家'}</span>
+          <span class="duration">190 min</span>
+        </div>
+      </div>
+      <h3><a href={`/${lang}/5-advanced/data-structure-dp`}>
+        {lang === 'en' ? '7. Data Structure Optimized DP' : '7. 数据结构优化DP'}
+      </a></h3>
+      <p>
+        {lang === 'en' 
+          ? 'Using advanced data structures to optimize dynamic programming solutions'
+          : '使用高级数据结构优化动态规划解法'
+        }
+      </p>
+      <div class="card-footer">
+        <div class="topics">
+          <span class="topic">{lang === 'en' ? 'DP Optimization' : 'DP优化'}</span>
+          <span class="topic">{lang === 'en' ? 'Segment Tree DP' : '线段树DP'}</span>
+          <span class="topic">{lang === 'en' ? 'Convex Hull Trick' : '凸包优化'}</span>
+        </div>
+      </div>
+    </div>
+  </div>
 </Layout>
 
 <style>
-  main {
-    margin: auto;
-    padding: 2rem;
-    width: 1200px;
-    max-width: calc(100% - 2rem);
-    color: #1e293b;
-    line-height: 1.6;
+  .breadcrumb {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 1rem;
   }
-  
+
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
   h1 {
     font-size: 2.5rem;
     font-weight: 700;
@@ -56,68 +242,146 @@ export async function getStaticPaths() {
     -webkit-text-fill-color: transparent;
     background-clip: text;
   }
-  
-  .intro {
-    font-size: 1.125rem;
+
+  .section-description {
+    font-size: 1.1rem;
     color: #6b7280;
-    margin-bottom: 3rem;
+    margin-bottom: 2rem;
+    text-align: center;
   }
-  
+
+  h2 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem;
+    color: #1e293b;
+  }
+
   .lesson-grid {
     display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
+    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
   }
   
   .lesson-card {
     background: white;
     border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 1.5rem;
+    border-radius: 12px;
+    padding: 0;
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    overflow: hidden;
+    position: relative;
   }
   
   .lesson-card:hover {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
+    transform: translateY(-4px);
     border-color: #4f46e5;
   }
-  
-  .lesson-card h2 {
-    margin: 0 0 1rem 0;
-    font-size: 1.25rem;
+
+  .lesson-card:hover .lesson-icon {
+    transform: scale(1.2) rotate(5deg);
   }
-  
-  .lesson-card h2 a {
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 1.5rem 1rem 1.5rem;
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border-bottom: 1px solid #e2e8f0;
+  }
+
+  .lesson-icon {
+    font-size: 2rem;
+    transition: all 0.3s ease;
+  }
+
+  .lesson-meta {
+    display: flex;
+    gap: 0.75rem;
+    align-items: center;
+  }
+
+  .difficulty {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .expert {
+    background: linear-gradient(135deg, #dc2626, #991b1b);
+    color: white;
+  }
+
+  .duration {
+    font-size: 0.75rem;
+    color: #6b7280;
+    font-weight: 500;
+  }
+
+  .lesson-card h3 {
+    margin: 0 0 1rem 0;
+    padding: 0 1.5rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+
+  .lesson-card h3 a {
     color: #1e293b;
     text-decoration: none;
-    font-weight: 600;
     transition: color 0.3s ease;
   }
-  
-  .lesson-card:hover h2 a {
+
+  .lesson-card:hover h3 a {
     color: #4f46e5;
   }
-  
+
   .lesson-card p {
-    margin: 0;
+    margin: 0 0 1.5rem 0;
+    padding: 0 1.5rem;
     color: #6b7280;
     font-size: 0.95rem;
     line-height: 1.6;
   }
-  
+
+  .card-footer {
+    padding: 1rem 1.5rem 1.5rem 1.5rem;
+  }
+
+  .topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .topic {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 0.25rem 0.75rem;
+    border-radius: 16px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    border: 1px solid #e2e8f0;
+  }
+
   @media (max-width: 768px) {
-    main {
-      padding: 1rem;
+    .lesson-grid {
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
     }
     
     h1 {
       font-size: 2rem;
     }
     
-    .lesson-grid {
-      grid-template-columns: 1fr;
+    .lesson-card {
+      margin: 0;
     }
   }
 </style> 

@@ -1,0 +1,739 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { ui } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } }
+  ];
+}
+
+const { lang } = Astro.params;
+const t = ui[lang as keyof typeof ui];
+---
+
+<Layout title={lang === 'zh' ? "高级树算法 - 世界级算法" : "Advanced Tree Algorithms - World Class Algorithms"}>
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href={`/${lang}`}>{t['nav.home']}</a> &gt; 
+      <a href={`/${lang}/6-world-class`}>{lang === 'zh' ? '世界级算法' : 'World Class'}</a> &gt; 
+      <span>{lang === 'zh' ? '高级树算法' : 'Advanced Tree Algorithms'}</span>
+    </nav>
+
+    <div class="header-section">
+      <h1 class="main-title">
+        {lang === 'zh' ? '高级树算法' : 'Advanced Tree Algorithms'}
+      </h1>
+      <p class="subtitle">
+        {lang === 'zh' 
+          ? '掌握树的直径、重心分解和高级树形DP技术'
+          : 'Master tree diameter, centroid decomposition, and advanced tree DP techniques'
+        }
+      </p>
+    </div>
+
+    <div class="overview-section">
+      <h2>{lang === 'zh' ? '概述' : 'Overview'}</h2>
+      <p>
+        {lang === 'zh' 
+          ? '高级树算法是解决复杂树问题的核心技术。本章节深入探讨树的直径算法、重心分解、虚树构造等高级技术，为处理大规模树上查询和优化问题提供强大工具。'
+          : 'Advanced tree algorithms are core techniques for solving complex tree problems. This chapter explores tree diameter algorithms, centroid decomposition, virtual tree construction, and other advanced techniques for handling large-scale tree queries and optimization problems.'
+        }
+      </p>
+    </div>
+
+    <div class="content-section">
+      <h2>{lang === 'zh' ? '核心内容' : 'Core Content'}</h2>
+
+      <div class="topic-section">
+        <h3>{lang === 'zh' ? '1. 树的直径算法' : '1. Tree Diameter Algorithm'}</h3>
+        
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// 树的直径算法' : '// Tree diameter algorithm'}
+#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+class TreeDiameter {
+private:
+    int n;
+    vector<vector<pair<int, long long>>> adj;
+    
+    ${lang === 'zh' ? '// BFS找最远节点' : '// BFS to find farthest node'}
+    pair<int, long long> bfs(int start) {
+        vector<long long> dist(n, -1);
+        queue<int> q;
+        q.push(start);
+        dist[start] = 0;
+        
+        int farthest = start;
+        long long maxDist = 0;
+        
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            
+            for (auto [v, weight] : adj[u]) {
+                if (dist[v] == -1) {
+                    dist[v] = dist[u] + weight;
+                    q.push(v);
+                    
+                    if (dist[v] > maxDist) {
+                        maxDist = dist[v];
+                        farthest = v;
+                    }
+                }
+            }
+        }
+        
+        return {farthest, maxDist};
+    }
+    
+    ${lang === 'zh' ? '// DFS计算直径' : '// DFS to calculate diameter'}
+    pair<long long, long long> dfs(int u, int parent) {
+        long long max1 = 0, max2 = 0; ${lang === 'zh' ? '// 最长和次长路径' : '// Longest and second longest paths'}
+        
+        for (auto [v, weight] : adj[u]) {
+            if (v != parent) {
+                auto [childMax, childDiameter] = dfs(v, u);
+                diameter = max(diameter, childDiameter);
+                
+                long long pathLen = childMax + weight;
+                if (pathLen > max1) {
+                    max2 = max1;
+                    max1 = pathLen;
+                } else if (pathLen > max2) {
+                    max2 = pathLen;
+                }
+            }
+        }
+        
+        diameter = max(diameter, max1 + max2);
+        return {max1, diameter};
+    }
+    
+    long long diameter;
+    
+public:
+    TreeDiameter(int vertices) : n(vertices), diameter(0) {
+        adj.resize(n);
+    }
+    
+    void addEdge(int u, int v, long long weight = 1) {
+        adj[u].push_back({v, weight});
+        adj[v].push_back({u, weight});
+    }
+    
+    ${lang === 'zh' ? '// 方法1：两次BFS' : '// Method 1: Two BFS'}
+    long long getDiameterBFS() {
+        if (n == 0) return 0;
+        
+        ${lang === 'zh' ? '// 第一次BFS找一个端点' : '// First BFS to find one endpoint'}
+        auto [node1, dist1] = bfs(0);
+        
+        ${lang === 'zh' ? '// 第二次BFS找另一个端点' : '// Second BFS to find other endpoint'}
+        auto [node2, diameter] = bfs(node1);
+        
+        return diameter;
+    }
+    
+    ${lang === 'zh' ? '// 方法2：一次DFS' : '// Method 2: One DFS'}
+    long long getDiameterDFS() {
+        if (n == 0) return 0;
+        
+        diameter = 0;
+        dfs(0, -1);
+        return diameter;
+    }
+    
+    ${lang === 'zh' ? '// 获取直径路径' : '// Get diameter path'}
+    vector<int> getDiameterPath() {
+        if (n == 0) return {};
+        
+        auto [node1, dist1] = bfs(0);
+        
+        ${lang === 'zh' ? '// 修改BFS记录路径' : '// Modified BFS to record path'}
+        vector<long long> dist(n, -1);
+        vector<int> parent(n, -1);
+        queue<int> q;
+        q.push(node1);
+        dist[node1] = 0;
+        
+        int node2 = node1;
+        long long maxDist = 0;
+        
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            
+            for (auto [v, weight] : adj[u]) {
+                if (dist[v] == -1) {
+                    dist[v] = dist[u] + weight;
+                    parent[v] = u;
+                    q.push(v);
+                    
+                    if (dist[v] > maxDist) {
+                        maxDist = dist[v];
+                        node2 = v;
+                    }
+                }
+            }
+        }
+        
+        ${lang === 'zh' ? '// 重构路径' : '// Reconstruct path'}
+        vector<int> path;
+        int current = node2;
+        while (current != -1) {
+            path.push_back(current);
+            current = parent[current];
+        }
+        
+        return path;
+    }
+};
+
+${lang === 'zh' ? '// 重心分解' : '// Centroid decomposition'}
+class CentroidDecomposition {
+private:
+    int n;
+    vector<vector<int>> adj;
+    vector<bool> removed;
+    vector<int> subtreeSize;
+    
+    ${lang === 'zh' ? '// 计算子树大小' : '// Calculate subtree size'}
+    int calculateSize(int u, int parent) {
+        subtreeSize[u] = 1;
+        for (int v : adj[u]) {
+            if (v != parent && !removed[v]) {
+                subtreeSize[u] += calculateSize(v, u);
+            }
+        }
+        return subtreeSize[u];
+    }
+    
+    ${lang === 'zh' ? '// 找重心' : '// Find centroid'}
+    int findCentroid(int u, int parent, int treeSize) {
+        for (int v : adj[u]) {
+            if (v != parent && !removed[v] && subtreeSize[v] > treeSize / 2) {
+                return findCentroid(v, u, treeSize);
+            }
+        }
+        return u;
+    }
+    
+    ${lang === 'zh' ? '// 分解过程' : '// Decomposition process'}
+    void decompose(int u, int parent) {
+        int treeSize = calculateSize(u, -1);
+        int centroid = findCentroid(u, -1, treeSize);
+        
+        removed[centroid] = true;
+        
+        ${lang === 'zh' ? '// 处理重心' : '// Process centroid'}
+        processCentroid(centroid);
+        
+        ${lang === 'zh' ? '// 递归分解子树' : '// Recursively decompose subtrees'}
+        for (int v : adj[centroid]) {
+            if (!removed[v]) {
+                decompose(v, centroid);
+            }
+        }
+    }
+    
+    ${lang === 'zh' ? '// 处理重心的逻辑（可自定义）' : '// Process centroid logic (customizable)'}
+    void processCentroid(int centroid) {
+        cout << "${lang === 'zh' ? '处理重心：' : 'Processing centroid:'} " << centroid << endl;
+        
+        ${lang === 'zh' ? '// 这里可以添加具体的处理逻辑' : '// Add specific processing logic here'}
+        ${lang === 'zh' ? '// 例如：计算经过重心的路径' : '// Example: calculate paths through centroid'}
+    }
+    
+public:
+    CentroidDecomposition(int vertices) : n(vertices) {
+        adj.resize(n);
+        removed.resize(n);
+        subtreeSize.resize(n);
+    }
+    
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    
+    void decompose() {
+        fill(removed.begin(), removed.end(), false);
+        decompose(0, -1);
+    }
+};
+
+${lang === 'zh' ? '// 虚树构造' : '// Virtual tree construction'}
+class VirtualTree {
+private:
+    int n, timer;
+    vector<vector<int>> adj;
+    vector<int> depth, parent, tin, tout;
+    vector<vector<int>> up; ${lang === 'zh' ? '// 二进制提升' : '// Binary lifting'}
+    
+    void dfs(int u, int p, int d) {
+        tin[u] = timer++;
+        depth[u] = d;
+        parent[u] = p;
+        up[u][0] = p;
+        
+        for (int i = 1; i < up[u].size(); i++) {
+            if (up[u][i-1] != -1) {
+                up[u][i] = up[up[u][i-1]][i-1];
+            }
+        }
+        
+        for (int v : adj[u]) {
+            if (v != p) {
+                dfs(v, u, d + 1);
+            }
+        }
+        
+        tout[u] = timer++;
+    }
+    
+    bool isAncestor(int u, int v) {
+        return tin[u] <= tin[v] && tout[u] >= tout[v];
+    }
+    
+    int lca(int u, int v) {
+        if (isAncestor(u, v)) return u;
+        if (isAncestor(v, u)) return v;
+        
+        for (int i = up[u].size() - 1; i >= 0; i--) {
+            if (up[u][i] != -1 && !isAncestor(up[u][i], v)) {
+                u = up[u][i];
+            }
+        }
+        
+        return up[u][0];
+    }
+    
+public:
+    VirtualTree(int vertices) : n(vertices), timer(0) {
+        adj.resize(n);
+        depth.resize(n);
+        parent.resize(n);
+        tin.resize(n);
+        tout.resize(n);
+        
+        int logN = 0;
+        while ((1 << logN) <= n) logN++;
+        up.assign(n, vector<int>(logN, -1));
+    }
+    
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    
+    void preprocess(int root = 0) {
+        timer = 0;
+        dfs(root, -1, 0);
+    }
+    
+    ${lang === 'zh' ? '// 构造虚树' : '// Build virtual tree'}
+    vector<vector<int>> buildVirtualTree(vector<int>& important) {
+        if (important.empty()) return {};
+        
+        ${lang === 'zh' ? '// 按DFS序排序' : '// Sort by DFS order'}
+        sort(important.begin(), important.end(), [&](int a, int b) {
+            return tin[a] < tin[b];
+        });
+        
+        ${lang === 'zh' ? '// 添加LCA节点' : '// Add LCA nodes'}
+        vector<int> nodes = important;
+        for (int i = 0; i < important.size() - 1; i++) {
+            int l = lca(important[i], important[i + 1]);
+            nodes.push_back(l);
+        }
+        
+        ${lang === 'zh' ? '// 去重并排序' : '// Remove duplicates and sort'}
+        sort(nodes.begin(), nodes.end());
+        nodes.erase(unique(nodes.begin(), nodes.end()), nodes.end());
+        sort(nodes.begin(), nodes.end(), [&](int a, int b) {
+            return tin[a] < tin[b];
+        });
+        
+        ${lang === 'zh' ? '// 构造虚树' : '// Build virtual tree'}
+        vector<vector<int>> vtree(n);
+        vector<int> stack;
+        
+        for (int u : nodes) {
+            while (!stack.empty() && !isAncestor(stack.back(), u)) {
+                stack.pop_back();
+            }
+            
+            if (!stack.empty()) {
+                vtree[stack.back()].push_back(u);
+            }
+            
+            stack.push_back(u);
+        }
+        
+        return vtree;
+    }
+};
+
+int main() {
+    ${lang === 'zh' ? '// 测试树的直径' : '// Test tree diameter'}
+    TreeDiameter td(6);
+    td.addEdge(0, 1, 2);
+    td.addEdge(1, 2, 3);
+    td.addEdge(1, 3, 1);
+    td.addEdge(3, 4, 4);
+    td.addEdge(3, 5, 2);
+    
+    cout << "${lang === 'zh' ? 'BFS方法直径：' : 'BFS method diameter:'} " << td.getDiameterBFS() << endl;
+    cout << "${lang === 'zh' ? 'DFS方法直径：' : 'DFS method diameter:'} " << td.getDiameterDFS() << endl;
+    
+    vector<int> path = td.getDiameterPath();
+    cout << "${lang === 'zh' ? '直径路径：' : 'Diameter path:'} ";
+    for (int i = 0; i < path.size(); i++) {
+        cout << path[i];
+        if (i < path.size() - 1) cout << " -> ";
+    }
+    cout << endl;
+    
+    ${lang === 'zh' ? '// 测试重心分解' : '// Test centroid decomposition'}
+    CentroidDecomposition cd(7);
+    cd.addEdge(0, 1);
+    cd.addEdge(1, 2);
+    cd.addEdge(1, 3);
+    cd.addEdge(3, 4);
+    cd.addEdge(3, 5);
+    cd.addEdge(5, 6);
+    
+    cout << "${lang === 'zh' ? '重心分解：' : 'Centroid decomposition:'}" << endl;
+    cd.decompose();
+    
+    ${lang === 'zh' ? '// 测试虚树' : '// Test virtual tree'}
+    VirtualTree vt(8);
+    vt.addEdge(0, 1);
+    vt.addEdge(0, 2);
+    vt.addEdge(1, 3);
+    vt.addEdge(1, 4);
+    vt.addEdge(2, 5);
+    vt.addEdge(2, 6);
+    vt.addEdge(6, 7);
+    
+    vt.preprocess(0);
+    
+    vector<int> important = {3, 4, 7};
+    vector<vector<int>> vtree = vt.buildVirtualTree(important);
+    
+    cout << "${lang === 'zh' ? '虚树构造完成' : 'Virtual tree construction completed'}" << endl;
+    
+    return 0;
+}`}
+          language="cpp"
+        />
+      </div>
+    </div>
+
+    <div class="tips-section">
+      <h2>{lang === 'zh' ? '解题技巧' : 'Problem-Solving Tips'}</h2>
+      <div class="tips-grid">
+        <div class="tip-card">
+          <h3>🎯 {lang === 'zh' ? '算法选择' : 'Algorithm Selection'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '树的直径用两次BFS或一次DFS，重心分解处理路径问题，虚树优化特定节点查询。'
+              : 'Use two BFS or one DFS for tree diameter, centroid decomposition for path problems, virtual tree for specific node queries.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>⚡ {lang === 'zh' ? '复杂度分析' : 'Complexity Analysis'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '直径算法O(n)，重心分解O(n log n)，虚树构造O(k log k)，k为重要节点数。'
+              : 'Diameter algorithm O(n), centroid decomposition O(n log n), virtual tree construction O(k log k) where k is number of important nodes.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>🔧 {lang === 'zh' ? '实现要点' : 'Implementation Points'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '重心分解要正确维护removed数组，虚树构造需要LCA预处理和DFS序排序。'
+              : 'Centroid decomposition requires proper maintenance of removed array, virtual tree needs LCA preprocessing and DFS order sorting.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>🧮 {lang === 'zh' ? '应用场景' : 'Application Scenarios'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '树上距离查询、路径统计、子树操作优化等高级树问题的高效解决方案。'
+              : 'Efficient solutions for advanced tree problems like distance queries, path counting, and subtree operation optimization.'
+            }
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="navigation">
+      <a href={`/${lang}/6-world-class/shortest-dag`} class="nav-button prev">
+        ← {lang === 'zh' ? '最短路DAG' : 'Shortest Path DAG'}
+      </a>
+      <a href={`/${lang}/6-world-class`} class="nav-button index">
+        📚 {lang === 'zh' ? '章节目录' : 'Chapter Index'}
+      </a>
+      <a href={`/${lang}/6-world-class/tree-problems`} class="nav-button next">
+        {lang === 'zh' ? '高级树问题' : 'Advanced Tree Problems'} →
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .breadcrumb {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .breadcrumb a:hover {
+    color: #3730a3;
+    text-decoration: underline;
+  }
+
+  .header-section {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .main-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #dc2626 0%, #ea580c 25%, #d97706 50%, #ca8a04 75%, #65a30d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+  }
+
+  .subtitle {
+    font-size: 1.25rem;
+    color: #6b7280;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .overview-section {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #f59e0b;
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin: 2rem 0 3rem 0;
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1);
+  }
+
+  .overview-section h2 {
+    color: #92400e;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .overview-section p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #78350f;
+  }
+
+  .content-section {
+    margin: 4rem 0;
+  }
+
+  .content-section > h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 3rem;
+    color: #1e293b;
+    text-align: center;
+    position: relative;
+  }
+
+  .content-section > h2::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #dc2626, #ea580c, #d97706);
+    border-radius: 2px;
+  }
+
+  .topic-section {
+    margin: 3rem 0;
+    padding: 2rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border-left: 4px solid #dc2626;
+  }
+
+  .topic-section h3 {
+    color: #dc2626;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .topic-section p {
+    color: #4b5563;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .tips-section {
+    margin: 4rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #e5e7eb;
+  }
+
+  .tips-section h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #1e293b;
+    text-align: center;
+  }
+
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .tip-card {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #0ea5e9;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: transform 0.2s ease;
+  }
+
+  .tip-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .tip-card h3 {
+    color: #0c4a6e;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .tip-card p {
+    color: #075985;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #e5e7eb;
+    gap: 1rem;
+  }
+
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.875rem 1.75rem;
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px 0 rgba(220, 38, 38, 0.39);
+  }
+
+  .nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px 0 rgba(220, 38, 38, 0.5);
+  }
+
+  .nav-button.index {
+    background: linear-gradient(135deg, #059669, #0d9488);
+    box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.39);
+  }
+
+  .nav-button.index:hover {
+    box-shadow: 0 8px 25px 0 rgba(5, 150, 105, 0.5);
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 0.5rem;
+    }
+
+    .main-title {
+      font-size: 2.5rem;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+    }
+
+    .overview-section {
+      padding: 1.5rem;
+      margin: 1.5rem 0 2rem 0;
+    }
+
+    .topic-section {
+      padding: 1.5rem;
+    }
+
+    .tips-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style> 

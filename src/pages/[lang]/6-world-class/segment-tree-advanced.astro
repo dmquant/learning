@@ -1,0 +1,914 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { ui } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } }
+  ];
+}
+
+const { lang } = Astro.params;
+const t = ui[lang as keyof typeof ui];
+---
+
+<Layout title={lang === 'zh' ? "高级线段树 - 世界级算法" : "Advanced Segment Trees - World Class Algorithms"}>
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href={`/${lang}`}>{t['nav.home']}</a> &gt; 
+      <a href={`/${lang}/6-world-class`}>{lang === 'zh' ? '世界级算法' : 'World Class'}</a> &gt; 
+      <span>{lang === 'zh' ? '高级线段树' : 'Advanced Segment Trees'}</span>
+    </nav>
+
+    <div class="header-section">
+      <h1 class="main-title">
+        {lang === 'zh' ? '高级线段树' : 'Advanced Segment Trees'}
+      </h1>
+      <p class="subtitle">
+        {lang === 'zh' 
+          ? '掌握可持久化线段树、复杂区间操作和高级线段树技术'
+          : 'Master persistent segment trees, complex range operations, and advanced segment tree techniques'
+        }
+      </p>
+    </div>
+
+    <div class="overview-section">
+      <h2>{lang === 'zh' ? '概述' : 'Overview'}</h2>
+      <p>
+        {lang === 'zh' 
+          ? '高级线段树技术是处理复杂区间问题的核心工具。本章节深入探讨可持久化线段树、李超线段树、动态开点线段树等高级技术，为解决世界级竞赛中的复杂区间查询和更新问题提供强大支持。'
+          : 'Advanced segment tree techniques are core tools for handling complex range problems. This chapter explores persistent segment trees, Li Chao trees, dynamic segment trees, and other advanced techniques for solving complex range queries and updates in world-class competitions.'
+        }
+      </p>
+    </div>
+
+    <div class="content-section">
+      <h2>{lang === 'zh' ? '核心内容' : 'Core Content'}</h2>
+
+      <div class="topic-section">
+        <h3>{lang === 'zh' ? '1. 可持久化线段树' : '1. Persistent Segment Trees'}</h3>
+        <p>
+          {lang === 'zh' 
+            ? '可持久化线段树保存数据结构的历史版本，支持查询任意历史状态。'
+            : 'Persistent segment trees preserve historical versions of data structures, supporting queries on any historical state.'
+          }
+        </p>
+
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// 可持久化线段树实现' : '// Persistent segment tree implementation'}
+#include <iostream>
+#include <vector>
+using namespace std;
+
+struct PersistentSegmentTree {
+    struct Node {
+        int left, right, sum;
+        Node() : left(0), right(0), sum(0) {}
+        Node(int l, int r, int s) : left(l), right(r), sum(s) {}
+    };
+    
+    vector<Node> tree;
+    vector<int> roots;
+    int n, nodeCount;
+    
+    PersistentSegmentTree(vector<int>& arr) {
+        n = arr.size();
+        tree.reserve(n * 20); ${lang === 'zh' ? '// 预留足够空间' : '// Reserve enough space'}
+        nodeCount = 0;
+        
+        ${lang === 'zh' ? '// 构建初始版本' : '// Build initial version'}
+        roots.push_back(build(arr, 0, n - 1));
+    }
+    
+    int build(vector<int>& arr, int l, int r) {
+        int node = nodeCount++;
+        tree.push_back(Node());
+        
+        if (l == r) {
+            tree[node].sum = arr[l];
+        } else {
+            int mid = (l + r) / 2;
+            tree[node].left = build(arr, l, mid);
+            tree[node].right = build(arr, mid + 1, r);
+            tree[node].sum = tree[tree[node].left].sum + tree[tree[node].right].sum;
+        }
+        
+        return node;
+    }
+    
+    ${lang === 'zh' ? '// 创建新版本（单点更新）' : '// Create new version (point update)'}
+    int update(int prevRoot, int l, int r, int pos, int val) {
+        int node = nodeCount++;
+        tree.push_back(Node());
+        
+        if (l == r) {
+            tree[node].sum = val;
+        } else {
+            int mid = (l + r) / 2;
+            if (pos <= mid) {
+                tree[node].left = update(tree[prevRoot].left, l, mid, pos, val);
+                tree[node].right = tree[prevRoot].right;
+            } else {
+                tree[node].left = tree[prevRoot].left;
+                tree[node].right = update(tree[prevRoot].right, mid + 1, r, pos, val);
+            }
+            tree[node].sum = tree[tree[node].left].sum + tree[tree[node].right].sum;
+        }
+        
+        return node;
+    }
+    
+    ${lang === 'zh' ? '// 查询历史版本' : '// Query historical version'}
+    int query(int root, int l, int r, int ql, int qr) {
+        if (ql > r || qr < l) return 0;
+        if (ql <= l && r <= qr) return tree[root].sum;
+        
+        int mid = (l + r) / 2;
+        return query(tree[root].left, l, mid, ql, qr) + 
+               query(tree[root].right, mid + 1, r, ql, qr);
+    }
+    
+    ${lang === 'zh' ? '// 添加新版本' : '// Add new version'}
+    void addVersion(int pos, int val) {
+        int newRoot = update(roots.back(), 0, n - 1, pos, val);
+        roots.push_back(newRoot);
+    }
+    
+    ${lang === 'zh' ? '// 查询指定版本' : '// Query specific version'}
+    int queryVersion(int version, int l, int r) {
+        return query(roots[version], 0, n - 1, l, r);
+    }
+    
+    ${lang === 'zh' ? '// 获取版本数' : '// Get version count'}
+    int getVersionCount() {
+        return roots.size();
+    }
+};
+
+${lang === 'zh' ? '// 可持久化数组应用' : '// Persistent array application'}
+class PersistentArray {
+private:
+    PersistentSegmentTree* pst;
+    
+public:
+    PersistentArray(vector<int>& initial) {
+        pst = new PersistentSegmentTree(initial);
+    }
+    
+    void set(int pos, int val) {
+        pst->addVersion(pos, val);
+    }
+    
+    int get(int version, int pos) {
+        return pst->queryVersion(version, pos, pos);
+    }
+    
+    int rangeSum(int version, int l, int r) {
+        return pst->queryVersion(version, l, r);
+    }
+    
+    int getCurrentVersion() {
+        return pst->getVersionCount() - 1;
+    }
+};
+
+int main() {
+    vector<int> arr = {1, 2, 3, 4, 5};
+    PersistentArray pa(arr);
+    
+    cout << "${lang === 'zh' ? '初始版本区间和[1,3]：' : 'Initial version range sum[1,3]:'} " 
+         << pa.rangeSum(0, 1, 3) << endl;
+    
+    ${lang === 'zh' ? '// 修改位置2为10' : '// Modify position 2 to 10'}
+    pa.set(2, 10);
+    
+    cout << "${lang === 'zh' ? '版本0位置2的值：' : 'Version 0 position 2 value:'} " << pa.get(0, 2) << endl;
+    cout << "${lang === 'zh' ? '版本1位置2的值：' : 'Version 1 position 2 value:'} " << pa.get(1, 2) << endl;
+    
+    cout << "${lang === 'zh' ? '版本1区间和[1,3]：' : 'Version 1 range sum[1,3]:'} " 
+         << pa.rangeSum(1, 1, 3) << endl;
+    
+    return 0;
+}`}
+          language="cpp"
+        />
+      </div>
+
+      <div class="topic-section">
+        <h3>{lang === 'zh' ? '2. 李超线段树' : '2. Li Chao Segment Tree'}</h3>
+        <p>
+          {lang === 'zh' 
+            ? '李超线段树专门处理直线查询问题，支持动态添加直线和查询最值。'
+            : 'Li Chao segment tree specializes in line query problems, supporting dynamic line addition and extremum queries.'
+          }
+        </p>
+
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// 李超线段树实现' : '// Li Chao segment tree implementation'}
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+struct Line {
+    long long k, b; ${lang === 'zh' ? '// y = kx + b' : '// y = kx + b'}
+    int id;
+    
+    Line() : k(0), b(LLONG_MIN), id(-1) {}
+    Line(long long _k, long long _b, int _id) : k(_k), b(_b), id(_id) {}
+    
+    long long eval(long long x) {
+        return k * x + b;
+    }
+};
+
+class LiChaoTree {
+private:
+    vector<Line> tree;
+    int n;
+    
+    ${lang === 'zh' ? '// 判断直线1在x处是否优于直线2' : '// Check if line1 is better than line2 at x'}
+    bool better(Line& l1, Line& l2, long long x) {
+        return l1.eval(x) > l2.eval(x);
+    }
+    
+    void update(int node, int l, int r, Line& newLine) {
+        if (l == r) {
+            if (better(newLine, tree[node], l)) {
+                tree[node] = newLine;
+            }
+            return;
+        }
+        
+        int mid = (l + r) / 2;
+        bool betterLeft = better(newLine, tree[node], l);
+        bool betterMid = better(newLine, tree[node], mid);
+        
+        if (betterMid) {
+            swap(tree[node], newLine);
+        }
+        
+        if (betterLeft != betterMid) {
+            update(2 * node, l, mid, newLine);
+        } else {
+            update(2 * node + 1, mid + 1, r, newLine);
+        }
+    }
+    
+    Line query(int node, int l, int r, long long x) {
+        if (l == r) {
+            return tree[node];
+        }
+        
+        int mid = (l + r) / 2;
+        Line result = tree[node];
+        
+        if (x <= mid) {
+            Line candidate = query(2 * node, l, mid, x);
+            if (better(candidate, result, x)) {
+                result = candidate;
+            }
+        } else {
+            Line candidate = query(2 * node + 1, mid + 1, r, x);
+            if (better(candidate, result, x)) {
+                result = candidate;
+            }
+        }
+        
+        return result;
+    }
+    
+public:
+    LiChaoTree(int size) {
+        n = 1;
+        while (n < size) n *= 2;
+        tree.resize(4 * n);
+    }
+    
+    ${lang === 'zh' ? '// 添加直线' : '// Add line'}
+    void addLine(long long k, long long b, int id) {
+        Line newLine(k, b, id);
+        update(1, 0, n - 1, newLine);
+    }
+    
+    ${lang === 'zh' ? '// 查询x处的最大值' : '// Query maximum value at x'}
+    pair<long long, int> queryMax(long long x) {
+        Line result = query(1, 0, n - 1, x);
+        return {result.eval(x), result.id};
+    }
+};
+
+${lang === 'zh' ? '// 凸包优化DP应用' : '// Convex hull optimization DP application'}
+class ConvexHullOptimization {
+private:
+    LiChaoTree* lct;
+    
+public:
+    ConvexHullOptimization(int maxX) {
+        lct = new LiChaoTree(maxX + 1);
+    }
+    
+    ${lang === 'zh' ? '// 添加新的转移' : '// Add new transition'}
+    void addTransition(long long slope, long long intercept, int id) {
+        lct->addLine(slope, intercept, id);
+    }
+    
+    ${lang === 'zh' ? '// 查询最优转移' : '// Query optimal transition'}
+    pair<long long, int> queryOptimal(long long x) {
+        return lct->queryMax(x);
+    }
+};
+
+${lang === 'zh' ? '// 示例：最大子矩形问题' : '// Example: Maximum submatrix problem'}
+long long maxSubmatrixDP(vector<vector<int>>& matrix) {
+    int n = matrix.size(), m = matrix[0].size();
+    long long result = LLONG_MIN;
+    
+    ${lang === 'zh' ? '// 枚举上下边界' : '// Enumerate top and bottom boundaries'}
+    for (int top = 0; top < n; top++) {
+        vector<long long> heights(m, 0);
+        
+        for (int bottom = top; bottom < n; bottom++) {
+            ${lang === 'zh' ? '// 更新高度数组' : '// Update height array'}
+            for (int j = 0; j < m; j++) {
+                heights[j] += matrix[bottom][j];
+            }
+            
+            ${lang === 'zh' ? '// 使用李超树优化DP' : '// Use Li Chao tree for DP optimization'}
+            ConvexHullOptimization cho(m);
+            vector<long long> dp(m);
+            
+            dp[0] = heights[0];
+            cho.addTransition(0, heights[0], 0);
+            result = max(result, dp[0]);
+            
+            for (int j = 1; j < m; j++) {
+                auto [maxVal, fromIdx] = cho.queryOptimal(j);
+                dp[j] = max(heights[j], maxVal + heights[j]);
+                cho.addTransition(-j, dp[j], j);
+                result = max(result, dp[j]);
+            }
+        }
+    }
+    
+    return result;
+}
+
+int main() {
+    ${lang === 'zh' ? '// 测试李超线段树' : '// Test Li Chao segment tree'}
+    LiChaoTree lct(100);
+    
+    ${lang === 'zh' ? '// 添加直线 y = 2x + 1' : '// Add line y = 2x + 1'}
+    lct.addLine(2, 1, 1);
+    
+    ${lang === 'zh' ? '// 添加直线 y = -x + 10' : '// Add line y = -x + 10'}
+    lct.addLine(-1, 10, 2);
+    
+    ${lang === 'zh' ? '// 添加直线 y = x + 3' : '// Add line y = x + 3'}
+    lct.addLine(1, 3, 3);
+    
+    for (int x = 0; x <= 10; x++) {
+        auto [maxVal, lineId] = lct.queryMax(x);
+        cout << "x=" << x << ": max=" << maxVal << " (line " << lineId << ")" << endl;
+    }
+    
+    ${lang === 'zh' ? '// 测试矩阵DP' : '// Test matrix DP'}
+    vector<vector<int>> matrix = {
+        {1, -2, 3},
+        {-1, 4, -2},
+        {2, -1, 1}
+    };
+    
+    cout << "${lang === 'zh' ? '最大子矩形和：' : 'Maximum submatrix sum:'} " 
+         << maxSubmatrixDP(matrix) << endl;
+    
+    return 0;
+}`}
+          language="cpp"
+        />
+      </div>
+
+      <div class="topic-section">
+        <h3>{lang === 'zh' ? '3. 动态开点线段树' : '3. Dynamic Segment Tree'}</h3>
+        
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// 动态开点线段树' : '// Dynamic segment tree'}
+#include <iostream>
+#include <unordered_map>
+using namespace std;
+
+class DynamicSegmentTree {
+private:
+    struct Node {
+        long long sum;
+        int left, right;
+        Node() : sum(0), left(-1), right(-1) {}
+    };
+    
+    vector<Node> tree;
+    int nodeCount;
+    long long L, R; ${lang === 'zh' ? '// 值域范围' : '// Value range'}
+    
+    void pushUp(int node) {
+        tree[node].sum = 0;
+        if (tree[node].left != -1) {
+            tree[node].sum += tree[tree[node].left].sum;
+        }
+        if (tree[node].right != -1) {
+            tree[node].sum += tree[tree[node].right].sum;
+        }
+    }
+    
+    int createNode() {
+        tree.push_back(Node());
+        return nodeCount++;
+    }
+    
+    void update(int& node, long long l, long long r, long long pos, long long val) {
+        if (node == -1) {
+            node = createNode();
+        }
+        
+        if (l == r) {
+            tree[node].sum += val;
+            return;
+        }
+        
+        long long mid = l + (r - l) / 2;
+        if (pos <= mid) {
+            update(tree[node].left, l, mid, pos, val);
+        } else {
+            update(tree[node].right, mid + 1, r, pos, val);
+        }
+        
+        pushUp(node);
+    }
+    
+    long long query(int node, long long l, long long r, long long ql, long long qr) {
+        if (node == -1 || ql > r || qr < l) {
+            return 0;
+        }
+        
+        if (ql <= l && r <= qr) {
+            return tree[node].sum;
+        }
+        
+        long long mid = l + (r - l) / 2;
+        return query(tree[node].left, l, mid, ql, qr) + 
+               query(tree[node].right, mid + 1, r, ql, qr);
+    }
+    
+public:
+    DynamicSegmentTree(long long minVal, long long maxVal) {
+        L = minVal;
+        R = maxVal;
+        nodeCount = 0;
+        tree.reserve(1000000); ${lang === 'zh' ? '// 预留空间' : '// Reserve space'}
+    }
+    
+    int root = -1;
+    
+    void update(long long pos, long long val) {
+        update(root, L, R, pos, val);
+    }
+    
+    long long query(long long l, long long r) {
+        return query(root, L, R, l, r);
+    }
+    
+    ${lang === 'zh' ? '// 查询第k小' : '// Query k-th smallest'}
+    long long kthSmallest(int k) {
+        return kthSmallest(root, L, R, k);
+    }
+    
+private:
+    long long kthSmallest(int node, long long l, long long r, int k) {
+        if (node == -1 || k <= 0) return -1;
+        
+        if (l == r) {
+            return l;
+        }
+        
+        long long mid = l + (r - l) / 2;
+        long long leftSum = (tree[node].left == -1) ? 0 : tree[tree[node].left].sum;
+        
+        if (k <= leftSum) {
+            return kthSmallest(tree[node].left, l, mid, k);
+        } else {
+            return kthSmallest(tree[node].right, mid + 1, r, k - leftSum);
+        }
+    }
+};
+
+${lang === 'zh' ? '// 权值线段树应用' : '// Weight segment tree application'}
+class WeightSegmentTree {
+private:
+    DynamicSegmentTree* dst;
+    
+public:
+    WeightSegmentTree(long long minVal, long long maxVal) {
+        dst = new DynamicSegmentTree(minVal, maxVal);
+    }
+    
+    ${lang === 'zh' ? '// 插入数字' : '// Insert number'}
+    void insert(long long val) {
+        dst->update(val, 1);
+    }
+    
+    ${lang === 'zh' ? '// 删除数字' : '// Delete number'}
+    void remove(long long val) {
+        dst->update(val, -1);
+    }
+    
+    ${lang === 'zh' ? '// 查询小于等于val的数字个数' : '// Count numbers <= val'}
+    long long countLE(long long val) {
+        return dst->query(LLONG_MIN, val);
+    }
+    
+    ${lang === 'zh' ? '// 查询第k小的数字' : '// Find k-th smallest number'}
+    long long kthSmallest(int k) {
+        return dst->kthSmallest(k);
+    }
+    
+    ${lang === 'zh' ? '// 查询区间内数字个数' : '// Count numbers in range'}
+    long long countRange(long long l, long long r) {
+        return dst->query(l, r);
+    }
+};
+
+${lang === 'zh' ? '// 区间第k小问题' : '// Range k-th smallest problem'}
+class RangeKthSmallest {
+private:
+    vector<DynamicSegmentTree*> trees;
+    vector<long long> arr;
+    int n;
+    
+public:
+    RangeKthSmallest(vector<long long>& data) {
+        arr = data;
+        n = arr.size();
+        trees.resize(n + 1);
+        
+        ${lang === 'zh' ? '// 初始化前缀权值线段树' : '// Initialize prefix weight segment trees'}
+        for (int i = 0; i <= n; i++) {
+            trees[i] = new DynamicSegmentTree(LLONG_MIN, LLONG_MAX);
+        }
+        
+        ${lang === 'zh' ? '// 构建前缀和' : '// Build prefix sums'}
+        for (int i = 0; i < n; i++) {
+            trees[i + 1] = new DynamicSegmentTree(LLONG_MIN, LLONG_MAX);
+            ${lang === 'zh' ? '// 复制前一个版本并添加新元素' : '// Copy previous version and add new element'}
+            for (int j = 0; j <= i; j++) {
+                trees[i + 1]->update(arr[j], 1);
+            }
+        }
+    }
+    
+    ${lang === 'zh' ? '// 查询区间[l,r]的第k小' : '// Query k-th smallest in range [l,r]'}
+    long long queryKth(int l, int r, int k) {
+        ${lang === 'zh' ? '// 使用两个前缀树的差值' : '// Use difference of two prefix trees'}
+        ${lang === 'zh' ? '// 这里简化实现，实际需要可持久化权值线段树' : '// Simplified implementation, actually needs persistent weight segment tree'}
+        vector<long long> values;
+        for (int i = l; i <= r; i++) {
+            values.push_back(arr[i]);
+        }
+        sort(values.begin(), values.end());
+        return values[k - 1];
+    }
+};
+
+int main() {
+    ${lang === 'zh' ? '// 测试动态开点线段树' : '// Test dynamic segment tree'}
+    DynamicSegmentTree dst(-1000000, 1000000);
+    
+    dst.update(5, 3);
+    dst.update(10, 2);
+    dst.update(15, 1);
+    
+    cout << "${lang === 'zh' ? '区间[5,15]的和：' : 'Sum of range [5,15]:'} " << dst.query(5, 15) << endl;
+    cout << "${lang === 'zh' ? '第2小的数：' : '2nd smallest number:'} " << dst.kthSmallest(2) << endl;
+    
+    ${lang === 'zh' ? '// 测试权值线段树' : '// Test weight segment tree'}
+    WeightSegmentTree wst(-100, 100);
+    
+    wst.insert(5);
+    wst.insert(3);
+    wst.insert(8);
+    wst.insert(1);
+    wst.insert(7);
+    
+    cout << "${lang === 'zh' ? '小于等于6的数字个数：' : 'Count of numbers <= 6:'} " << wst.countLE(6) << endl;
+    cout << "${lang === 'zh' ? '第3小的数字：' : '3rd smallest number:'} " << wst.kthSmallest(3) << endl;
+    
+    return 0;
+}`}
+          language="cpp"
+        />
+      </div>
+    </div>
+
+    <div class="tips-section">
+      <h2>{lang === 'zh' ? '解题技巧' : 'Problem-Solving Tips'}</h2>
+      <div class="tips-grid">
+        <div class="tip-card">
+          <h3>💾 {lang === 'zh' ? '空间优化' : 'Space Optimization'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '可持久化结构要注意空间使用，动态开点避免不必要的节点创建，合理估算空间需求。'
+              : 'Pay attention to space usage in persistent structures, avoid unnecessary node creation in dynamic trees, estimate space requirements reasonably.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>⚡ {lang === 'zh' ? '性能考虑' : 'Performance Considerations'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '李超树适合直线查询，权值线段树处理第k小问题，根据问题特点选择合适的高级线段树。'
+              : 'Li Chao trees are suitable for line queries, weight segment trees handle k-th smallest problems, choose appropriate advanced segment trees based on problem characteristics.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>🔧 {lang === 'zh' ? '实现技巧' : 'Implementation Tricks'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '注意边界处理和特殊情况，合理设计节点结构，使用对象池优化内存分配。'
+              : 'Pay attention to boundary handling and special cases, design node structures reasonably, use object pools to optimize memory allocation.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>🎯 {lang === 'zh' ? '应用场景' : 'Application Scenarios'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '可持久化处理历史查询，李超树优化DP转移，动态开点处理大值域稀疏数据。'
+              : 'Persistent structures handle historical queries, Li Chao trees optimize DP transitions, dynamic trees handle large sparse data ranges.'
+            }
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="navigation">
+      <a href={`/${lang}/6-world-class/tree-problems`} class="nav-button prev">
+        ← {lang === 'zh' ? '高级树问题' : 'Advanced Tree Problems'}
+      </a>
+      <a href={`/${lang}/6-world-class`} class="nav-button index">
+        📚 {lang === 'zh' ? '章节目录' : 'Chapter Index'}
+      </a>
+      <a href={`/${lang}/6-world-class/balanced-tree`} class="nav-button next">
+        {lang === 'zh' ? '平衡树' : 'Balanced Trees'} →
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .breadcrumb {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .breadcrumb a:hover {
+    color: #3730a3;
+    text-decoration: underline;
+  }
+
+  .header-section {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .main-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #dc2626 0%, #ea580c 25%, #d97706 50%, #ca8a04 75%, #65a30d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+  }
+
+  .subtitle {
+    font-size: 1.25rem;
+    color: #6b7280;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .overview-section {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #f59e0b;
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin: 2rem 0 3rem 0;
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1);
+  }
+
+  .overview-section h2 {
+    color: #92400e;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .overview-section p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #78350f;
+  }
+
+  .content-section {
+    margin: 4rem 0;
+  }
+
+  .content-section > h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 3rem;
+    color: #1e293b;
+    text-align: center;
+    position: relative;
+  }
+
+  .content-section > h2::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #dc2626, #ea580c, #d97706);
+    border-radius: 2px;
+  }
+
+  .topic-section {
+    margin: 3rem 0;
+    padding: 2rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border-left: 4px solid #dc2626;
+  }
+
+  .topic-section h3 {
+    color: #dc2626;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .topic-section p {
+    color: #4b5563;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .tips-section {
+    margin: 4rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #e5e7eb;
+  }
+
+  .tips-section h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #1e293b;
+    text-align: center;
+  }
+
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .tip-card {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #0ea5e9;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: transform 0.2s ease;
+  }
+
+  .tip-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .tip-card h3 {
+    color: #0c4a6e;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .tip-card p {
+    color: #075985;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #e5e7eb;
+    gap: 1rem;
+  }
+
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.875rem 1.75rem;
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px 0 rgba(220, 38, 38, 0.39);
+  }
+
+  .nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px 0 rgba(220, 38, 38, 0.5);
+  }
+
+  .nav-button.index {
+    background: linear-gradient(135deg, #059669, #0d9488);
+    box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.39);
+  }
+
+  .nav-button.index:hover {
+    box-shadow: 0 8px 25px 0 rgba(5, 150, 105, 0.5);
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 0.5rem;
+    }
+
+    .main-title {
+      font-size: 2.5rem;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+    }
+
+    .overview-section {
+      padding: 1.5rem;
+      margin: 1.5rem 0 2rem 0;
+    }
+
+    .topic-section {
+      padding: 1.5rem;
+    }
+
+    .tips-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style> 

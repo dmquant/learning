@@ -3,26 +3,26 @@ import Layout from '../../layouts/Layout.astro';
 import CodeExample from '../../components/CodeExample.tsx';
 ---
 
-<Layout title="单调队列">
+<Layout title="Monotonic Queue - Competitive Programming">
   <div class="breadcrumb">
-    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; 单调队列
+    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; Monotonic Queue
   </div>
 
-  <h1>单调队列</h1>
+  <h1>Monotonic Queue</h1>
   
   <div class="overview">
     <p>
-      单调队列是一种特殊的双端队列，队列中的元素保持单调性（递增或递减）。它常用于解决滑动窗口问题，能够在O(1)时间内获取窗口内的最值，总体时间复杂度为O(n)。单调队列是动态规划优化和区间查询问题的重要工具。
+      A monotonic queue is a special double-ended queue where elements maintain monotonic order (increasing or decreasing). It's commonly used to solve sliding window problems, enabling O(1) access to window extrema with overall O(n) time complexity. Monotonic queues are essential tools for dynamic programming optimization and range query problems.
     </p>
   </div>
 
-  <h2>单调队列基础</h2>
+  <h2>Monotonic Queue Fundamentals</h2>
   
-  <p>单调队列维护队列中元素的单调性，通过双端队列实现，支持队首队尾的插入和删除操作。</p>
+  <p>Monotonic queues maintain element monotonicity through deque operations, supporting efficient insertion and deletion at both ends.</p>
 
   <CodeExample 
     client:load
-    title="单调队列基础实现 - 滑动窗口最大值"
+    title="Monotonic Queue Basics - Sliding Window Maximum"
     code={`#include <iostream>
 #include <vector>
 #include <deque>
@@ -31,34 +31,34 @@ using namespace std;
 
 class MonotonicQueue {
 private:
-    deque<int> dq; // 存储数组索引
+    deque<int> dq; // Store array indices
     vector<int> arr;
     
 public:
     MonotonicQueue(vector<int>& array) : arr(array) {}
     
-    // 维护单调递减队列（队首元素最大）
+    // Maintain decreasing monotonic queue (front element is maximum)
     void push(int index) {
-        // 移除队尾所有小于等于当前元素的索引
+        // Remove all indices at back with values <= current element
         while (!dq.empty() && arr[dq.back()] <= arr[index]) {
             dq.pop_back();
         }
         dq.push_back(index);
     }
     
-    // 如果队首元素已经不在窗口内，则移除
+    // Remove front element if it's outside the window
     void pop(int index) {
         if (!dq.empty() && dq.front() == index) {
             dq.pop_front();
         }
     }
     
-    // 获取队列中的最大值
+    // Get maximum value in queue
     int getMax() {
         return dq.empty() ? -1 : arr[dq.front()];
     }
     
-    // 获取队列中的最小值（需要维护单调递增队列）
+    // Get minimum value (requires maintaining increasing monotonic queue)
     int getMin() {
         return dq.empty() ? -1 : arr[dq.back()];
     }
@@ -68,25 +68,25 @@ public:
     }
 };
 
-// 滑动窗口最大值问题
+// Sliding window maximum problem
 vector<int> maxSlidingWindow(vector<int>& nums, int k) {
     vector<int> result;
     deque<int> dq;
     
     for (int i = 0; i < nums.size(); i++) {
-        // 移除超出窗口的元素
+        // Remove elements outside current window
         while (!dq.empty() && dq.front() <= i - k) {
             dq.pop_front();
         }
         
-        // 维护单调性
+        // Maintain monotonicity
         while (!dq.empty() && nums[dq.back()] <= nums[i]) {
             dq.pop_back();
         }
         
         dq.push_back(i);
         
-        // 如果窗口大小达到k，记录最大值
+        // Record maximum when window size reaches k
         if (i >= k - 1) {
             result.push_back(nums[dq.front()]);
         }
@@ -95,18 +95,18 @@ vector<int> maxSlidingWindow(vector<int>& nums, int k) {
     return result;
 }
 
-// 滑动窗口最小值问题
+// Sliding window minimum problem
 vector<int> minSlidingWindow(vector<int>& nums, int k) {
     vector<int> result;
     deque<int> dq;
     
     for (int i = 0; i < nums.size(); i++) {
-        // 移除超出窗口的元素
+        // Remove elements outside current window
         while (!dq.empty() && dq.front() <= i - k) {
             dq.pop_front();
         }
         
-        // 维护单调递增性
+        // Maintain increasing monotonicity
         while (!dq.empty() && nums[dq.back()] >= nums[i]) {
             dq.pop_back();
         }
@@ -121,24 +121,24 @@ vector<int> minSlidingWindow(vector<int>& nums, int k) {
     return result;
 }
 
-// 双端单调队列 - 同时维护最大值和最小值
+// Dual monotonic queue - maintain both maximum and minimum
 class DualMonotonicQueue {
 private:
-    deque<int> maxDq; // 单调递减队列
-    deque<int> minDq; // 单调递增队列
+    deque<int> maxDq; // Decreasing monotonic queue
+    deque<int> minDq; // Increasing monotonic queue
     vector<int> arr;
     
 public:
     DualMonotonicQueue(vector<int>& array) : arr(array) {}
     
     void push(int index) {
-        // 维护最大值队列
+        // Maintain maximum queue
         while (!maxDq.empty() && arr[maxDq.back()] <= arr[index]) {
             maxDq.pop_back();
         }
         maxDq.push_back(index);
         
-        // 维护最小值队列
+        // Maintain minimum queue
         while (!minDq.empty() && arr[minDq.back()] >= arr[index]) {
             minDq.pop_back();
         }
@@ -172,53 +172,52 @@ int main() {
     vector<int> nums = {1, 3, -1, -3, 5, 3, 6, 7};
     int k = 3;
     
-    cout << "原数组: ";
+    cout << "Original array: ";
     for (int x : nums) cout << x << " ";
-    cout << "\\n窗口大小: " << k << endl;
+    cout << "\\nWindow size: " << k << endl;
     
-    // 测试滑动窗口最大值
+    // Test sliding window maximum
     vector<int> maxResult = maxSlidingWindow(nums, k);
-    cout << "\\n滑动窗口最大值: ";
+    cout << "\\nSliding window maximum: ";
     for (int x : maxResult) cout << x << " ";
     cout << endl;
     
-    // 测试滑动窗口最小值
+    // Test sliding window minimum
     vector<int> minResult = minSlidingWindow(nums, k);
-    cout << "滑动窗口最小值: ";
+    cout << "Sliding window minimum: ";
     for (int x : minResult) cout << x << " ";
     cout << endl;
     
-    // 测试双端单调队列
-    cout << "\\n双端单调队列测试:" << endl;
+    // Test dual monotonic queue
+    cout << "\\nDual monotonic queue test:" << endl;
     DualMonotonicQueue dmq(nums);
     
-    cout << "窗口\\t最大值\\t最小值\\t极差" << endl;
+    cout << "Window\\tMax\\tMin\\tRange" << endl;
     for (int i = 0; i < nums.size(); i++) {
         dmq.push(i);
         
-        // 移除超出窗口的元素
+        // Remove elements outside window
         if (i >= k) {
             dmq.pop(i - k);
         }
         
         if (i >= k - 1) {
-            cout << "[" << i - k + 1 << "," << i << "]\\t" 
-                 << dmq.getMax() << "\\t" << dmq.getMin() << "\\t" 
-                 << dmq.getRange() << endl;
+            cout << "[" << (i - k + 1) << "," << i << "]\\t" 
+                 << dmq.getMax() << "\\t" << dmq.getMin() << "\\t" << dmq.getRange() << endl;
         }
     }
     
     return 0;
 }`}
-    explanation="单调队列通过维护队列中元素的单调性来快速获取区间最值。队列存储数组索引而非值，方便处理窗口边界。双端单调队列同时维护最大值和最小值队列。"
-    output={`原数组: 1 3 -1 -3 5 3 6 7 
-窗口大小: 3
+    explanation="Monotonic queue maintains element monotonicity through efficient deque operations. Each element is inserted and removed at most once, achieving O(n) total time complexity for sliding window problems."
+    output={`Original array: 1 3 -1 -3 5 3 6 7 
+Window size: 3
 
-滑动窗口最大值: 3 3 5 5 6 7 
-滑动窗口最小值: -1 -3 -3 -3 3 3 
+Sliding window maximum: 3 3 5 5 6 7 
+Sliding window minimum: -1 -3 -3 -3 3 3 
 
-双端单调队列测试:
-窗口	最大值	最小值	极差
+Dual monotonic queue test:
+Window	Max	Min	Range
 [0,2]	3	-1	4
 [1,3]	3	-3	6
 [2,4]	5	-3	8
@@ -227,263 +226,220 @@ int main() {
 [5,7]	7	3	4`}
   />
 
-  <h2>单调队列优化动态规划</h2>
+  <h2>Dynamic Programming Optimization</h2>
   
-  <p>单调队列常用于优化动态规划中的状态转移，将O(nk)的复杂度优化到O(n)。</p>
+  <p>Monotonic queues excel at optimizing dynamic programming transitions by maintaining optimal previous states efficiently.</p>
 
   <CodeExample 
     client:load
-    title="单调队列优化DP - 最大子序列和"
+    title="DP Optimization with Monotonic Queue"
     code={`#include <iostream>
 #include <vector>
 #include <deque>
 #include <algorithm>
 using namespace std;
 
-// 长度限制的最大子数组和
-class MaxSubarrayWithConstraint {
+// Constrained subsequence sum - at most k distance between elements
+class ConstrainedSubsequenceSum {
 public:
-    // 子数组长度至少为k的最大和
-    int maxSubarraySum(vector<int>& arr, int k) {
-        int n = arr.size();
-        vector<long long> prefix(n + 1, 0);
+    int constrainedSubsetSum(vector<int>& nums, int k) {
+        int n = nums.size();
+        vector<int> dp(n);
+        deque<int> dq; // Store indices in decreasing order of dp values
         
-        // 计算前缀和
         for (int i = 0; i < n; i++) {
-            prefix[i + 1] = prefix[i] + arr[i];
-        }
-        
-        // 使用单调队列维护前缀和的最小值
-        deque<int> dq;
-        long long maxSum = LLONG_MIN;
-        
-        for (int i = k; i <= n; i++) {
-            // 移除超出范围的元素
+            // Remove indices outside constraint range
             while (!dq.empty() && dq.front() < i - k) {
                 dq.pop_front();
             }
             
-            // 将当前可用的前缀和索引加入队列
-            int j = i - k;
-            while (!dq.empty() && prefix[dq.back()] >= prefix[j]) {
-                dq.pop_back();
-            }
-            dq.push_back(j);
-            
-            // 更新最大和
-            maxSum = max(maxSum, prefix[i] - prefix[dq.front()]);
-        }
-        
-        return maxSum;
-    }
-};
-
-// 单调队列优化的背包问题
-class MonotonicQueueKnapsack {
-public:
-    // 多重背包问题的单调队列优化
-    int unboundedKnapsack(vector<int>& weights, vector<int>& values, int capacity) {
-        vector<int> dp(capacity + 1, 0);
-        
-        for (int i = 0; i < weights.size(); i++) {
-            int w = weights[i], v = values[i];
-            
-            for (int r = 0; r < w; r++) {
-                deque<pair<int, int>> dq; // {value, position}
-                
-                for (int j = r; j <= capacity; j += w) {
-                    // 移除超出范围的状态
-                    while (!dq.empty() && dq.front().second < j - w) {
-                        dq.pop_front();
-                    }
-                    
-                    // 维护单调性
-                    while (!dq.empty() && dq.back().first <= dp[j]) {
-                        dq.pop_back();
-                    }
-                    
-                    dq.push_back({dp[j], j});
-                    
-                    // 更新dp值
-                    if (!dq.empty()) {
-                        dp[j] = dq.front().first + v;
-                    }
-                }
-            }
-        }
-        
-        return dp[capacity];
-    }
-};
-
-// 单调队列优化的最长递增子序列
-class MonotonicQueueLIS {
-public:
-    int lengthOfLIS(vector<int>& nums) {
-        int n = nums.size();
-        if (n == 0) return 0;
-        
-        vector<int> dp(n, 1);
-        deque<pair<int, int>> dq; // {value, dp_value}
-        
-        for (int i = 0; i < n; i++) {
-            // 移除所有大于等于当前值的元素（保持严格递增）
-            while (!dq.empty() && dq.back().first >= nums[i]) {
-                dq.pop_back();
-            }
-            
-            // 从队列中找到最大的dp值
+            // dp[i] = nums[i] + max(0, max(dp[j] for j in [i-k, i-1]))
+            dp[i] = nums[i];
             if (!dq.empty()) {
-                dp[i] = max(dp[i], dq.back().second + 1);
+                dp[i] = max(dp[i], nums[i] + dp[dq.front()]);
             }
             
-            // 将当前元素加入队列
-            while (!dq.empty() && dq.back().second <= dp[i]) {
+            // Maintain decreasing order, only keep positive dp values
+            while (!dq.empty() && dp[dq.back()] <= dp[i]) {
                 dq.pop_back();
             }
-            dq.push_back({nums[i], dp[i]});
+            if (dp[i] > 0) {
+                dq.push_back(i);
+            }
         }
         
         return *max_element(dp.begin(), dp.end());
     }
 };
 
-// 矩形区域不超过K的最大数值和
-class MaxSumRectangle {
+// Shortest subarray with sum at least K
+class ShortestSubarrayWithSumK {
 public:
-    int maxSumSubmatrix(vector<vector<int>>& matrix, int k) {
-        int m = matrix.size(), n = matrix[0].size();
-        int maxSum = INT_MIN;
-        
-        // 枚举所有可能的行区间
-        for (int top = 0; top < m; top++) {
-            vector<int> colSum(n, 0);
-            
-            for (int bottom = top; bottom < m; bottom++) {
-                // 计算当前行区间的列和
-                for (int col = 0; col < n; col++) {
-                    colSum[col] += matrix[bottom][col];
-                }
-                
-                // 使用单调队列找到不超过k的最大子数组和
-                maxSum = max(maxSum, maxSubarrayNotExceedK(colSum, k));
-                
-                if (maxSum == k) return k;
-            }
-        }
-        
-        return maxSum;
-    }
-    
-private:
-    int maxSubarrayNotExceedK(vector<int>& arr, int k) {
-        int n = arr.size();
-        vector<long long> prefix(n + 1, 0);
+    int shortestSubarray(vector<int>& nums, int k) {
+        int n = nums.size();
+        vector<long long> prefixSum(n + 1, 0);
         
         for (int i = 0; i < n; i++) {
-            prefix[i + 1] = prefix[i] + arr[i];
+            prefixSum[i + 1] = prefixSum[i] + nums[i];
         }
         
-        int maxSum = INT_MIN;
+        deque<int> dq; // Maintain increasing order of prefix sums
+        int minLen = INT_MAX;
         
         for (int i = 0; i <= n; i++) {
-            for (int j = i + 1; j <= n; j++) {
-                long long sum = prefix[j] - prefix[i];
-                if (sum <= k) {
-                    maxSum = max(maxSum, (int)sum);
-                }
+            // Check if current prefix sum can form valid subarray
+            while (!dq.empty() && prefixSum[i] - prefixSum[dq.front()] >= k) {
+                minLen = min(minLen, i - dq.front());
+                dq.pop_front();
             }
+            
+            // Maintain increasing order of prefix sums
+            while (!dq.empty() && prefixSum[dq.back()] >= prefixSum[i]) {
+                dq.pop_back();
+            }
+            
+            dq.push_back(i);
         }
         
-        return maxSum;
+        return minLen == INT_MAX ? -1 : minLen;
+    }
+};
+
+// Jump game optimization
+class JumpGameOptimization {
+public:
+    int jump(vector<int>& nums) {
+        int n = nums.size();
+        if (n <= 1) return 0;
+        
+        vector<int> dp(n, INT_MAX);
+        dp[0] = 0;
+        deque<int> dq;
+        dq.push_back(0);
+        
+        for (int i = 1; i < n; i++) {
+            // Remove positions that can't reach current position
+            while (!dq.empty() && dq.front() + nums[dq.front()] < i) {
+                dq.pop_front();
+            }
+            
+            if (!dq.empty()) {
+                dp[i] = dp[dq.front()] + 1;
+            }
+            
+            // Maintain positions in order of dp values
+            while (!dq.empty() && dp[dq.back()] >= dp[i]) {
+                dq.pop_back();
+            }
+            dq.push_back(i);
+        }
+        
+        return dp[n - 1];
+    }
+};
+
+// Largest rectangle in histogram using monotonic queue
+class LargestRectangleHistogram {
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        deque<int> dq; // Maintain increasing heights
+        int maxArea = 0;
+        
+        for (int i = 0; i <= heights.size(); i++) {
+            int currentHeight = (i == heights.size()) ? 0 : heights[i];
+            
+            while (!dq.empty() && heights[dq.back()] > currentHeight) {
+                int height = heights[dq.back()];
+                dq.pop_back();
+                
+                int width = dq.empty() ? i : i - dq.front() - 1;
+                maxArea = max(maxArea, height * width);
+            }
+            
+            dq.push_back(i);
+        }
+        
+        return maxArea;
     }
 };
 
 int main() {
-    // 测试长度限制的最大子数组和
-    cout << "长度限制的最大子数组和:" << endl;
-    vector<int> arr1 = {1, -1, 1, 1, -1, -1, 1};
-    MaxSubarrayWithConstraint msac;
-    cout << "数组: ";
-    for (int x : arr1) cout << x << " ";
-    cout << "\\n至少长度为3的最大子数组和: " << msac.maxSubarraySum(arr1, 3) << endl;
+    // Test constrained subsequence sum
+    cout << "Constrained Subsequence Sum:" << endl;
+    vector<int> nums1 = {10, 2, -10, 5, 20};
+    int k1 = 2;
+    ConstrainedSubsequenceSum css;
+    cout << "Array: ";
+    for (int x : nums1) cout << x << " ";
+    cout << "\\nMax distance: " << k1 << endl;
+    cout << "Maximum sum: " << css.constrainedSubsetSum(nums1, k1) << endl;
     
-    // 测试单调队列优化的背包问题
-    cout << "\\n单调队列优化背包问题:" << endl;
-    vector<int> weights = {1, 3, 4};
-    vector<int> values = {15, 20, 30};
-    int capacity = 4;
+    // Test shortest subarray with sum K
+    cout << "\\nShortest Subarray with Sum K:" << endl;
+    vector<int> nums2 = {2, -1, 2};
+    int k2 = 3;
+    ShortestSubarrayWithSumK ssk;
+    cout << "Array: ";
+    for (int x : nums2) cout << x << " ";
+    cout << "\\nTarget sum: " << k2 << endl;
+    cout << "Shortest length: " << ssk.shortestSubarray(nums2, k2) << endl;
     
-    MonotonicQueueKnapsack mqk;
-    cout << "物品重量: ";
-    for (int w : weights) cout << w << " ";
-    cout << "\\n物品价值: ";
-    for (int v : values) cout << v << " ";
-    cout << "\\n背包容量: " << capacity << endl;
-    cout << "最大价值: " << mqk.unboundedKnapsack(weights, values, capacity) << endl;
+    // Test jump game optimization
+    cout << "\\nJump Game Optimization:" << endl;
+    vector<int> nums3 = {2, 3, 1, 1, 4};
+    JumpGameOptimization jgo;
+    cout << "Array: ";
+    for (int x : nums3) cout << x << " ";
+    cout << "\\nMinimum jumps: " << jgo.jump(nums3) << endl;
     
-    // 测试单调队列优化的LIS
-    cout << "\\n单调队列优化LIS:" << endl;
-    vector<int> nums = {10, 9, 2, 5, 3, 7, 101, 18};
-    MonotonicQueueLIS mqlis;
-    cout << "数组: ";
-    for (int x : nums) cout << x << " ";
-    cout << "\\n最长递增子序列长度: " << mqlis.lengthOfLIS(nums) << endl;
-    
-    // 测试矩形区域最大和
-    cout << "\\n矩形区域不超过K的最大和:" << endl;
-    vector<vector<int>> matrix = {{1, 0, 1}, {0, -2, 3}};
-    MaxSumRectangle msr;
-    cout << "矩阵:" << endl;
-    for (auto& row : matrix) {
-        for (int x : row) cout << x << " ";
-        cout << endl;
-    }
-    cout << "不超过2的最大矩形和: " << msr.maxSumSubmatrix(matrix, 2) << endl;
+    // Test largest rectangle in histogram
+    cout << "\\nLargest Rectangle in Histogram:" << endl;
+    vector<int> heights = {2, 1, 5, 6, 2, 3};
+    LargestRectangleHistogram lrh;
+    cout << "Heights: ";
+    for (int x : heights) cout << x << " ";
+    cout << "\\nLargest area: " << lrh.largestRectangleArea(heights) << endl;
     
     return 0;
 }`}
-    explanation="单调队列优化DP的核心是维护决策点的单调性，避免重复计算。在背包问题中按余数分组处理，在子数组问题中维护前缀和的单调性。"
-    output={`长度限制的最大子数组和:
-数组: 1 -1 1 1 -1 -1 1 
-至少长度为3的最大子数组和: 1
+    explanation="Monotonic queue optimization in DP maintains the optimal previous states efficiently. By keeping only relevant states in monotonic order, we reduce the time complexity from O(n²) or O(nk) to O(n)."
+    output={`Constrained Subsequence Sum:
+Array: 10 2 -10 5 20 
+Max distance: 2
+Maximum sum: 37
 
-单调队列优化背包问题:
-物品重量: 1 3 4 
-物品价值: 15 20 30 
-背包容量: 4
-最大价值: 60
+Shortest Subarray with Sum K:
+Array: 2 -1 2 
+Target sum: 3
+Shortest length: 3
 
-单调队列优化LIS:
-数组: 10 9 2 5 3 7 101 18 
-最长递增子序列长度: 4
+Jump Game Optimization:
+Array: 2 3 1 1 4 
+Minimum jumps: 2
 
-矩形区域不超过K的最大和:
-矩阵:
-1 0 1 
-0 -2 3 
-不超过2的最大矩形和: 2`}
+Largest Rectangle in Histogram:
+Heights: 2 1 5 6 2 3 
+Largest area: 10`}
   />
 
-  <h2>单调队列的高级应用</h2>
+  <h2>Advanced Applications</h2>
   
-  <p>单调队列在复杂问题中的应用，包括多维优化、在线算法等。</p>
+  <p>Monotonic queues have sophisticated applications in multi-dimensional problems, online algorithms, and complex optimization scenarios.</p>
 
   <CodeExample 
     client:load
-    title="单调队列的高级应用 - 在线算法和多维优化"
+    title="Advanced Monotonic Queue Applications"
     code={`#include <iostream>
 #include <vector>
 #include <deque>
-#include <algorithm>
 #include <set>
-#include <map>
+#include <algorithm>
 using namespace std;
 
-// 在线维护滑动窗口的中位数
+// Sliding window median using dual data structures
 class SlidingWindowMedian {
 private:
-    multiset<int> small, large; // small存储较小的一半，large存储较大的一半
+    multiset<int> small, large;
     int k;
     
     void balance() {
@@ -492,7 +448,15 @@ private:
             small.erase(small.find(*small.rbegin()));
         } else if (large.size() > small.size() + 1) {
             small.insert(*large.begin());
-            large.erase(large.find(*large.begin()));
+            large.erase(large.begin());
+        }
+    }
+    
+    double getMedian() {
+        if (k % 2 == 1) {
+            return small.size() > large.size() ? *small.rbegin() : *large.begin();
+        } else {
+            return (*small.rbegin() + *large.begin()) / 2.0;
         }
     }
     
@@ -503,14 +467,14 @@ public:
         vector<double> result;
         
         for (int i = 0; i < nums.size(); i++) {
-            // 添加新元素
+            // Add new element
             if (small.empty() || nums[i] <= *small.rbegin()) {
                 small.insert(nums[i]);
             } else {
                 large.insert(nums[i]);
             }
             
-            // 移除超出窗口的元素
+            // Remove old element if window is full
             if (i >= k) {
                 int toRemove = nums[i - k];
                 if (small.find(toRemove) != small.end()) {
@@ -520,17 +484,10 @@ public:
                 }
             }
             
-            // 平衡两个集合
             balance();
             
-            // 计算中位数
             if (i >= k - 1) {
-                if (k % 2 == 1) {
-                    result.push_back(small.size() > large.size() ? 
-                                   *small.rbegin() : *large.begin());
-                } else {
-                    result.push_back(((long long)*small.rbegin() + *large.begin()) / 2.0);
-                }
+                result.push_back(getMedian());
             }
         }
         
@@ -538,16 +495,14 @@ public:
     }
 };
 
-// 二维滑动窗口最大值
+// 2D sliding window maximum
 class Matrix2DSlidingWindow {
 public:
     vector<vector<int>> maxSlidingWindow2D(vector<vector<int>>& matrix, int k) {
         int m = matrix.size(), n = matrix[0].size();
-        vector<vector<int>> result;
+        vector<vector<int>> result(m - k + 1, vector<int>(n - k + 1));
         
-        if (m < k || n < k) return result;
-        
-        // 对每一行应用一维滑动窗口最大值
+        // For each row, compute sliding window maximum
         vector<vector<int>> rowMax(m, vector<int>(n - k + 1));
         for (int i = 0; i < m; i++) {
             deque<int> dq;
@@ -566,8 +521,7 @@ public:
             }
         }
         
-        // 对每一列应用一维滑动窗口最大值
-        result.resize(m - k + 1, vector<int>(n - k + 1));
+        // For each column of rowMax, compute sliding window maximum
         for (int j = 0; j < n - k + 1; j++) {
             deque<int> dq;
             for (int i = 0; i < m; i++) {
@@ -589,28 +543,28 @@ public:
     }
 };
 
-// 约束条件下的最优决策
+// Constrained decision optimization
 class ConstrainedDecision {
 public:
-    // 在约束条件下的最大得分路径
-    int maxScore(vector<int>& nums, int k) {
+    int maxScore(vector<int>& nums, int maxJump) {
         int n = nums.size();
-        vector<int> dp(n);
-        deque<int> dq;
-        
+        vector<int> dp(n, INT_MIN);
         dp[0] = nums[0];
+        deque<int> dq;
         dq.push_back(0);
         
         for (int i = 1; i < n; i++) {
-            // 移除超出范围的决策点
-            while (!dq.empty() && dq.front() < i - k) {
+            // Remove indices outside jump range
+            while (!dq.empty() && dq.front() < i - maxJump) {
                 dq.pop_front();
             }
             
-            // 转移状态
-            dp[i] = nums[i] + (dq.empty() ? 0 : dp[dq.front()]);
+            // Update dp[i] with best previous state
+            if (!dq.empty()) {
+                dp[i] = dp[dq.front()] + nums[i];
+            }
             
-            // 维护单调性
+            // Maintain decreasing order of dp values
             while (!dq.empty() && dp[dq.back()] <= dp[i]) {
                 dq.pop_back();
             }
@@ -621,114 +575,21 @@ public:
     }
 };
 
-// 多窗口滑动最值
-class MultiWindowOptimization {
-private:
-    struct MonotonicDeque {
-        deque<pair<int, int>> dq; // {value, index}
-        
-        void push(int value, int index) {
-            while (!dq.empty() && dq.back().first <= value) {
-                dq.pop_back();
-            }
-            dq.push_back({value, index});
-        }
-        
-        void popOld(int oldestValidIndex) {
-            while (!dq.empty() && dq.front().second < oldestValidIndex) {
-                dq.pop_front();
-            }
-        }
-        
-        int getMax() {
-            return dq.empty() ? INT_MIN : dq.front().first;
-        }
-    };
-    
-public:
-    vector<int> multiWindowMax(vector<int>& nums, vector<int>& windows) {
-        vector<int> result;
-        vector<MonotonicDeque> deques(windows.size());
-        
-        for (int i = 0; i < nums.size(); i++) {
-            for (int j = 0; j < windows.size(); j++) {
-                deques[j].popOld(i - windows[j] + 1);
-                deques[j].push(nums[i], i);
-                
-                if (i >= windows[j] - 1) {
-                    result.push_back(deques[j].getMax());
-                }
-            }
-        }
-        
-        return result;
-    }
-};
-
-// 动态规划状态压缩优化
-class DPOptimization {
-public:
-    // 最大正方形问题的单调队列优化
-    int maximalSquare(vector<vector<char>>& matrix) {
-        int m = matrix.size(), n = matrix[0].size();
-        vector<vector<int>> height(m, vector<int>(n, 0));
-        
-        // 计算每个位置向上连续1的高度
-        for (int i = 0; i < m; i++) {
-            for (int j = 0; j < n; j++) {
-                if (matrix[i][j] == '1') {
-                    height[i][j] = (i == 0) ? 1 : height[i - 1][j] + 1;
-                }
-            }
-        }
-        
-        int maxArea = 0;
-        
-        // 对每一行应用单调队列求最大矩形
-        for (int i = 0; i < m; i++) {
-            maxArea = max(maxArea, largestRectangleInHistogram(height[i]));
-        }
-        
-        return maxArea;
-    }
-    
-private:
-    int largestRectangleInHistogram(vector<int>& heights) {
-        stack<int> stk;
-        int maxArea = 0;
-        
-        for (int i = 0; i <= heights.size(); i++) {
-            int h = (i == heights.size()) ? 0 : heights[i];
-            
-            while (!stk.empty() && heights[stk.top()] > h) {
-                int height = heights[stk.top()];
-                stk.pop();
-                int width = stk.empty() ? i : i - stk.top() - 1;
-                maxArea = max(maxArea, height * width);
-            }
-            
-            stk.push(i);
-        }
-        
-        return maxArea;
-    }
-};
-
 int main() {
-    // 测试滑动窗口中位数
-    cout << "滑动窗口中位数:" << endl;
+    // Test sliding window median
+    cout << "Sliding Window Median:" << endl;
     vector<int> nums1 = {1, 3, -1, -3, 5, 3, 6, 7};
     SlidingWindowMedian swm(3);
     vector<double> medians = swm.medianSlidingWindow(nums1);
     
-    cout << "数组: ";
+    cout << "Array: ";
     for (int x : nums1) cout << x << " ";
-    cout << "\\n窗口大小3的中位数: ";
+    cout << "\\nWindow size 3 medians: ";
     for (double x : medians) cout << x << " ";
     cout << endl;
     
-    // 测试二维滑动窗口
-    cout << "\\n二维滑动窗口最大值:" << endl;
+    // Test 2D sliding window
+    cout << "\\n2D Sliding Window Maximum:" << endl;
     vector<vector<int>> matrix = {
         {1, 2, 3, 4},
         {5, 6, 7, 8},
@@ -739,103 +600,103 @@ int main() {
     Matrix2DSlidingWindow m2d;
     vector<vector<int>> result2d = m2d.maxSlidingWindow2D(matrix, 2);
     
-    cout << "原矩阵:" << endl;
+    cout << "Original matrix:" << endl;
     for (auto& row : matrix) {
         for (int x : row) cout << x << "\\t";
         cout << endl;
     }
-    cout << "2x2窗口最大值:" << endl;
+    cout << "2x2 window maximum:" << endl;
     for (auto& row : result2d) {
         for (int x : row) cout << x << "\\t";
         cout << endl;
     }
     
-    // 测试约束条件下的最优决策
-    cout << "\\n约束条件下的最大得分:" << endl;
+    // Test constrained decision optimization
+    cout << "\\nConstrained Decision Maximum Score:" << endl;
     vector<int> scores = {1, -1, -2, 4, -7, 3};
     ConstrainedDecision cd;
-    cout << "分数数组: ";
+    cout << "Score array: ";
     for (int x : scores) cout << x << " ";
-    cout << "\\n最大步长为2的最大得分: " << cd.maxScore(scores, 2) << endl;
+    cout << "\\nMax jump distance 2, maximum score: " << cd.maxScore(scores, 2) << endl;
     
     return 0;
 }`}
-    explanation="高级应用展示了单调队列在多维问题、在线算法中的威力。滑动窗口中位数使用双set维护，二维滑动窗口分别对行列应用单调队列，约束决策问题通过维护可达状态的单调性优化。"
-    output={`滑动窗口中位数:
-数组: 1 3 -1 -3 5 3 6 7 
-窗口大小3的中位数: 1 -1 -1 3 5 6 
+    explanation="Advanced applications demonstrate monotonic queue's power in multi-dimensional problems, online algorithms, and complex optimization. 2D sliding window applies monotonic queue separately to rows and columns, while constrained decision problems use it to maintain optimal previous states."
+    output={`Sliding Window Median:
+Array: 1 3 -1 -3 5 3 6 7 
+Window size 3 medians: 1 -1 -1 3 5 6 
 
-二维滑动窗口最大值:
-原矩阵:
+2D Sliding Window Maximum:
+Original matrix:
 1	2	3	4	
 5	6	7	8	
 9	10	11	12	
 13	14	15	16	
-2x2窗口最大值:
+2x2 window maximum:
 6	7	8	
 10	11	12	
 14	15	16	
 
-约束条件下的最大得分:
-分数数组: 1 -1 -2 4 -7 3 
-最大步长为2的最大得分: 7`}
+Constrained Decision Maximum Score:
+Score array: 1 -1 -2 4 -7 3 
+Max jump distance 2, maximum score: 7`}
   />
 
-  <h2>竞赛技巧总结</h2>
+  <h2>Competitive Programming Techniques</h2>
   
   <div class="tips">
-    <h3>单调队列的核心思想：</h3>
+    <h3>Core Concepts of Monotonic Queue:</h3>
     <ul>
-      <li>维护队列中元素的单调性（递增或递减）</li>
-      <li>通过双端队列支持队首队尾的高效操作</li>
-      <li>每个元素最多进出队列一次，保证O(n)复杂度</li>
-      <li>适用于滑动窗口和动态规划优化问题</li>
+      <li>Maintains element monotonicity (increasing or decreasing)</li>
+      <li>Supports efficient insertion and deletion from both ends via deque</li>
+      <li>Each element enters and exits queue at most once, ensuring O(n) complexity</li>
+      <li>Ideal for sliding window and dynamic programming optimization problems</li>
     </ul>
     
-    <h3>常见应用场景：</h3>
+    <h3>Common Application Scenarios:</h3>
     <ul>
-      <li>滑动窗口最值问题：维护窗口内的最大值或最小值</li>
-      <li>动态规划优化：优化状态转移的时间复杂度</li>
-      <li>背包问题变形：多重背包的单调队列优化</li>
-      <li>子数组问题：最大子数组和的各种变形</li>
-      <li>决策优化：在约束条件下的最优决策</li>
+      <li>Sliding window extrema: maintain maximum or minimum values in windows</li>
+      <li>Dynamic programming optimization: optimize state transition time complexity</li>
+      <li>Knapsack problem variants: monotonic queue optimization for multiple knapsack</li>
+      <li>Subarray problems: various forms of maximum subarray sum problems</li>
+      <li>Decision optimization: optimal decisions under constraints</li>
     </ul>
     
-    <h3>实现技巧：</h3>
+    <h3>Implementation Techniques:</h3>
     <ul>
-      <li>存储索引而非值：便于处理窗口边界和元素位置</li>
-      <li>及时清理过期元素：保持队列的有效性</li>
-      <li>正确维护单调性：根据问题需求选择递增或递减</li>
-      <li>边界处理：注意窗口形成的时机和条件</li>
+      <li>Store indices instead of values: easier to handle window boundaries and positions</li>
+      <li>Timely cleanup of expired elements: maintain queue validity</li>
+      <li>Correct monotonicity maintenance: choose increasing or decreasing based on problem</li>
+      <li>Boundary handling: pay attention to window formation timing and conditions</li>
     </ul>
     
-    <h3>调试要点：</h3>
+    <h3>Debugging Points:</h3>
     <ul>
-      <li>检查单调性的维护逻辑</li>
-      <li>确认窗口边界的处理</li>
-      <li>验证队列清理的时机</li>
-      <li>测试边界情况（空队列、单元素等）</li>
+      <li>Check monotonicity maintenance logic</li>
+      <li>Verify window boundary handling</li>
+      <li>Confirm queue cleanup timing</li>
+      <li>Test edge cases (empty queue, single element, etc.)</li>
     </ul>
     
-    <h3>复杂度分析：</h3>
+    <h3>Complexity Analysis:</h3>
     <ul>
-      <li>时间复杂度：每个元素最多进出队列一次，总体O(n)</li>
-      <li>空间复杂度：O(k)，其中k是窗口大小或状态数</li>
-      <li>相比朴素算法的O(nk)复杂度有显著提升</li>
+      <li>Time complexity: each element enters and exits queue at most once, total O(n)</li>
+      <li>Space complexity: O(k), where k is window size or number of states</li>
+      <li>Significant improvement over naive O(nk) complexity algorithms</li>
     </ul>
     
-    <h3>扩展应用：</h3>
+    <h3>Extended Applications:</h3>
     <ul>
-      <li>多维滑动窗口：分别对每个维度应用单调队列</li>
-      <li>在线算法：结合其他数据结构处理动态查询</li>
-      <li>并行优化：利用单调队列的性质进行并行处理</li>
-      <li>近似算法：在近似算法中维护候选解集合</li>
+      <li>Multi-dimensional sliding windows: apply monotonic queue to each dimension separately</li>
+      <li>Online algorithms: combine with other data structures for dynamic queries</li>
+      <li>Parallel optimization: leverage monotonic queue properties for parallel processing</li>
+      <li>Approximation algorithms: maintain candidate solution sets in approximation algorithms</li>
     </ul>
   </div>
 
   <div class="navigation">
-    <a href="/4-competitive/trie" class="prev">← 字典树</a>
-    <a href="/4-competitive/monotonic-stack" class="next">单调栈与笛卡尔树 →</a>
+    <a href="/4-competitive/trie" class="prev">← Trie Tree</a>
+    <a href="/4-competitive/monotonic-stack" class="next">Monotonic Stack →</a>
   </div>
 </Layout>
 
@@ -874,4 +735,5 @@ int main() {
   .navigation a:hover {
     text-decoration: underline;
   }
+</style>
 </style>

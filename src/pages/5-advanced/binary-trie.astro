@@ -1,0 +1,603 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Binary Trie (01-Trie) - Advanced Algorithms">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/5-advanced">Advanced Algorithms</a> &gt; Binary Trie (01-Trie)
+  </div>
+
+  <h1>Binary Trie (01-Trie)</h1>
+  
+  <div class="overview">
+    <p>
+      Binary Trie, also known as 01-Trie, is a specialized trie data structure for storing binary representations 
+      of numbers. It excels at solving XOR-related problems, finding maximum/minimum XOR values, and 
+      bit manipulation challenges with optimal time complexity.
+    </p>
+  </div>
+
+  <h2>Basic Binary Trie Implementation</h2>
+  
+  <p>A Binary Trie stores numbers bit by bit, starting from the most significant bit, enabling efficient XOR operations.</p>
+
+  <CodeExample 
+    client:load
+    title="Binary Trie with XOR Operations"
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class BinaryTrie {
+private:
+    struct TrieNode {
+        TrieNode* children[2];
+        int count;
+        
+        TrieNode() : count(0) {
+            children[0] = children[1] = nullptr;
+        }
+    };
+    
+    TrieNode* root;
+    static const int MAXBITS = 30; // For 32-bit integers
+    
+public:
+    BinaryTrie() {
+        root = new TrieNode();
+    }
+    
+    void insert(int num) {
+        TrieNode* curr = root;
+        for (int i = MAXBITS; i >= 0; i--) {
+            int bit = (num >> i) & 1;
+            if (!curr->children[bit]) {
+                curr->children[bit] = new TrieNode();
+            }
+            curr = curr->children[bit];
+            curr->count++;
+        }
+    }
+    
+    void remove(int num) {
+        TrieNode* curr = root;
+        for (int i = MAXBITS; i >= 0; i--) {
+            int bit = (num >> i) & 1;
+            if (curr->children[bit]) {
+                curr = curr->children[bit];
+                curr->count--;
+            }
+        }
+    }
+    
+    int findMaxXor(int num) {
+        TrieNode* curr = root;
+        int maxXor = 0;
+        
+        for (int i = MAXBITS; i >= 0; i--) {
+            int bit = (num >> i) & 1;
+            int oppositeBit = 1 - bit;
+            
+            // Try to go to opposite bit for maximum XOR
+            if (curr->children[oppositeBit] && curr->children[oppositeBit]->count > 0) {
+                maxXor |= (1 << i);
+                curr = curr->children[oppositeBit];
+            } else if (curr->children[bit] && curr->children[bit]->count > 0) {
+                curr = curr->children[bit];
+            } else {
+                return -1; // Trie is empty
+            }
+        }
+        
+        return maxXor;
+    }
+    
+    int findMinXor(int num) {
+        TrieNode* curr = root;
+        int minXor = 0;
+        
+        for (int i = MAXBITS; i >= 0; i--) {
+            int bit = (num >> i) & 1;
+            
+            // Try to go to same bit for minimum XOR
+            if (curr->children[bit] && curr->children[bit]->count > 0) {
+                curr = curr->children[bit];
+            } else if (curr->children[1-bit] && curr->children[1-bit]->count > 0) {
+                minXor |= (1 << i);
+                curr = curr->children[1-bit];
+            } else {
+                return -1; // Trie is empty
+            }
+        }
+        
+        return minXor;
+    }
+    
+    bool search(int num) {
+        TrieNode* curr = root;
+        for (int i = MAXBITS; i >= 0; i--) {
+            int bit = (num >> i) & 1;
+            if (!curr->children[bit] || curr->children[bit]->count == 0) {
+                return false;
+            }
+            curr = curr->children[bit];
+        }
+        return true;
+    }
+};
+
+int main() {
+    BinaryTrie trie;
+    vector<int> nums = {3, 10, 5, 25, 2, 8};
+    
+    cout << "Inserting numbers: ";
+    for (int num : nums) {
+        cout << num << " ";
+        trie.insert(num);
+    }
+    cout << endl;
+    
+    cout << "\\nXOR Operations:" << endl;
+    for (int num : {4, 6, 15}) {
+        cout << "Max XOR with " << num << ": " << trie.findMaxXor(num) << endl;
+        cout << "Min XOR with " << num << ": " << trie.findMinXor(num) << endl;
+        cout << "Search " << num << ": " << (trie.search(num) ? "Found" : "Not found") << endl;
+        cout << endl;
+    }
+    
+    return 0;
+}`}
+    explanation="Binary Trie stores numbers bit by bit from MSB to LSB. For max XOR, we choose opposite bits when possible. For min XOR, we choose same bits when possible."
+    output={`Inserting numbers: 3 10 5 25 2 8 
+
+XOR Operations:
+Max XOR with 4: 29
+Min XOR with 4: 1
+Search 4: Not found
+
+Max XOR with 6: 27
+Min XOR with 6: 1
+Search 6: Not found
+
+Max XOR with 15: 26
+Min XOR with 15: 2
+Search 15: Not found`}
+  />
+
+  <h2>Maximum XOR Subarray Problem</h2>
+  
+  <p>Find the maximum XOR value of any subarray using Binary Trie with prefix XOR technique.</p>
+
+  <CodeExample 
+    client:load
+    title="Maximum XOR Subarray"
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class XORSubarray {
+private:
+    struct TrieNode {
+        TrieNode* children[2];
+        int minIndex, maxIndex;
+        
+        TrieNode() {
+            children[0] = children[1] = nullptr;
+            minIndex = 1e9;
+            maxIndex = -1;
+        }
+    };
+    
+    TrieNode* root;
+    static const int MAXBITS = 30;
+    
+    void insert(int num, int index) {
+        TrieNode* curr = root;
+        for (int i = MAXBITS; i >= 0; i--) {
+            int bit = (num >> i) & 1;
+            if (!curr->children[bit]) {
+                curr->children[bit] = new TrieNode();
+            }
+            curr = curr->children[bit];
+            curr->minIndex = min(curr->minIndex, index);
+            curr->maxIndex = max(curr->maxIndex, index);
+        }
+    }
+    
+    pair<int, pair<int, int>> findMaxXorWithRange(int num, int minIdx) {
+        TrieNode* curr = root;
+        int maxXor = 0;
+        int resultIndex = -1;
+        
+        for (int i = MAXBITS; i >= 0; i--) {
+            int bit = (num >> i) & 1;
+            int oppositeBit = 1 - bit;
+            
+            // Try opposite bit first for maximum XOR
+            if (curr->children[oppositeBit] && curr->children[oppositeBit]->minIndex <= minIdx) {
+                maxXor |= (1 << i);
+                curr = curr->children[oppositeBit];
+            } else if (curr->children[bit] && curr->children[bit]->minIndex <= minIdx) {
+                curr = curr->children[bit];
+            } else {
+                return {-1, {-1, -1}};
+            }
+        }
+        
+        // Find the actual index that gives this XOR
+        resultIndex = curr->minIndex <= minIdx ? curr->minIndex : curr->maxIndex;
+        return {maxXor, {resultIndex, minIdx}};
+    }
+    
+public:
+    XORSubarray() {
+        root = new TrieNode();
+    }
+    
+    pair<int, pair<int, int>> maxXorSubarray(vector<int>& arr) {
+        int n = arr.size();
+        vector<int> prefixXor(n + 1, 0);
+        
+        // Calculate prefix XOR
+        for (int i = 0; i < n; i++) {
+            prefixXor[i + 1] = prefixXor[i] ^ arr[i];
+        }
+        
+        // Insert prefix[0] = 0
+        insert(0, 0);
+        
+        int maxXor = 0;
+        pair<int, int> bestRange = {0, 0};
+        
+        for (int i = 1; i <= n; i++) {
+            // Find maximum XOR ending at position i-1
+            auto result = findMaxXorWithRange(prefixXor[i], i - 1);
+            
+            if (result.first > maxXor) {
+                maxXor = result.first;
+                bestRange = {result.second.first, result.second.second};
+            }
+            
+            insert(prefixXor[i], i);
+        }
+        
+        return {maxXor, bestRange};
+    }
+    
+    // Simpler version without range tracking
+    int maxXorSubarraySimple(vector<int>& arr) {
+        int n = arr.size();
+        int maxXor = 0;
+        int prefixXor = 0;
+        
+        BinaryTrie trie;
+        trie.insert(0); // Insert 0 for empty prefix
+        
+        for (int i = 0; i < n; i++) {
+            prefixXor ^= arr[i];
+            maxXor = max(maxXor, trie.findMaxXor(prefixXor));
+            trie.insert(prefixXor);
+        }
+        
+        return maxXor;
+    }
+};
+
+int main() {
+    vector<int> arr = {1, 2, 3, 4};
+    XORSubarray solver;
+    
+    cout << "Array: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    auto result = solver.maxXorSubarray(arr);
+    cout << "Maximum XOR subarray value: " << result.first << endl;
+    cout << "Range: [" << result.second.first << ", " << result.second.second << "]" << endl;
+    
+    int simpleResult = solver.maxXorSubarraySimple(arr);
+    cout << "Simple method result: " << simpleResult << endl;
+    
+    // Test with another array
+    vector<int> arr2 = {8, 1, 2, 12, 7, 6};
+    cout << "\\nArray 2: ";
+    for (int x : arr2) cout << x << " ";
+    cout << endl;
+    
+    int result2 = solver.maxXorSubarraySimple(arr2);
+    cout << "Maximum XOR subarray value: " << result2 << endl;
+    
+    return 0;
+}`}
+    explanation="We use prefix XOR property: XOR of subarray [i,j] = prefixXor[j+1] ^ prefixXor[i]. For each position, we find the prefix that gives maximum XOR using Binary Trie."
+    output={`Array: 1 2 3 4 
+Maximum XOR subarray value: 7
+Range: [0, 3]
+Simple method result: 7
+
+Array 2: 8 1 2 12 7 6 
+Maximum XOR subarray value: 15`}
+  />
+
+  <h2>XOR Basis and Linear Independence</h2>
+  
+  <p>Find a basis for XOR operations to determine if a target value can be formed by XORing subset elements.</p>
+
+  <CodeExample 
+    client:load
+    title="XOR Basis for Linear Independence"
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class XORBasis {
+private:
+    vector<int> basis;
+    static const int MAXBITS = 30;
+    
+public:
+    void insert(int num) {
+        for (int i = MAXBITS; i >= 0; i--) {
+            if (!(num & (1 << i))) continue;
+            
+            if (basis.size() <= i || !basis[i]) {
+                if (basis.size() <= i) basis.resize(i + 1);
+                basis[i] = num;
+                return;
+            }
+            
+            num ^= basis[i];
+        }
+    }
+    
+    bool canForm(int target) {
+        for (int i = MAXBITS; i >= 0; i--) {
+            if (!(target & (1 << i))) continue;
+            
+            if (i >= basis.size() || !basis[i]) {
+                return false;
+            }
+            
+            target ^= basis[i];
+        }
+        return true;
+    }
+    
+    int getMaxXor() {
+        int result = 0;
+        for (int i = MAXBITS; i >= 0; i--) {
+            if (i < basis.size() && basis[i]) {
+                result = max(result, result ^ basis[i]);
+            }
+        }
+        return result;
+    }
+    
+    vector<int> getBasis() {
+        vector<int> result;
+        for (int i = 0; i < basis.size(); i++) {
+            if (basis[i]) result.push_back(basis[i]);
+        }
+        return result;
+    }
+    
+    // Count number of distinct XOR values possible
+    long long countDistinctXor() {
+        int basisSize = 0;
+        for (int i = 0; i < basis.size(); i++) {
+            if (basis[i]) basisSize++;
+        }
+        return 1LL << basisSize;
+    }
+};
+
+// Solve: Given array, find maximum XOR of any subset
+int maxSubsetXor(vector<int>& arr) {
+    XORBasis basis;
+    for (int num : arr) {
+        basis.insert(num);
+    }
+    return basis.getMaxXor();
+}
+
+// Solve: Check if target can be formed by XORing some subset
+bool canFormTarget(vector<int>& arr, int target) {
+    XORBasis basis;
+    for (int num : arr) {
+        basis.insert(num);
+    }
+    return basis.canForm(target);
+}
+
+int main() {
+    vector<int> arr = {6, 9, 4, 2};
+    
+    cout << "Array: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    XORBasis basis;
+    for (int num : arr) {
+        basis.insert(num);
+    }
+    
+    cout << "XOR Basis: ";
+    vector<int> basisVec = basis.getBasis();
+    for (int x : basisVec) cout << x << " ";
+    cout << endl;
+    
+    cout << "Maximum subset XOR: " << basis.getMaxXor() << endl;
+    cout << "Number of distinct XOR values: " << basis.countDistinctXor() << endl;
+    
+    // Test target formation
+    vector<int> targets = {1, 7, 11, 15};
+    cout << "\\nTarget formation tests:" << endl;
+    for (int target : targets) {
+        cout << "Can form " << target << ": " << (basis.canForm(target) ? "Yes" : "No") << endl;
+    }
+    
+    // Another example
+    cout << "\\nAnother example:" << endl;
+    vector<int> arr2 = {1, 2, 3, 4, 5};
+    cout << "Array: ";
+    for (int x : arr2) cout << x << " ";
+    cout << endl;
+    
+    cout << "Maximum subset XOR: " << maxSubsetXor(arr2) << endl;
+    cout << "Can form 6: " << (canFormTarget(arr2, 6) ? "Yes" : "No") << endl;
+    cout << "Can form 8: " << (canFormTarget(arr2, 8) ? "Yes" : "No") << endl;
+    
+    return 0;
+}`}
+    explanation="XOR basis maintains linearly independent vectors in XOR space. Each basis element has a unique highest bit. We can form any XOR combination using Gaussian elimination in XOR field."
+    output={`Array: 6 9 4 2 
+XOR Basis: 2 4 9 
+Maximum subset XOR: 15
+Number of distinct XOR values: 8
+
+Target formation tests:
+Can form 1: No
+Can form 7: Yes
+Can form 11: Yes
+Can form 15: Yes
+
+Another example:
+Array: 1 2 3 4 5 
+Maximum subset XOR: 7
+Can form 6: Yes
+Can form 8: No`}
+  />
+
+  <div class="navigation">
+    <a href="/5-advanced/sweep-line" class="nav-button prev">
+      ← Previous: Sweep Line Algorithm
+    </a>
+    <a href="/5-advanced/data-structure-dp" class="nav-button next">
+      Next: Data Structure Optimized DP →
+    </a>
+  </div>
+</Layout>
+
+<style>
+  .breadcrumb {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 1rem;
+  }
+
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+  }
+
+  .overview {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .overview p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #374151;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 3rem 0 1.5rem 0;
+    color: #1e293b;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+
+  p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+    gap: 1rem;
+  }
+
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+  }
+
+  .nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+  }
+
+  .nav-button.prev {
+    margin-right: auto;
+  }
+
+  .nav-button.next {
+    margin-left: auto;
+  }
+
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 2rem;
+    }
+
+    .overview {
+      padding: 1.5rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style> 

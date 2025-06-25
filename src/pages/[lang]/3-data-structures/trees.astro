@@ -1,0 +1,592 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('ds.trees')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/3-data-structures`}>{t('nav.data-structures')}</a> > 
+      {t('ds.trees')}
+    </div>
+    
+    <h1>{t('ds.trees')}</h1>
+    
+    <div class="overview">
+      <p>
+        {lang === 'en' 
+          ? 'Trees are hierarchical data structures consisting of nodes connected by edges. Each tree has a root node and zero or more subtrees. Trees are fundamental in computer science and are used for organizing data, searching, sorting, and representing hierarchical relationships.'
+          : '树是由边连接的节点组成的分层数据结构。每棵树都有一个根节点和零个或多个子树。树在计算机科学中是基础性的，用于组织数据、搜索、排序和表示分层关系。'
+        }
+      </p>
+      
+      <p>
+        {lang === 'en'
+          ? 'Common applications include file systems, expression parsing, decision trees, and database indexing. Binary trees, in particular, form the foundation for many efficient algorithms.'
+          : '常见应用包括文件系统、表达式解析、决策树和数据库索引。特别是二叉树，为许多高效算法奠定了基础。'
+        }
+      </p>
+    </div>
+
+    <section>
+      <h2>{lang === 'en' ? 'Binary Tree Basics' : '二叉树基础'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'A binary tree is a tree where each node has at most two children, typically called left and right child:'
+          : '二叉树是每个节点最多有两个子节点的树，通常称为左子节点和右子节点：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Binary Tree Implementation' : '二叉树实现'}
+        code={`#include <iostream>
+#include <queue>
+using namespace std;
+
+struct TreeNode {
+    int data;
+    TreeNode* left;
+    TreeNode* right;
+    
+    TreeNode(int value) : data(value), left(nullptr), right(nullptr) {}
+};
+
+class BinaryTree {
+private:
+    TreeNode* root;
+    
+    // Helper function for inorder traversal
+    void inorderHelper(TreeNode* node) {
+        if (node != nullptr) {
+            inorderHelper(node->left);
+            cout << node->data << " ";
+            inorderHelper(node->right);
+        }
+    }
+    
+    // Helper function for preorder traversal
+    void preorderHelper(TreeNode* node) {
+        if (node != nullptr) {
+            cout << node->data << " ";
+            preorderHelper(node->left);
+            preorderHelper(node->right);
+        }
+    }
+    
+    // Helper function for postorder traversal
+    void postorderHelper(TreeNode* node) {
+        if (node != nullptr) {
+            postorderHelper(node->left);
+            postorderHelper(node->right);
+            cout << node->data << " ";
+        }
+    }
+    
+    // Helper function to calculate height
+    int heightHelper(TreeNode* node) {
+        if (node == nullptr) return -1;
+        return 1 + max(heightHelper(node->left), heightHelper(node->right));
+    }
+    
+    // Helper function to delete tree
+    void deleteTree(TreeNode* node) {
+        if (node != nullptr) {
+            deleteTree(node->left);
+            deleteTree(node->right);
+            delete node;
+        }
+    }
+
+public:
+    BinaryTree() : root(nullptr) {}
+    
+    ~BinaryTree() {
+        deleteTree(root);
+    }
+    
+    // Insert using level-order (breadth-first)
+    void insert(int value) {
+        TreeNode* newNode = new TreeNode(value);
+        
+        if (root == nullptr) {
+            root = newNode;
+            return;
+        }
+        
+        queue<TreeNode*> q;
+        q.push(root);
+        
+        while (!q.empty()) {
+            TreeNode* current = q.front();
+            q.pop();
+            
+            if (current->left == nullptr) {
+                current->left = newNode;
+                return;
+            } else if (current->right == nullptr) {
+                current->right = newNode;
+                return;
+            } else {
+                q.push(current->left);
+                q.push(current->right);
+            }
+        }
+    }
+    
+    // Tree traversals
+    void inorderTraversal() {
+        cout << "Inorder: ";
+        inorderHelper(root);
+        cout << endl;
+    }
+    
+    void preorderTraversal() {
+        cout << "Preorder: ";
+        preorderHelper(root);
+        cout << endl;
+    }
+    
+    void postorderTraversal() {
+        cout << "Postorder: ";
+        postorderHelper(root);
+        cout << endl;
+    }
+    
+    // Level-order traversal (breadth-first)
+    void levelOrderTraversal() {
+        if (root == nullptr) return;
+        
+        cout << "Level-order: ";
+        queue<TreeNode*> q;
+        q.push(root);
+        
+        while (!q.empty()) {
+            TreeNode* current = q.front();
+            q.pop();
+            cout << current->data << " ";
+            
+            if (current->left) q.push(current->left);
+            if (current->right) q.push(current->right);
+        }
+        cout << endl;
+    }
+    
+    int height() {
+        return heightHelper(root);
+    }
+};
+
+int main() {
+    BinaryTree tree;
+    
+    // Insert nodes
+    tree.insert(1);
+    tree.insert(2);
+    tree.insert(3);
+    tree.insert(4);
+    tree.insert(5);
+    
+    cout << "Tree traversals:" << endl;
+    tree.inorderTraversal();
+    tree.preorderTraversal();
+    tree.postorderTraversal();
+    tree.levelOrderTraversal();
+    
+    cout << "Tree height: " << tree.height() << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Binary Search Tree (BST)' : '二叉搜索树 (BST)'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'A Binary Search Tree is a binary tree where the left subtree contains nodes with values less than the root, and the right subtree contains nodes with values greater than the root:'
+          : '二叉搜索树是一种二叉树，其中左子树包含值小于根节点的节点，右子树包含值大于根节点的节点：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Binary Search Tree Implementation' : '二叉搜索树实现'}
+        code={`#include <iostream>
+using namespace std;
+
+struct BSTNode {
+    int data;
+    BSTNode* left;
+    BSTNode* right;
+    
+    BSTNode(int value) : data(value), left(nullptr), right(nullptr) {}
+};
+
+class BST {
+private:
+    BSTNode* root;
+    
+    BSTNode* insertHelper(BSTNode* node, int value) {
+        if (node == nullptr) {
+            return new BSTNode(value);
+        }
+        
+        if (value < node->data) {
+            node->left = insertHelper(node->left, value);
+        } else if (value > node->data) {
+            node->right = insertHelper(node->right, value);
+        }
+        // If value equals node->data, we don't insert (no duplicates)
+        
+        return node;
+    }
+    
+    BSTNode* searchHelper(BSTNode* node, int value) {
+        if (node == nullptr || node->data == value) {
+            return node;
+        }
+        
+        if (value < node->data) {
+            return searchHelper(node->left, value);
+        } else {
+            return searchHelper(node->right, value);
+        }
+    }
+    
+    BSTNode* findMin(BSTNode* node) {
+        while (node && node->left) {
+            node = node->left;
+        }
+        return node;
+    }
+    
+    BSTNode* deleteHelper(BSTNode* node, int value) {
+        if (node == nullptr) return node;
+        
+        if (value < node->data) {
+            node->left = deleteHelper(node->left, value);
+        } else if (value > node->data) {
+            node->right = deleteHelper(node->right, value);
+        } else {
+            // Node to be deleted found
+            if (node->left == nullptr) {
+                BSTNode* temp = node->right;
+                delete node;
+                return temp;
+            } else if (node->right == nullptr) {
+                BSTNode* temp = node->left;
+                delete node;
+                return temp;
+            }
+            
+            // Node with two children
+            BSTNode* temp = findMin(node->right);
+            node->data = temp->data;
+            node->right = deleteHelper(node->right, temp->data);
+        }
+        return node;
+    }
+    
+    void inorderHelper(BSTNode* node) {
+        if (node != nullptr) {
+            inorderHelper(node->left);
+            cout << node->data << " ";
+            inorderHelper(node->right);
+        }
+    }
+    
+    void deleteTree(BSTNode* node) {
+        if (node != nullptr) {
+            deleteTree(node->left);
+            deleteTree(node->right);
+            delete node;
+        }
+    }
+
+public:
+    BST() : root(nullptr) {}
+    
+    ~BST() {
+        deleteTree(root);
+    }
+    
+    void insert(int value) {
+        root = insertHelper(root, value);
+    }
+    
+    bool search(int value) {
+        return searchHelper(root, value) != nullptr;
+    }
+    
+    void remove(int value) {
+        root = deleteHelper(root, value);
+    }
+    
+    void inorderTraversal() {
+        cout << "BST (sorted): ";
+        inorderHelper(root);
+        cout << endl;
+    }
+};
+
+int main() {
+    BST bst;
+    
+    // Insert values
+    int values[] = {50, 30, 70, 20, 40, 60, 80};
+    for (int val : values) {
+        bst.insert(val);
+    }
+    
+    bst.inorderTraversal(); // Should print in sorted order
+    
+    // Search
+    cout << "Search 40: " << (bst.search(40) ? "Found" : "Not Found") << endl;
+    cout << "Search 25: " << (bst.search(25) ? "Found" : "Not Found") << endl;
+    
+    // Delete
+    bst.remove(30);
+    cout << "After deleting 30: ";
+    bst.inorderTraversal();
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Tree Applications' : '树的应用'}</h2>
+      
+      <h3>{lang === 'en' ? 'Expression Tree' : '表达式树'}</h3>
+      <p>
+        {lang === 'en'
+          ? 'Expression trees represent mathematical expressions where operators are internal nodes and operands are leaves:'
+          : '表达式树表示数学表达式，其中操作符是内部节点，操作数是叶子节点：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Expression Tree Evaluation' : '表达式树求值'}
+        code={`#include <iostream>
+#include <stack>
+#include <string>
+using namespace std;
+
+struct ExprNode {
+    string data;
+    ExprNode* left;
+    ExprNode* right;
+    
+    ExprNode(string value) : data(value), left(nullptr), right(nullptr) {}
+};
+
+class ExpressionTree {
+private:
+    ExprNode* root;
+    
+    bool isOperator(string str) {
+        return str == "+" || str == "-" || str == "*" || str == "/";
+    }
+    
+    int evaluate(ExprNode* node) {
+        if (node == nullptr) return 0;
+        
+        // If leaf node (operand)
+        if (!isOperator(node->data)) {
+            return stoi(node->data);
+        }
+        
+        // Evaluate left and right subtrees
+        int leftVal = evaluate(node->left);
+        int rightVal = evaluate(node->right);
+        
+        // Apply operator
+        if (node->data == "+") return leftVal + rightVal;
+        if (node->data == "-") return leftVal - rightVal;
+        if (node->data == "*") return leftVal * rightVal;
+        if (node->data == "/") return leftVal / rightVal;
+        
+        return 0;
+    }
+    
+    void inorderHelper(ExprNode* node) {
+        if (node != nullptr) {
+            if (isOperator(node->data)) cout << "(";
+            inorderHelper(node->left);
+            cout << node->data;
+            inorderHelper(node->right);
+            if (isOperator(node->data)) cout << ")";
+        }
+    }
+
+public:
+    ExpressionTree() : root(nullptr) {}
+    
+    // Build expression tree from postfix expression
+    void buildFromPostfix(vector<string> postfix) {
+        stack<ExprNode*> st;
+        
+        for (string token : postfix) {
+            ExprNode* node = new ExprNode(token);
+            
+            if (isOperator(token)) {
+                node->right = st.top(); st.pop();
+                node->left = st.top(); st.pop();
+            }
+            
+            st.push(node);
+        }
+        
+        root = st.top();
+    }
+    
+    int evaluateExpression() {
+        return evaluate(root);
+    }
+    
+    void printInfix() {
+        cout << "Infix expression: ";
+        inorderHelper(root);
+        cout << endl;
+    }
+};
+
+int main() {
+    ExpressionTree tree;
+    
+    // Postfix expression: "2 3 + 4 *" represents (2 + 3) * 4
+    vector<string> postfix = {"2", "3", "+", "4", "*"};
+    
+    tree.buildFromPostfix(postfix);
+    tree.printInfix();
+    
+    cout << "Result: " << tree.evaluateExpression() << endl;
+    
+    // Another example: "15 7 1 1 + - / 3 * 2 1 1 + + -"
+    vector<string> complex = {"15", "7", "1", "1", "+", "-", "/", "3", "*", "2", "1", "1", "+", "+", "-"};
+    
+    ExpressionTree complexTree;
+    complexTree.buildFromPostfix(complex);
+    complexTree.printInfix();
+    cout << "Result: " << complexTree.evaluateExpression() << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    width: 1200px;
+    max-width: calc(100% - 2rem);
+    color: #1e293b;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .overview {
+    background: #f8fafc;
+    border-left: 4px solid #4f46e5;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-radius: 0 8px 8px 0;
+  }
+  
+  .overview p {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    line-height: 1.7;
+  }
+  
+  .overview p:last-child {
+    margin-bottom: 0;
+  }
+  
+  section {
+    margin: 3rem 0;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1e293b;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 2rem 0 1rem 0;
+    color: #1e293b;
+  }
+  
+  p {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #374151;
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+    }
+    
+    h3 {
+      font-size: 1.25rem;
+    }
+  }
+</style> 

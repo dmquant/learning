@@ -1,0 +1,892 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { ui } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } }
+  ];
+}
+
+const { lang } = Astro.params;
+const t = ui[lang as keyof typeof ui];
+---
+
+<Layout title={lang === 'zh' ? "高级动态规划 - 世界级算法" : "Advanced Dynamic Programming - World Class Algorithms"}>
+  <div class="container">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      <a href={`/${lang}`}>{t['nav.home']}</a> &gt; 
+      <a href={`/${lang}/6-world-class`}>{lang === 'zh' ? '世界级算法' : 'World Class'}</a> &gt; 
+      <span>{lang === 'zh' ? '高级动态规划' : 'Advanced DP'}</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="header-section">
+      <h1 class="main-title">
+        {lang === 'zh' ? '高级动态规划' : 'Advanced Dynamic Programming'}
+      </h1>
+      <p class="subtitle">
+        {lang === 'zh' 
+          ? '掌握区间DP、树形DP和复杂优化技术'
+          : 'Master interval DP, tree DP, and complex optimization techniques'
+        }
+      </p>
+    </div>
+
+    <!-- Overview -->
+    <div class="overview-section">
+      <h2>{lang === 'zh' ? '概述' : 'Overview'}</h2>
+      <p>
+        {lang === 'zh' 
+          ? '高级动态规划是解决复杂优化问题的核心技术。本章节深入探讨区间动态规划、树形动态规划、背包问题的高级变种，以及各种DP优化技术，为解决世界级竞赛中的挑战性问题提供强大工具。'
+          : 'Advanced dynamic programming is the core technique for solving complex optimization problems. This chapter explores interval DP, tree DP, advanced knapsack variations, and various DP optimization techniques, providing powerful tools for challenging problems in world-class competitions.'
+        }
+      </p>
+    </div>
+
+    <!-- Content Sections -->
+    <div class="content-section">
+      <h2>{lang === 'zh' ? '核心内容' : 'Core Content'}</h2>
+
+      <!-- Interval DP -->
+      <div class="topic-section">
+        <h3>{lang === 'zh' ? '1. 区间动态规划' : '1. Interval Dynamic Programming'}</h3>
+        <p>
+          {lang === 'zh' 
+            ? '区间DP是处理区间相关问题的经典技术，通过枚举分割点来求解最优子结构问题。'
+            : 'Interval DP is a classic technique for interval-related problems, solving optimal substructure problems by enumerating split points.'
+          }
+        </p>
+
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// 区间动态规划经典问题' : '// Classic interval DP problems'}
+#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+${lang === 'zh' ? '// 问题1：矩阵链乘法' : '// Problem 1: Matrix Chain Multiplication'}
+int matrixChainMultiplication(vector<int>& dimensions) {
+    int n = dimensions.size() - 1; ${lang === 'zh' ? '// n个矩阵' : '// n matrices'}
+    vector<vector<int>> dp(n, vector<int>(n, 0));
+    
+    ${lang === 'zh' ? '// len是链的长度' : '// len is the chain length'}
+    for (int len = 2; len <= n; len++) {
+        for (int i = 0; i <= n - len; i++) {
+            int j = i + len - 1;
+            dp[i][j] = INT_MAX;
+            
+            ${lang === 'zh' ? '// 尝试所有可能的分割点' : '// Try all possible split points'}
+            for (int k = i; k < j; k++) {
+                int cost = dp[i][k] + dp[k + 1][j] + 
+                          dimensions[i] * dimensions[k + 1] * dimensions[j + 1];
+                dp[i][j] = min(dp[i][j], cost);
+            }
+        }
+    }
+    
+    return dp[0][n - 1];
+}
+
+${lang === 'zh' ? '// 问题2：回文串分割（最少分割次数）' : '// Problem 2: Palindrome Partitioning (minimum cuts)'}
+int minPalindromePartitions(string s) {
+    int n = s.length();
+    
+    ${lang === 'zh' ? '// 预处理：判断子串是否为回文' : '// Preprocessing: check if substring is palindrome'}
+    vector<vector<bool>> isPalindrome(n, vector<bool>(n, false));
+    
+    ${lang === 'zh' ? '// 奇数长度回文' : '// Odd length palindromes'}
+    for (int center = 0; center < n; center++) {
+        int left = center, right = center;
+        while (left >= 0 && right < n && s[left] == s[right]) {
+            isPalindrome[left][right] = true;
+            left--;
+            right++;
+        }
+    }
+    
+    ${lang === 'zh' ? '// 偶数长度回文' : '// Even length palindromes'}
+    for (int center = 0; center < n - 1; center++) {
+        int left = center, right = center + 1;
+        while (left >= 0 && right < n && s[left] == s[right]) {
+            isPalindrome[left][right] = true;
+            left--;
+            right++;
+        }
+    }
+    
+    ${lang === 'zh' ? '// DP：计算最少分割次数' : '// DP: calculate minimum cuts'}
+    vector<int> dp(n, INT_MAX);
+    
+    for (int i = 0; i < n; i++) {
+        if (isPalindrome[0][i]) {
+            dp[i] = 0; ${lang === 'zh' ? '// 整个前缀是回文' : '// Entire prefix is palindrome'}
+        } else {
+            for (int j = 0; j < i; j++) {
+                if (isPalindrome[j + 1][i]) {
+                    dp[i] = min(dp[i], dp[j] + 1);
+                }
+            }
+        }
+    }
+    
+    return dp[n - 1];
+}
+
+${lang === 'zh' ? '// 问题3：最优二叉搜索树' : '// Problem 3: Optimal Binary Search Tree'}
+double optimalBST(vector<double>& keys, vector<double>& freq) {
+    int n = keys.size();
+    vector<vector<double>> dp(n + 1, vector<double>(n + 1, 0));
+    vector<double> sum(n + 1, 0);
+    
+    ${lang === 'zh' ? '// 计算频率前缀和' : '// Calculate frequency prefix sum'}
+    for (int i = 1; i <= n; i++) {
+        sum[i] = sum[i - 1] + freq[i - 1];
+    }
+    
+    ${lang === 'zh' ? '// 区间DP' : '// Interval DP'}
+    for (int len = 1; len <= n; len++) {
+        for (int i = 1; i <= n - len + 1; i++) {
+            int j = i + len - 1;
+            dp[i][j] = DBL_MAX;
+            double freqSum = sum[j] - sum[i - 1];
+            
+            ${lang === 'zh' ? '// 尝试每个节点作为根' : '// Try each node as root'}
+            for (int root = i; root <= j; root++) {
+                double cost = freqSum;
+                if (root > i) cost += dp[i][root - 1];
+                if (root < j) cost += dp[root + 1][j];
+                dp[i][j] = min(dp[i][j], cost);
+            }
+        }
+    }
+    
+    return dp[1][n];
+}
+
+int main() {
+    ${lang === 'zh' ? '// 测试矩阵链乘法' : '// Test matrix chain multiplication'}
+    vector<int> dimensions = {40, 20, 30, 10, 30}; ${lang === 'zh' ? '// 4个矩阵的维度' : '// Dimensions of 4 matrices'}
+    cout << "${lang === 'zh' ? '矩阵链乘法最少标量乘法次数：' : 'Matrix chain minimum scalar multiplications:'} " 
+         << matrixChainMultiplication(dimensions) << endl;
+    
+    ${lang === 'zh' ? '// 测试回文分割' : '// Test palindrome partitioning'}
+    string s = "aabcbaa";
+    cout << "${lang === 'zh' ? '字符串 \"' : 'String \"'}" << s << "${lang === 'zh' ? '\" 的最少分割次数：' : '\" minimum partitions:'} " 
+         << minPalindromePartitions(s) << endl;
+    
+    ${lang === 'zh' ? '// 测试最优BST' : '// Test optimal BST'}
+    vector<double> keys = {10, 12, 20};
+    vector<double> freq = {34, 8, 50};
+    cout << "${lang === 'zh' ? '最优BST的期望搜索成本：' : 'Optimal BST expected search cost:'} " 
+         << optimalBST(keys, freq) << endl;
+    
+    return 0;
+}`}
+          language="cpp"
+        />
+      </div>
+
+      <!-- Tree DP -->
+      <div class="topic-section">
+        <h3>{lang === 'zh' ? '2. 树形动态规划' : '2. Tree Dynamic Programming'}</h3>
+        <p>
+          {lang === 'zh' 
+            ? '树形DP是在树结构上进行动态规划，通过DFS遍历和状态转移解决树上的优化问题。'
+            : 'Tree DP performs dynamic programming on tree structures, solving optimization problems on trees through DFS traversal and state transitions.'
+          }
+        </p>
+
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// 树形动态规划经典问题' : '// Classic tree DP problems'}
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+struct TreeNode {
+    int val;
+    vector<TreeNode*> children;
+    TreeNode(int x) : val(x) {}
+};
+
+${lang === 'zh' ? '// 问题1：树的直径' : '// Problem 1: Tree Diameter'}
+class TreeDiameter {
+private:
+    int maxDiameter;
+    
+    int dfs(TreeNode* root) {
+        if (!root) return 0;
+        
+        vector<int> depths;
+        for (TreeNode* child : root->children) {
+            depths.push_back(dfs(child));
+        }
+        
+        ${lang === 'zh' ? '// 找到最深的两条路径' : '// Find two deepest paths'}
+        sort(depths.rbegin(), depths.rend());
+        
+        int diameter = 0;
+        if (depths.size() >= 2) {
+            diameter = depths[0] + depths[1];
+        } else if (depths.size() == 1) {
+            diameter = depths[0];
+        }
+        
+        maxDiameter = max(maxDiameter, diameter);
+        
+        return depths.empty() ? 1 : depths[0] + 1;
+    }
+    
+public:
+    int findDiameter(TreeNode* root) {
+        maxDiameter = 0;
+        dfs(root);
+        return maxDiameter;
+    }
+};
+
+${lang === 'zh' ? '// 问题2：树上最大独立集' : '// Problem 2: Maximum Independent Set on Tree'}
+class MaxIndependentSet {
+private:
+    pair<int, int> dfs(TreeNode* root) {
+        if (!root) return {0, 0};
+        
+        int include = root->val; ${lang === 'zh' ? '// 包含当前节点' : '// Include current node'}
+        int exclude = 0;         ${lang === 'zh' ? '// 不包含当前节点' : '// Exclude current node'}
+        
+        for (TreeNode* child : root->children) {
+            auto childResult = dfs(child);
+            include += childResult.second; ${lang === 'zh' ? '// 子节点必须不选' : '// Child must not be selected'}
+            exclude += max(childResult.first, childResult.second); ${lang === 'zh' ? '// 子节点可选可不选' : '// Child can be selected or not'}
+        }
+        
+        return {include, exclude};
+    }
+    
+public:
+    int maxIndependentSet(TreeNode* root) {
+        auto result = dfs(root);
+        return max(result.first, result.second);
+    }
+};
+
+${lang === 'zh' ? '// 问题3：树的重心' : '// Problem 3: Tree Centroid'}
+class TreeCentroid {
+private:
+    int n;
+    vector<vector<int>> adj;
+    vector<int> subtreeSize;
+    int centroid;
+    int minMaxSubtree;
+    
+    void dfs(int u, int parent) {
+        subtreeSize[u] = 1;
+        int maxSubtree = 0;
+        
+        for (int v : adj[u]) {
+            if (v != parent) {
+                dfs(v, u);
+                subtreeSize[u] += subtreeSize[v];
+                maxSubtree = max(maxSubtree, subtreeSize[v]);
+            }
+        }
+        
+        ${lang === 'zh' ? '// 考虑父节点方向的子树' : '// Consider subtree in parent direction'}
+        maxSubtree = max(maxSubtree, n - subtreeSize[u]);
+        
+        if (maxSubtree < minMaxSubtree) {
+            minMaxSubtree = maxSubtree;
+            centroid = u;
+        }
+    }
+    
+public:
+    int findCentroid(vector<vector<int>>& edges) {
+        n = edges.size() + 1;
+        adj.resize(n);
+        subtreeSize.resize(n);
+        minMaxSubtree = n;
+        
+        for (auto& edge : edges) {
+            adj[edge[0]].push_back(edge[1]);
+            adj[edge[1]].push_back(edge[0]);
+        }
+        
+        dfs(0, -1);
+        return centroid;
+    }
+};
+
+${lang === 'zh' ? '// 问题4：树上背包' : '// Problem 4: Tree Knapsack'}
+class TreeKnapsack {
+private:
+    vector<vector<int>> adj;
+    vector<int> weight, value;
+    vector<vector<int>> dp;
+    
+    void dfs(int u, int parent, int capacity) {
+        ${lang === 'zh' ? '// 初始化：只考虑当前节点' : '// Initialize: consider only current node'}
+        for (int w = 0; w <= capacity; w++) {
+            if (w >= weight[u]) {
+                dp[u][w] = value[u];
+            }
+        }
+        
+        ${lang === 'zh' ? '// 处理每个子树' : '// Process each subtree'}
+        for (int v : adj[u]) {
+            if (v != parent) {
+                dfs(v, u, capacity);
+                
+                ${lang === 'zh' ? '// 合并子树的结果' : '// Merge subtree results'}
+                for (int w = capacity; w >= 0; w--) {
+                    for (int k = 0; k <= w; k++) {
+                        dp[u][w] = max(dp[u][w], dp[u][k] + dp[v][w - k]);
+                    }
+                }
+            }
+        }
+    }
+    
+public:
+    int solve(vector<vector<int>>& edges, vector<int>& weights, vector<int>& values, int capacity) {
+        int n = weights.size();
+        adj.resize(n);
+        weight = weights;
+        value = values;
+        dp.assign(n, vector<int>(capacity + 1, 0));
+        
+        for (auto& edge : edges) {
+            adj[edge[0]].push_back(edge[1]);
+            adj[edge[1]].push_back(edge[0]);
+        }
+        
+        dfs(0, -1, capacity);
+        return dp[0][capacity];
+    }
+};
+
+int main() {
+    ${lang === 'zh' ? '// 构建测试树' : '// Build test tree'}
+    TreeNode* root = new TreeNode(1);
+    root->children.push_back(new TreeNode(2));
+    root->children.push_back(new TreeNode(3));
+    root->children[0]->children.push_back(new TreeNode(4));
+    root->children[0]->children.push_back(new TreeNode(5));
+    root->children[1]->children.push_back(new TreeNode(6));
+    
+    ${lang === 'zh' ? '// 测试树的直径' : '// Test tree diameter'}
+    TreeDiameter diameterSolver;
+    cout << "${lang === 'zh' ? '树的直径：' : 'Tree diameter:'} " << diameterSolver.findDiameter(root) << endl;
+    
+    ${lang === 'zh' ? '// 测试最大独立集' : '// Test maximum independent set'}
+    MaxIndependentSet misSolver;
+    cout << "${lang === 'zh' ? '最大独立集大小：' : 'Maximum independent set size:'} " << misSolver.maxIndependentSet(root) << endl;
+    
+    ${lang === 'zh' ? '// 测试树的重心' : '// Test tree centroid'}
+    vector<vector<int>> edges = {{0, 1}, {0, 2}, {1, 3}, {1, 4}, {2, 5}};
+    TreeCentroid centroidSolver;
+    cout << "${lang === 'zh' ? '树的重心：' : 'Tree centroid:'} " << centroidSolver.findCentroid(edges) << endl;
+    
+    ${lang === 'zh' ? '// 测试树上背包' : '// Test tree knapsack'}
+    vector<int> weights = {2, 1, 3, 2, 1, 4};
+    vector<int> values = {3, 2, 4, 4, 2, 5};
+    TreeKnapsack knapsackSolver;
+    cout << "${lang === 'zh' ? '树上背包最大价值：' : 'Tree knapsack maximum value:'} " 
+         << knapsackSolver.solve(edges, weights, values, 7) << endl;
+    
+    return 0;
+}`}
+          language="cpp"
+        />
+      </div>
+
+      <!-- Advanced Knapsack -->
+      <div class="topic-section">
+        <h3>{lang === 'zh' ? '3. 高级背包问题' : '3. Advanced Knapsack Problems'}</h3>
+        
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// 高级背包问题变种' : '// Advanced knapsack problem variations'}
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+${lang === 'zh' ? '// 多重背包（二进制优化）' : '// Multiple knapsack (binary optimization)'}
+int multipleKnapsack(vector<int>& weights, vector<int>& values, vector<int>& counts, int capacity) {
+    vector<int> w, v;
+    
+    ${lang === 'zh' ? '// 二进制拆分' : '// Binary decomposition'}
+    for (int i = 0; i < weights.size(); i++) {
+        int count = counts[i];
+        for (int k = 1; k <= count; k *= 2) {
+            w.push_back(k * weights[i]);
+            v.push_back(k * values[i]);
+            count -= k;
+        }
+        if (count > 0) {
+            w.push_back(count * weights[i]);
+            v.push_back(count * values[i]);
+        }
+    }
+    
+    ${lang === 'zh' ? '// 01背包' : '// 0-1 knapsack'}
+    vector<int> dp(capacity + 1, 0);
+    for (int i = 0; i < w.size(); i++) {
+        for (int j = capacity; j >= w[i]; j--) {
+            dp[j] = max(dp[j], dp[j - w[i]] + v[i]);
+        }
+    }
+    
+    return dp[capacity];
+}
+
+${lang === 'zh' ? '// 分组背包' : '// Group knapsack'}
+int groupKnapsack(vector<vector<pair<int, int>>>& groups, int capacity) {
+    vector<int> dp(capacity + 1, 0);
+    
+    for (auto& group : groups) {
+        for (int j = capacity; j >= 0; j--) {
+            ${lang === 'zh' ? '// 尝试选择组内每个物品' : '// Try selecting each item in the group'}
+            for (auto& item : group) {
+                int weight = item.first, value = item.second;
+                if (j >= weight) {
+                    dp[j] = max(dp[j], dp[j - weight] + value);
+                }
+            }
+        }
+    }
+    
+    return dp[capacity];
+}
+
+${lang === 'zh' ? '// 有依赖的背包（树形背包）' : '// Dependent knapsack (tree knapsack)'}
+class DependentKnapsack {
+private:
+    struct Item {
+        int weight, value;
+        vector<int> children;
+    };
+    
+    vector<Item> items;
+    vector<vector<int>> dp;
+    
+    void dfs(int u, int capacity) {
+        ${lang === 'zh' ? '// 初始化：选择当前物品' : '// Initialize: select current item'}
+        for (int w = items[u].weight; w <= capacity; w++) {
+            dp[u][w] = items[u].value;
+        }
+        
+        ${lang === 'zh' ? '// 处理依赖的子物品' : '// Process dependent sub-items'}
+        for (int child : items[u].children) {
+            dfs(child, capacity);
+            
+            ${lang === 'zh' ? '// 合并子物品的结果' : '// Merge sub-item results'}
+            for (int w = capacity; w >= items[u].weight; w--) {
+                for (int k = 0; k <= w - items[u].weight; k++) {
+                    dp[u][w] = max(dp[u][w], dp[u][w - k] + dp[child][k]);
+                }
+            }
+        }
+    }
+    
+public:
+    int solve(vector<pair<int, int>>& itemData, vector<vector<int>>& dependencies, int capacity) {
+        int n = itemData.size();
+        items.resize(n);
+        dp.assign(n, vector<int>(capacity + 1, 0));
+        
+        for (int i = 0; i < n; i++) {
+            items[i].weight = itemData[i].first;
+            items[i].value = itemData[i].second;
+            items[i].children = dependencies[i];
+        }
+        
+        int result = 0;
+        for (int i = 0; i < n; i++) {
+            ${lang === 'zh' ? '// 检查是否为根物品（没有被其他物品依赖）' : '// Check if root item (not depended by others)'}
+            bool isRoot = true;
+            for (int j = 0; j < n; j++) {
+                for (int child : items[j].children) {
+                    if (child == i) {
+                        isRoot = false;
+                        break;
+                    }
+                }
+                if (!isRoot) break;
+            }
+            
+            if (isRoot) {
+                dfs(i, capacity);
+                for (int w = 0; w <= capacity; w++) {
+                    result = max(result, dp[i][w]);
+                }
+            }
+        }
+        
+        return result;
+    }
+};
+
+${lang === 'zh' ? '// 二维背包' : '// 2D knapsack'}
+int twoDimensionalKnapsack(vector<int>& weights, vector<int>& volumes, vector<int>& values, 
+                          int maxWeight, int maxVolume) {
+    vector<vector<int>> dp(maxWeight + 1, vector<int>(maxVolume + 1, 0));
+    
+    for (int i = 0; i < weights.size(); i++) {
+        for (int w = maxWeight; w >= weights[i]; w--) {
+            for (int v = maxVolume; v >= volumes[i]; v--) {
+                dp[w][v] = max(dp[w][v], dp[w - weights[i]][v - volumes[i]] + values[i]);
+            }
+        }
+    }
+    
+    return dp[maxWeight][maxVolume];
+}
+
+int main() {
+    ${lang === 'zh' ? '// 测试多重背包' : '// Test multiple knapsack'}
+    vector<int> weights = {2, 3, 4};
+    vector<int> values = {3, 4, 5};
+    vector<int> counts = {3, 2, 1};
+    cout << "${lang === 'zh' ? '多重背包最大价值：' : 'Multiple knapsack maximum value:'} " 
+         << multipleKnapsack(weights, values, counts, 10) << endl;
+    
+    ${lang === 'zh' ? '// 测试分组背包' : '// Test group knapsack'}
+    vector<vector<pair<int, int>>> groups = {
+        {{1, 2}, {2, 3}, {3, 4}},  ${lang === 'zh' ? '// 第一组' : '// Group 1'}
+        {{2, 3}, {3, 5}, {4, 6}},  ${lang === 'zh' ? '// 第二组' : '// Group 2'}
+        {{1, 1}, {4, 7}}           ${lang === 'zh' ? '// 第三组' : '// Group 3'}
+    };
+    cout << "${lang === 'zh' ? '分组背包最大价值：' : 'Group knapsack maximum value:'} " 
+         << groupKnapsack(groups, 8) << endl;
+    
+    ${lang === 'zh' ? '// 测试二维背包' : '// Test 2D knapsack'}
+    vector<int> weights2d = {2, 3, 4};
+    vector<int> volumes2d = {1, 3, 2};
+    vector<int> values2d = {3, 5, 4};
+    cout << "${lang === 'zh' ? '二维背包最大价值：' : '2D knapsack maximum value:'} " 
+         << twoDimensionalKnapsack(weights2d, volumes2d, values2d, 6, 4) << endl;
+    
+    return 0;
+}`}
+          language="cpp"
+        />
+      </div>
+    </div>
+
+    <!-- Tips Section -->
+    <div class="tips-section">
+      <h2>{lang === 'zh' ? '解题技巧' : 'Problem-Solving Tips'}</h2>
+      <div class="tips-grid">
+        <div class="tip-card">
+          <h3>🎯 {lang === 'zh' ? '状态设计' : 'State Design'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '合理设计DP状态是关键。区间DP考虑区间端点，树形DP考虑子树信息，复杂问题可能需要多维状态。'
+              : 'Proper DP state design is crucial. Consider interval endpoints for interval DP, subtree information for tree DP, and multi-dimensional states for complex problems.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>⚡ {lang === 'zh' ? '优化技巧' : 'Optimization Techniques'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '使用滚动数组优化空间，二进制拆分优化多重背包，记忆化搜索处理复杂状态转移。'
+              : 'Use rolling arrays for space optimization, binary decomposition for multiple knapsack, memoization for complex state transitions.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>🔄 {lang === 'zh' ? '转移方程' : 'Transition Equations'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '仔细分析状态转移方程，注意边界条件和特殊情况。树形DP要考虑父子关系，区间DP要枚举分割点。'
+              : 'Carefully analyze state transition equations, pay attention to boundary conditions and special cases. Consider parent-child relationships in tree DP, enumerate split points in interval DP.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>🧮 {lang === 'zh' ? '复杂度分析' : 'Complexity Analysis'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '准确分析时间和空间复杂度。区间DP通常是O(n³)，树形DP是O(n)，背包问题要考虑容量限制。'
+              : 'Accurately analyze time and space complexity. Interval DP is typically O(n³), tree DP is O(n), knapsack problems consider capacity constraints.'
+            }
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation">
+      <a href={`/${lang}/6-world-class/linear-algebra`} class="nav-button prev">
+        ← {lang === 'zh' ? '线性代数' : 'Linear Algebra'}
+      </a>
+      <a href={`/${lang}/6-world-class`} class="nav-button index">
+        📚 {lang === 'zh' ? '章节目录' : 'Chapter Index'}
+      </a>
+      <a href={`/${lang}/6-world-class/tree-problems`} class="nav-button next">
+        {lang === 'zh' ? '高级树问题' : 'Tree Problems'} →
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .breadcrumb {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .breadcrumb a:hover {
+    color: #3730a3;
+    text-decoration: underline;
+  }
+
+  .header-section {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .main-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #dc2626 0%, #ea580c 25%, #d97706 50%, #ca8a04 75%, #65a30d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+  }
+
+  .subtitle {
+    font-size: 1.25rem;
+    color: #6b7280;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .overview-section {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #f59e0b;
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin: 2rem 0 3rem 0;
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1);
+  }
+
+  .overview-section h2 {
+    color: #92400e;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .overview-section p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #78350f;
+  }
+
+  .content-section {
+    margin: 4rem 0;
+  }
+
+  .content-section > h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 3rem;
+    color: #1e293b;
+    text-align: center;
+    position: relative;
+  }
+
+  .content-section > h2::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #dc2626, #ea580c, #d97706);
+    border-radius: 2px;
+  }
+
+  .topic-section {
+    margin: 3rem 0;
+    padding: 2rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border-left: 4px solid #dc2626;
+  }
+
+  .topic-section h3 {
+    color: #dc2626;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .topic-section h4 {
+    color: #1e293b;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 2rem 0 1rem 0;
+  }
+
+  .topic-section p {
+    color: #4b5563;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .tips-section {
+    margin: 4rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #e5e7eb;
+  }
+
+  .tips-section h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #1e293b;
+    text-align: center;
+  }
+
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .tip-card {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #0ea5e9;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: transform 0.2s ease;
+  }
+
+  .tip-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .tip-card h3 {
+    color: #0c4a6e;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .tip-card p {
+    color: #075985;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #e5e7eb;
+    gap: 1rem;
+  }
+
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.875rem 1.75rem;
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px 0 rgba(220, 38, 38, 0.39);
+  }
+
+  .nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px 0 rgba(220, 38, 38, 0.5);
+  }
+
+  .nav-button.index {
+    background: linear-gradient(135deg, #059669, #0d9488);
+    box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.39);
+  }
+
+  .nav-button.index:hover {
+    box-shadow: 0 8px 25px 0 rgba(5, 150, 105, 0.5);
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 0.5rem;
+    }
+
+    .main-title {
+      font-size: 2.5rem;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+    }
+
+    .overview-section {
+      padding: 1.5rem;
+      margin: 1.5rem 0 2rem 0;
+    }
+
+    .topic-section {
+      padding: 1.5rem;
+    }
+
+    .tips-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style> 

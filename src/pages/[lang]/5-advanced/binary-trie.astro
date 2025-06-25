@@ -1,0 +1,397 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { ui } from '../../../i18n/ui';
+import { getLangFromUrl } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = ui[lang];
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } }
+  ];
+}
+---
+
+<Layout title={lang === 'zh' ? '二进制字典树(01-Trie) - 高级算法' : 'Binary Trie (01-Trie) - Advanced Algorithms'}>
+  <div class="breadcrumb">
+    <a href={`/${lang}`}>{t['nav.home']}</a> &gt; <a href={`/${lang}/5-advanced`}>{lang === 'zh' ? '高级算法' : 'Advanced Algorithms'}</a> &gt; {lang === 'zh' ? '二进制字典树(01-Trie)' : 'Binary Trie (01-Trie)'}
+  </div>
+
+  <h1>{lang === 'zh' ? '二进制字典树(01-Trie)' : 'Binary Trie (01-Trie)'}</h1>
+  
+  <div class="overview">
+    <p>
+      {lang === 'zh' 
+        ? '二进制字典树，也称为01-Trie，是一种专门用于存储数字二进制表示的字典树数据结构。它在解决异或相关问题、寻找最大/最小异或值以及位操作挑战方面表现出色，具有最优时间复杂度。'
+        : 'Binary Trie, also known as 01-Trie, is a specialized trie data structure for storing binary representations of numbers. It excels at solving XOR-related problems, finding maximum/minimum XOR values, and bit manipulation challenges with optimal time complexity.'
+      }
+    </p>
+  </div>
+
+  <h2>{lang === 'zh' ? '基本二进制字典树实现' : 'Basic Binary Trie Implementation'}</h2>
+  
+  <p>{lang === 'zh' ? '二进制字典树从最高有效位开始逐位存储数字，实现高效的异或操作。' : 'A Binary Trie stores numbers bit by bit, starting from the most significant bit, enabling efficient XOR operations.'}</p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'zh' ? '带异或操作的二进制字典树' : 'Binary Trie with XOR Operations'}
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class BinaryTrie {
+private:
+    struct TrieNode {
+        TrieNode* children[2];
+        int count;
+        
+        TrieNode() : count(0) {
+            children[0] = children[1] = nullptr;
+        }
+    };
+    
+    TrieNode* root;
+    static const int MAXBITS = 30; ${lang === 'zh' ? '// 对于32位整数' : '// For 32-bit integers'}
+    
+public:
+    BinaryTrie() {
+        root = new TrieNode();
+    }
+    
+    void insert(int num) {
+        TrieNode* curr = root;
+        for (int i = MAXBITS; i >= 0; i--) {
+            int bit = (num >> i) & 1;
+            if (!curr->children[bit]) {
+                curr->children[bit] = new TrieNode();
+            }
+            curr = curr->children[bit];
+            curr->count++;
+        }
+    }
+    
+    void remove(int num) {
+        TrieNode* curr = root;
+        for (int i = MAXBITS; i >= 0; i--) {
+            int bit = (num >> i) & 1;
+            if (curr->children[bit]) {
+                curr = curr->children[bit];
+                curr->count--;
+            }
+        }
+    }
+    
+    int findMaxXor(int num) {
+        TrieNode* curr = root;
+        int maxXor = 0;
+        
+        for (int i = MAXBITS; i >= 0; i--) {
+            int bit = (num >> i) & 1;
+            int oppositeBit = 1 - bit;
+            
+            ${lang === 'zh' ? '// 尝试走相反位以获得最大异或' : '// Try to go to opposite bit for maximum XOR'}
+            if (curr->children[oppositeBit] && curr->children[oppositeBit]->count > 0) {
+                maxXor |= (1 << i);
+                curr = curr->children[oppositeBit];
+            } else if (curr->children[bit] && curr->children[bit]->count > 0) {
+                curr = curr->children[bit];
+            } else {
+                return -1; ${lang === 'zh' ? '// 字典树为空' : '// Trie is empty'}
+            }
+        }
+        
+        return maxXor;
+    }
+    
+    int findMinXor(int num) {
+        TrieNode* curr = root;
+        int minXor = 0;
+        
+        for (int i = MAXBITS; i >= 0; i--) {
+            int bit = (num >> i) & 1;
+            
+            ${lang === 'zh' ? '// 尝试走相同位以获得最小异或' : '// Try to go to same bit for minimum XOR'}
+            if (curr->children[bit] && curr->children[bit]->count > 0) {
+                curr = curr->children[bit];
+            } else if (curr->children[1-bit] && curr->children[1-bit]->count > 0) {
+                minXor |= (1 << i);
+                curr = curr->children[1-bit];
+            } else {
+                return -1; ${lang === 'zh' ? '// 字典树为空' : '// Trie is empty'}
+            }
+        }
+        
+        return minXor;
+    }
+    
+    bool search(int num) {
+        TrieNode* curr = root;
+        for (int i = MAXBITS; i >= 0; i--) {
+            int bit = (num >> i) & 1;
+            if (!curr->children[bit] || curr->children[bit]->count == 0) {
+                return false;
+            }
+            curr = curr->children[bit];
+        }
+        return true;
+    }
+};
+
+int main() {
+    BinaryTrie trie;
+    vector<int> nums = {3, 10, 5, 25, 2, 8};
+    
+    cout << "${lang === 'zh' ? '插入数字：' : 'Inserting numbers: '}";
+    for (int num : nums) {
+        cout << num << " ";
+        trie.insert(num);
+    }
+    cout << endl;
+    
+    cout << "\\n${lang === 'zh' ? '异或操作：' : 'XOR Operations:'}" << endl;
+    for (int num : {4, 6, 15}) {
+        cout << "${lang === 'zh' ? '与' : 'Max XOR with'} " << num << "${lang === 'zh' ? '的最大异或：' : ': '}" << trie.findMaxXor(num) << endl;
+        cout << "${lang === 'zh' ? '与' : 'Min XOR with'} " << num << "${lang === 'zh' ? '的最小异或：' : ': '}" << trie.findMinXor(num) << endl;
+        cout << "${lang === 'zh' ? '搜索' : 'Search'} " << num << ": " << (trie.search(num) ? "${lang === 'zh' ? '找到' : 'Found'}" : "${lang === 'zh' ? '未找到' : 'Not found'}") << endl;
+        cout << endl;
+    }
+    
+    return 0;
+}`}
+    explanation={lang === 'zh' 
+      ? '二进制字典树从MSB到LSB逐位存储数字。对于最大异或，我们尽可能选择相反的位。对于最小异或，我们尽可能选择相同的位。'
+      : 'Binary Trie stores numbers bit by bit from MSB to LSB. For max XOR, we choose opposite bits when possible. For min XOR, we choose same bits when possible.'
+    }
+    output={`${lang === 'zh' ? '插入数字：' : 'Inserting numbers: '}3 10 5 25 2 8 
+
+${lang === 'zh' ? '异或操作：' : 'XOR Operations:'}
+${lang === 'zh' ? '与' : 'Max XOR with'} 4${lang === 'zh' ? '的最大异或：' : ': '}29
+${lang === 'zh' ? '与' : 'Min XOR with'} 4${lang === 'zh' ? '的最小异或：' : ': '}1
+${lang === 'zh' ? '搜索' : 'Search'} 4: ${lang === 'zh' ? '未找到' : 'Not found'}
+
+${lang === 'zh' ? '与' : 'Max XOR with'} 6${lang === 'zh' ? '的最大异或：' : ': '}27
+${lang === 'zh' ? '与' : 'Min XOR with'} 6${lang === 'zh' ? '的最小异或：' : ': '}1
+${lang === 'zh' ? '搜索' : 'Search'} 6: ${lang === 'zh' ? '未找到' : 'Not found'}
+
+${lang === 'zh' ? '与' : 'Max XOR with'} 15${lang === 'zh' ? '的最大异或：' : ': '}26
+${lang === 'zh' ? '与' : 'Min XOR with'} 15${lang === 'zh' ? '的最小异或：' : ': '}2
+${lang === 'zh' ? '搜索' : 'Search'} 15: ${lang === 'zh' ? '未找到' : 'Not found'}`}
+  />
+
+  <h2>{lang === 'zh' ? '最大异或子数组问题' : 'Maximum XOR Subarray Problem'}</h2>
+  
+  <p>{lang === 'zh' ? '使用二进制字典树和前缀异或技术找到任意子数组的最大异或值。' : 'Find the maximum XOR value of any subarray using Binary Trie with prefix XOR technique.'}</p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'zh' ? '最大异或子数组' : 'Maximum XOR Subarray'}
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class XORSubarray {
+public:
+    ${lang === 'zh' ? '// 简化版本，不跟踪范围' : '// Simpler version without range tracking'}
+    int maxXorSubarraySimple(vector<int>& arr) {
+        int n = arr.size();
+        int maxXor = 0;
+        int prefixXor = 0;
+        
+        BinaryTrie trie;
+        trie.insert(0); ${lang === 'zh' ? '// 插入0作为空前缀' : '// Insert 0 for empty prefix'}
+        
+        for (int i = 0; i < n; i++) {
+            prefixXor ^= arr[i];
+            maxXor = max(maxXor, trie.findMaxXor(prefixXor));
+            trie.insert(prefixXor);
+        }
+        
+        return maxXor;
+    }
+};
+
+${lang === 'zh' ? '// 解决：给定数组，找到任意子集的最大异或' : '// Solve: Given array, find maximum XOR of any subset'}
+int maxSubsetXor(vector<int>& arr) {
+    XORBasis basis;
+    for (int num : arr) {
+        basis.insert(num);
+    }
+    return basis.getMaxXor();
+}
+
+${lang === 'zh' ? '// 解决：检查目标是否可以通过异或某个子集形成' : '// Solve: Check if target can be formed by XORing some subset'}
+bool canFormTarget(vector<int>& arr, int target) {
+    XORBasis basis;
+    for (int num : arr) {
+        basis.insert(num);
+    }
+    return basis.canForm(target);
+}
+
+int main() {
+    vector<int> arr = {1, 2, 3, 4};
+    XORSubarray solver;
+    
+    cout << "${lang === 'zh' ? '数组：' : 'Array: '}";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    int simpleResult = solver.maxXorSubarraySimple(arr);
+    cout << "${lang === 'zh' ? '简单方法结果：' : 'Simple method result: '}" << simpleResult << endl;
+    
+    ${lang === 'zh' ? '// 用另一个数组测试' : '// Test with another array'}
+    vector<int> arr2 = {8, 1, 2, 12, 7, 6};
+    cout << "\\n${lang === 'zh' ? '数组2：' : 'Array 2: '}";
+    for (int x : arr2) cout << x << " ";
+    cout << endl;
+    
+    int result2 = solver.maxXorSubarraySimple(arr2);
+    cout << "${lang === 'zh' ? '最大异或子数组值：' : 'Maximum XOR subarray value: '}" << result2 << endl;
+    
+    return 0;
+}`}
+    explanation={lang === 'zh' 
+      ? '我们使用前缀异或性质：子数组[i,j]的异或 = prefixXor[j+1] ^ prefixXor[i]。对于每个位置，我们使用二进制字典树找到能给出最大异或的前缀。'
+      : 'We use prefix XOR property: XOR of subarray [i,j] = prefixXor[j+1] ^ prefixXor[i]. For each position, we find the prefix that gives maximum XOR using Binary Trie.'
+    }
+    output={`${lang === 'zh' ? '数组：' : 'Array: '}1 2 3 4 
+${lang === 'zh' ? '简单方法结果：' : 'Simple method result: '}7
+
+${lang === 'zh' ? '数组2：' : 'Array 2: '}8 1 2 12 7 6 
+${lang === 'zh' ? '最大异或子数组值：' : 'Maximum XOR subarray value: '}15`}
+  />
+
+  <div class="navigation">
+    <a href={`/${lang}/5-advanced/sweep-line`} class="nav-button prev">
+      ← {lang === 'zh' ? '上一节：扫描线算法' : 'Previous: Sweep Line Algorithm'}
+    </a>
+    <a href={`/${lang}/5-advanced/data-structure-dp`} class="nav-button next">
+      {lang === 'zh' ? '下一节：数据结构优化DP' : 'Next: Data Structure Optimized DP'} →
+    </a>
+  </div>
+</Layout>
+
+<style>
+  .breadcrumb {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 1rem;
+  }
+
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+  }
+
+  .overview {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .overview p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #374151;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 3rem 0 1.5rem 0;
+    color: #1e293b;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+
+  p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+    gap: 1rem;
+  }
+
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+  }
+
+  .nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+  }
+
+  .nav-button.prev {
+    margin-right: auto;
+  }
+
+  .nav-button.next {
+    margin-left: auto;
+  }
+
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 2rem;
+    }
+
+    .overview {
+      padding: 1.5rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style> 

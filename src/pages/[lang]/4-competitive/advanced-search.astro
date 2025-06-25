@@ -1,0 +1,312 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={lang === 'en' ? 'Advanced Search - Competitive Programming' : '高级搜索 - 竞赛编程'}>
+  <main>
+    <nav class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a>
+      <span>›</span>
+      <a href={`/${lang}/4-competitive`}>{t('nav.competitive')}</a>
+      <span>›</span>
+      <span>{t('comp.advanced-search')}</span>
+    </nav>
+
+    <h1>{t('comp.advanced-search')}</h1>
+    
+    <div class="intro">
+      {lang === 'en' ? (
+        <p>Master advanced search algorithms including A* search, heuristic functions, bidirectional BFS, and search optimization techniques for complex problem solving.</p>
+      ) : (
+        <p>掌握高级搜索算法，包括 A* 搜索、启发式函数、双向 BFS 和搜索优化技术，用于解决复杂问题。</p>
+      )}
+    </div>
+
+    <section>
+      <h2>{lang === 'en' ? '1. A* Search Algorithm' : '1. A* 搜索算法'}</h2>
+      {lang === 'en' ? (
+        <p>A* search combines the benefits of Dijkstra's algorithm and greedy best-first search using heuristic functions to find optimal paths efficiently.</p>
+      ) : (
+        <p>A* 搜索结合了 Dijkstra 算法和贪心最佳优先搜索的优点，使用启发式函数高效找到最优路径。</p>
+      )}
+
+      <CodeExample
+        title={lang === 'en' ? 'A* Search Implementation' : 'A* 搜索实现'}
+        code={`#include <iostream>
+#include <vector>
+#include <queue>
+#include <cmath>
+#include <climits>
+using namespace std;
+
+struct Node {
+    int x, y;
+    int g, h, f;
+    Node* parent;
+    
+    Node(int x, int y, int g = 0, int h = 0, Node* parent = nullptr) 
+        : x(x), y(y), g(g), h(h), f(g + h), parent(parent) {}
+    
+    bool operator>(const Node& other) const {
+        return f > other.f;
+    }
+};
+
+class AStar {
+private:
+    vector<vector<int>> grid;
+    int rows, cols;
+    
+    int heuristic(int x1, int y1, int x2, int y2) {
+        return abs(x1 - x2) + abs(y1 - y2); // Manhattan distance
+    }
+    
+    bool isValid(int x, int y) {
+        return x >= 0 && x < rows && y >= 0 && y < cols && grid[x][y] == 0;
+    }
+    
+    vector<pair<int, int>> getNeighbors(int x, int y) {
+        vector<pair<int, int>> neighbors;
+        int dx[] = {-1, 1, 0, 0};
+        int dy[] = {0, 0, -1, 1};
+        
+        for (int i = 0; i < 4; i++) {
+            int nx = x + dx[i];
+            int ny = y + dy[i];
+            if (isValid(nx, ny)) {
+                neighbors.push_back({nx, ny});
+            }
+        }
+        return neighbors;
+    }
+    
+public:
+    AStar(vector<vector<int>>& grid) : grid(grid) {
+        rows = grid.size();
+        cols = grid[0].size();
+    }
+    
+    vector<pair<int, int>> findPath(int startX, int startY, int endX, int endY) {
+        priority_queue<Node, vector<Node>, greater<Node>> openSet;
+        vector<vector<bool>> inOpenSet(rows, vector<bool>(cols, false));
+        vector<vector<bool>> inClosedSet(rows, vector<bool>(cols, false));
+        vector<vector<Node*>> nodeMap(rows, vector<Node*>(cols, nullptr));
+        
+        Node* startNode = new Node(startX, startY, 0, 
+                                  heuristic(startX, startY, endX, endY));
+        openSet.push(*startNode);
+        nodeMap[startX][startY] = startNode;
+        inOpenSet[startX][startY] = true;
+        
+        while (!openSet.empty()) {
+            Node current = openSet.top();
+            openSet.pop();
+            
+            if (current.x == endX && current.y == endY) {
+                // Reconstruct path
+                vector<pair<int, int>> path;
+                Node* node = nodeMap[current.x][current.y];
+                while (node != nullptr) {
+                    path.push_back({node->x, node->y});
+                    node = node->parent;
+                }
+                reverse(path.begin(), path.end());
+                return path;
+            }
+            
+            inOpenSet[current.x][current.y] = false;
+            inClosedSet[current.x][current.y] = true;
+            
+            for (auto& neighbor : getNeighbors(current.x, current.y)) {
+                int nx = neighbor.first, ny = neighbor.second;
+                
+                if (inClosedSet[nx][ny]) continue;
+                
+                int tentativeG = current.g + 1;
+                
+                if (!inOpenSet[nx][ny]) {
+                    Node* newNode = new Node(nx, ny, tentativeG,
+                                           heuristic(nx, ny, endX, endY),
+                                           nodeMap[current.x][current.y]);
+                    openSet.push(*newNode);
+                    nodeMap[nx][ny] = newNode;
+                    inOpenSet[nx][ny] = true;
+                } else if (tentativeG < nodeMap[nx][ny]->g) {
+                    nodeMap[nx][ny]->g = tentativeG;
+                    nodeMap[nx][ny]->f = tentativeG + nodeMap[nx][ny]->h;
+                    nodeMap[nx][ny]->parent = nodeMap[current.x][current.y];
+                }
+            }
+        }
+        
+        return {}; // No path found
+    }
+};
+
+int main() {
+    vector<vector<int>> grid = {
+        {0, 0, 0, 1, 0},
+        {0, 1, 0, 1, 0},
+        {0, 1, 0, 0, 0},
+        {0, 0, 0, 1, 0},
+        {0, 0, 0, 0, 0}
+    };
+    
+    AStar astar(grid);
+    auto path = astar.findPath(0, 0, 4, 4);
+    
+    cout << "Grid (0 = free, 1 = obstacle):" << endl;
+    for (auto& row : grid) {
+        for (int cell : row) {
+            cout << cell << " ";
+        }
+        cout << endl;
+    }
+    
+    cout << "\\nPath from (0,0) to (4,4):" << endl;
+    for (auto& point : path) {
+        cout << "(" << point.first << "," << point.second << ") ";
+    }
+    cout << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <div class="summary">
+      <h2>{lang === 'en' ? 'Summary' : '总结'}</h2>
+      {lang === 'en' ? (
+        <ul>
+          <li><strong>A* Search:</strong> Optimal pathfinding with heuristic guidance</li>
+          <li><strong>Heuristic Functions:</strong> Manhattan distance, Euclidean distance for guidance</li>
+          <li><strong>Optimality:</strong> Guarantees shortest path when heuristic is admissible</li>
+          <li><strong>Applications:</strong> Pathfinding, puzzle solving, game AI</li>
+        </ul>
+      ) : (
+        <ul>
+          <li><strong>A* 搜索：</strong>使用启发式指导的最优路径查找</li>
+          <li><strong>启发式函数：</strong>曼哈顿距离、欧几里得距离作为指导</li>
+          <li><strong>最优性：</strong>当启发式函数可接受时保证最短路径</li>
+          <li><strong>应用：</strong>路径查找、拼图求解、游戏 AI</li>
+        </ul>
+      )}
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    width: 1200px;
+    max-width: calc(100% - 2rem);
+    color: #1e293b;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .intro {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin-bottom: 3rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 4px solid #4f46e5;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1e293b;
+  }
+  
+  .summary {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: #f0f9ff;
+    border-radius: 8px;
+    border: 1px solid #0ea5e9;
+  }
+  
+  .summary h2 {
+    color: #0c4a6e;
+    margin-bottom: 1rem;
+  }
+  
+  .summary ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .summary li {
+    margin-bottom: 0.5rem;
+    padding-left: 1rem;
+    position: relative;
+  }
+  
+  .summary li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #0ea5e9;
+    font-weight: bold;
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+    }
+  }
+</style> 

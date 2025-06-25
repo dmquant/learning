@@ -3,22 +3,22 @@ import Layout from '../../layouts/Layout.astro';
 import CodeExample from '../../components/CodeExample.tsx';
 ---
 
-<Layout title="数据结构（线段树、树状数组）">
+<Layout title="Segment Tree & Binary Indexed Tree - Competitive Programming">
   <div class="breadcrumb">
-    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; 数据结构（线段树、树状数组）
+    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; Segment Tree & Binary Indexed Tree
   </div>
 
-  <h1>数据结构（线段树、树状数组）</h1>
+  <h1>Segment Tree & Binary Indexed Tree</h1>
   
   <div class="overview">
     <p>
-      线段树和树状数组是竞赛编程中用于解决区间查询和更新问题的高效数据结构。线段树支持任意区间操作，树状数组（Binary Indexed Tree/Fenwick Tree）专门用于前缀和查询，都能在O(log n)时间内完成单点更新和区间查询。
+      Segment trees and Binary Indexed Trees (BIT) are efficient data structures for solving range query and update problems in competitive programming. Segment trees support arbitrary range operations, while Binary Indexed Trees (also known as Fenwick Trees) are specialized for prefix sum queries. Both can complete single-point updates and range queries in O(log n) time.
     </p>
   </div>
 
-  <h2>树状数组（Binary Indexed Tree）</h2>
+  <h2>Binary Indexed Tree (Fenwick Tree)</h2>
   
-  <p>树状数组是一种支持单点更新和前缀和查询的数据结构，实现简单且常数因子小。</p>
+  <p>Binary Indexed Tree is a data structure that supports single-point updates and prefix sum queries, with simple implementation and small constant factors.</p>
 
   <CodeExample 
     client:load
@@ -911,8 +911,8 @@ int main() {
   </div>
 
   <div class="navigation">
-    <a href="/4-competitive/binary-search" class="prev">← 二分查找</a>
-    <a href="/4-competitive/trie" class="next">字典树 →</a>
+    <a href="/4-competitive/binary-search" class="prev">← Binary Search</a>
+    <a href="/4-competitive/trie" class="next">Trie →</a>
   </div>
 </Layout>
 

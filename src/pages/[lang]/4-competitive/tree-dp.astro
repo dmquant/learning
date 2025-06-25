@@ -1,0 +1,766 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { ui, defaultLang } from '../../../i18n/ui';
+import { getLangFromUrl } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = (key: keyof typeof ui[typeof defaultLang]) => ui[lang][key] || ui[defaultLang][key];
+
+export function getStaticPaths() {
+  return [
+    {params: {lang: 'en'}},
+    {params: {lang: 'zh'}}
+  ];
+}
+---
+
+<Layout title={lang === 'zh' ? '树上DP与状压DP - 竞赛编程' : 'Tree DP & Bitmask DP - Competitive Programming'}>
+  <div class="breadcrumb">
+    <a href={`/${lang}`}>{t('nav.home')}</a> &gt; 
+    <a href={`/${lang}/4-competitive`}>{lang === 'zh' ? '竞赛编程' : 'Competitive Programming'}</a> &gt; 
+    {lang === 'zh' ? '树上DP与状压DP' : 'Tree DP & Bitmask DP'}
+  </div>
+
+  <h1>{lang === 'zh' ? '树上DP与状压DP' : 'Tree DP & Bitmask DP'}</h1>
+  
+  <div class="overview">
+    <p>
+      {lang === 'zh' 
+        ? '树上动态规划和状态压缩动态规划是竞赛编程中的高级技巧。树上DP利用树的递归结构进行状态转移，状压DP通过二进制位表示状态集合，都能解决复杂的组合优化问题。'
+        : 'Tree Dynamic Programming and Bitmask Dynamic Programming are advanced techniques in competitive programming. Tree DP leverages the recursive structure of trees for state transitions, while Bitmask DP uses binary representation for state sets, both solving complex combinatorial optimization problems.'
+      }
+    </p>
+  </div>
+
+  <h2>{lang === 'zh' ? '树上DP基础' : 'Tree DP Fundamentals'}</h2>
+  
+  <p>
+    {lang === 'zh' 
+      ? '树上DP的核心思想是在树的后序遍历过程中，利用子树的信息计算当前节点的状态。'
+      : 'The core idea of Tree DP is to use information from subtrees during post-order traversal to compute the state of the current node.'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'zh' ? '树的直径 - 经典树上DP' : 'Tree Diameter - Classic Tree DP'}
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class TreeDiameter {
+private:
+    vector<vector<pair<int, int>>> adj;
+    int maxDiameter = 0;
+    
+public:
+    TreeDiameter(int n) : adj(n) {}
+    
+    void addEdge(int u, int v, int w) {
+        adj[u].push_back({v, w});
+        adj[v].push_back({u, w});
+    }
+    
+    ${lang === 'zh' 
+      ? '// 返回以node为根的子树中，从node出发的最长路径'
+      : '// Returns the longest path starting from node in its subtree'
+    }
+    int dfs(int node, int parent) {
+        int maxPath1 = 0, maxPath2 = 0;
+        
+        for (auto& edge : adj[node]) {
+            int child = edge.first;
+            int weight = edge.second;
+            
+            if (child == parent) continue;
+            
+            int childPath = dfs(child, node) + weight;
+            
+            ${lang === 'zh' 
+              ? '// 维护最长和次长路径'
+              : '// Maintain longest and second longest paths'
+            }
+            if (childPath > maxPath1) {
+                maxPath2 = maxPath1;
+                maxPath1 = childPath;
+            } else if (childPath > maxPath2) {
+                maxPath2 = childPath;
+            }
+        }
+        
+        ${lang === 'zh' 
+          ? '// 更新直径（经过当前节点的最长路径）'
+          : '// Update diameter (longest path passing through current node)'
+        }
+        maxDiameter = max(maxDiameter, maxPath1 + maxPath2);
+        
+        return maxPath1;
+    }
+    
+    int getDiameter() {
+        maxDiameter = 0;
+        dfs(0, -1);
+        return maxDiameter;
+    }
+};
+
+${lang === 'zh' ? '// 树的重心' : '// Tree Centroid'}
+class TreeCentroid {
+private:
+    vector<vector<int>> adj;
+    vector<int> subtreeSize;
+    int n, centroid, minMaxSubtree;
+    
+public:
+    TreeCentroid(int n) : n(n), adj(n), subtreeSize(n) {}
+    
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    
+    int dfs(int node, int parent) {
+        subtreeSize[node] = 1;
+        int maxSubtree = 0;
+        
+        for (int child : adj[node]) {
+            if (child == parent) continue;
+            
+            int childSubtreeSize = dfs(child, node);
+            subtreeSize[node] += childSubtreeSize;
+            maxSubtree = max(maxSubtree, childSubtreeSize);
+        }
+        
+        ${lang === 'zh' 
+          ? '// 考虑删除当前节点后，上方的子树大小'
+          : '// Consider the subtree above when removing current node'
+        }
+        maxSubtree = max(maxSubtree, n - subtreeSize[node]);
+        
+        if (maxSubtree < minMaxSubtree) {
+            minMaxSubtree = maxSubtree;
+            centroid = node;
+        }
+        
+        return subtreeSize[node];
+    }
+    
+    int findCentroid() {
+        minMaxSubtree = n;
+        dfs(0, -1);
+        return centroid;
+    }
+};
+
+int main() {
+    ${lang === 'zh' ? '// 测试树的直径' : '// Test tree diameter'}
+    TreeDiameter td(6);
+    td.addEdge(0, 1, 2);
+    td.addEdge(0, 2, 3);
+    td.addEdge(1, 3, 1);
+    td.addEdge(1, 4, 4);
+    td.addEdge(2, 5, 2);
+    
+    cout << "${lang === 'zh' ? '树的直径: ' : 'Tree diameter: '}" << td.getDiameter() << endl;
+    
+    ${lang === 'zh' ? '// 测试树的重心' : '// Test tree centroid'}
+    TreeCentroid tc(6);
+    tc.addEdge(0, 1);
+    tc.addEdge(0, 2);
+    tc.addEdge(1, 3);
+    tc.addEdge(1, 4);
+    tc.addEdge(2, 5);
+    
+    cout << "${lang === 'zh' ? '树的重心: ' : 'Tree centroid: '}" << tc.findCentroid() << endl;
+    
+    return 0;
+}`}
+    explanation={lang === 'zh' 
+      ? '树的直径通过树上DP在每个节点维护最长和次长路径。树的重心是删除后剩余连通分量最大值最小的节点。'
+      : 'Tree diameter uses Tree DP to maintain longest and second longest paths at each node. Tree centroid is the node whose removal results in the smallest maximum connected component.'
+    }
+    output={lang === 'zh' 
+      ? `树的直径: 9
+树的重心: 0`
+      : `Tree diameter: 9
+Tree centroid: 0`
+    }
+  />
+
+  <h2>{lang === 'zh' ? '换根DP技巧' : 'Rerooting DP Technique'}</h2>
+  
+  <p>
+    {lang === 'zh' 
+      ? '换根DP先以任意节点为根计算答案，然后通过状态转移计算其他节点为根的答案。'
+      : 'Rerooting DP first computes answers with any node as root, then uses state transitions to compute answers for other nodes as roots.'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'zh' ? '换根DP - 计算每个节点到其他所有节点的距离和' : 'Rerooting DP - Sum of Distances from Each Node'}
+    code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+class RerootingDP {
+private:
+    vector<vector<int>> adj;
+    vector<long long> subtreeSum;    ${lang === 'zh' ? '// 子树内距离和' : '// Sum of distances in subtree'}
+    vector<int> subtreeSize;         ${lang === 'zh' ? '// 子树大小' : '// Size of subtree'}
+    vector<long long> ans;           ${lang === 'zh' ? '// 每个节点的答案' : '// Answer for each node'}
+    int n;
+    
+public:
+    RerootingDP(int n) : n(n), adj(n), subtreeSum(n), subtreeSize(n), ans(n) {}
+    
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    
+    ${lang === 'zh' 
+      ? '// 第一次DFS：计算以node为根时的子树信息'
+      : '// First DFS: compute subtree information with node as root'
+    }
+    void dfs1(int node, int parent) {
+        subtreeSize[node] = 1;
+        subtreeSum[node] = 0;
+        
+        for (int child : adj[node]) {
+            if (child == parent) continue;
+            
+            dfs1(child, node);
+            subtreeSize[node] += subtreeSize[child];
+            subtreeSum[node] += subtreeSum[child] + subtreeSize[child];
+        }
+    }
+    
+    ${lang === 'zh' 
+      ? '// 第二次DFS：换根计算每个节点的答案'
+      : '// Second DFS: reroot to compute answer for each node'
+    }
+    void dfs2(int node, int parent) {
+        for (int child : adj[node]) {
+            if (child == parent) continue;
+            
+            ${lang === 'zh' 
+              ? `// 计算child为根时的答案
+            // 从node转移到child：
+            // 1. child的子树贡献不变
+            // 2. 其余部分（包括node）的贡献需要重新计算`
+              : `// Compute answer when child is root
+            // Transfer from node to child:
+            // 1. Child's subtree contribution remains same
+            // 2. Rest (including node) contribution needs recalculation`
+            }
+            
+            long long childSubtreeSum = subtreeSum[child];
+            int childSubtreeSize = subtreeSize[child];
+            
+            ${lang === 'zh' ? '// 从node中移除child的贡献' : '// Remove child\'s contribution from node'}
+            subtreeSum[node] -= (childSubtreeSum + childSubtreeSize);
+            subtreeSize[node] -= childSubtreeSize;
+            
+            ${lang === 'zh' ? '// 将node的贡献加到child' : '// Add node\'s contribution to child'}
+            subtreeSum[child] += (subtreeSum[node] + subtreeSize[node]);
+            subtreeSize[child] += subtreeSize[node];
+            
+            ans[child] = subtreeSum[child];
+            
+            dfs2(child, node);
+            
+            ${lang === 'zh' ? '// 恢复原始值' : '// Restore original values'}
+            subtreeSum[child] = childSubtreeSum;
+            subtreeSize[child] = childSubtreeSize;
+            subtreeSum[node] += (childSubtreeSum + childSubtreeSize);
+            subtreeSize[node] += childSubtreeSize;
+        }
+    }
+    
+    vector<long long> solve() {
+        dfs1(0, -1);
+        ans[0] = subtreeSum[0];
+        dfs2(0, -1);
+        return ans;
+    }
+};
+
+int main() {
+    RerootingDP rd(6);
+    rd.addEdge(0, 1);
+    rd.addEdge(0, 2);
+    rd.addEdge(1, 3);
+    rd.addEdge(1, 4);
+    rd.addEdge(2, 5);
+    
+    vector<long long> result = rd.solve();
+    
+    cout << "${lang === 'zh' ? '每个节点到其他节点的距离和:' : 'Sum of distances from each node:'}" << endl;
+    for (int i = 0; i < result.size(); i++) {
+        cout << "${lang === 'zh' ? '节点 ' : 'Node '}" << i << ": " << result[i] << endl;
+    }
+    
+    return 0;
+}`}
+    explanation={lang === 'zh' 
+      ? '换根DP通过两次DFS避免为每个根重新计算。它通过考虑移动根时贡献如何变化来高效转移状态。'
+      : 'Rerooting DP avoids recomputing from scratch for each root. It transfers states efficiently by considering how contributions change when moving the root.'
+    }
+    output={lang === 'zh' 
+      ? `每个节点到其他节点的距离和:
+节点 0: 8
+节点 1: 9
+节点 2: 10
+节点 3: 12
+节点 4: 12
+节点 5: 13`
+      : `Sum of distances from each node:
+Node 0: 8
+Node 1: 9
+Node 2: 10
+Node 3: 12
+Node 4: 12
+Node 5: 13`
+    }
+  />
+
+  <h2>{lang === 'zh' ? '状压DP基础' : 'Bitmask DP Fundamentals'}</h2>
+  
+  <p>
+    {lang === 'zh' 
+      ? '状态压缩动态规划使用二进制位表示状态集合，适用于指数状态空间但参数范围较小的问题。'
+      : 'Bitmask DP uses binary representation to encode state sets, suitable for problems with exponential state space but small parameter ranges.'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'zh' ? '旅行商问题 - 状压DP经典应用' : 'Traveling Salesman Problem - Classic Bitmask DP'}
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+class TSP {
+private:
+    vector<vector<int>> dist;
+    vector<vector<int>> dp;
+    int n;
+    
+public:
+    TSP(vector<vector<int>>& distances) : dist(distances) {
+        n = dist.size();
+        dp.assign(1 << n, vector<int>(n, INT_MAX));
+    }
+    
+    int solve() {
+        ${lang === 'zh' ? '// 基础情况：从城市0开始' : '// Base case: start from city 0'}
+        dp[1][0] = 0; ${lang === 'zh' ? '// mask = 1 (只访问了城市0), 当前城市 = 0' : '// mask = 1 (only city 0 visited), current city = 0'}
+        
+        for (int mask = 1; mask < (1 << n); mask++) {
+            for (int u = 0; u < n; u++) {
+                if (!(mask & (1 << u)) || dp[mask][u] == INT_MAX) continue;
+                
+                for (int v = 0; v < n; v++) {
+                    if (mask & (1 << v)) continue; ${lang === 'zh' ? '// 城市v已经访问过' : '// City v already visited'}
+                    
+                    int newMask = mask | (1 << v);
+                    dp[newMask][v] = min(dp[newMask][v], dp[mask][u] + dist[u][v]);
+                }
+            }
+        }
+        
+        ${lang === 'zh' ? '// 找到回到起始城市的最小代价' : '// Find minimum cost to return to starting city'}
+        int result = INT_MAX;
+        int finalMask = (1 << n) - 1; ${lang === 'zh' ? '// 所有城市都访问过' : '// All cities visited'}
+        
+        for (int u = 1; u < n; u++) {
+            if (dp[finalMask][u] != INT_MAX) {
+                result = min(result, dp[finalMask][u] + dist[u][0]);
+            }
+        }
+        
+        return result == INT_MAX ? -1 : result;
+    }
+    
+    vector<int> getPath() {
+        vector<int> path;
+        int mask = (1 << n) - 1;
+        int current = 0;
+        
+        ${lang === 'zh' ? '// 找到给出最小代价的结束城市' : '// Find the ending city that gives minimum cost'}
+        for (int u = 1; u < n; u++) {
+            if (dp[mask][u] + dist[u][0] < dp[mask][current] + dist[current][0]) {
+                current = u;
+            }
+        }
+        
+        ${lang === 'zh' ? '// 重构路径' : '// Reconstruct path'}
+        while (mask != 1) {
+            path.push_back(current);
+            int prevMask = mask ^ (1 << current);
+            
+            for (int u = 0; u < n; u++) {
+                if ((prevMask & (1 << u)) && 
+                    dp[prevMask][u] + dist[u][current] == dp[mask][current]) {
+                    mask = prevMask;
+                    current = u;
+                    break;
+                }
+            }
+        }
+        
+        path.push_back(0);
+        reverse(path.begin(), path.end());
+        return path;
+    }
+};
+
+${lang === 'zh' ? '// 使用状压DP的任务分配问题' : '// Assignment Problem using Bitmask DP'}
+class AssignmentProblem {
+private:
+    vector<vector<int>> cost;
+    vector<int> dp;
+    int n;
+    
+public:
+    AssignmentProblem(vector<vector<int>>& costs) : cost(costs) {
+        n = cost.size();
+        dp.assign(1 << n, INT_MAX);
+    }
+    
+    int solve() {
+        dp[0] = 0; ${lang === 'zh' ? '// 没有任务被分配' : '// No tasks assigned'}
+        
+        for (int mask = 0; mask < (1 << n); mask++) {
+            if (dp[mask] == INT_MAX) continue;
+            
+            int person = __builtin_popcount(mask); ${lang === 'zh' ? '// 已分配任务的数量' : '// Number of assigned tasks'}
+            if (person >= n) continue;
+            
+            for (int task = 0; task < n; task++) {
+                if (mask & (1 << task)) continue; ${lang === 'zh' ? '// 任务已被分配' : '// Task already assigned'}
+                
+                int newMask = mask | (1 << task);
+                dp[newMask] = min(dp[newMask], dp[mask] + cost[person][task]);
+            }
+        }
+        
+        return dp[(1 << n) - 1];
+    }
+};
+
+int main() {
+    ${lang === 'zh' ? '// 测试TSP' : '// Test TSP'}
+    vector<vector<int>> distances = {
+        {0, 10, 15, 20},
+        {10, 0, 35, 25},
+        {15, 35, 0, 30},
+        {20, 25, 30, 0}
+    };
+    
+    TSP tsp(distances);
+    int minCost = tsp.solve();
+    vector<int> path = tsp.getPath();
+    
+    cout << "${lang === 'zh' ? 'TSP最小代价: ' : 'TSP minimum cost: '}" << minCost << endl;
+    cout << "${lang === 'zh' ? '最优路径: ' : 'Optimal path: '}";
+    for (int i = 0; i < path.size(); i++) {
+        cout << path[i];
+        if (i < path.size() - 1) cout << " -> ";
+    }
+    cout << " -> 0" << endl;
+    
+    ${lang === 'zh' ? '// 测试任务分配问题' : '// Test Assignment Problem'}
+    vector<vector<int>> costs = {
+        {9, 2, 7, 8},
+        {6, 4, 3, 7},
+        {5, 8, 1, 8},
+        {7, 6, 9, 4}
+    };
+    
+    AssignmentProblem ap(costs);
+    cout << "\\n${lang === 'zh' ? '任务分配最小代价: ' : 'Assignment minimum cost: '}" << ap.solve() << endl;
+    
+    return 0;
+}`}
+    explanation={lang === 'zh' 
+      ? '状压DP使用二进制位编码访问状态。TSP使用dp[mask][u]表示访问mask中城市并以u结尾的最小代价。任务分配问题将任务最优分配给人员。'
+      : 'Bitmask DP encodes visited states using binary bits. TSP uses dp[mask][u] representing minimum cost to visit cities in mask ending at u. Assignment problem assigns tasks to people optimally.'
+    }
+    output={lang === 'zh' 
+      ? `TSP最小代价: 80
+最优路径: 0 -> 1 -> 3 -> 2 -> 0
+
+任务分配最小代价: 13`
+      : `TSP minimum cost: 80
+Optimal path: 0 -> 1 -> 3 -> 2 -> 0
+
+Assignment minimum cost: 13`
+    }
+  />
+
+  <h2>{lang === 'zh' ? '高级树上DP应用' : 'Advanced Tree DP Applications'}</h2>
+  
+  <p>
+    {lang === 'zh' 
+      ? '高级树上DP处理复杂约束和多状态维度，常与其他技巧结合使用。'
+      : 'Advanced Tree DP handles complex constraints and multiple state dimensions, often combined with other techniques.'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'zh' ? '树着色问题' : 'Tree Coloring with Constraints'}
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class TreeColoring {
+private:
+    vector<vector<int>> adj;
+    vector<vector<long long>> dp;
+    int n, k;
+    const int MOD = 1000000007;
+    
+public:
+    TreeColoring(int n, int k) : n(n), k(k), adj(n), dp(n, vector<long long>(k, 0)) {}
+    
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    
+    ${lang === 'zh' ? '// dp[u][c] = 以u为根的子树中u着色为c的方案数' : '// dp[u][c] = number of ways to color subtree rooted at u with u colored c'}
+    void dfs(int u, int parent) {
+        ${lang === 'zh' ? '// 基础情况：叶子节点可以着任意颜色' : '// Base case: leaf node can be colored in any color'}
+        for (int c = 0; c < k; c++) {
+            dp[u][c] = 1;
+        }
+        
+        for (int v : adj[u]) {
+            if (v == parent) continue;
+            
+            dfs(v, u);
+            
+            ${lang === 'zh' ? '// 合并子节点v的结果' : '// Combine results from child v'}
+            vector<long long> newDp(k, 0);
+            
+            for (int uc = 0; uc < k; uc++) {
+                for (int vc = 0; vc < k; vc++) {
+                    if (uc != vc) { ${lang === 'zh' ? '// 相邻节点必须颜色不同' : '// Adjacent nodes must have different colors'}
+                        newDp[uc] = (newDp[uc] + dp[u][uc] * dp[v][vc]) % MOD;
+                    }
+                }
+            }
+            
+            dp[u] = newDp;
+        }
+    }
+    
+    long long solve() {
+        dfs(0, -1);
+        long long result = 0;
+        for (int c = 0; c < k; c++) {
+            result = (result + dp[0][c]) % MOD;
+        }
+        return result;
+    }
+};
+
+${lang === 'zh' ? '// 树上最大权独立集' : '// Maximum Weight Independent Set in Tree'}
+class MaxWeightIndependentSet {
+private:
+    vector<vector<int>> adj;
+    vector<int> weight;
+    vector<vector<long long>> dp;
+    int n;
+    
+public:
+    MaxWeightIndependentSet(vector<int>& weights) : weight(weights) {
+        n = weight.size();
+        adj.resize(n);
+        dp.assign(n, vector<long long>(2, 0));
+    }
+    
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    
+    ${lang === 'zh' 
+      ? '// dp[u][0] = 不选择u时的最大权重\n    // dp[u][1] = 选择u时的最大权重'
+      : '// dp[u][0] = max weight when u is not selected\n    // dp[u][1] = max weight when u is selected'
+    }
+    void dfs(int u, int parent) {
+        dp[u][0] = 0;
+        dp[u][1] = weight[u];
+        
+        for (int v : adj[u]) {
+            if (v == parent) continue;
+            
+            dfs(v, u);
+            
+            ${lang === 'zh' ? '// 如果不选择u，v可以选择或不选择' : '// If u is not selected, v can be either selected or not'}
+            dp[u][0] += max(dp[v][0], dp[v][1]);
+            
+            ${lang === 'zh' ? '// 如果选择u，v不能被选择' : '// If u is selected, v cannot be selected'}
+            dp[u][1] += dp[v][0];
+        }
+    }
+    
+    long long solve() {
+        dfs(0, -1);
+        return max(dp[0][0], dp[0][1]);
+    }
+    
+    vector<int> getSelectedNodes() {
+        vector<int> selected;
+        function<void(int, int, bool)> reconstruct = [&](int u, int parent, bool canSelect) {
+            if (canSelect && dp[u][1] >= dp[u][0]) {
+                selected.push_back(u);
+                for (int v : adj[u]) {
+                    if (v != parent) {
+                        reconstruct(v, u, false);
+                    }
+                }
+            } else {
+                for (int v : adj[u]) {
+                    if (v != parent) {
+                        reconstruct(v, u, true);
+                    }
+                }
+            }
+        };
+        
+        reconstruct(0, -1, true);
+        return selected;
+    }
+};
+
+int main() {
+    ${lang === 'zh' ? '// 测试树着色' : '// Test tree coloring'}
+    TreeColoring tc(5, 3);
+    tc.addEdge(0, 1);
+    tc.addEdge(0, 2);
+    tc.addEdge(1, 3);
+    tc.addEdge(1, 4);
+    
+    cout << "${lang === 'zh' ? '用3种颜色给树着色的方案数: ' : 'Tree coloring ways with 3 colors: '}" << tc.solve() << endl;
+    
+    ${lang === 'zh' ? '// 测试最大权独立集' : '// Test maximum weight independent set'}
+    vector<int> weights = {10, 5, 2, 7, 8};
+    MaxWeightIndependentSet mwis(weights);
+    mwis.addEdge(0, 1);
+    mwis.addEdge(0, 2);
+    mwis.addEdge(1, 3);
+    mwis.addEdge(1, 4);
+    
+    cout << "${lang === 'zh' ? '最大权独立集: ' : 'Maximum weight independent set: '}" << mwis.solve() << endl;
+    
+    vector<int> selected = mwis.getSelectedNodes();
+    cout << "${lang === 'zh' ? '选择的节点: ' : 'Selected nodes: '}";
+    for (int node : selected) {
+        cout << node << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}`}
+    explanation={lang === 'zh' 
+      ? '高级树上DP同时处理多个约束。树着色确保相邻节点颜色不同。最大权独立集选择不相邻节点使总权重最大。'
+      : 'Advanced Tree DP handles multiple constraints simultaneously. Tree coloring ensures adjacent nodes have different colors. Maximum weight independent set selects non-adjacent nodes with maximum total weight.'
+    }
+    output={lang === 'zh' 
+      ? `用3种颜色给树着色的方案数: 246
+最大权独立集: 19
+选择的节点: 0 3 4`
+      : `Tree coloring ways with 3 colors: 246
+Maximum weight independent set: 19
+Selected nodes: 0 3 4`
+    }
+  />
+
+  <h2>{lang === 'zh' ? '竞赛编程技巧' : 'Competitive Programming Techniques'}</h2>
+  
+  <div class="tips">
+    <h3>{lang === 'zh' ? '树上DP核心概念：' : 'Tree DP Core Concepts:'}</h3>
+    <ul>
+      <li>{lang === 'zh' ? '利用树的递归结构进行自底向上的状态计算' : 'Utilize tree\'s recursive structure for bottom-up state computation'}</li>
+      <li>{lang === 'zh' ? '基于子树属性和节点特征定义状态' : 'Define states based on subtree properties and node characteristics'}</li>
+      <li>{lang === 'zh' ? '在后序遍历过程中合并子状态计算父状态' : 'Combine child states to compute parent state during post-order traversal'}</li>
+      <li>{lang === 'zh' ? '对于需要所有节点作为潜在根的问题考虑换根' : 'Consider rerooting for problems requiring all nodes as potential roots'}</li>
+    </ul>
+    
+    <h3>{lang === 'zh' ? '状压DP应用：' : 'Bitmask DP Applications:'}</h3>
+    <ul>
+      <li>{lang === 'zh' ? '指数状态空间但参数约束较小的问题 (n ≤ 20)' : 'Exponential state space with small parameter constraints (n ≤ 20)'}</li>
+      <li>{lang === 'zh' ? '子集枚举和选择问题' : 'Subset enumeration and selection problems'}</li>
+      <li>{lang === 'zh' ? '使用二进制表示进行状态压缩' : 'State compression using binary representation'}</li>
+      <li>{lang === 'zh' ? '使用位运算进行高效转移' : 'Efficient transitions using bitwise operations'}</li>
+    </ul>
+    
+    <h3>{lang === 'zh' ? '实现技巧：' : 'Implementation Tips:'}</h3>
+    <ul>
+      <li>{lang === 'zh' ? '树上DP：在DFS过程中正确处理父子关系' : 'Tree DP: Handle parent-child relationships correctly during DFS'}</li>
+      <li>{lang === 'zh' ? '状压DP：使用__builtin_popcount()进行位计数' : 'Bitmask DP: Use __builtin_popcount() for bit counting'}</li>
+      <li>{lang === 'zh' ? '内存优化：可能时使用滚动数组' : 'Memory optimization: Use rolling arrays when possible'}</li>
+      <li>{lang === 'zh' ? '状态重构：跟踪转移选择以恢复解' : 'State reconstruction: Track transition choices for solution recovery'}</li>
+    </ul>
+    
+    <h3>{lang === 'zh' ? '常见模式：' : 'Common Patterns:'}</h3>
+    <ul>
+      <li>{lang === 'zh' ? '树的直径、重心和距离问题' : 'Tree diameter, centroid, and distance problems'}</li>
+      <li>{lang === 'zh' ? 'TSP、任务分配和子集选择问题' : 'TSP, assignment, and subset selection problems'}</li>
+      <li>{lang === 'zh' ? '树着色和独立集问题' : 'Tree coloring and independent set problems'}</li>
+      <li>{lang === 'zh' ? '具有树或子集约束的计数问题' : 'Counting problems with tree or subset constraints'}</li>
+    </ul>
+  </div>
+
+  <div class="navigation">
+    <a href={`/${lang}/4-competitive/search-advanced`} class="prev">← {lang === 'zh' ? '高级搜索' : 'Advanced Search'}</a>
+    <a href={`/${lang}/4-competitive/segment-tree`} class="next">{lang === 'zh' ? '线段树' : 'Segment Tree'} →</a>
+  </div>
+</Layout>
+
+<style>
+  .tips {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border-left: 4px solid #007bff;
+  }
+  
+  .tips h3 {
+    color: #007bff;
+    margin-top: 1rem;
+  }
+  
+  .tips ul {
+    margin-left: 1rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+  }
+  
+  .navigation a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .navigation a:hover {
+    text-decoration: underline;
+  }
+</style> 

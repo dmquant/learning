@@ -1,0 +1,782 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { ui } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } }
+  ];
+}
+
+const { lang } = Astro.params;
+const t = ui[lang as keyof typeof ui];
+---
+
+<Layout title={lang === 'zh' ? "高级树问题 - 世界级算法" : "Advanced Tree Problems - World Class Algorithms"}>
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href={`/${lang}`}>{t['nav.home']}</a> &gt; 
+      <a href={`/${lang}/6-world-class`}>{lang === 'zh' ? '世界级算法' : 'World Class'}</a> &gt; 
+      <span>{lang === 'zh' ? '高级树问题' : 'Advanced Tree Problems'}</span>
+    </nav>
+
+    <div class="header-section">
+      <h1 class="main-title">
+        {lang === 'zh' ? '高级树问题' : 'Advanced Tree Problems'}
+      </h1>
+      <p class="subtitle">
+        {lang === 'zh' 
+          ? '掌握DFS序、树与线段树结合等高级树算法技巧'
+          : 'Master DFS ordering, tree + segment tree combinations, and advanced tree algorithms'
+        }
+      </p>
+    </div>
+
+    <div class="overview-section">
+      <h2>{lang === 'zh' ? '概述' : 'Overview'}</h2>
+      <p>
+        {lang === 'zh' 
+          ? '高级树问题是算法竞赛中的核心内容，涉及DFS序列化、树与数据结构结合、复杂树算法等技术。本章节深入探讨这些高级技巧，为解决世界级竞赛中的复杂树问题提供强大工具。'
+          : 'Advanced tree problems are core content in competitive programming, involving DFS serialization, tree-data structure combinations, and complex tree algorithms. This chapter explores these advanced techniques for solving complex tree problems in world-class competitions.'
+        }
+      </p>
+    </div>
+
+    <div class="content-section">
+      <h2>{lang === 'zh' ? '核心内容' : 'Core Content'}</h2>
+
+      <div class="topic-section">
+        <h3>{lang === 'zh' ? '1. DFS序与树的线性化' : '1. DFS Ordering and Tree Linearization'}</h3>
+        <p>
+          {lang === 'zh' 
+            ? 'DFS序将树结构转换为线性序列，使得树上的子树查询转化为区间查询。'
+            : 'DFS ordering converts tree structure to linear sequence, transforming subtree queries to range queries.'
+          }
+        </p>
+
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// DFS序与树的线性化' : '// DFS ordering and tree linearization'}
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class TreeDFS {
+private:
+    vector<vector<int>> adj;
+    vector<int> dfs_order, start_time, end_time;
+    vector<int> depth, parent;
+    int timer;
+    
+    void dfs(int u, int p, int d) {
+        start_time[u] = timer;
+        dfs_order[timer++] = u;
+        depth[u] = d;
+        parent[u] = p;
+        
+        for (int v : adj[u]) {
+            if (v != p) {
+                dfs(v, u, d + 1);
+            }
+        }
+        
+        end_time[u] = timer - 1;
+    }
+    
+public:
+    void build(vector<vector<int>>& edges, int root = 0) {
+        int n = edges.size() + 1;
+        adj.resize(n);
+        dfs_order.resize(n);
+        start_time.resize(n);
+        end_time.resize(n);
+        depth.resize(n);
+        parent.resize(n);
+        timer = 0;
+        
+        for (auto& edge : edges) {
+            adj[edge[0]].push_back(edge[1]);
+            adj[edge[1]].push_back(edge[0]);
+        }
+        
+        dfs(root, -1, 0);
+    }
+    
+    ${lang === 'zh' ? '// 检查u是否是v的祖先' : '// Check if u is ancestor of v'}
+    bool isAncestor(int u, int v) {
+        return start_time[u] <= start_time[v] && end_time[v] <= end_time[u];
+    }
+    
+    ${lang === 'zh' ? '// 获取子树的DFS序区间' : '// Get DFS range of subtree'}
+    pair<int, int> getSubtreeRange(int u) {
+        return {start_time[u], end_time[u]};
+    }
+    
+    void printDFSOrder() {
+        cout << "${lang === 'zh' ? 'DFS序：' : 'DFS order:'} ";
+        for (int i = 0; i < dfs_order.size(); i++) {
+            cout << dfs_order[i] << " ";
+        }
+        cout << endl;
+    }
+};
+
+int main() {
+    vector<vector<int>> edges = {{0,1}, {0,2}, {1,3}, {1,4}, {2,5}};
+    TreeDFS treeDFS;
+    treeDFS.build(edges);
+    treeDFS.printDFSOrder();
+    
+    cout << "${lang === 'zh' ? '节点1的子树区间：[' : 'Node 1 subtree range: ['}" 
+         << treeDFS.getSubtreeRange(1).first << ", " 
+         << treeDFS.getSubtreeRange(1).second << "]" << endl;
+    
+    return 0;
+}`}
+          language="cpp"
+        />
+      </div>
+
+      <div class="topic-section">
+        <h3>{lang === 'zh' ? '2. 树与线段树结合' : '2. Tree + Segment Tree'}</h3>
+        <p>
+          {lang === 'zh' 
+            ? '通过DFS序将树问题转化为线段树问题，支持子树更新和查询操作。'
+            : 'Transform tree problems to segment tree problems using DFS ordering, supporting subtree updates and queries.'
+          }
+        </p>
+
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// 树与线段树结合解决子树问题' : '// Tree + Segment Tree for subtree problems'}
+#include <iostream>
+#include <vector>
+using namespace std;
+
+class TreeSegmentTree {
+private:
+    vector<vector<int>> adj;
+    vector<int> start_time, end_time, values;
+    vector<long long> tree, lazy;
+    int n, timer;
+    
+    void dfs(int u, int p) {
+        start_time[u] = timer++;
+        for (int v : adj[u]) {
+            if (v != p) dfs(v, u);
+        }
+        end_time[u] = timer - 1;
+    }
+    
+    void build(int node, int start, int end) {
+        if (start == end) {
+            tree[node] = values[start];
+        } else {
+            int mid = (start + end) / 2;
+            build(2*node, start, mid);
+            build(2*node+1, mid+1, end);
+            tree[node] = tree[2*node] + tree[2*node+1];
+        }
+    }
+    
+    void updateLazy(int node, int start, int end) {
+        if (lazy[node] != 0) {
+            tree[node] += lazy[node] * (end - start + 1);
+            if (start != end) {
+                lazy[2*node] += lazy[node];
+                lazy[2*node+1] += lazy[node];
+            }
+            lazy[node] = 0;
+        }
+    }
+    
+    void updateRange(int node, int start, int end, int l, int r, long long val) {
+        updateLazy(node, start, end);
+        if (start > r || end < l) return;
+        
+        if (start >= l && end <= r) {
+            lazy[node] += val;
+            updateLazy(node, start, end);
+            return;
+        }
+        
+        int mid = (start + end) / 2;
+        updateRange(2*node, start, mid, l, r, val);
+        updateRange(2*node+1, mid+1, end, l, r, val);
+        
+        updateLazy(2*node, start, mid);
+        updateLazy(2*node+1, mid+1, end);
+        tree[node] = tree[2*node] + tree[2*node+1];
+    }
+    
+    long long queryRange(int node, int start, int end, int l, int r) {
+        if (start > r || end < l) return 0;
+        updateLazy(node, start, end);
+        
+        if (start >= l && end <= r) return tree[node];
+        
+        int mid = (start + end) / 2;
+        return queryRange(2*node, start, mid, l, r) + 
+               queryRange(2*node+1, mid+1, end, l, r);
+    }
+    
+public:
+    void initialize(vector<vector<int>>& edges, vector<int>& nodeValues, int root = 0) {
+        n = edges.size() + 1;
+        adj.resize(n);
+        start_time.resize(n);
+        end_time.resize(n);
+        values.resize(n);
+        tree.resize(4 * n);
+        lazy.resize(4 * n);
+        timer = 0;
+        
+        for (auto& edge : edges) {
+            adj[edge[0]].push_back(edge[1]);
+            adj[edge[1]].push_back(edge[0]);
+        }
+        
+        dfs(root, -1);
+        
+        ${lang === 'zh' ? '// 按DFS序重排值' : '// Rearrange values by DFS order'}
+        for (int i = 0; i < n; i++) {
+            values[start_time[i]] = nodeValues[i];
+        }
+        
+        build(1, 0, n - 1);
+    }
+    
+    ${lang === 'zh' ? '// 子树更新' : '// Subtree update'}
+    void updateSubtree(int u, long long val) {
+        updateRange(1, 0, n - 1, start_time[u], end_time[u], val);
+    }
+    
+    ${lang === 'zh' ? '// 子树查询' : '// Subtree query'}
+    long long querySubtree(int u) {
+        return queryRange(1, 0, n - 1, start_time[u], end_time[u]);
+    }
+};
+
+int main() {
+    vector<vector<int>> edges = {{0,1}, {0,2}, {1,3}, {1,4}, {2,5}};
+    vector<int> values = {1, 2, 3, 4, 5, 6};
+    
+    TreeSegmentTree tst;
+    tst.initialize(edges, values);
+    
+    cout << "${lang === 'zh' ? '节点1子树和：' : 'Node 1 subtree sum:'} " << tst.querySubtree(1) << endl;
+    
+    tst.updateSubtree(1, 10);
+    cout << "${lang === 'zh' ? '更新后节点1子树和：' : 'After update, node 1 subtree sum:'} " << tst.querySubtree(1) << endl;
+    
+    return 0;
+}`}
+          language="cpp"
+        />
+      </div>
+
+      <div class="topic-section">
+        <h3>{lang === 'zh' ? '3. 高级树算法' : '3. Advanced Tree Algorithms'}</h3>
+        
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// 树链剖分与LCA' : '// Tree chain decomposition and LCA'}
+#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class TreeChainDecomposition {
+private:
+    vector<vector<int>> adj;
+    vector<int> parent, depth, heavy, head, pos;
+    int timer;
+    
+    int dfs1(int u) {
+        int size = 1, maxSize = 0;
+        for (int v : adj[u]) {
+            if (v != parent[u]) {
+                parent[v] = u;
+                depth[v] = depth[u] + 1;
+                int childSize = dfs1(v);
+                if (childSize > maxSize) {
+                    maxSize = childSize;
+                    heavy[u] = v;
+                }
+                size += childSize;
+            }
+        }
+        return size;
+    }
+    
+    void dfs2(int u, int h) {
+        head[u] = h;
+        pos[u] = timer++;
+        
+        if (heavy[u] != -1) {
+            dfs2(heavy[u], h);
+        }
+        
+        for (int v : adj[u]) {
+            if (v != parent[u] && v != heavy[u]) {
+                dfs2(v, v);
+            }
+        }
+    }
+    
+public:
+    void build(vector<vector<int>>& edges, int root = 0) {
+        int n = edges.size() + 1;
+        adj.resize(n);
+        parent.resize(n);
+        depth.resize(n);
+        heavy.assign(n, -1);
+        head.resize(n);
+        pos.resize(n);
+        timer = 0;
+        
+        for (auto& edge : edges) {
+            adj[edge[0]].push_back(edge[1]);
+            adj[edge[1]].push_back(edge[0]);
+        }
+        
+        parent[root] = -1;
+        depth[root] = 0;
+        dfs1(root);
+        dfs2(root, root);
+    }
+    
+    int lca(int u, int v) {
+        while (head[u] != head[v]) {
+            if (depth[head[u]] > depth[head[v]]) {
+                u = parent[head[u]];
+            } else {
+                v = parent[head[v]];
+            }
+        }
+        return depth[u] < depth[v] ? u : v;
+    }
+    
+    int distance(int u, int v) {
+        return depth[u] + depth[v] - 2 * depth[lca(u, v)];
+    }
+};
+
+${lang === 'zh' ? '// 树的直径和中心' : '// Tree diameter and center'}
+class TreeDiameterCenter {
+private:
+    vector<vector<int>> adj;
+    vector<int> dist;
+    
+    pair<int, int> bfs(int start) {
+        fill(dist.begin(), dist.end(), -1);
+        queue<int> q;
+        q.push(start);
+        dist[start] = 0;
+        
+        int farthest = start, maxDist = 0;
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            
+            for (int v : adj[u]) {
+                if (dist[v] == -1) {
+                    dist[v] = dist[u] + 1;
+                    q.push(v);
+                    if (dist[v] > maxDist) {
+                        maxDist = dist[v];
+                        farthest = v;
+                    }
+                }
+            }
+        }
+        
+        return {farthest, maxDist};
+    }
+    
+public:
+    void build(vector<vector<int>>& edges) {
+        int n = edges.size() + 1;
+        adj.resize(n);
+        dist.resize(n);
+        
+        for (auto& edge : edges) {
+            adj[edge[0]].push_back(edge[1]);
+            adj[edge[1]].push_back(edge[0]);
+        }
+    }
+    
+    pair<int, vector<int>> findDiameter() {
+        ${lang === 'zh' ? '// 第一次BFS找到最远点' : '// First BFS to find farthest point'}
+        auto [u, _] = bfs(0);
+        
+        ${lang === 'zh' ? '// 第二次BFS找到直径' : '// Second BFS to find diameter'}
+        auto [v, diameter] = bfs(u);
+        
+        ${lang === 'zh' ? '// 重构直径路径' : '// Reconstruct diameter path'}
+        vector<int> path;
+        int curr = v;
+        while (curr != u) {
+            path.push_back(curr);
+            for (int next : adj[curr]) {
+                if (dist[next] == dist[curr] - 1) {
+                    curr = next;
+                    break;
+                }
+            }
+        }
+        path.push_back(u);
+        reverse(path.begin(), path.end());
+        
+        return {diameter, path};
+    }
+    
+    vector<int> findCenter() {
+        auto [diameter, path] = findDiameter();
+        vector<int> centers;
+        
+        int n = path.size();
+        if (n % 2 == 1) {
+            centers.push_back(path[n / 2]);
+        } else {
+            centers.push_back(path[n / 2 - 1]);
+            centers.push_back(path[n / 2]);
+        }
+        
+        return centers;
+    }
+};
+
+int main() {
+    vector<vector<int>> edges = {{0,1}, {1,2}, {2,3}, {1,4}, {4,5}};
+    
+    ${lang === 'zh' ? '// 测试树链剖分' : '// Test tree chain decomposition'}
+    TreeChainDecomposition tcd;
+    tcd.build(edges);
+    
+    cout << "${lang === 'zh' ? '节点3和5的LCA：' : 'LCA of nodes 3 and 5:'} " << tcd.lca(3, 5) << endl;
+    cout << "${lang === 'zh' ? '节点3和5的距离：' : 'Distance between nodes 3 and 5:'} " << tcd.distance(3, 5) << endl;
+    
+    ${lang === 'zh' ? '// 测试直径和中心' : '// Test diameter and center'}
+    TreeDiameterCenter tdc;
+    tdc.build(edges);
+    
+    auto [diameter, path] = tdc.findDiameter();
+    cout << "${lang === 'zh' ? '树的直径：' : 'Tree diameter:'} " << diameter << endl;
+    
+    vector<int> centers = tdc.findCenter();
+    cout << "${lang === 'zh' ? '树的中心：' : 'Tree centers:'} ";
+    for (int center : centers) {
+        cout << center << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}`}
+          language="cpp"
+        />
+      </div>
+    </div>
+
+    <div class="tips-section">
+      <h2>{lang === 'zh' ? '解题技巧' : 'Problem-Solving Tips'}</h2>
+      <div class="tips-grid">
+        <div class="tip-card">
+          <h3>🎯 {lang === 'zh' ? 'DFS序应用' : 'DFS Order Applications'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '利用DFS序将树问题转化为序列问题，子树操作变为区间操作，大大简化问题复杂度。'
+              : 'Use DFS ordering to transform tree problems to sequence problems, converting subtree operations to range operations, greatly simplifying complexity.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>⚡ {lang === 'zh' ? '数据结构结合' : 'Data Structure Integration'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '树与线段树、树状数组等数据结构结合，可以高效处理树上的区间查询和更新操作。'
+              : 'Combining trees with segment trees, Fenwick trees, and other data structures enables efficient range queries and updates on trees.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>🔄 {lang === 'zh' ? '树的性质' : 'Tree Properties'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '深入理解树的性质：直径、中心、重心等，这些性质在解决复杂树问题时非常有用。'
+              : 'Deeply understand tree properties: diameter, center, centroid, etc. These properties are very useful for solving complex tree problems.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>🧮 {lang === 'zh' ? '算法优化' : 'Algorithm Optimization'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '使用重链剖分、LCA预处理等技术优化树上查询，将复杂度从O(n)降低到O(log n)。'
+              : 'Use heavy-light decomposition, LCA preprocessing, and other techniques to optimize tree queries, reducing complexity from O(n) to O(log n).'
+            }
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="navigation">
+      <a href={`/${lang}/6-world-class/advanced-dp`} class="nav-button prev">
+        ← {lang === 'zh' ? '高级动态规划' : 'Advanced DP'}
+      </a>
+      <a href={`/${lang}/6-world-class`} class="nav-button index">
+        📚 {lang === 'zh' ? '章节目录' : 'Chapter Index'}
+      </a>
+      <a href={`/${lang}/6-world-class/segment-tree-advanced`} class="nav-button next">
+        {lang === 'zh' ? '高级线段树' : 'Advanced Segment Trees'} →
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .breadcrumb {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .breadcrumb a:hover {
+    color: #3730a3;
+    text-decoration: underline;
+  }
+
+  .header-section {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .main-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #dc2626 0%, #ea580c 25%, #d97706 50%, #ca8a04 75%, #65a30d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+  }
+
+  .subtitle {
+    font-size: 1.25rem;
+    color: #6b7280;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .overview-section {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #f59e0b;
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin: 2rem 0 3rem 0;
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1);
+  }
+
+  .overview-section h2 {
+    color: #92400e;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .overview-section p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #78350f;
+  }
+
+  .content-section {
+    margin: 4rem 0;
+  }
+
+  .content-section > h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 3rem;
+    color: #1e293b;
+    text-align: center;
+    position: relative;
+  }
+
+  .content-section > h2::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #dc2626, #ea580c, #d97706);
+    border-radius: 2px;
+  }
+
+  .topic-section {
+    margin: 3rem 0;
+    padding: 2rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border-left: 4px solid #dc2626;
+  }
+
+  .topic-section h3 {
+    color: #dc2626;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .topic-section p {
+    color: #4b5563;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .tips-section {
+    margin: 4rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #e5e7eb;
+  }
+
+  .tips-section h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #1e293b;
+    text-align: center;
+  }
+
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .tip-card {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #0ea5e9;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: transform 0.2s ease;
+  }
+
+  .tip-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .tip-card h3 {
+    color: #0c4a6e;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .tip-card p {
+    color: #075985;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #e5e7eb;
+    gap: 1rem;
+  }
+
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.875rem 1.75rem;
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px 0 rgba(220, 38, 38, 0.39);
+  }
+
+  .nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px 0 rgba(220, 38, 38, 0.5);
+  }
+
+  .nav-button.index {
+    background: linear-gradient(135deg, #059669, #0d9488);
+    box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.39);
+  }
+
+  .nav-button.index:hover {
+    box-shadow: 0 8px 25px 0 rgba(5, 150, 105, 0.5);
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 0.5rem;
+    }
+
+    .main-title {
+      font-size: 2.5rem;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+    }
+
+    .overview-section {
+      padding: 1.5rem;
+      margin: 1.5rem 0 2rem 0;
+    }
+
+    .topic-section {
+      padding: 1.5rem;
+    }
+
+    .tips-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style> 

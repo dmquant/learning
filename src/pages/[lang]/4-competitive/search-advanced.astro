@@ -1,0 +1,565 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { ui } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  return [
+    {params: {lang: 'en'}},
+    {params: {lang: 'zh'}}
+  ];
+}
+
+const { lang } = Astro.params;
+const t = ui[lang as keyof typeof ui];
+---
+
+<Layout title={lang === 'en' ? 'Advanced Search Algorithms' : '高级搜索算法'}>
+  <div class="breadcrumb">
+    <a href={`/${lang}`}>{t['nav.home']}</a> &gt; 
+    <a href={`/${lang}/4-competitive`}>{lang === 'zh' ? '竞赛编程' : 'Competitive Programming'}</a> &gt; 
+    {lang === 'en' ? 'Advanced Search' : '高级搜索'}
+  </div>
+
+  <h1>{lang === 'en' ? 'Advanced Search Algorithms' : '高级搜索算法'}</h1>
+  
+  <div class="overview">
+    <p>
+      {lang === 'en' 
+        ? 'Advanced search algorithms extend beyond basic DFS and BFS to include specialized techniques like A* search, bidirectional search, and iterative deepening. These algorithms are essential for solving complex pathfinding and optimization problems efficiently.'
+        : '高级搜索算法超越了基本的DFS和BFS，包括A*搜索、双向搜索和迭代加深等专门技术。这些算法对于高效解决复杂的路径查找和优化问题至关重要。'
+      }
+    </p>
+  </div>
+
+  <h2>{lang === 'en' ? 'A* Search Algorithm' : 'A*搜索算法'}</h2>
+  
+  <p>
+    {lang === 'en'
+      ? 'A* search uses heuristics to guide the search towards the goal, combining the benefits of Dijkstra\'s algorithm with informed search strategies.'
+      : 'A*搜索使用启发式函数引导搜索朝向目标，结合了Dijkstra算法的优点和有信息搜索策略。'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'en' ? 'A* Search Implementation' : 'A*搜索实现'}
+    code={`#include <iostream>
+#include <vector>
+#include <queue>
+#include <unordered_map>
+#include <cmath>
+using namespace std;
+
+struct Point {
+    int x, y;
+    
+    Point(int x = 0, int y = 0) : x(x), y(y) {}
+    
+    bool operator==(const Point& other) const {
+        return x == other.x && y == other.y;
+    }
+    
+    // ${lang === 'en' ? 'Manhattan distance heuristic' : '曼哈顿距离启发式'}
+    int manhattanDistance(const Point& other) const {
+        return abs(x - other.x) + abs(y - other.y);
+    }
+    
+    // ${lang === 'en' ? 'Euclidean distance heuristic' : '欧几里得距离启发式'}
+    double euclideanDistance(const Point& other) const {
+        return sqrt((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y));
+    }
+};
+
+// ${lang === 'en' ? 'Hash function for Point' : 'Point的哈希函数'}
+struct PointHash {
+    size_t operator()(const Point& p) const {
+        return hash<int>()(p.x) ^ (hash<int>()(p.y) << 1);
+    }
+};
+
+struct AStarNode {
+    Point pos;
+    int gCost; // ${lang === 'en' ? 'cost from start' : '从起点的代价'}
+    int hCost; // ${lang === 'en' ? 'heuristic cost to goal' : '到目标的启发式代价'}
+    Point parent;
+    
+    AStarNode(Point p, int g, int h, Point par) 
+        : pos(p), gCost(g), hCost(h), parent(par) {}
+    
+    int fCost() const { return gCost + hCost; }
+    
+    bool operator>(const AStarNode& other) const {
+        return fCost() > other.fCost();
+    }
+};
+
+class AStar {
+private:
+    vector<vector<int>> grid;
+    int rows, cols;
+    vector<Point> directions = {{0,1}, {1,0}, {0,-1}, {-1,0}, 
+                               {1,1}, {1,-1}, {-1,1}, {-1,-1}}; // ${lang === 'en' ? '8-directional' : '8方向'}
+    
+public:
+    AStar(vector<vector<int>>& g) : grid(g), rows(g.size()), cols(g[0].size()) {}
+    
+    bool isValid(const Point& p) {
+        return p.x >= 0 && p.x < rows && p.y >= 0 && p.y < cols && grid[p.x][p.y] == 0;
+    }
+    
+    int getMoveCost(const Point& from, const Point& to) {
+        // ${lang === 'en' ? 'Diagonal moves cost more' : '对角线移动代价更高'}
+        if (abs(from.x - to.x) + abs(from.y - to.y) == 2) {
+            return 14; // ${lang === 'en' ? 'approximately sqrt(2) * 10' : '约为sqrt(2) * 10'}
+        }
+        return 10;
+    }
+    
+    vector<Point> findPath(Point start, Point goal) {
+        priority_queue<AStarNode, vector<AStarNode>, greater<AStarNode>> openSet;
+        unordered_map<Point, int, PointHash> gScore;
+        unordered_map<Point, Point, PointHash> cameFrom;
+        
+        openSet.push(AStarNode(start, 0, start.manhattanDistance(goal), Point(-1, -1)));
+        gScore[start] = 0;
+        
+        while (!openSet.empty()) {
+            AStarNode current = openSet.top();
+            openSet.pop();
+            
+            if (current.pos == goal) {
+                // ${lang === 'en' ? 'Reconstruct path' : '重构路径'}
+                vector<Point> path;
+                Point curr = goal;
+                while (!(curr.x == -1 && curr.y == -1)) {
+                    path.push_back(curr);
+                    curr = cameFrom[curr];
+                }
+                reverse(path.begin(), path.end());
+                return path;
+            }
+            
+            // ${lang === 'en' ? 'Skip if we found a better path already' : '如果已经找到更好的路径则跳过'}
+            if (gScore.count(current.pos) && current.gCost > gScore[current.pos]) {
+                continue;
+            }
+            
+            for (const Point& dir : directions) {
+                Point neighbor(current.pos.x + dir.x, current.pos.y + dir.y);
+                
+                if (!isValid(neighbor)) continue;
+                
+                int tentativeG = current.gCost + getMoveCost(current.pos, neighbor);
+                
+                if (!gScore.count(neighbor) || tentativeG < gScore[neighbor]) {
+                    gScore[neighbor] = tentativeG;
+                    cameFrom[neighbor] = current.pos;
+                    
+                    int hCost = neighbor.manhattanDistance(goal);
+                    openSet.push(AStarNode(neighbor, tentativeG, hCost, current.pos));
+                }
+            }
+        }
+        
+        return {}; // ${lang === 'en' ? 'No path found' : '未找到路径'}
+    }
+    
+    void printPath(const vector<Point>& path) {
+        if (path.empty()) {
+            cout << "${lang === 'en' ? 'No path found!' : '未找到路径！'}" << endl;
+            return;
+        }
+        
+        vector<vector<char>> display(rows, vector<char>(cols, '.'));
+        
+        // ${lang === 'en' ? 'Mark obstacles' : '标记障碍物'}
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                if (grid[i][j] == 1) display[i][j] = '#';
+            }
+        }
+        
+        // ${lang === 'en' ? 'Mark path' : '标记路径'}
+        for (int i = 0; i < path.size(); i++) {
+            if (i == 0) display[path[i].x][path[i].y] = 'S'; // ${lang === 'en' ? 'Start' : '起点'}
+            else if (i == path.size() - 1) display[path[i].x][path[i].y] = 'G'; // ${lang === 'en' ? 'Goal' : '终点'}
+            else display[path[i].x][path[i].y] = '*';
+        }
+        
+        // ${lang === 'en' ? 'Print grid' : '打印网格'}
+        for (const auto& row : display) {
+            for (char c : row) {
+                cout << c << " ";
+            }
+            cout << endl;
+        }
+        
+        cout << "${lang === 'en' ? 'Path length: ' : '路径长度: '}" << path.size() << endl;
+    }
+};
+
+int main() {
+    // ${lang === 'en' ? 'Create a grid with obstacles (1 = obstacle, 0 = free)' : '创建带障碍物的网格（1=障碍物，0=空闲）'}
+    vector<vector<int>> grid = {
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 1, 0, 0, 0, 0, 0},
+        {0, 0, 0, 0, 0, 0, 0, 0, 0, 0}
+    };
+    
+    AStar astar(grid);
+    Point start(0, 0);
+    Point goal(9, 9);
+    
+    cout << "${lang === 'en' ? 'Finding path from (0,0) to (9,9) using A* search:' : '使用A*搜索从(0,0)到(9,9)找路径:'}" << endl;
+    cout << "${lang === 'en' ? 'Legend: S=Start, G=Goal, *=Path, #=Obstacle, .=Free' : '图例: S=起点, G=终点, *=路径, #=障碍物, .=空闲'}" << endl << endl;
+    
+    vector<Point> path = astar.findPath(start, goal);
+    astar.printPath(path);
+    
+    return 0;
+}`}
+    explanation={lang === 'en' 
+      ? 'A* search uses f(n) = g(n) + h(n) where g(n) is the actual cost from start and h(n) is the heuristic estimate to goal. The algorithm guarantees optimal paths when the heuristic is admissible (never overestimates).'
+      : 'A*搜索使用f(n) = g(n) + h(n)，其中g(n)是从起点的实际代价，h(n)是到目标的启发式估计。当启发式函数是可接受的（从不高估）时，算法保证最优路径。'
+    }
+    output={`${lang === 'en' ? 'Finding path from (0,0) to (9,9) using A* search:' : '使用A*搜索从(0,0)到(9,9)找路径:'}
+${lang === 'en' ? 'Legend: S=Start, G=Goal, *=Path, #=Obstacle, .=Free' : '图例: S=起点, G=终点, *=路径, #=障碍物, .=空闲'}
+
+S . . . # . . . . . 
+* . . . # . . . . . 
+* . . . # . . . . . 
+* . . . # . . . . . 
+* * * * . . . . . . 
+. . . . # . . . . . 
+. . . . # . * * * * 
+. . . . # . . . . * 
+. . . . # . . . . * 
+. . . . . . . . . G 
+${lang === 'en' ? 'Path length: ' : '路径长度: '}14`}
+  />
+
+  <h2>{lang === 'en' ? 'Bidirectional Search' : '双向搜索'}</h2>
+  
+  <p>
+    {lang === 'en'
+      ? 'Bidirectional search runs two simultaneous searches from start and goal, meeting in the middle to reduce the search space exponentially.'
+      : '双向搜索从起点和终点同时运行两个搜索，在中间相遇以指数级减少搜索空间。'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'en' ? 'Bidirectional BFS Implementation' : '双向BFS实现'}
+    code={`#include <iostream>
+#include <vector>
+#include <queue>
+#include <unordered_set>
+#include <unordered_map>
+using namespace std;
+
+class BidirectionalBFS {
+private:
+    vector<vector<int>> graph;
+    int n;
+    
+public:
+    BidirectionalBFS(vector<vector<int>>& g) : graph(g), n(g.size()) {}
+    
+    vector<int> findPath(int start, int goal) {
+        if (start == goal) return {start};
+        
+        // ${lang === 'en' ? 'Two queues for forward and backward search' : '正向和反向搜索的两个队列'}
+        queue<int> forwardQueue, backwardQueue;
+        unordered_set<int> forwardVisited, backwardVisited;
+        unordered_map<int, int> forwardParent, backwardParent;
+        
+        forwardQueue.push(start);
+        backwardQueue.push(goal);
+        forwardVisited.insert(start);
+        backwardVisited.insert(goal);
+        forwardParent[start] = -1;
+        backwardParent[goal] = -1;
+        
+        while (!forwardQueue.empty() || !backwardQueue.empty()) {
+            // ${lang === 'en' ? 'Expand forward search' : '扩展正向搜索'}
+            if (!forwardQueue.empty()) {
+                int meetingPoint = expandLevel(forwardQueue, forwardVisited, backwardVisited, 
+                                             forwardParent, true);
+                if (meetingPoint != -1) {
+                    return constructPath(meetingPoint, forwardParent, backwardParent);
+                }
+            }
+            
+            // ${lang === 'en' ? 'Expand backward search' : '扩展反向搜索'}
+            if (!backwardQueue.empty()) {
+                int meetingPoint = expandLevel(backwardQueue, backwardVisited, forwardVisited, 
+                                             backwardParent, false);
+                if (meetingPoint != -1) {
+                    return constructPath(meetingPoint, forwardParent, backwardParent);
+                }
+            }
+        }
+        
+        return {}; // ${lang === 'en' ? 'No path found' : '未找到路径'}
+    }
+    
+private:
+    int expandLevel(queue<int>& q, unordered_set<int>& visited, 
+                   unordered_set<int>& otherVisited, unordered_map<int, int>& parent, 
+                   bool isForward) {
+        int levelSize = q.size();
+        
+        for (int i = 0; i < levelSize; i++) {
+            int current = q.front();
+            q.pop();
+            
+            for (int neighbor : graph[current]) {
+                if (otherVisited.count(neighbor)) {
+                    // ${lang === 'en' ? 'Found intersection!' : '找到交集！'}
+                    parent[neighbor] = current;
+                    return neighbor;
+                }
+                
+                if (!visited.count(neighbor)) {
+                    visited.insert(neighbor);
+                    parent[neighbor] = current;
+                    q.push(neighbor);
+                }
+            }
+        }
+        
+        return -1; // ${lang === 'en' ? 'No intersection found in this level' : '在此层未找到交集'}
+    }
+    
+    vector<int> constructPath(int meetingPoint, unordered_map<int, int>& forwardParent, 
+                             unordered_map<int, int>& backwardParent) {
+        vector<int> path;
+        
+        // ${lang === 'en' ? 'Build path from start to meeting point' : '构建从起点到交汇点的路径'}
+        vector<int> forwardPath;
+        int current = meetingPoint;
+        while (current != -1) {
+            forwardPath.push_back(current);
+            current = forwardParent[current];
+        }
+        reverse(forwardPath.begin(), forwardPath.end());
+        
+        // ${lang === 'en' ? 'Build path from meeting point to goal' : '构建从交汇点到终点的路径'}
+        vector<int> backwardPath;
+        current = backwardParent[meetingPoint];
+        while (current != -1) {
+            backwardPath.push_back(current);
+            current = backwardParent[current];
+        }
+        
+        // ${lang === 'en' ? 'Combine paths' : '合并路径'}
+        path = forwardPath;
+        path.insert(path.end(), backwardPath.begin(), backwardPath.end());
+        
+        return path;
+    }
+};
+
+// ${lang === 'en' ? 'Iterative Deepening DFS' : '迭代加深DFS'}
+class IterativeDeepeningDFS {
+private:
+    vector<vector<int>> graph;
+    int n;
+    
+public:
+    IterativeDeepeningDFS(vector<vector<int>>& g) : graph(g), n(g.size()) {}
+    
+    vector<int> findPath(int start, int goal, int maxDepth = 20) {
+        for (int depth = 0; depth <= maxDepth; depth++) {
+            vector<bool> visited(n, false);
+            vector<int> path;
+            
+            if (dfsLimited(start, goal, depth, visited, path)) {
+                return path;
+            }
+        }
+        
+        return {}; // ${lang === 'en' ? 'No path found within depth limit' : '在深度限制内未找到路径'}
+    }
+    
+private:
+    bool dfsLimited(int current, int goal, int depth, vector<bool>& visited, vector<int>& path) {
+        path.push_back(current);
+        
+        if (current == goal) {
+            return true;
+        }
+        
+        if (depth == 0) {
+            path.pop_back();
+            return false;
+        }
+        
+        visited[current] = true;
+        
+        for (int neighbor : graph[current]) {
+            if (!visited[neighbor]) {
+                if (dfsLimited(neighbor, goal, depth - 1, visited, path)) {
+                    return true;
+                }
+            }
+        }
+        
+        visited[current] = false;
+        path.pop_back();
+        return false;
+    }
+};
+
+int main() {
+    // ${lang === 'en' ? 'Create a sample graph' : '创建示例图'}
+    vector<vector<int>> graph = {
+        {1, 2},       // 0 -> 1, 2
+        {0, 3, 4},    // 1 -> 0, 3, 4
+        {0, 5, 6},    // 2 -> 0, 5, 6
+        {1, 7},       // 3 -> 1, 7
+        {1, 7},       // 4 -> 1, 7
+        {2, 8},       // 5 -> 2, 8
+        {2, 8},       // 6 -> 2, 8
+        {3, 4, 9},    // 7 -> 3, 4, 9
+        {5, 6, 9},    // 8 -> 5, 6, 9
+        {7, 8}        // 9 -> 7, 8
+    };
+    
+    BidirectionalBFS bidiBFS(graph);
+    IterativeDeepeningDFS iddfs(graph);
+    
+    int start = 0, goal = 9;
+    
+    // ${lang === 'en' ? 'Test bidirectional BFS' : '测试双向BFS'}
+    cout << "${lang === 'en' ? 'Bidirectional BFS path from ' : '双向BFS从 '}" << start << "${lang === 'en' ? ' to ' : ' 到 '}" << goal << ": ";
+    vector<int> bidiPath = bidiBFS.findPath(start, goal);
+    if (!bidiPath.empty()) {
+        for (int i = 0; i < bidiPath.size(); i++) {
+            if (i > 0) cout << " -> ";
+            cout << bidiPath[i];
+        }
+        cout << " (${lang === 'en' ? 'length: ' : '长度: '}" << bidiPath.size() << ")" << endl;
+    } else {
+        cout << "${lang === 'en' ? 'No path found' : '未找到路径'}" << endl;
+    }
+    
+    // ${lang === 'en' ? 'Test iterative deepening DFS' : '测试迭代加深DFS'}
+    cout << "${lang === 'en' ? 'Iterative Deepening DFS path from ' : '迭代加深DFS从 '}" << start << "${lang === 'en' ? ' to ' : ' 到 '}" << goal << ": ";
+    vector<int> iddfsPath = iddfs.findPath(start, goal);
+    if (!iddfsPath.empty()) {
+        for (int i = 0; i < iddfsPath.size(); i++) {
+            if (i > 0) cout << " -> ";
+            cout << iddfsPath[i];
+        }
+        cout << " (${lang === 'en' ? 'length: ' : '长度: '}" << iddfsPath.size() << ")" << endl;
+    } else {
+        cout << "${lang === 'en' ? 'No path found' : '未找到路径'}" << endl;
+    }
+    
+    return 0;
+}`}
+    explanation={lang === 'en' 
+      ? 'Bidirectional search reduces time complexity from O(b^d) to O(b^(d/2)) where b is branching factor and d is depth. Iterative deepening combines DFS space efficiency with BFS optimality.'
+      : '双向搜索将时间复杂度从O(b^d)减少到O(b^(d/2))，其中b是分支因子，d是深度。迭代加深结合了DFS的空间效率和BFS的最优性。'
+    }
+    output={`${lang === 'en' ? 'Bidirectional BFS path from ' : '双向BFS从 '}0${lang === 'en' ? ' to ' : ' 到 '}9: 0 -> 1 -> 4 -> 7 -> 9 (${lang === 'en' ? 'length: ' : '长度: '}5)
+${lang === 'en' ? 'Iterative Deepening DFS path from ' : '迭代加深DFS从 '}0${lang === 'en' ? ' to ' : ' 到 '}9: 0 -> 1 -> 4 -> 7 -> 9 (${lang === 'en' ? 'length: ' : '长度: '}5)`}
+  />
+
+  <div class="summary">
+    <h2>{lang === 'en' ? 'Key Takeaways' : '关键要点'}</h2>
+    <ul>
+      <li>
+        {lang === 'en'
+          ? 'A* search uses heuristics to guide search efficiently, guaranteeing optimal paths with admissible heuristics'
+          : 'A*搜索使用启发式函数高效引导搜索，在可接受启发式下保证最优路径'
+        }
+      </li>
+      <li>
+        {lang === 'en'
+          ? 'Bidirectional search reduces exponential search space by meeting in the middle'
+          : '双向搜索通过在中间相遇减少指数级搜索空间'
+        }
+      </li>
+      <li>
+        {lang === 'en'
+          ? 'Iterative deepening combines DFS memory efficiency with BFS completeness and optimality'
+          : '迭代加深结合了DFS的内存效率和BFS的完整性与最优性'
+        }
+      </li>
+      <li>
+        {lang === 'en'
+          ? 'Choose search algorithm based on problem constraints: memory, optimality requirements, and heuristic availability'
+          : '根据问题约束选择搜索算法：内存、最优性要求和启发式可用性'
+        }
+      </li>
+    </ul>
+  </div>
+</Layout>
+
+<style>
+  .overview {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    margin: 2rem 0;
+  }
+  
+  .summary {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 10px;
+    margin: 2rem 0;
+    border-left: 4px solid #667eea;
+  }
+  
+  .breadcrumb {
+    margin: 1rem 0;
+    color: #666;
+  }
+  
+  .breadcrumb a {
+    color: #667eea;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    color: #2c3e50;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 0.5rem;
+  }
+  
+  h2 {
+    color: #34495e;
+    margin-top: 2rem;
+  }
+  
+  p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  
+  ul {
+    line-height: 1.8;
+  }
+  
+  @media (max-width: 768px) {
+    .overview, .summary {
+      padding: 1rem;
+    }
+  }
+</style> 

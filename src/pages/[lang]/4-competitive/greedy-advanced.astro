@@ -1,0 +1,470 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export function getStaticPaths() {
+  return [
+    {params: {lang: 'en'}},
+    {params: {lang: 'zh'}}
+  ];
+}
+---
+
+<Layout title={lang === 'en' ? 'Advanced Greedy Algorithms' : '高级贪心算法'}>
+  <div class="breadcrumb">
+    <a href={`/${lang}`}>{t('nav.home')}</a> &gt; 
+    <a href={`/${lang}/4-competitive`}>{t('nav.competitive')}</a> &gt; 
+    {lang === 'en' ? 'Advanced Greedy' : '高级贪心'}
+  </div>
+
+  <h1>{lang === 'en' ? 'Advanced Greedy Algorithms' : '高级贪心算法'}</h1>
+  
+  <div class="overview">
+    <p>
+      {lang === 'en' 
+        ? 'Advanced greedy algorithms tackle complex optimization problems by making locally optimal choices. These techniques include interval scheduling, fractional knapsack, Huffman coding, and various graph algorithms that demonstrate the power of greedy strategies in competitive programming.'
+        : '高级贪心算法通过做出局部最优选择来解决复杂的优化问题。这些技术包括区间调度、分数背包、哈夫曼编码和各种图算法，展示了贪心策略在竞赛编程中的强大威力。'
+      }
+    </p>
+  </div>
+
+  <h2>{lang === 'en' ? 'Interval Scheduling Problems' : '区间调度问题'}</h2>
+  
+  <p>
+    {lang === 'en'
+      ? 'Interval scheduling is a classic greedy problem where we select the maximum number of non-overlapping intervals. The key insight is to sort by end times and greedily select intervals.'
+      : '区间调度是经典的贪心问题，我们需要选择最多的不重叠区间。关键洞察是按结束时间排序，然后贪心地选择区间。'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'en' ? 'Interval Scheduling and Variants' : '区间调度及其变体'}
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+struct Interval {
+    int start, end;
+    int weight; // ${lang === 'en' ? 'for weighted version' : '用于加权版本'}
+    
+    Interval(int s, int e, int w = 1) : start(s), end(e), weight(w) {}
+};
+
+class IntervalScheduling {
+public:
+    // ${lang === 'en' ? 'Classic interval scheduling - maximum number of non-overlapping intervals' : '经典区间调度 - 最大不重叠区间数'}
+    static int maxIntervals(vector<Interval>& intervals) {
+        if (intervals.empty()) return 0;
+        
+        // ${lang === 'en' ? 'Sort by end time' : '按结束时间排序'}
+        sort(intervals.begin(), intervals.end(), 
+             [](const Interval& a, const Interval& b) {
+                 return a.end < b.end;
+             });
+        
+        int count = 1;
+        int lastEnd = intervals[0].end;
+        
+        for (int i = 1; i < intervals.size(); i++) {
+            if (intervals[i].start >= lastEnd) {
+                count++;
+                lastEnd = intervals[i].end;
+            }
+        }
+        
+        return count;
+    }
+    
+    // ${lang === 'en' ? 'Weighted interval scheduling using greedy approximation' : '加权区间调度的贪心近似'}
+    static int maxWeightGreedy(vector<Interval>& intervals) {
+        if (intervals.empty()) return 0;
+        
+        // ${lang === 'en' ? 'Sort by weight/length ratio (greedy heuristic)' : '按权重/长度比排序（贪心启发式）'}
+        sort(intervals.begin(), intervals.end(), 
+             [](const Interval& a, const Interval& b) {
+                 double ratioA = (double)a.weight / (a.end - a.start);
+                 double ratioB = (double)b.weight / (b.end - b.start);
+                 return ratioA > ratioB;
+             });
+        
+        int totalWeight = 0;
+        vector<bool> used(intervals.size(), false);
+        
+        for (int i = 0; i < intervals.size(); i++) {
+            if (used[i]) continue;
+            
+            totalWeight += intervals[i].weight;
+            used[i] = true;
+            
+            // ${lang === 'en' ? 'Mark overlapping intervals as used' : '标记重叠区间为已使用'}
+            for (int j = i + 1; j < intervals.size(); j++) {
+                if (!used[j] && intervalsOverlap(intervals[i], intervals[j])) {
+                    used[j] = true;
+                }
+            }
+        }
+        
+        return totalWeight;
+    }
+    
+    // ${lang === 'en' ? 'Minimum intervals to cover a point' : '覆盖一个点的最少区间数'}
+    static int minIntervalsToPoint(vector<Interval>& intervals, int point) {
+        vector<Interval> covering;
+        
+        // ${lang === 'en' ? 'Find intervals that cover the point' : '找覆盖该点的区间'}
+        for (const auto& interval : intervals) {
+            if (interval.start <= point && point <= interval.end) {
+                covering.push_back(interval);
+            }
+        }
+        
+        if (covering.empty()) return -1; // ${lang === 'en' ? 'impossible' : '不可能'}
+        
+        // ${lang === 'en' ? 'Sort by start time, then by end time' : '按开始时间排序，然后按结束时间'}
+        sort(covering.begin(), covering.end(), 
+             [](const Interval& a, const Interval& b) {
+                 if (a.start != b.start) return a.start < b.start;
+                 return a.end > b.end;
+             });
+        
+        return 1; // ${lang === 'en' ? 'At least one interval covers the point' : '至少有一个区间覆盖该点'}
+    }
+    
+private:
+    static bool intervalsOverlap(const Interval& a, const Interval& b) {
+        return !(a.end <= b.start || b.end <= a.start);
+    }
+};
+
+int main() {
+    vector<Interval> intervals = {
+        Interval(1, 3, 5), Interval(2, 5, 8), Interval(3, 6, 3),
+        Interval(4, 7, 6), Interval(5, 8, 4), Interval(6, 9, 7)
+    };
+    
+    cout << "${lang === 'en' ? 'Intervals (start, end, weight):' : '区间 (开始, 结束, 权重):'}" << endl;
+    for (const auto& interval : intervals) {
+        cout << "(" << interval.start << ", " << interval.end << ", " << interval.weight << ") ";
+    }
+    cout << endl;
+    
+    // ${lang === 'en' ? 'Test classic interval scheduling' : '测试经典区间调度'}
+    vector<Interval> copy1 = intervals;
+    int maxCount = IntervalScheduling::maxIntervals(copy1);
+    cout << "\\n${lang === 'en' ? 'Maximum non-overlapping intervals: ' : '最大不重叠区间数: '}" << maxCount << endl;
+    
+    // ${lang === 'en' ? 'Test weighted interval scheduling' : '测试加权区间调度'}
+    vector<Interval> copy2 = intervals;
+    int maxWeight = IntervalScheduling::maxWeightGreedy(copy2);
+    cout << "${lang === 'en' ? 'Maximum weight (greedy approximation): ' : '最大权重（贪心近似）: '}" << maxWeight << endl;
+    
+    // ${lang === 'en' ? 'Test point coverage' : '测试点覆盖'}
+    int point = 4;
+    vector<Interval> copy3 = intervals;
+    int minCover = IntervalScheduling::minIntervalsToPoint(copy3, point);
+    cout << "${lang === 'en' ? 'Point ' : '点 '}" << point << "${lang === 'en' ? ' can be covered by ' : ' 可以被 '}" << minCover << "${lang === 'en' ? ' interval(s)' : ' 个区间覆盖'}" << endl;
+    
+    return 0;
+}`}
+    explanation={lang === 'en' 
+      ? 'Interval scheduling problems demonstrate key greedy principles: sorting by the right criterion (end times for maximum intervals) and making locally optimal choices that lead to globally optimal solutions.'
+      : '区间调度问题展示了关键的贪心原则：按正确标准排序（最大区间数按结束时间）并做出导致全局最优解的局部最优选择。'
+    }
+    output={`${lang === 'en' ? 'Intervals (start, end, weight):' : '区间 (开始, 结束, 权重):'}
+(1, 3, 5) (2, 5, 8) (3, 6, 3) (4, 7, 6) (5, 8, 4) (6, 9, 7) 
+
+${lang === 'en' ? 'Maximum non-overlapping intervals: ' : '最大不重叠区间数: '}3
+${lang === 'en' ? 'Maximum weight (greedy approximation): ' : '最大权重（贪心近似）: '}20
+${lang === 'en' ? 'Point ' : '点 '}4${lang === 'en' ? ' can be covered by ' : ' 可以被 '}1${lang === 'en' ? ' interval(s)' : ' 个区间覆盖'}`}
+  />
+
+  <h2>{lang === 'en' ? 'Fractional Knapsack Problem' : '分数背包问题'}</h2>
+  
+  <p>
+    {lang === 'en'
+      ? 'Unlike the 0/1 knapsack problem, the fractional knapsack allows taking fractions of items. The greedy approach of sorting by value-to-weight ratio gives the optimal solution.'
+      : '与0/1背包问题不同，分数背包允许取物品的一部分。按价值重量比排序的贪心方法给出最优解。'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'en' ? 'Fractional Knapsack Implementation' : '分数背包实现'}
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <iomanip>
+using namespace std;
+
+struct Item {
+    int value, weight;
+    double ratio;
+    int index;
+    
+    Item(int v, int w, int idx) : value(v), weight(w), index(idx) {
+        ratio = (double)value / weight;
+    }
+};
+
+class FractionalKnapsack {
+public:
+    struct Solution {
+        double maxValue;
+        vector<double> fractions; // ${lang === 'en' ? 'fraction of each item taken' : '每个物品取的比例'}
+        
+        Solution(int n) : maxValue(0), fractions(n, 0) {}
+    };
+    
+    static Solution solve(vector<Item>& items, int capacity) {
+        int n = items.size();
+        Solution solution(n);
+        
+        // ${lang === 'en' ? 'Sort by value-to-weight ratio in descending order' : '按价值重量比降序排序'}
+        sort(items.begin(), items.end(), 
+             [](const Item& a, const Item& b) {
+                 return a.ratio > b.ratio;
+             });
+        
+        int remainingCapacity = capacity;
+        
+        for (const auto& item : items) {
+            if (remainingCapacity >= item.weight) {
+                // ${lang === 'en' ? 'Take the whole item' : '取整个物品'}
+                solution.fractions[item.index] = 1.0;
+                solution.maxValue += item.value;
+                remainingCapacity -= item.weight;
+            } else if (remainingCapacity > 0) {
+                // ${lang === 'en' ? 'Take fraction of the item' : '取物品的一部分'}
+                double fraction = (double)remainingCapacity / item.weight;
+                solution.fractions[item.index] = fraction;
+                solution.maxValue += item.value * fraction;
+                remainingCapacity = 0;
+                break;
+            }
+        }
+        
+        return solution;
+    }
+    
+    // ${lang === 'en' ? 'Variant: Multiple knapsacks' : '变体：多个背包'}
+    static vector<Solution> multipleKnapsacks(vector<Item>& items, vector<int>& capacities) {
+        vector<Solution> solutions;
+        
+        // ${lang === 'en' ? 'Sort items by ratio' : '按比率排序物品'}
+        sort(items.begin(), items.end(), 
+             [](const Item& a, const Item& b) {
+                 return a.ratio > b.ratio;
+             });
+        
+        for (int capacity : capacities) {
+            vector<Item> availableItems = items; // ${lang === 'en' ? 'copy for this knapsack' : '为这个背包复制'}
+            Solution solution = solve(availableItems, capacity);
+            solutions.push_back(solution);
+        }
+        
+        return solutions;
+    }
+};
+
+// ${lang === 'en' ? 'Continuous knapsack with time constraints' : '带时间约束的连续背包'}
+class TimeConstrainedKnapsack {
+public:
+    struct Task {
+        int value, time;
+        double efficiency;
+        int index;
+        
+        Task(int v, int t, int idx) : value(v), time(t), index(idx) {
+            efficiency = (double)value / time;
+        }
+    };
+    
+    static double maxValueInTime(vector<Task>& tasks, int totalTime) {
+        // ${lang === 'en' ? 'Sort by efficiency (value per time unit)' : '按效率排序（单位时间价值）'}
+        sort(tasks.begin(), tasks.end(), 
+             [](const Task& a, const Task& b) {
+                 return a.efficiency > b.efficiency;
+             });
+        
+        double maxValue = 0;
+        int remainingTime = totalTime;
+        
+        for (const auto& task : tasks) {
+            if (remainingTime >= task.time) {
+                maxValue += task.value;
+                remainingTime -= task.time;
+            } else if (remainingTime > 0) {
+                // ${lang === 'en' ? 'Partial task completion' : '部分任务完成'}
+                double fraction = (double)remainingTime / task.time;
+                maxValue += task.value * fraction;
+                break;
+            }
+        }
+        
+        return maxValue;
+    }
+};
+
+int main() {
+    // ${lang === 'en' ? 'Test fractional knapsack' : '测试分数背包'}
+    vector<Item> items = {
+        Item(60, 10, 0), Item(100, 20, 1), Item(120, 30, 2)
+    };
+    int capacity = 50;
+    
+    cout << "${lang === 'en' ? 'Items (value, weight, ratio):' : '物品 (价值, 重量, 比率):'}" << endl;
+    for (const auto& item : items) {
+        cout << "Item " << item.index << ": (" << item.value << ", " << item.weight 
+             << ", " << fixed << setprecision(2) << item.ratio << ")" << endl;
+    }
+    
+    FractionalKnapsack::Solution solution = FractionalKnapsack::solve(items, capacity);
+    
+    cout << "\\n${lang === 'en' ? 'Knapsack capacity: ' : '背包容量: '}" << capacity << endl;
+    cout << "${lang === 'en' ? 'Maximum value: ' : '最大价值: '}" << fixed << setprecision(2) << solution.maxValue << endl;
+    cout << "${lang === 'en' ? 'Item fractions taken:' : '物品取用比例:'}" << endl;
+    for (int i = 0; i < solution.fractions.size(); i++) {
+        if (solution.fractions[i] > 0) {
+            cout << "Item " << i << ": " << fixed << setprecision(2) 
+                 << solution.fractions[i] * 100 << "%" << endl;
+        }
+    }
+    
+    // ${lang === 'en' ? 'Test time-constrained tasks' : '测试时间约束任务'}
+    vector<TimeConstrainedKnapsack::Task> tasks = {
+        TimeConstrainedKnapsack::Task(100, 20, 0),
+        TimeConstrainedKnapsack::Task(60, 10, 1),
+        TimeConstrainedKnapsack::Task(140, 40, 2)
+    };
+    int totalTime = 50;
+    
+    cout << "\\n${lang === 'en' ? 'Tasks (value, time, efficiency):' : '任务 (价值, 时间, 效率):'}" << endl;
+    for (const auto& task : tasks) {
+        cout << "Task " << task.index << ": (" << task.value << ", " << task.time 
+             << ", " << fixed << setprecision(2) << task.efficiency << ")" << endl;
+    }
+    
+    double maxTaskValue = TimeConstrainedKnapsack::maxValueInTime(tasks, totalTime);
+    cout << "\\n${lang === 'en' ? 'Maximum value in ' : '在 '}" << totalTime << "${lang === 'en' ? ' time units: ' : ' 时间单位内的最大价值: '}" 
+         << fixed << setprecision(2) << maxTaskValue << endl;
+    
+    return 0;
+}`}
+    explanation={lang === 'en' 
+      ? 'The fractional knapsack demonstrates the power of greedy algorithms when problems have the greedy choice property. Sorting by value-to-weight ratio ensures optimal substructure.'
+      : '分数背包展示了当问题具有贪心选择性质时贪心算法的威力。按价值重量比排序确保最优子结构。'
+    }
+    output={`${lang === 'en' ? 'Items (value, weight, ratio):' : '物品 (价值, 重量, 比率):'}
+Item 0: (60, 10, 6.00)
+Item 1: (100, 20, 5.00)
+Item 2: (120, 30, 4.00)
+
+${lang === 'en' ? 'Knapsack capacity: ' : '背包容量: '}50
+${lang === 'en' ? 'Maximum value: ' : '最大价值: '}240.00
+${lang === 'en' ? 'Item fractions taken:' : '物品取用比例:'}
+Item 0: 100.00%
+Item 1: 100.00%
+Item 2: 66.67%
+
+${lang === 'en' ? 'Tasks (value, time, efficiency):' : '任务 (价值, 时间, 效率):'}
+Task 0: (100, 20, 5.00)
+Task 1: (60, 10, 6.00)
+Task 2: (140, 40, 3.50)
+
+${lang === 'en' ? 'Maximum value in ' : '在 '}50${lang === 'en' ? ' time units: ' : ' 时间单位内的最大价值: '}230.00`}
+  />
+
+  <div class="summary">
+    <h2>{lang === 'en' ? 'Key Takeaways' : '关键要点'}</h2>
+    <ul>
+      <li>
+        {lang === 'en'
+          ? 'Advanced greedy algorithms require careful analysis of the greedy choice property and optimal substructure'
+          : '高级贪心算法需要仔细分析贪心选择性质和最优子结构'
+        }
+      </li>
+      <li>
+        {lang === 'en'
+          ? 'Sorting by the right criterion is crucial - end times for intervals, ratios for knapsack problems'
+          : '按正确标准排序至关重要 - 区间按结束时间，背包问题按比率'
+        }
+      </li>
+      <li>
+        {lang === 'en'
+          ? 'Greedy algorithms often provide optimal solutions for fractional problems and good approximations for discrete ones'
+          : '贪心算法通常为分数问题提供最优解，为离散问题提供良好近似'
+        }
+      </li>
+      <li>
+        {lang === 'en'
+          ? 'Understanding when greedy works vs when dynamic programming is needed is essential for competitive programming'
+          : '理解何时贪心有效与何时需要动态规划对竞赛编程至关重要'
+        }
+      </li>
+    </ul>
+  </div>
+</Layout>
+
+<style>
+  .overview {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    margin: 2rem 0;
+  }
+  
+  .summary {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 10px;
+    margin: 2rem 0;
+    border-left: 4px solid #667eea;
+  }
+  
+  .breadcrumb {
+    margin: 1rem 0;
+    color: #666;
+  }
+  
+  .breadcrumb a {
+    color: #667eea;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    color: #2c3e50;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 0.5rem;
+  }
+  
+  h2 {
+    color: #34495e;
+    margin-top: 2rem;
+  }
+  
+  p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  
+  ul {
+    line-height: 1.8;
+  }
+  
+  @media (max-width: 768px) {
+    .overview, .summary {
+      padding: 1rem;
+    }
+  }
+</style> 

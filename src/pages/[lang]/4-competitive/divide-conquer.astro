@@ -1,0 +1,566 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export function getStaticPaths() {
+  return [
+    {params: {lang: 'en'}},
+    {params: {lang: 'zh'}}
+  ];
+}
+---
+
+<Layout title={lang === 'en' ? 'Divide and Conquer Algorithms' : '分治算法'}>
+  <div class="breadcrumb">
+    <a href={`/${lang}`}>{t('nav.home')}</a> &gt; 
+    <a href={`/${lang}/4-competitive`}>{t('nav.competitive')}</a> &gt; 
+    {lang === 'en' ? 'Divide and Conquer' : '分治算法'}
+  </div>
+
+  <h1>{lang === 'en' ? 'Divide and Conquer Algorithms' : '分治算法'}</h1>
+  
+  <div class="overview">
+    <p>
+      {lang === 'en' 
+        ? 'Divide and conquer is a fundamental algorithmic paradigm that solves problems by breaking them into smaller subproblems, solving them recursively, and combining the results. This approach leads to elegant solutions with optimal time complexities for many classic problems.'
+        : '分治算法通过将问题分解为更小的子问题来解决，是算法设计的重要思想。在竞赛编程中，分治算法常用于解决排序、搜索、数值计算等问题，具有优美的递归结构和高效的时间复杂度。'
+      }
+    </p>
+  </div>
+
+  <h2>{lang === 'en' ? 'Merge Sort - Classic Divide and Conquer' : '归并排序 - 分治算法的经典应用'}</h2>
+  
+  <p>
+    {lang === 'en'
+      ? 'Merge sort exemplifies the divide-and-conquer approach: divide the array into halves, recursively sort each half, then merge the sorted halves.'
+      : '归并排序完美体现了分治思想：将数组分为两半，递归排序每一半，然后合并已排序的部分。'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'en' ? 'Merge Sort Implementation' : '归并排序实现'}
+    code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+class MergeSort {
+public:
+    void mergeSort(vector<int>& arr, int left, int right) {
+        if (left >= right) return;
+        
+        int mid = left + (right - left) / 2;
+        
+        // ${lang === 'en' ? 'Divide: recursively sort both halves' : '分解：递归排序左右两部分'}
+        mergeSort(arr, left, mid);
+        mergeSort(arr, mid + 1, right);
+        
+        // ${lang === 'en' ? 'Conquer: merge the sorted halves' : '合并：将两个有序部分合并'}
+        merge(arr, left, mid, right);
+    }
+    
+private:
+    void merge(vector<int>& arr, int left, int mid, int right) {
+        vector<int> temp(right - left + 1);
+        int i = left, j = mid + 1, k = 0;
+        
+        // ${lang === 'en' ? 'Merge two sorted arrays' : '合并两个有序数组'}
+        while (i <= mid && j <= right) {
+            if (arr[i] <= arr[j]) {
+                temp[k++] = arr[i++];
+            } else {
+                temp[k++] = arr[j++];
+            }
+        }
+        
+        // ${lang === 'en' ? 'Copy remaining elements' : '复制剩余元素'}
+        while (i <= mid) temp[k++] = arr[i++];
+        while (j <= right) temp[k++] = arr[j++];
+        
+        // ${lang === 'en' ? 'Copy back to original array' : '将排序结果复制回原数组'}
+        for (int i = 0; i < k; i++) {
+            arr[left + i] = temp[i];
+        }
+    }
+};
+
+int main() {
+    vector<int> arr = {64, 34, 25, 12, 22, 11, 90, 88, 76, 50, 42};
+    
+    cout << "${lang === 'en' ? 'Original array: ' : '原数组: '}";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    MergeSort ms;
+    ms.mergeSort(arr, 0, arr.size() - 1);
+    
+    cout << "${lang === 'en' ? 'Sorted array: ' : '排序后: '}";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    return 0;
+}`}
+    explanation={lang === 'en' 
+      ? 'Merge sort has O(n log n) time complexity and O(n) space complexity. It is a stable sorting algorithm and particularly useful for sorting linked lists.'
+      : '归并排序的时间复杂度为O(n log n)，空间复杂度O(n)。它是稳定排序算法，在链表排序中特别有用。'
+    }
+    output={`${lang === 'en' ? 'Original array: ' : '原数组: '}64 34 25 12 22 11 90 88 76 50 42 
+${lang === 'en' ? 'Sorted array: ' : '排序后: '}11 12 22 25 34 42 50 64 76 88 90`}
+  />
+
+  <h2>{lang === 'en' ? 'Quick Sort and Quick Select' : '快速排序与快速选择'}</h2>
+  
+  <p>
+    {lang === 'en'
+      ? 'Quick sort partitions the array around a pivot element, then recursively sorts the partitions. Quick select finds the kth smallest element efficiently.'
+      : '快速排序通过选择基准元素将数组分为两部分，每部分独立排序。快速选择算法可以高效找到第k小的元素。'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'en' ? 'Quick Sort and Quick Select' : '快速排序与快速选择'}
+    code={`#include <iostream>
+#include <vector>
+#include <random>
+using namespace std;
+
+class QuickSort {
+public:
+    void quickSort(vector<int>& arr, int left, int right) {
+        if (left >= right) return;
+        
+        // ${lang === 'en' ? 'Randomize pivot to avoid worst case' : '随机化选择基准，避免最坏情况'}
+        int randomIndex = left + rand() % (right - left + 1);
+        swap(arr[left], arr[randomIndex]);
+        
+        int pivotIndex = partition(arr, left, right);
+        
+        quickSort(arr, left, pivotIndex - 1);
+        quickSort(arr, pivotIndex + 1, right);
+    }
+    
+    // ${lang === 'en' ? 'Quick Select - find kth smallest element' : '快速选择 - 找第k小元素'}
+    int quickSelect(vector<int>& arr, int left, int right, int k) {
+        if (left == right) return arr[left];
+        
+        int randomIndex = left + rand() % (right - left + 1);
+        swap(arr[left], arr[randomIndex]);
+        
+        int pivotIndex = partition(arr, left, right);
+        
+        if (pivotIndex == k) return arr[pivotIndex];
+        else if (pivotIndex > k) return quickSelect(arr, left, pivotIndex - 1, k);
+        else return quickSelect(arr, pivotIndex + 1, right, k);
+    }
+    
+private:
+    int partition(vector<int>& arr, int left, int right) {
+        int pivot = arr[left];
+        int i = left, j = right;
+        
+        while (i < j) {
+            while (i < j && arr[j] >= pivot) j--;
+            if (i < j) arr[i++] = arr[j];
+            while (i < j && arr[i] <= pivot) i++;
+            if (i < j) arr[j--] = arr[i];
+        }
+        
+        arr[i] = pivot;
+        return i;
+    }
+};
+
+int main() {
+    srand(time(nullptr));
+    
+    vector<int> arr = {64, 34, 25, 12, 22, 11, 90, 88, 76, 50, 42};
+    
+    cout << "${lang === 'en' ? 'Original array: ' : '原数组: '}";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    QuickSort qs;
+    vector<int> sortArr = arr;
+    qs.quickSort(sortArr, 0, sortArr.size() - 1);
+    
+    cout << "${lang === 'en' ? 'Sorted array: ' : '排序后: '}";
+    for (int x : sortArr) cout << x << " ";
+    cout << endl;
+    
+    // ${lang === 'en' ? 'Test quick select' : '测试快速选择'}
+    int k = 5; // ${lang === 'en' ? '6th smallest element (0-indexed)' : '第6小的元素（0-indexed）'}
+    int kthSmallest = qs.quickSelect(arr, 0, arr.size() - 1, k);
+    cout << "${lang === 'en' ? 'The ' : '第'}" << (k + 1) << "${lang === 'en' ? 'th smallest element: ' : '小的元素: '}" << kthSmallest << endl;
+    
+    return 0;
+}`}
+    explanation={lang === 'en' 
+      ? 'Quick sort has O(n log n) average time complexity, O(n²) worst case. Quick select can find the kth smallest element in O(n) average time.'
+      : '快速排序平均时间复杂度O(n log n)，最坏情况O(n²)。快速选择算法可以在O(n)平均时间内找到第K小元素。'
+    }
+    output={`${lang === 'en' ? 'Original array: ' : '原数组: '}64 34 25 12 22 11 90 88 76 50 42 
+${lang === 'en' ? 'Sorted array: ' : '排序后: '}11 12 22 25 34 42 50 64 76 88 90 
+${lang === 'en' ? 'The 6th smallest element: ' : '第6小的元素: '}42`}
+  />
+
+  <h2>{lang === 'en' ? 'Maximum Subarray Problem' : '最大子数组问题'}</h2>
+  
+  <p>
+    {lang === 'en'
+      ? 'The maximum subarray problem can be solved elegantly using divide and conquer, achieving O(n log n) complexity.'
+      : '最大子数组问题可以用分治算法优雅地解决，时间复杂度为O(n log n)。'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'en' ? 'Maximum Subarray - Divide and Conquer' : '最大子数组 - 分治解法'}
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+class MaxSubarray {
+public:
+    struct Result {
+        int maxSum;
+        int left;
+        int right;
+        
+        Result(int sum = INT_MIN, int l = -1, int r = -1) 
+            : maxSum(sum), left(l), right(r) {}
+    };
+    
+    Result maxSubarrayDC(vector<int>& arr, int left, int right) {
+        // ${lang === 'en' ? 'Base case: single element' : '基础情况：单个元素'}
+        if (left == right) {
+            return Result(arr[left], left, right);
+        }
+        
+        int mid = left + (right - left) / 2;
+        
+        // ${lang === 'en' ? 'Recursively find max subarray in left and right halves' : '递归找左右两半的最大子数组'}
+        Result leftResult = maxSubarrayDC(arr, left, mid);
+        Result rightResult = maxSubarrayDC(arr, mid + 1, right);
+        
+        // ${lang === 'en' ? 'Find max subarray crossing the middle' : '找跨越中点的最大子数组'}
+        Result crossResult = maxCrossingSubarray(arr, left, mid, right);
+        
+        // ${lang === 'en' ? 'Return the maximum of three cases' : '返回三种情况中的最大值'}
+        if (leftResult.maxSum >= rightResult.maxSum && 
+            leftResult.maxSum >= crossResult.maxSum) {
+            return leftResult;
+        } else if (rightResult.maxSum >= leftResult.maxSum && 
+                   rightResult.maxSum >= crossResult.maxSum) {
+            return rightResult;
+        } else {
+            return crossResult;
+        }
+    }
+    
+private:
+    Result maxCrossingSubarray(vector<int>& arr, int left, int mid, int right) {
+        // ${lang === 'en' ? 'Find max sum extending left from mid' : '从中点向左扩展的最大和'}
+        int leftSum = INT_MIN;
+        int sum = 0;
+        int maxLeft = mid;
+        
+        for (int i = mid; i >= left; i--) {
+            sum += arr[i];
+            if (sum > leftSum) {
+                leftSum = sum;
+                maxLeft = i;
+            }
+        }
+        
+        // ${lang === 'en' ? 'Find max sum extending right from mid+1' : '从中点+1向右扩展的最大和'}
+        int rightSum = INT_MIN;
+        sum = 0;
+        int maxRight = mid + 1;
+        
+        for (int i = mid + 1; i <= right; i++) {
+            sum += arr[i];
+            if (sum > rightSum) {
+                rightSum = sum;
+                maxRight = i;
+            }
+        }
+        
+        return Result(leftSum + rightSum, maxLeft, maxRight);
+    }
+};
+
+// ${lang === 'en' ? 'Kadane\'s algorithm for comparison (O(n))' : 'Kadane算法对比（O(n)）'}
+int kadane(vector<int>& arr) {
+    int maxSoFar = arr[0];
+    int maxEndingHere = arr[0];
+    
+    for (int i = 1; i < arr.size(); i++) {
+        maxEndingHere = max(arr[i], maxEndingHere + arr[i]);
+        maxSoFar = max(maxSoFar, maxEndingHere);
+    }
+    
+    return maxSoFar;
+}
+
+int main() {
+    vector<int> arr = {-2, -3, 4, -1, -2, 1, 5, -3};
+    
+    cout << "${lang === 'en' ? 'Array: ' : '数组: '}";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    MaxSubarray ms;
+    MaxSubarray::Result result = ms.maxSubarrayDC(arr, 0, arr.size() - 1);
+    
+    cout << "${lang === 'en' ? 'Divide & Conquer - Max sum: ' : '分治算法 - 最大和: '}" << result.maxSum << endl;
+    cout << "${lang === 'en' ? 'Subarray indices: [' : '子数组索引: ['}" << result.left << ", " << result.right << "]" << endl;
+    cout << "${lang === 'en' ? 'Subarray: ' : '子数组: '}";
+    for (int i = result.left; i <= result.right; i++) {
+        cout << arr[i] << " ";
+    }
+    cout << endl;
+    
+    cout << "${lang === 'en' ? 'Kadane\'s algorithm: ' : 'Kadane算法: '}" << kadane(arr) << endl;
+    
+    return 0;
+}`}
+    explanation={lang === 'en' 
+      ? 'The divide-and-conquer approach considers three cases: max subarray in left half, right half, or crossing the middle. Time complexity is O(n log n).'
+      : '分治方法考虑三种情况：最大子数组在左半部分、右半部分或跨越中点。时间复杂度为O(n log n)。'
+    }
+    output={`${lang === 'en' ? 'Array: ' : '数组: '}-2 -3 4 -1 -2 1 5 -3 
+${lang === 'en' ? 'Divide & Conquer - Max sum: ' : '分治算法 - 最大和: '}7
+${lang === 'en' ? 'Subarray indices: [' : '子数组索引: ['}2, 6]
+${lang === 'en' ? 'Subarray: ' : '子数组: '}4 -1 -2 1 5 
+${lang === 'en' ? 'Kadane\'s algorithm: ' : 'Kadane算法: '}7`}
+  />
+
+  <h2>{lang === 'en' ? 'Closest Pair of Points' : '最近点对问题'}</h2>
+  
+  <p>
+    {lang === 'en'
+      ? 'Finding the closest pair of points in 2D plane using divide and conquer achieves O(n log n) complexity, better than the brute force O(n²) approach.'
+      : '使用分治算法在二维平面中找最近点对，时间复杂度O(n log n)，优于暴力方法的O(n²)。'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'en' ? 'Closest Pair of Points' : '最近点对问题'}
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <float.h>
+using namespace std;
+
+struct Point {
+    double x, y;
+    
+    Point(double x = 0, double y = 0) : x(x), y(y) {}
+    
+    double distanceTo(const Point& other) const {
+        return sqrt((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y));
+    }
+};
+
+class ClosestPair {
+public:
+    double findClosestPair(vector<Point>& points) {
+        // ${lang === 'en' ? 'Sort points by x-coordinate' : '按x坐标排序'}
+        sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
+            return a.x < b.x;
+        });
+        
+        return closestPairRec(points, 0, points.size() - 1);
+    }
+    
+private:
+    double closestPairRec(vector<Point>& points, int left, int right) {
+        int n = right - left + 1;
+        
+        // ${lang === 'en' ? 'Base case: brute force for small arrays' : '基础情况：小数组用暴力方法'}
+        if (n <= 3) {
+            return bruteForce(points, left, right);
+        }
+        
+        int mid = left + (right - left) / 2;
+        Point midPoint = points[mid];
+        
+        // ${lang === 'en' ? 'Recursively find closest pairs in left and right halves' : '递归找左右两半的最近点对'}
+        double leftMin = closestPairRec(points, left, mid);
+        double rightMin = closestPairRec(points, mid + 1, right);
+        
+        double minDist = min(leftMin, rightMin);
+        
+        // ${lang === 'en' ? 'Find points close to the dividing line' : '找接近分割线的点'}
+        vector<Point> strip;
+        for (int i = left; i <= right; i++) {
+            if (abs(points[i].x - midPoint.x) < minDist) {
+                strip.push_back(points[i]);
+            }
+        }
+        
+        // ${lang === 'en' ? 'Sort strip by y-coordinate' : '按y坐标排序条带'}
+        sort(strip.begin(), strip.end(), [](const Point& a, const Point& b) {
+            return a.y < b.y;
+        });
+        
+        // ${lang === 'en' ? 'Find closest points in strip' : '在条带中找最近点对'}
+        return min(minDist, stripClosest(strip, minDist));
+    }
+    
+    double bruteForce(vector<Point>& points, int left, int right) {
+        double minDist = DBL_MAX;
+        for (int i = left; i <= right; i++) {
+            for (int j = i + 1; j <= right; j++) {
+                minDist = min(minDist, points[i].distanceTo(points[j]));
+            }
+        }
+        return minDist;
+    }
+    
+    double stripClosest(vector<Point>& strip, double minDist) {
+        double min_val = minDist;
+        
+        for (int i = 0; i < strip.size(); i++) {
+            // ${lang === 'en' ? 'Check at most 7 points (proven geometrically)' : '最多检查7个点（几何证明）'}
+            for (int j = i + 1; j < strip.size() && 
+                 (strip[j].y - strip[i].y) < min_val; j++) {
+                min_val = min(min_val, strip[i].distanceTo(strip[j]));
+            }
+        }
+        
+        return min_val;
+    }
+};
+
+int main() {
+    vector<Point> points = {
+        Point(2, 3), Point(12, 30), Point(40, 50), Point(5, 1),
+        Point(12, 10), Point(3, 4), Point(1, 1), Point(8, 7)
+    };
+    
+    cout << "${lang === 'en' ? 'Points:' : '点集:'}" << endl;
+    for (int i = 0; i < points.size(); i++) {
+        cout << "(" << points[i].x << ", " << points[i].y << ")" << endl;
+    }
+    
+    ClosestPair cp;
+    double closestDistance = cp.findClosestPair(points);
+    
+    cout << "${lang === 'en' ? 'Closest pair distance: ' : '最近点对距离: '}" << closestDistance << endl;
+    
+    return 0;
+}`}
+    explanation={lang === 'en' 
+      ? 'The algorithm divides points by x-coordinate, finds closest pairs in each half, then checks points near the dividing line. The key insight is that we only need to check at most 7 points in the strip.'
+      : '算法按x坐标分割点集，在每一半中找最近点对，然后检查分割线附近的点。关键洞察是在条带中最多只需检查7个点。'
+    }
+    output={`${lang === 'en' ? 'Points:' : '点集:'}
+(2, 3)
+(12, 30)
+(40, 50)
+(5, 1)
+(12, 10)
+(3, 4)
+(1, 1)
+(8, 7)
+${lang === 'en' ? 'Closest pair distance: ' : '最近点对距离: '}1.41421`}
+  />
+
+  <div class="summary">
+    <h2>{lang === 'en' ? 'Key Takeaways' : '关键要点'}</h2>
+    <ul>
+      <li>
+        {lang === 'en'
+          ? 'Divide and conquer breaks problems into smaller subproblems, solves them recursively, and combines results'
+          : '分治算法将问题分解为更小的子问题，递归求解，然后合并结果'
+        }
+      </li>
+      <li>
+        {lang === 'en'
+          ? 'Time complexity often follows the recurrence T(n) = aT(n/b) + f(n), analyzed using Master Theorem'
+          : '时间复杂度通常遵循递推关系T(n) = aT(n/b) + f(n)，使用主定理分析'
+        }
+      </li>
+      <li>
+        {lang === 'en'
+          ? 'Common applications: sorting algorithms, closest pair, maximum subarray, fast multiplication'
+          : '常见应用：排序算法、最近点对、最大子数组、快速乘法'
+        }
+      </li>
+      <li>
+        {lang === 'en'
+          ? 'Often provides optimal solutions with elegant recursive structure'
+          : '通常提供具有优雅递归结构的最优解'
+        }
+      </li>
+    </ul>
+  </div>
+</Layout>
+
+<style>
+  .overview {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    margin: 2rem 0;
+  }
+  
+  .summary {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 10px;
+    margin: 2rem 0;
+    border-left: 4px solid #667eea;
+  }
+  
+  .breadcrumb {
+    margin: 1rem 0;
+    color: #666;
+  }
+  
+  .breadcrumb a {
+    color: #667eea;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    color: #2c3e50;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 0.5rem;
+  }
+  
+  h2 {
+    color: #34495e;
+    margin-top: 2rem;
+  }
+  
+  p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  
+  ul {
+    line-height: 1.8;
+  }
+  
+  @media (max-width: 768px) {
+    .overview, .summary {
+      padding: 1rem;
+    }
+  }
+</style> 

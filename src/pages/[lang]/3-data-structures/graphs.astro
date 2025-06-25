@@ -1,0 +1,605 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('ds.graphs')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/3-data-structures`}>{t('nav.data-structures')}</a> > 
+      {t('ds.graphs')}
+    </div>
+    
+    <h1>{t('ds.graphs')}</h1>
+    
+    <div class="overview">
+      <p>
+        {lang === 'en' 
+          ? 'A graph is a non-linear data structure consisting of vertices (nodes) connected by edges. Unlike trees, graphs can have cycles and multiple paths between vertices. Graphs are essential for modeling relationships, networks, and many real-world problems.'
+          : '图是由边连接的顶点（节点）组成的非线性数据结构。与树不同，图可以有环和顶点之间的多条路径。图对于建模关系、网络和许多现实世界的问题是必不可少的。'
+        }
+      </p>
+      
+      <p>
+        {lang === 'en'
+          ? 'Common applications include social networks, transportation systems, computer networks, web page linking, and pathfinding algorithms like GPS navigation.'
+          : '常见应用包括社交网络、交通系统、计算机网络、网页链接和 GPS 导航等路径查找算法。'
+        }
+      </p>
+    </div>
+
+    <section>
+      <h2>{lang === 'en' ? 'Graph Representations' : '图的表示'}</h2>
+      
+      <h3>{lang === 'en' ? 'Adjacency Matrix' : '邻接矩阵'}</h3>
+      <p>
+        {lang === 'en'
+          ? 'An adjacency matrix uses a 2D array where matrix[i][j] indicates if there is an edge between vertex i and vertex j:'
+          : '邻接矩阵使用二维数组，其中 matrix[i][j] 表示顶点 i 和顶点 j 之间是否有边：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Graph using Adjacency Matrix' : '使用邻接矩阵的图'}
+        code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+class GraphMatrix {
+private:
+    int vertices;
+    vector<vector<int>> adjMatrix;
+
+public:
+    GraphMatrix(int v) : vertices(v) {
+        adjMatrix.resize(v, vector<int>(v, 0));
+    }
+    
+    void addEdge(int src, int dest, bool isDirected = false) {
+        if (src >= 0 && src < vertices && dest >= 0 && dest < vertices) {
+            adjMatrix[src][dest] = 1;
+            if (!isDirected) {
+                adjMatrix[dest][src] = 1; // For undirected graph
+            }
+        }
+    }
+    
+    void removeEdge(int src, int dest, bool isDirected = false) {
+        if (src >= 0 && src < vertices && dest >= 0 && dest < vertices) {
+            adjMatrix[src][dest] = 0;
+            if (!isDirected) {
+                adjMatrix[dest][src] = 0;
+            }
+        }
+    }
+    
+    bool hasEdge(int src, int dest) {
+        if (src >= 0 && src < vertices && dest >= 0 && dest < vertices) {
+            return adjMatrix[src][dest] == 1;
+        }
+        return false;
+    }
+    
+    void printGraph() {
+        cout << "Adjacency Matrix:" << endl;
+        cout << "   ";
+        for (int i = 0; i < vertices; i++) {
+            cout << i << " ";
+        }
+        cout << endl;
+        
+        for (int i = 0; i < vertices; i++) {
+            cout << i << ": ";
+            for (int j = 0; j < vertices; j++) {
+                cout << adjMatrix[i][j] << " ";
+            }
+            cout << endl;
+        }
+    }
+    
+    void dfs(int start, vector<bool>& visited) {
+        visited[start] = true;
+        cout << start << " ";
+        
+        for (int i = 0; i < vertices; i++) {
+            if (adjMatrix[start][i] == 1 && !visited[i]) {
+                dfs(i, visited);
+            }
+        }
+    }
+    
+    void dfsTraversal(int start) {
+        vector<bool> visited(vertices, false);
+        cout << "DFS Traversal starting from " << start << ": ";
+        dfs(start, visited);
+        cout << endl;
+    }
+};
+
+int main() {
+    GraphMatrix graph(5);
+    
+    // Add edges
+    graph.addEdge(0, 1);
+    graph.addEdge(0, 4);
+    graph.addEdge(1, 2);
+    graph.addEdge(1, 3);
+    graph.addEdge(1, 4);
+    graph.addEdge(2, 3);
+    graph.addEdge(3, 4);
+    
+    graph.printGraph();
+    
+    cout << "\\nEdge (0,1) exists: " << (graph.hasEdge(0, 1) ? "Yes" : "No") << endl;
+    cout << "Edge (0,3) exists: " << (graph.hasEdge(0, 3) ? "Yes" : "No") << endl;
+    
+    graph.dfsTraversal(0);
+    
+    return 0;
+}`}
+        client:load
+      />
+      
+      <h3>{lang === 'en' ? 'Adjacency List' : '邻接表'}</h3>
+      <p>
+        {lang === 'en'
+          ? 'An adjacency list uses an array of lists where each list contains the neighbors of a vertex:'
+          : '邻接表使用列表数组，其中每个列表包含一个顶点的邻居：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Graph using Adjacency List' : '使用邻接表的图'}
+        code={`#include <iostream>
+#include <vector>
+#include <list>
+#include <queue>
+using namespace std;
+
+class GraphList {
+private:
+    int vertices;
+    vector<list<int>> adjList;
+
+public:
+    GraphList(int v) : vertices(v) {
+        adjList.resize(v);
+    }
+    
+    void addEdge(int src, int dest, bool isDirected = false) {
+        adjList[src].push_back(dest);
+        if (!isDirected) {
+            adjList[dest].push_back(src);
+        }
+    }
+    
+    void removeEdge(int src, int dest, bool isDirected = false) {
+        adjList[src].remove(dest);
+        if (!isDirected) {
+            adjList[dest].remove(src);
+        }
+    }
+    
+    void printGraph() {
+        cout << "Adjacency List:" << endl;
+        for (int i = 0; i < vertices; i++) {
+            cout << i << ": ";
+            for (int neighbor : adjList[i]) {
+                cout << neighbor << " ";
+            }
+            cout << endl;
+        }
+    }
+    
+    void bfsTraversal(int start) {
+        vector<bool> visited(vertices, false);
+        queue<int> q;
+        
+        visited[start] = true;
+        q.push(start);
+        
+        cout << "BFS Traversal starting from " << start << ": ";
+        
+        while (!q.empty()) {
+            int current = q.front();
+            q.pop();
+            cout << current << " ";
+            
+            for (int neighbor : adjList[current]) {
+                if (!visited[neighbor]) {
+                    visited[neighbor] = true;
+                    q.push(neighbor);
+                }
+            }
+        }
+        cout << endl;
+    }
+    
+    void dfs(int start, vector<bool>& visited) {
+        visited[start] = true;
+        cout << start << " ";
+        
+        for (int neighbor : adjList[start]) {
+            if (!visited[neighbor]) {
+                dfs(neighbor, visited);
+            }
+        }
+    }
+    
+    void dfsTraversal(int start) {
+        vector<bool> visited(vertices, false);
+        cout << "DFS Traversal starting from " << start << ": ";
+        dfs(start, visited);
+        cout << endl;
+    }
+    
+    bool hasPath(int src, int dest) {
+        if (src == dest) return true;
+        
+        vector<bool> visited(vertices, false);
+        queue<int> q;
+        
+        visited[src] = true;
+        q.push(src);
+        
+        while (!q.empty()) {
+            int current = q.front();
+            q.pop();
+            
+            for (int neighbor : adjList[current]) {
+                if (neighbor == dest) return true;
+                
+                if (!visited[neighbor]) {
+                    visited[neighbor] = true;
+                    q.push(neighbor);
+                }
+            }
+        }
+        
+        return false;
+    }
+};
+
+int main() {
+    GraphList graph(6);
+    
+    // Add edges
+    graph.addEdge(0, 1);
+    graph.addEdge(0, 2);
+    graph.addEdge(1, 3);
+    graph.addEdge(2, 4);
+    graph.addEdge(3, 4);
+    graph.addEdge(3, 5);
+    graph.addEdge(4, 5);
+    
+    graph.printGraph();
+    
+    cout << endl;
+    graph.bfsTraversal(0);
+    graph.dfsTraversal(0);
+    
+    cout << "\\nPath from 0 to 5: " << (graph.hasPath(0, 5) ? "Exists" : "Doesn't exist") << endl;
+    cout << "Path from 1 to 4: " << (graph.hasPath(1, 4) ? "Exists" : "Doesn't exist") << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Graph Algorithms' : '图算法'}</h2>
+      
+      <h3>{lang === 'en' ? 'Shortest Path (Dijkstra\'s Algorithm)' : '最短路径（Dijkstra 算法）'}</h3>
+      <p>
+        {lang === 'en'
+          ? 'Dijkstra\'s algorithm finds the shortest path from a source vertex to all other vertices in a weighted graph:'
+          : 'Dijkstra 算法在加权图中找到从源顶点到所有其他顶点的最短路径：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Dijkstra\'s Shortest Path Algorithm' : 'Dijkstra 最短路径算法'}
+        code={`#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+using namespace std;
+
+class WeightedGraph {
+private:
+    int vertices;
+    vector<vector<pair<int, int>>> adjList; // pair<destination, weight>
+
+public:
+    WeightedGraph(int v) : vertices(v) {
+        adjList.resize(v);
+    }
+    
+    void addEdge(int src, int dest, int weight) {
+        adjList[src].push_back({dest, weight});
+        adjList[dest].push_back({src, weight}); // For undirected graph
+    }
+    
+    vector<int> dijkstra(int start) {
+        vector<int> dist(vertices, INT_MAX);
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+        
+        dist[start] = 0;
+        pq.push({0, start}); // {distance, vertex}
+        
+        while (!pq.empty()) {
+            int u = pq.top().second;
+            int d = pq.top().first;
+            pq.pop();
+            
+            if (d > dist[u]) continue;
+            
+            for (auto& edge : adjList[u]) {
+                int v = edge.first;
+                int weight = edge.second;
+                
+                if (dist[u] + weight < dist[v]) {
+                    dist[v] = dist[u] + weight;
+                    pq.push({dist[v], v});
+                }
+            }
+        }
+        
+        return dist;
+    }
+    
+    void printShortestPaths(int start) {
+        vector<int> distances = dijkstra(start);
+        
+        cout << "Shortest distances from vertex " << start << ":" << endl;
+        for (int i = 0; i < vertices; i++) {
+            if (distances[i] == INT_MAX) {
+                cout << "Vertex " << i << ": No path" << endl;
+            } else {
+                cout << "Vertex " << i << ": " << distances[i] << endl;
+            }
+        }
+    }
+};
+
+int main() {
+    WeightedGraph graph(6);
+    
+    // Add weighted edges
+    graph.addEdge(0, 1, 4);
+    graph.addEdge(0, 2, 2);
+    graph.addEdge(1, 2, 1);
+    graph.addEdge(1, 3, 5);
+    graph.addEdge(2, 3, 8);
+    graph.addEdge(2, 4, 10);
+    graph.addEdge(3, 4, 2);
+    graph.addEdge(3, 5, 6);
+    graph.addEdge(4, 5, 3);
+    
+    graph.printShortestPaths(0);
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Graph Applications' : '图的应用'}</h2>
+      
+      <h3>{lang === 'en' ? 'Cycle Detection' : '环检测'}</h3>
+      <p>
+        {lang === 'en'
+          ? 'Detecting cycles in graphs is important for many applications. Here\'s cycle detection for undirected graphs:'
+          : '在图中检测环对许多应用很重要。这里是无向图的环检测：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Cycle Detection in Undirected Graph' : '无向图中的环检测'}
+        code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+class CycleDetection {
+private:
+    int vertices;
+    vector<vector<int>> adjList;
+    
+    bool dfsHasCycle(int v, vector<bool>& visited, int parent) {
+        visited[v] = true;
+        
+        for (int neighbor : adjList[v]) {
+            if (!visited[neighbor]) {
+                if (dfsHasCycle(neighbor, visited, v)) {
+                    return true;
+                }
+            } else if (neighbor != parent) {
+                // Back edge found (cycle detected)
+                return true;
+            }
+        }
+        
+        return false;
+    }
+
+public:
+    CycleDetection(int v) : vertices(v) {
+        adjList.resize(v);
+    }
+    
+    void addEdge(int src, int dest) {
+        adjList[src].push_back(dest);
+        adjList[dest].push_back(src);
+    }
+    
+    bool hasCycle() {
+        vector<bool> visited(vertices, false);
+        
+        // Check each component
+        for (int i = 0; i < vertices; i++) {
+            if (!visited[i]) {
+                if (dfsHasCycle(i, visited, -1)) {
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    void printGraph() {
+        cout << "Graph:" << endl;
+        for (int i = 0; i < vertices; i++) {
+            cout << i << ": ";
+            for (int neighbor : adjList[i]) {
+                cout << neighbor << " ";
+            }
+            cout << endl;
+        }
+    }
+};
+
+int main() {
+    // Test with a graph that has a cycle
+    CycleDetection graph1(5);
+    graph1.addEdge(0, 1);
+    graph1.addEdge(1, 2);
+    graph1.addEdge(2, 3);
+    graph1.addEdge(3, 4);
+    graph1.addEdge(4, 1); // Creates a cycle
+    
+    graph1.printGraph();
+    cout << "Has cycle: " << (graph1.hasCycle() ? "Yes" : "No") << endl;
+    
+    cout << "\\n" << string(30, '-') << "\\n" << endl;
+    
+    // Test with a graph without cycle (tree)
+    CycleDetection graph2(4);
+    graph2.addEdge(0, 1);
+    graph2.addEdge(1, 2);
+    graph2.addEdge(2, 3);
+    
+    graph2.printGraph();
+    cout << "Has cycle: " << (graph2.hasCycle() ? "Yes" : "No") << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    width: 1200px;
+    max-width: calc(100% - 2rem);
+    color: #1e293b;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .overview {
+    background: #f8fafc;
+    border-left: 4px solid #4f46e5;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-radius: 0 8px 8px 0;
+  }
+  
+  .overview p {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    line-height: 1.7;
+  }
+  
+  .overview p:last-child {
+    margin-bottom: 0;
+  }
+  
+  section {
+    margin: 3rem 0;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1e293b;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 2.5rem 0 1rem 0;
+    color: #1e293b;
+  }
+  
+  p {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #374151;
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+    }
+    
+    h3 {
+      font-size: 1.25rem;
+    }
+  }
+</style> 

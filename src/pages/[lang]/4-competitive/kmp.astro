@@ -1,0 +1,401 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export function getStaticPaths() {
+  return [
+    {params: {lang: 'en'}},
+    {params: {lang: 'zh'}}
+  ];
+}
+---
+
+<Layout title={lang === 'en' ? 'KMP String Algorithm' : 'KMP字符串算法'}>
+  <div class="breadcrumb">
+    <a href={`/${lang}`}>{t('nav.home')}</a> &gt; 
+    <a href={`/${lang}/4-competitive`}>{t('nav.competitive')}</a> &gt; 
+    {lang === 'en' ? 'KMP Algorithm' : 'KMP算法'}
+  </div>
+
+  <h1>{lang === 'en' ? 'KMP String Matching Algorithm' : 'KMP字符串匹配算法'}</h1>
+  
+  <div class="overview">
+    <p>
+      {lang === 'en' 
+        ? 'The Knuth-Morris-Pratt (KMP) algorithm is a fundamental string matching algorithm that achieves O(n+m) time complexity by preprocessing the pattern to build a failure function, avoiding redundant comparisons during matching.'
+        : 'KMP（Knuth-Morris-Pratt）算法是字符串匹配的经典算法，通过预处理模式串构建失配函数，实现O(n+m)时间复杂度的字符串匹配，避免重复比较。'
+      }
+    </p>
+  </div>
+
+  <h2>{lang === 'en' ? 'KMP Algorithm Implementation' : 'KMP算法基础实现'}</h2>
+  
+  <p>
+    {lang === 'en'
+      ? 'The KMP algorithm uses a failure function (π function) to record the longest proper prefix which is also a suffix for each position in the pattern.'
+      : 'KMP算法的核心是利用已匹配的信息，避免重复比较。关键在于构建失配函数（π函数），记录模式串的最长相等前后缀。'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'en' ? 'KMP Algorithm Basic Implementation' : 'KMP算法基础实现'}
+    code={`#include <iostream>
+#include <vector>
+#include <string>
+using namespace std;
+
+class KMP {
+private:
+    string pattern;
+    vector<int> pi; // ${lang === 'en' ? 'failure function' : '失配函数'}
+    
+public:
+    KMP(const string& p) : pattern(p) {
+        computePi();
+    }
+    
+    // ${lang === 'en' ? 'Build failure function' : '构建失配函数'}
+    void computePi() {
+        int m = pattern.length();
+        pi.assign(m, 0);
+        
+        for (int i = 1; i < m; i++) {
+            int j = pi[i - 1];
+            
+            // ${lang === 'en' ? 'Find longest proper prefix which is also suffix' : '寻找最长相等前后缀'}
+            while (j > 0 && pattern[i] != pattern[j]) {
+                j = pi[j - 1];
+            }
+            
+            if (pattern[i] == pattern[j]) {
+                j++;
+            }
+            
+            pi[i] = j;
+        }
+    }
+    
+    // ${lang === 'en' ? 'Find all match positions in text' : '在文本中查找所有匹配位置'}
+    vector<int> findAll(const string& text) {
+        vector<int> matches;
+        int n = text.length();
+        int m = pattern.length();
+        
+        if (m == 0) return matches;
+        
+        int j = 0; // ${lang === 'en' ? 'pattern index' : 'pattern的索引'}
+        
+        for (int i = 0; i < n; i++) {
+            // ${lang === 'en' ? 'Use failure function to skip unnecessary comparisons' : '利用失配函数跳过不必要的比较'}
+            while (j > 0 && text[i] != pattern[j]) {
+                j = pi[j - 1];
+            }
+            
+            if (text[i] == pattern[j]) {
+                j++;
+            }
+            
+            // ${lang === 'en' ? 'Found complete match' : '找到完整匹配'}
+            if (j == m) {
+                matches.push_back(i - m + 1);
+                j = pi[j - 1]; // ${lang === 'en' ? 'continue searching for next match' : '继续寻找下一个匹配'}
+            }
+        }
+        
+        return matches;
+    }
+    
+    // ${lang === 'en' ? 'Get failure function array' : '获取失配函数数组'}
+    vector<int> getPi() const {
+        return pi;
+    }
+    
+    // ${lang === 'en' ? 'Show failure function construction process' : '显示失配函数的构建过程'}
+    void showPiConstruction() {
+        cout << "${lang === 'en' ? 'Pattern: ' : '模式串: '}" << pattern << endl;
+        cout << "${lang === 'en' ? 'Index:   ' : '索引:   '}";
+        for (int i = 0; i < pattern.length(); i++) {
+            cout << i << " ";
+        }
+        cout << endl;
+        cout << "${lang === 'en' ? 'π function: ' : 'π函数:  '}";
+        for (int x : pi) {
+            cout << x << " ";
+        }
+        cout << endl;
+    }
+};
+
+int main() {
+    string text = "ABABDABACDABABCABCABCABABABCAC";
+    string pattern = "ABABCAC";
+    
+    cout << "${lang === 'en' ? 'Text: ' : '文本: '}" << text << endl;
+    cout << "${lang === 'en' ? 'Pattern: ' : '模式: '}" << pattern << endl << endl;
+    
+    KMP kmp(pattern);
+    kmp.showPiConstruction();
+    
+    vector<int> matches = kmp.findAll(text);
+    
+    cout << "\\n${lang === 'en' ? 'Match positions: ' : '匹配位置: '}";
+    for (int pos : matches) {
+        cout << pos << " ";
+    }
+    cout << endl;
+    
+    // ${lang === 'en' ? 'Show matched substrings' : '显示匹配的子串'}
+    cout << "\\n${lang === 'en' ? 'Match details:' : '匹配详情:'}" << endl;
+    for (int pos : matches) {
+        cout << "${lang === 'en' ? 'Position ' : '位置 '}" << pos << ": " << text.substr(pos, pattern.length()) << endl;
+    }
+    
+    return 0;
+}`}
+    explanation={lang === 'en' 
+      ? 'The KMP algorithm uses the π function to record the length of the longest proper prefix which is also a suffix at each position, enabling efficient skipping of known non-matching parts.'
+      : 'KMP算法通过π函数记录模式串中每个位置的最长相等前后缀长度，在匹配失败时能够跳过已知不匹配的部分。'
+    }
+    output={`${lang === 'en' ? 'Text: ' : '文本: '}ABABDABACDABABCABCABCABABABCAC
+${lang === 'en' ? 'Pattern: ' : '模式: '}ABABCAC
+
+${lang === 'en' ? 'Pattern: ' : '模式串: '}ABABCAC
+${lang === 'en' ? 'Index:   ' : '索引:   '}0 1 2 3 4 5 6 
+${lang === 'en' ? 'π function: ' : 'π函数:  '}0 0 1 2 0 1 0 
+
+${lang === 'en' ? 'Match positions: ' : '匹配位置: '}
+
+${lang === 'en' ? 'Match details:' : '匹配详情:'}`}
+  />
+
+  <h2>{lang === 'en' ? 'Z Algorithm - Extended KMP' : 'Z算法 - 扩展KMP'}</h2>
+  
+  <p>
+    {lang === 'en'
+      ? 'The Z algorithm computes the longest common prefix between the string and each of its suffixes, providing an alternative approach to string matching.'
+      : 'Z算法计算字符串每个位置与整个字符串的最长公共前缀，是KMP的一个重要扩展。'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'en' ? 'Z Algorithm Implementation' : 'Z算法实现'}
+    code={`#include <iostream>
+#include <vector>
+#include <string>
+#include <algorithm>
+using namespace std;
+
+class ZAlgorithm {
+public:
+    // ${lang === 'en' ? 'Compute Z array' : '计算Z数组'}
+    static vector<int> computeZ(const string& s) {
+        int n = s.length();
+        vector<int> z(n);
+        z[0] = n; // ${lang === 'en' ? 'z[0] is defined as string length' : 'z[0]定义为字符串长度'}
+        
+        int l = 0, r = 0; // ${lang === 'en' ? 'Z-box boundaries' : 'Z-box的左右边界'}
+        
+        for (int i = 1; i < n; i++) {
+            if (i <= r) {
+                // ${lang === 'en' ? 'i is inside Z-box, use previous information' : 'i在Z-box内，可以利用之前的信息'}
+                z[i] = min(r - i + 1, z[i - l]);
+            }
+            
+            // ${lang === 'en' ? 'Try to extend the match' : '尝试扩展匹配'}
+            while (i + z[i] < n && s[z[i]] == s[i + z[i]]) {
+                z[i]++;
+            }
+            
+            // ${lang === 'en' ? 'Update Z-box' : '更新Z-box'}
+            if (i + z[i] - 1 > r) {
+                l = i;
+                r = i + z[i] - 1;
+            }
+        }
+        
+        return z;
+    }
+    
+    // ${lang === 'en' ? 'String matching using Z algorithm' : '使用Z算法进行字符串匹配'}
+    static vector<int> stringMatch(const string& text, const string& pattern) {
+        string combined = pattern + "#" + text; // ${lang === 'en' ? 'separate with special character' : '用特殊字符分隔'}
+        vector<int> z = computeZ(combined);
+        
+        vector<int> matches;
+        int patternLen = pattern.length();
+        
+        for (int i = patternLen + 1; i < combined.length(); i++) {
+            if (z[i] == patternLen) {
+                matches.push_back(i - patternLen - 1);
+            }
+        }
+        
+        return matches;
+    }
+    
+    // ${lang === 'en' ? 'Find all palindromic substrings' : '找所有回文子串'}
+    static vector<pair<int, int>> findPalindromes(const string& s) {
+        vector<pair<int, int>> palindromes;
+        int n = s.length();
+        
+        // ${lang === 'en' ? 'Check odd-length palindromes' : '检查奇数长度回文'}
+        for (int center = 0; center < n; center++) {
+            string left = s.substr(0, center + 1);
+            reverse(left.begin(), left.end());
+            string right = s.substr(center);
+            
+            string combined = left + "#" + right;
+            vector<int> z = computeZ(combined);
+            
+            for (int i = left.length() + 1; i < combined.length(); i++) {
+                int len = z[i];
+                if (len > 0 && center - len + 1 >= 0 && center + len - 1 < n) {
+                    palindromes.push_back({center - len + 1, center + len - 1});
+                }
+            }
+        }
+        
+        return palindromes;
+    }
+};
+
+int main() {
+    string text = "AABAACAADAABAABA";
+    string pattern = "AABA";
+    
+    cout << "${lang === 'en' ? 'Text: ' : '文本: '}" << text << endl;
+    cout << "${lang === 'en' ? 'Pattern: ' : '模式: '}" << pattern << endl;
+    
+    // ${lang === 'en' ? 'Compute Z array for pattern' : '计算模式串的Z数组'}
+    vector<int> z = ZAlgorithm::computeZ(pattern);
+    cout << "\\n${lang === 'en' ? 'Z array for pattern: ' : '模式串的Z数组: '}";
+    for (int x : z) cout << x << " ";
+    cout << endl;
+    
+    // ${lang === 'en' ? 'Find matches' : '查找匹配'}
+    vector<int> matches = ZAlgorithm::stringMatch(text, pattern);
+    cout << "\\n${lang === 'en' ? 'Match positions: ' : '匹配位置: '}";
+    for (int pos : matches) {
+        cout << pos << " ";
+    }
+    cout << endl;
+    
+    // ${lang === 'en' ? 'Show matched substrings' : '显示匹配的子串'}
+    cout << "\\n${lang === 'en' ? 'Matched substrings:' : '匹配的子串:'}" << endl;
+    for (int pos : matches) {
+        cout << "${lang === 'en' ? 'Position ' : '位置 '}" << pos << ": " << text.substr(pos, pattern.length()) << endl;
+    }
+    
+    return 0;
+}`}
+    explanation={lang === 'en' 
+      ? 'The Z algorithm maintains a Z-box [l, r] representing the rightmost segment that matches a prefix. This allows efficient computation of Z values using previously computed information.'
+      : 'Z算法维护一个Z-box [l, r]表示最右边与前缀匹配的段。这允许使用之前计算的信息高效计算Z值。'
+    }
+    output={`${lang === 'en' ? 'Text: ' : '文本: '}AABAACAADAABAABA
+${lang === 'en' ? 'Pattern: ' : '模式: '}AABA
+
+${lang === 'en' ? 'Z array for pattern: ' : '模式串的Z数组: '}4 1 0 1 
+
+${lang === 'en' ? 'Match positions: ' : '匹配位置: '}0 9 12 
+
+${lang === 'en' ? 'Matched substrings:' : '匹配的子串:'}
+${lang === 'en' ? 'Position ' : '位置 '}0: AABA
+${lang === 'en' ? 'Position ' : '位置 '}9: AABA
+${lang === 'en' ? 'Position ' : '位置 '}12: AABA`}
+  />
+
+  <div class="summary">
+    <h2>{lang === 'en' ? 'Key Takeaways' : '关键要点'}</h2>
+    <ul>
+      <li>
+        {lang === 'en'
+          ? 'KMP achieves O(n+m) time complexity by preprocessing the pattern to build a failure function'
+          : 'KMP通过预处理模式串构建失配函数实现O(n+m)时间复杂度'
+        }
+      </li>
+      <li>
+        {lang === 'en'
+          ? 'The failure function π[i] stores the length of the longest proper prefix that is also a suffix'
+          : '失配函数π[i]存储最长相等前后缀的长度'
+        }
+      </li>
+      <li>
+        {lang === 'en'
+          ? 'Z algorithm computes longest common prefix with the entire string for each position'
+          : 'Z算法计算每个位置与整个字符串的最长公共前缀'
+        }
+      </li>
+      <li>
+        {lang === 'en'
+          ? 'Both algorithms are fundamental for advanced string processing and pattern matching problems'
+          : '两种算法都是高级字符串处理和模式匹配问题的基础'
+        }
+      </li>
+    </ul>
+  </div>
+</Layout>
+
+<style>
+  .overview {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    margin: 2rem 0;
+  }
+  
+  .summary {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 10px;
+    margin: 2rem 0;
+    border-left: 4px solid #667eea;
+  }
+  
+  .breadcrumb {
+    margin: 1rem 0;
+    color: #666;
+  }
+  
+  .breadcrumb a {
+    color: #667eea;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    color: #2c3e50;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 0.5rem;
+  }
+  
+  h2 {
+    color: #34495e;
+    margin-top: 2rem;
+  }
+  
+  p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  
+  ul {
+    line-height: 1.8;
+  }
+  
+  @media (max-width: 768px) {
+    .overview, .summary {
+      padding: 1rem;
+    }
+  }
+</style> 

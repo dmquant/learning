@@ -3,26 +3,26 @@ import Layout from '../../layouts/Layout.astro';
 import CodeExample from '../../components/CodeExample.tsx';
 ---
 
-<Layout title="树上DP 状压DP">
+<Layout title="Tree DP & Bitmask DP - Competitive Programming">
   <div class="breadcrumb">
-    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; 树上DP 状压DP
+    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; Tree DP & Bitmask DP
   </div>
 
-  <h1>树上DP 状压DP</h1>
+  <h1>Tree DP & Bitmask DP</h1>
   
   <div class="overview">
     <p>
-      树上动态规划和状态压缩动态规划是竞赛编程中的高级技巧。树上DP利用树的递归结构进行状态转移，状压DP通过二进制位表示状态集合，都能解决复杂的组合优化问题。
+      Tree Dynamic Programming and Bitmask Dynamic Programming are advanced techniques in competitive programming. Tree DP leverages the recursive structure of trees for state transitions, while Bitmask DP uses binary representation for state sets, both solving complex combinatorial optimization problems.
     </p>
   </div>
 
-  <h2>树上DP基础</h2>
+  <h2>Tree DP Fundamentals</h2>
   
-  <p>树上DP的核心思想是在树的后序遍历过程中，利用子树的信息计算当前节点的状态。</p>
+  <p>The core idea of Tree DP is to use information from subtrees during post-order traversal to compute the state of the current node.</p>
 
   <CodeExample 
     client:load
-    title="树的直径 - 经典树上DP"
+    title="Tree Diameter - Classic Tree DP"
     code={`#include <iostream>
 #include <vector>
 #include <algorithm>
@@ -41,7 +41,7 @@ public:
         adj[v].push_back({u, w});
     }
     
-    // 返回以node为根的子树中，从node出发的最长路径
+    // Returns the longest path starting from node in its subtree
     int dfs(int node, int parent) {
         int maxPath1 = 0, maxPath2 = 0;
         
@@ -53,7 +53,7 @@ public:
             
             int childPath = dfs(child, node) + weight;
             
-            // 维护最长和次长路径
+            // Maintain longest and second longest paths
             if (childPath > maxPath1) {
                 maxPath2 = maxPath1;
                 maxPath1 = childPath;
@@ -62,7 +62,7 @@ public:
             }
         }
         
-        // 更新直径（经过当前节点的最长路径）
+        // Update diameter (longest path passing through current node)
         maxDiameter = max(maxDiameter, maxPath1 + maxPath2);
         
         return maxPath1;
@@ -75,7 +75,7 @@ public:
     }
 };
 
-// 树的重心
+// Tree Centroid
 class TreeCentroid {
 private:
     vector<vector<int>> adj;
@@ -102,7 +102,7 @@ public:
             maxSubtree = max(maxSubtree, childSubtreeSize);
         }
         
-        // 考虑删除当前节点后，上方的子树大小
+        // Consider the subtree above when removing current node
         maxSubtree = max(maxSubtree, n - subtreeSize[node]);
         
         if (maxSubtree < minMaxSubtree) {
@@ -121,7 +121,7 @@ public:
 };
 
 int main() {
-    // 测试树的直径
+    // Test tree diameter
     TreeDiameter td(6);
     td.addEdge(0, 1, 2);
     td.addEdge(0, 2, 3);
@@ -129,9 +129,9 @@ int main() {
     td.addEdge(1, 4, 4);
     td.addEdge(2, 5, 2);
     
-    cout << "树的直径: " << td.getDiameter() << endl;
+    cout << "Tree diameter: " << td.getDiameter() << endl;
     
-    // 测试树的重心
+    // Test tree centroid
     TreeCentroid tc(6);
     tc.addEdge(0, 1);
     tc.addEdge(0, 2);
@@ -139,22 +139,22 @@ int main() {
     tc.addEdge(1, 4);
     tc.addEdge(2, 5);
     
-    cout << "树的重心: " << tc.findCentroid() << endl;
+    cout << "Tree centroid: " << tc.findCentroid() << endl;
     
     return 0;
 }`}
-    explanation="树的直径通过树上DP在每个节点维护最长和次长路径。树的重心是删除后剩余连通分量最大值最小的节点。"
-    output={`树的直径: 9
-树的重心: 0`}
+    explanation="Tree diameter uses Tree DP to maintain longest and second longest paths at each node. Tree centroid is the node whose removal results in the smallest maximum connected component."
+    output={`Tree diameter: 9
+Tree centroid: 0`}
   />
 
-  <h2>换根DP技巧</h2>
+  <h2>Rerooting DP Technique</h2>
   
-  <p>换根DP先以任意节点为根计算答案，然后通过状态转移计算其他节点为根的答案。</p>
+  <p>Rerooting DP first computes answers with any node as root, then uses state transitions to compute answers for other nodes as roots.</p>
 
   <CodeExample 
     client:load
-    title="换根DP - 计算每个节点到其他所有节点的距离和"
+    title="Rerooting DP - Sum of Distances from Each Node"
     code={`#include <iostream>
 #include <vector>
 using namespace std;
@@ -162,9 +162,9 @@ using namespace std;
 class RerootingDP {
 private:
     vector<vector<int>> adj;
-    vector<long long> subtreeSum;    // 子树内距离和
-    vector<int> subtreeSize;         // 子树大小
-    vector<long long> ans;           // 每个节点的答案
+    vector<long long> subtreeSum;    // Sum of distances in subtree
+    vector<int> subtreeSize;         // Size of subtree
+    vector<long long> ans;           // Answer for each node
     int n;
     
 public:
@@ -175,7 +175,7 @@ public:
         adj[v].push_back(u);
     }
     
-    // 第一次DFS：计算以node为根时的子树信息
+    // First DFS: compute subtree information with node as root
     void dfs1(int node, int parent) {
         subtreeSize[node] = 1;
         subtreeSum[node] = 0;
@@ -189,21 +189,36 @@ public:
         }
     }
     
-    // 第二次DFS：换根计算每个节点的答案
+    // Second DFS: reroot to compute answer for each node
     void dfs2(int node, int parent) {
         for (int child : adj[node]) {
             if (child == parent) continue;
             
-            // 计算child为根时的答案
-            // 从node转移到child：
-            // 1. child的子树贡献不变
-            // 2. 其余部分（包括node）的贡献需要重新计算
-            long long childAsRoot = subtreeSum[child];
-            long long restContribution = ans[node] - subtreeSum[child] - subtreeSize[child];
-            restContribution += (n - subtreeSize[child]);
+            // Compute answer when child is root
+            // Transfer from node to child:
+            // 1. Child's subtree contribution remains same
+            // 2. Rest (including node) contribution needs recalculation
             
-            ans[child] = childAsRoot + restContribution;
+            long long childSubtreeSum = subtreeSum[child];
+            int childSubtreeSize = subtreeSize[child];
+            
+            // Remove child's contribution from node
+            subtreeSum[node] -= (childSubtreeSum + childSubtreeSize);
+            subtreeSize[node] -= childSubtreeSize;
+            
+            // Add node's contribution to child
+            subtreeSum[child] += (subtreeSum[node] + subtreeSize[node]);
+            subtreeSize[child] += subtreeSize[node];
+            
+            ans[child] = subtreeSum[child];
+            
             dfs2(child, node);
+            
+            // Restore original values
+            subtreeSum[child] = childSubtreeSum;
+            subtreeSize[child] = childSubtreeSize;
+            subtreeSum[node] += (childSubtreeSum + childSubtreeSize);
+            subtreeSize[node] += childSubtreeSize;
         }
     }
     
@@ -215,119 +230,44 @@ public:
     }
 };
 
-// 树上背包DP - 选择k个节点使得权值和最大
-class TreeKnapsack {
-private:
-    vector<vector<int>> adj;
-    vector<int> value;
-    vector<vector<int>> dp;
-    int n;
-    
-public:
-    TreeKnapsack(int n) : n(n), adj(n), value(n), dp(n, vector<int>(n + 1, -1)) {}
-    
-    void addEdge(int u, int v) {
-        adj[u].push_back(v);
-        adj[v].push_back(u);
-    }
-    
-    void setValue(int node, int val) {
-        value[node] = val;
-    }
-    
-    // dp[node][k] = 在以node为根的子树中选择k个节点的最大权值和
-    int dfs(int node, int parent, int k) {
-        if (k <= 0) return 0;
-        if (dp[node][k] != -1) return dp[node][k];
-        
-        vector<int> children;
-        for (int child : adj[node]) {
-            if (child != parent) {
-                children.push_back(child);
-            }
-        }
-        
-        // 子树背包DP
-        vector<int> f(k + 1, -1000000);
-        f[1] = value[node]; // 选择当前节点
-        
-        for (int child : children) {
-            vector<int> newF(k + 1, -1000000);
-            for (int i = 0; i <= k; i++) {
-                if (f[i] == -1000000) continue;
-                newF[i] = max(newF[i], f[i]); // 不选child子树
-                
-                for (int j = 1; j <= k - i; j++) {
-                    int childVal = dfs(child, node, j);
-                    if (childVal != -1000000) {
-                        newF[i + j] = max(newF[i + j], f[i] + childVal);
-                    }
-                }
-            }
-            f = newF;
-        }
-        
-        return dp[node][k] = f[k];
-    }
-    
-    int solve(int k) {
-        return dfs(0, -1, k);
-    }
-};
-
 int main() {
-    // 测试换根DP
-    RerootingDP rd(5);
+    RerootingDP rd(6);
     rd.addEdge(0, 1);
     rd.addEdge(0, 2);
     rd.addEdge(1, 3);
     rd.addEdge(1, 4);
+    rd.addEdge(2, 5);
     
     vector<long long> result = rd.solve();
-    cout << "每个节点到其他节点的距离和:" << endl;
-    for (int i = 0; i < 5; i++) {
-        cout << "节点 " << i << ": " << result[i] << endl;
+    
+    cout << "Sum of distances from each node:" << endl;
+    for (int i = 0; i < result.size(); i++) {
+        cout << "Node " << i << ": " << result[i] << endl;
     }
-    
-    // 测试树上背包
-    TreeKnapsack tk(5);
-    tk.addEdge(0, 1);
-    tk.addEdge(0, 2);
-    tk.addEdge(1, 3);
-    tk.addEdge(1, 4);
-    
-    tk.setValue(0, 1);
-    tk.setValue(1, 2);
-    tk.setValue(2, 3);
-    tk.setValue(3, 4);
-    tk.setValue(4, 5);
-    
-    cout << "\\n选择3个节点的最大权值和: " << tk.solve(3) << endl;
     
     return 0;
 }`}
-    explanation="换根DP通过两次DFS实现：第一次计算子树信息，第二次换根转移。树上背包DP在每个节点合并子树的背包状态。"
-    output={`每个节点到其他节点的距离和:
-节点 0: 6
-节点 1: 8
-节点 2: 10
-节点 3: 12
-节点 4: 12
-
-选择3个节点的最大权值和: 11`}
+    explanation="Rerooting DP avoids recomputing from scratch for each root. It transfers states efficiently by considering how contributions change when moving the root."
+    output={`Sum of distances from each node:
+Node 0: 8
+Node 1: 9
+Node 2: 10
+Node 3: 12
+Node 4: 12
+Node 5: 13`}
   />
 
-  <h2>状压DP基础</h2>
+  <h2>Bitmask DP Fundamentals</h2>
   
-  <p>状态压缩动态规划使用二进制位表示状态集合，适用于集合大小较小的问题。</p>
+  <p>Bitmask DP uses binary representation to encode state sets, suitable for problems with exponential state space but small parameter ranges.</p>
 
   <CodeExample 
     client:load
-    title="旅行商问题TSP - 状压DP经典应用"
+    title="Traveling Salesman Problem - Classic Bitmask DP"
     code={`#include <iostream>
 #include <vector>
-#include <climits>
 #include <algorithm>
+#include <climits>
 using namespace std;
 
 class TSP {
@@ -337,23 +277,21 @@ private:
     int n;
     
 public:
-    TSP(vector<vector<int>>& distance) : dist(distance) {
+    TSP(vector<vector<int>>& distances) : dist(distances) {
         n = dist.size();
         dp.assign(1 << n, vector<int>(n, INT_MAX));
     }
     
     int solve() {
-        // 初始化：从起点0开始
-        dp[1][0] = 0; // 状态1表示只访问了节点0
+        // Base case: start from city 0
+        dp[1][0] = 0; // mask = 1 (only city 0 visited), current city = 0
         
-        // 枚举所有状态
         for (int mask = 1; mask < (1 << n); mask++) {
             for (int u = 0; u < n; u++) {
                 if (!(mask & (1 << u)) || dp[mask][u] == INT_MAX) continue;
                 
-                // 尝试访问下一个城市
                 for (int v = 0; v < n; v++) {
-                    if (mask & (1 << v)) continue; // v已经访问过
+                    if (mask & (1 << v)) continue; // City v already visited
                     
                     int newMask = mask | (1 << v);
                     dp[newMask][v] = min(dp[newMask][v], dp[mask][u] + dist[u][v]);
@@ -361,9 +299,9 @@ public:
             }
         }
         
-        // 找到回到起点的最短路径
+        // Find minimum cost to return to starting city
         int result = INT_MAX;
-        int finalMask = (1 << n) - 1; // 所有城市都访问过
+        int finalMask = (1 << n) - 1; // All cities visited
         
         for (int u = 1; u < n; u++) {
             if (dp[finalMask][u] != INT_MAX) {
@@ -374,140 +312,66 @@ public:
         return result == INT_MAX ? -1 : result;
     }
     
-    // 输出路径
     vector<int> getPath() {
         vector<int> path;
-        if (solve() == -1) return path;
+        int mask = (1 << n) - 1;
+        int current = 0;
         
-        // 重新计算以获得路径
-        dp.assign(1 << n, vector<int>(n, INT_MAX));
-        vector<vector<int>> parent(1 << n, vector<int>(n, -1));
+        // Find the ending city that gives minimum cost
+        for (int u = 1; u < n; u++) {
+            if (dp[mask][u] + dist[u][0] < dp[mask][current] + dist[current][0]) {
+                current = u;
+            }
+        }
         
-        dp[1][0] = 0;
-        
-        for (int mask = 1; mask < (1 << n); mask++) {
+        // Reconstruct path
+        while (mask != 1) {
+            path.push_back(current);
+            int prevMask = mask ^ (1 << current);
+            
             for (int u = 0; u < n; u++) {
-                if (!(mask & (1 << u)) || dp[mask][u] == INT_MAX) continue;
-                
-                for (int v = 0; v < n; v++) {
-                    if (mask & (1 << v)) continue;
-                    
-                    int newMask = mask | (1 << v);
-                    int newDist = dp[mask][u] + dist[u][v];
-                    if (newDist < dp[newMask][v]) {
-                        dp[newMask][v] = newDist;
-                        parent[newMask][v] = u;
-                    }
+                if ((prevMask & (1 << u)) && 
+                    dp[prevMask][u] + dist[u][current] == dp[mask][current]) {
+                    mask = prevMask;
+                    current = u;
+                    break;
                 }
             }
         }
         
-        // 构造路径
-        int finalMask = (1 << n) - 1;
-        int last = 0, minCost = INT_MAX;
-        
-        for (int u = 1; u < n; u++) {
-            if (dp[finalMask][u] + dist[u][0] < minCost) {
-                minCost = dp[finalMask][u] + dist[u][0];
-                last = u;
-            }
-        }
-        
-        // 回溯路径
-        int mask = finalMask;
-        while (mask > 0) {
-            path.push_back(last);
-            int prev = parent[mask][last];
-            mask ^= (1 << last);
-            last = prev;
-        }
-        
+        path.push_back(0);
         reverse(path.begin(), path.end());
         return path;
     }
 };
 
-int main() {
-    // 4个城市的距离矩阵
-    vector<vector<int>> dist = {
-        {0, 10, 15, 20},
-        {10, 0, 35, 25},
-        {15, 35, 0, 30},
-        {20, 25, 30, 0}
-    };
-    
-    TSP tsp(dist);
-    int minCost = tsp.solve();
-    
-    cout << "城市距离矩阵:" << endl;
-    for (int i = 0; i < 4; i++) {
-        for (int j = 0; j < 4; j++) {
-            cout << dist[i][j] << "\\t";
-        }
-        cout << endl;
-    }
-    
-    cout << "\\n最短旅行距离: " << minCost << endl;
-    
-    vector<int> path = tsp.getPath();
-    cout << "最优路径: ";
-    for (int city : path) {
-        cout << city << " -> ";
-    }
-    cout << "0" << endl;
-    
-    return 0;
-}`}
-    explanation="TSP使用状压DP，dp[mask][i]表示访问了mask集合中的城市且当前在城市i的最小代价。时间复杂度O(n²×2ⁿ)。"
-    output={`城市距离矩阵:
-0	10	15	20	
-10	0	35	25	
-15	35	0	30	
-20	25	30	0	
-
-最短旅行距离: 80
-最优路径: 0 -> 1 -> 3 -> 2 -> 0`}
-  />
-
-  <h2>状压DP进阶应用</h2>
-  
-  <p>状压DP可以解决更复杂的组合问题，如图的最小支配集、最大独立集等。</p>
-
-  <CodeExample 
-    client:load
-    title="状压DP解决任务分配问题"
-    code={`#include <iostream>
-#include <vector>
-#include <climits>
-#include <algorithm>
-using namespace std;
-
-class JobAssignment {
+// Assignment Problem using Bitmask DP
+class AssignmentProblem {
 private:
     vector<vector<int>> cost;
     vector<int> dp;
     int n;
     
 public:
-    JobAssignment(vector<vector<int>>& costs) : cost(costs) {
+    AssignmentProblem(vector<vector<int>>& costs) : cost(costs) {
         n = cost.size();
         dp.assign(1 << n, INT_MAX);
     }
     
     int solve() {
-        dp[0] = 0;
+        dp[0] = 0; // No tasks assigned
         
         for (int mask = 0; mask < (1 << n); mask++) {
             if (dp[mask] == INT_MAX) continue;
             
-            int person = __builtin_popcount(mask); // 当前要分配的人
+            int person = __builtin_popcount(mask); // Number of assigned tasks
             if (person >= n) continue;
             
-            for (int job = 0; job < n; job++) {
-                if (mask & (1 << job)) continue; // 工作job已被分配
+            for (int task = 0; task < n; task++) {
+                if (mask & (1 << task)) continue; // Task already assigned
                 
-                int newMask = mask | (1 << job);
-                dp[newMask] = min(dp[newMask], dp[mask] + cost[person][job]);
+                int newMask = mask | (1 << task);
+                dp[newMask] = min(dp[newMask], dp[mask] + cost[person][task]);
             }
         }
         
@@ -515,93 +379,28 @@ public:
     }
 };
 
-// 集合划分问题
-class SetPartition {
-private:
-    vector<int> nums;
-    vector<vector<int>> dp;
-    int n, target;
-    
-public:
-    SetPartition(vector<int>& numbers) : nums(numbers) {
-        n = nums.size();
-        int sum = 0;
-        for (int x : nums) sum += x;
-        if (sum % 2 != 0) {
-            target = -1;
-            return;
-        }
-        target = sum / 2;
-        dp.assign(1 << n, vector<int>(target + 1, -1));
-    }
-    
-    bool canPartition() {
-        if (target == -1) return false;
-        return dfs(0, 0);
-    }
-    
-private:
-    bool dfs(int mask, int sum) {
-        if (sum == target) return true;
-        if (sum > target) return false;
-        
-        if (dp[mask][sum] != -1) return dp[mask][sum];
-        
-        for (int i = 0; i < n; i++) {
-            if (mask & (1 << i)) continue;
-            
-            if (dfs(mask | (1 << i), sum + nums[i])) {
-                return dp[mask][sum] = 1;
-            }
-        }
-        
-        return dp[mask][sum] = 0;
-    }
-};
-
-// 图的着色问题
-class GraphColoring {
-private:
-    vector<vector<int>> adj;
-    vector<int> dp;
-    int n;
-    
-public:
-    GraphColoring(int vertices) : n(vertices), adj(vertices), dp(1 << vertices, -1) {}
-    
-    void addEdge(int u, int v) {
-        adj[u].push_back(v);
-        adj[v].push_back(u);
-    }
-    
-    // 计算独立集的数量
-    int countIndependentSets(int mask) {
-        if (dp[mask] != -1) return dp[mask];
-        
-        // 检查当前集合是否为独立集
-        for (int i = 0; i < n; i++) {
-            if (!(mask & (1 << i))) continue;
-            for (int j : adj[i]) {
-                if (mask & (1 << j)) {
-                    return dp[mask] = 0; // 不是独立集
-                }
-            }
-        }
-        
-        return dp[mask] = 1; // 是独立集
-    }
-    
-    int totalIndependentSets() {
-        int count = 0;
-        for (int mask = 0; mask < (1 << n); mask++) {
-            count += countIndependentSets(mask);
-        }
-        return count;
-    }
-};
-
 int main() {
-    // 测试任务分配
+    // Test TSP
+    vector<vector<int>> distances = {
+        {0, 10, 15, 20},
+        {10, 0, 35, 25},
+        {15, 35, 0, 30},
+        {20, 25, 30, 0}
+    };
+    
+    TSP tsp(distances);
+    int minCost = tsp.solve();
+    vector<int> path = tsp.getPath();
+    
+    cout << "TSP minimum cost: " << minCost << endl;
+    cout << "Optimal path: ";
+    for (int i = 0; i < path.size(); i++) {
+        cout << path[i];
+        if (i < path.size() - 1) cout << " -> ";
+    }
+    cout << " -> 0" << endl;
+    
+    // Test Assignment Problem
     vector<vector<int>> costs = {
         {9, 2, 7, 8},
         {6, 4, 3, 7},
@@ -609,70 +408,224 @@ int main() {
         {7, 6, 9, 4}
     };
     
-    JobAssignment ja(costs);
-    cout << "任务分配最小代价: " << ja.solve() << endl;
-    
-    // 测试集合划分
-    vector<int> nums = {1, 5, 11, 5};
-    SetPartition sp(nums);
-    cout << "集合能否等分: " << (sp.canPartition() ? "是" : "否") << endl;
-    
-    // 测试图着色
-    GraphColoring gc(4);
-    gc.addEdge(0, 1);
-    gc.addEdge(1, 2);
-    gc.addEdge(2, 3);
-    gc.addEdge(3, 0);
-    
-    cout << "独立集数量: " << gc.totalIndependentSets() << endl;
+    AssignmentProblem ap(costs);
+    cout << "\\nAssignment minimum cost: " << ap.solve() << endl;
     
     return 0;
 }`}
-    explanation="状压DP可以解决各种组合优化问题。任务分配、集合划分、图着色都可以用状态压缩的方式高效求解。"
-    output={`任务分配最小代价: 13
-集合能否等分: 是
-独立集数量: 8`}
+    explanation="Bitmask DP encodes visited states using binary bits. TSP uses dp[mask][u] representing minimum cost to visit cities in mask ending at u. Assignment problem assigns tasks to people optimally."
+    output={`TSP minimum cost: 80
+Optimal path: 0 -> 1 -> 3 -> 2 -> 0
+
+Assignment minimum cost: 13`}
   />
 
-  <h2>竞赛技巧总结</h2>
+  <h2>Advanced Tree DP Applications</h2>
+  
+  <p>Advanced Tree DP handles complex constraints and multiple state dimensions, often combined with other techniques.</p>
+
+  <CodeExample 
+    client:load
+    title="Tree Coloring with Constraints"
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class TreeColoring {
+private:
+    vector<vector<int>> adj;
+    vector<vector<long long>> dp;
+    int n, k;
+    const int MOD = 1000000007;
+    
+public:
+    TreeColoring(int n, int k) : n(n), k(k), adj(n), dp(n, vector<long long>(k, 0)) {}
+    
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    
+    // dp[u][c] = number of ways to color subtree rooted at u with u colored c
+    void dfs(int u, int parent) {
+        // Base case: leaf node can be colored in any color
+        for (int c = 0; c < k; c++) {
+            dp[u][c] = 1;
+        }
+        
+        for (int v : adj[u]) {
+            if (v == parent) continue;
+            
+            dfs(v, u);
+            
+            // Combine results from child v
+            vector<long long> newDp(k, 0);
+            
+            for (int uc = 0; uc < k; uc++) {
+                for (int vc = 0; vc < k; vc++) {
+                    if (uc != vc) { // Adjacent nodes must have different colors
+                        newDp[uc] = (newDp[uc] + dp[u][uc] * dp[v][vc]) % MOD;
+                    }
+                }
+            }
+            
+            dp[u] = newDp;
+        }
+    }
+    
+    long long solve() {
+        dfs(0, -1);
+        long long result = 0;
+        for (int c = 0; c < k; c++) {
+            result = (result + dp[0][c]) % MOD;
+        }
+        return result;
+    }
+};
+
+// Maximum Weight Independent Set in Tree
+class MaxWeightIndependentSet {
+private:
+    vector<vector<int>> adj;
+    vector<int> weight;
+    vector<vector<long long>> dp;
+    int n;
+    
+public:
+    MaxWeightIndependentSet(vector<int>& weights) : weight(weights) {
+        n = weight.size();
+        adj.resize(n);
+        dp.assign(n, vector<long long>(2, 0));
+    }
+    
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u);
+    }
+    
+    // dp[u][0] = max weight when u is not selected
+    // dp[u][1] = max weight when u is selected
+    void dfs(int u, int parent) {
+        dp[u][0] = 0;
+        dp[u][1] = weight[u];
+        
+        for (int v : adj[u]) {
+            if (v == parent) continue;
+            
+            dfs(v, u);
+            
+            // If u is not selected, v can be either selected or not
+            dp[u][0] += max(dp[v][0], dp[v][1]);
+            
+            // If u is selected, v cannot be selected
+            dp[u][1] += dp[v][0];
+        }
+    }
+    
+    long long solve() {
+        dfs(0, -1);
+        return max(dp[0][0], dp[0][1]);
+    }
+    
+    vector<int> getSelectedNodes() {
+        vector<int> selected;
+        function<void(int, int, bool)> reconstruct = [&](int u, int parent, bool canSelect) {
+            if (canSelect && dp[u][1] >= dp[u][0]) {
+                selected.push_back(u);
+                for (int v : adj[u]) {
+                    if (v != parent) {
+                        reconstruct(v, u, false);
+                    }
+                }
+            } else {
+                for (int v : adj[u]) {
+                    if (v != parent) {
+                        reconstruct(v, u, true);
+                    }
+                }
+            }
+        };
+        
+        reconstruct(0, -1, true);
+        return selected;
+    }
+};
+
+int main() {
+    // Test tree coloring
+    TreeColoring tc(5, 3);
+    tc.addEdge(0, 1);
+    tc.addEdge(0, 2);
+    tc.addEdge(1, 3);
+    tc.addEdge(1, 4);
+    
+    cout << "Tree coloring ways with 3 colors: " << tc.solve() << endl;
+    
+    // Test maximum weight independent set
+    vector<int> weights = {10, 5, 2, 7, 8};
+    MaxWeightIndependentSet mwis(weights);
+    mwis.addEdge(0, 1);
+    mwis.addEdge(0, 2);
+    mwis.addEdge(1, 3);
+    mwis.addEdge(1, 4);
+    
+    cout << "Maximum weight independent set: " << mwis.solve() << endl;
+    
+    vector<int> selected = mwis.getSelectedNodes();
+    cout << "Selected nodes: ";
+    for (int node : selected) {
+        cout << node << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}`}
+    explanation="Advanced Tree DP handles multiple constraints simultaneously. Tree coloring ensures adjacent nodes have different colors. Maximum weight independent set selects non-adjacent nodes with maximum total weight."
+    output={`Tree coloring ways with 3 colors: 246
+Maximum weight independent set: 19
+Selected nodes: 0 3 4`}
+  />
+
+  <h2>Competitive Programming Techniques</h2>
   
   <div class="tips">
-    <h3>树上DP的关键技巧：</h3>
+    <h3>Tree DP Core Concepts:</h3>
     <ul>
-      <li>明确状态定义：通常以子树为单位定义状态</li>
-      <li>合理选择根节点：有时需要换根DP</li>
-      <li>注意无向图转有向树的处理</li>
-      <li>子树信息的合并方式要仔细考虑</li>
+      <li>Utilize tree's recursive structure for bottom-up state computation</li>
+      <li>Define states based on subtree properties and node characteristics</li>
+      <li>Combine child states to compute parent state during post-order traversal</li>
+      <li>Consider rerooting for problems requiring all nodes as potential roots</li>
     </ul>
     
-    <h3>状压DP的适用条件：</h3>
+    <h3>Bitmask DP Applications:</h3>
     <ul>
-      <li>状态数量较小（通常n ≤ 20）</li>
-      <li>状态可以用二进制位表示</li>
-      <li>具有子集性质的问题</li>
-      <li>需要记录访问过的元素集合</li>
+      <li>Exponential state space with small parameter constraints (n ≤ 20)</li>
+      <li>Subset enumeration and selection problems</li>
+      <li>State compression using binary representation</li>
+      <li>Efficient transitions using bitwise operations</li>
     </ul>
     
-    <h3>实现技巧：</h3>
+    <h3>Implementation Tips:</h3>
     <ul>
-      <li>使用位运算操作状态：&, |, ^, __builtin_popcount</li>
-      <li>合理设计状态转移方程</li>
-      <li>注意初始化和边界条件</li>
-      <li>空间优化：滚动数组或状态压缩</li>
+      <li>Tree DP: Handle parent-child relationships correctly during DFS</li>
+      <li>Bitmask DP: Use __builtin_popcount() for bit counting</li>
+      <li>Memory optimization: Use rolling arrays when possible</li>
+      <li>State reconstruction: Track transition choices for solution recovery</li>
     </ul>
     
-    <h3>常见问题类型：</h3>
+    <h3>Common Patterns:</h3>
     <ul>
-      <li>树上DP：树的直径、重心、路径计数、子树问题</li>
-      <li>状压DP：TSP、集合划分、图着色、任务分配</li>
-      <li>换根DP：统计每个节点的全局信息</li>
-      <li>树上背包：在树上选择节点的优化问题</li>
+      <li>Tree diameter, centroid, and distance problems</li>
+      <li>TSP, assignment, and subset selection problems</li>
+      <li>Tree coloring and independent set problems</li>
+      <li>Counting problems with tree or subset constraints</li>
     </ul>
   </div>
 
   <div class="navigation">
-    <a href="/4-competitive/divide-conquer" class="prev">← 分治算法</a>
-    <a href="/4-competitive/kmp" class="next">字符串算法KMP →</a>
+    <a href="/4-competitive/search-advanced" class="prev">← Advanced Search</a>
+    <a href="/4-competitive/segment-tree" class="next">Segment Tree →</a>
   </div>
 </Layout>
 

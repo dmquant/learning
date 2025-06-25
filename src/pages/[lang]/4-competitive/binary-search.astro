@@ -1,0 +1,420 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={lang === 'en' ? 'Binary Search - Competitive Programming' : '二分查找 - 竞赛编程'}>
+  <main>
+    <nav class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a>
+      <span>›</span>
+      <a href={`/${lang}/4-competitive`}>{t('nav.competitive')}</a>
+      <span>›</span>
+      <span>{t('comp.binary-search')}</span>
+    </nav>
+
+    <h1>{t('comp.binary-search')}</h1>
+    
+    <div class="intro">
+      {lang === 'en' ? (
+        <p>Master binary search variations, optimization problems, and search spaces. Learn to apply binary search beyond sorted arrays to solve complex competitive programming problems.</p>
+      ) : (
+        <p>掌握二分查找的变种、优化问题和搜索空间。学习在排序数组之外应用二分查找解决复杂的竞赛编程问题。</p>
+      )}
+    </div>
+
+    <section>
+      <h2>{lang === 'en' ? '1. Classic Binary Search' : '1. 经典二分查找'}</h2>
+      {lang === 'en' ? (
+        <p>The foundation of binary search: finding elements in sorted arrays with O(log n) time complexity.</p>
+      ) : (
+        <p>二分查找的基础：在排序数组中以 O(log n) 时间复杂度查找元素。</p>
+      )}
+
+      <CodeExample
+        title={lang === 'en' ? 'Basic Binary Search Implementation' : '基础二分查找实现'}
+        code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+// Classic binary search
+int binarySearch(vector<int>& arr, int target) {
+    int left = 0, right = arr.size() - 1;
+    
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        
+        if (arr[mid] == target) {
+            return mid;
+        } else if (arr[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    
+    return -1; // Not found
+}
+
+// Lower bound: first position where element >= target
+int lowerBound(vector<int>& arr, int target) {
+    int left = 0, right = arr.size();
+    
+    while (left < right) {
+        int mid = left + (right - left) / 2;
+        
+        if (arr[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid;
+        }
+    }
+    
+    return left;
+}
+
+// Upper bound: first position where element > target
+int upperBound(vector<int>& arr, int target) {
+    int left = 0, right = arr.size();
+    
+    while (left < right) {
+        int mid = left + (right - left) / 2;
+        
+        if (arr[mid] <= target) {
+            left = mid + 1;
+        } else {
+            right = mid;
+        }
+    }
+    
+    return left;
+}
+
+int main() {
+    vector<int> arr = {1, 2, 2, 2, 3, 4, 5, 6, 7, 8};
+    
+    cout << "Array: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    int target = 2;
+    cout << "Target: " << target << endl;
+    cout << "Binary search result: " << binarySearch(arr, target) << endl;
+    cout << "Lower bound: " << lowerBound(arr, target) << endl;
+    cout << "Upper bound: " << upperBound(arr, target) << endl;
+    cout << "Count of target: " << (upperBound(arr, target) - lowerBound(arr, target)) << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? '2. Binary Answer Technique' : '2. 二分答案技术'}</h2>
+      {lang === 'en' ? (
+        <p>Binary search on the answer space to find optimal solutions to optimization problems.</p>
+      ) : (
+        <p>在答案空间上进行二分查找，找到优化问题的最优解。</p>
+      )}
+
+      <CodeExample
+        title={lang === 'en' ? 'Binary Answer Example: Minimum Maximum Subarray Sum' : '二分答案示例：最小化最大子数组和'}
+        code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+// Check if we can split array into k subarrays with max sum <= maxSum
+bool canSplit(vector<int>& arr, int k, long long maxSum) {
+    int subarrays = 1;
+    long long currentSum = 0;
+    
+    for (int num : arr) {
+        if (num > maxSum) return false;
+        
+        if (currentSum + num <= maxSum) {
+            currentSum += num;
+        } else {
+            subarrays++;
+            currentSum = num;
+            if (subarrays > k) return false;
+        }
+    }
+    
+    return true;
+}
+
+long long splitArray(vector<int>& arr, int k) {
+    long long left = *max_element(arr.begin(), arr.end());
+    long long right = 0;
+    
+    for (int num : arr) {
+        right += num;
+    }
+    
+    while (left < right) {
+        long long mid = left + (right - left) / 2;
+        
+        if (canSplit(arr, k, mid)) {
+            right = mid;
+        } else {
+            left = mid + 1;
+        }
+    }
+    
+    return left;
+}
+
+int main() {
+    vector<int> arr = {7, 2, 5, 10, 8};
+    int k = 2;
+    
+    cout << "Array: ";
+    for (int x : arr) cout << x << " ";
+    cout << endl;
+    
+    cout << "Split into " << k << " subarrays" << endl;
+    cout << "Minimum possible maximum sum: " << splitArray(arr, k) << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? '3. Ternary Search' : '3. 三分查找'}</h2>
+      {lang === 'en' ? (
+        <p>Ternary search for finding extrema in unimodal functions with O(log n) complexity.</p>
+      ) : (
+        <p>三分查找用于在单峰函数中以 O(log n) 复杂度找到极值。</p>
+      )}
+
+      <CodeExample
+        title={lang === 'en' ? 'Ternary Search Implementation' : '三分查找实现'}
+        code={`#include <iostream>
+#include <cmath>
+using namespace std;
+
+// Example function: f(x) = -(x-3)^2 + 10 (has maximum at x=3)
+double f(double x) {
+    return -(x - 3) * (x - 3) + 10;
+}
+
+// Ternary search for maximum
+double ternarySearchMax(double left, double right, double eps = 1e-9) {
+    while (right - left > eps) {
+        double m1 = left + (right - left) / 3;
+        double m2 = right - (right - left) / 3;
+        
+        if (f(m1) < f(m2)) {
+            left = m1;
+        } else {
+            right = m2;
+        }
+    }
+    
+    return (left + right) / 2;
+}
+
+// Ternary search for minimum
+double ternarySearchMin(double left, double right, double eps = 1e-9) {
+    while (right - left > eps) {
+        double m1 = left + (right - left) / 3;
+        double m2 = right - (right - left) / 3;
+        
+        if (f(m1) > f(m2)) {
+            left = m1;
+        } else {
+            right = m2;
+        }
+    }
+    
+    return (left + right) / 2;
+}
+
+// Discrete ternary search
+int ternarySearchMaxDiscrete(int left, int right) {
+    while (right - left > 2) {
+        int m1 = left + (right - left) / 3;
+        int m2 = right - (right - left) / 3;
+        
+        if (f(m1) < f(m2)) {
+            left = m1;
+        } else {
+            right = m2;
+        }
+    }
+    
+    // Check remaining candidates
+    double maxVal = f(left);
+    int result = left;
+    
+    for (int i = left + 1; i <= right; i++) {
+        if (f(i) > maxVal) {
+            maxVal = f(i);
+            result = i;
+        }
+    }
+    
+    return result;
+}
+
+int main() {
+    double left = 0, right = 6;
+    
+    cout << "Function: f(x) = -(x-3)^2 + 10" << endl;
+    cout << "Search range: [" << left << ", " << right << "]" << endl;
+    
+    double maxPoint = ternarySearchMax(left, right);
+    cout << "Maximum at x = " << maxPoint << endl;
+    cout << "f(" << maxPoint << ") = " << f(maxPoint) << endl;
+    
+    // Discrete version
+    int discreteMax = ternarySearchMaxDiscrete(0, 6);
+    cout << "Discrete maximum at x = " << discreteMax << endl;
+    cout << "f(" << discreteMax << ") = " << f(discreteMax) << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <div class="summary">
+      <h2>{lang === 'en' ? 'Summary' : '总结'}</h2>
+      {lang === 'en' ? (
+        <ul>
+          <li><strong>Classic Binary Search:</strong> Find elements in sorted arrays with O(log n) complexity</li>
+          <li><strong>Lower/Upper Bounds:</strong> Find insertion points and count occurrences</li>
+          <li><strong>Binary Answer:</strong> Search on answer space for optimization problems</li>
+          <li><strong>Ternary Search:</strong> Find extrema in unimodal functions</li>
+          <li><strong>Applications:</strong> Optimization, range queries, and search problems</li>
+        </ul>
+      ) : (
+        <ul>
+          <li><strong>经典二分查找：</strong>在排序数组中以 O(log n) 复杂度查找元素</li>
+          <li><strong>下界/上界：</strong>找到插入点并计算出现次数</li>
+          <li><strong>二分答案：</strong>在答案空间上搜索优化问题的解</li>
+          <li><strong>三分查找：</strong>在单峰函数中找到极值</li>
+          <li><strong>应用：</strong>优化、区间查询和搜索问题</li>
+        </ul>
+      )}
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    width: 1200px;
+    max-width: calc(100% - 2rem);
+    color: #1e293b;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .intro {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin-bottom: 3rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 4px solid #4f46e5;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1e293b;
+  }
+  
+  .summary {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: #f0f9ff;
+    border-radius: 8px;
+    border: 1px solid #0ea5e9;
+  }
+  
+  .summary h2 {
+    color: #0c4a6e;
+    margin-bottom: 1rem;
+  }
+  
+  .summary ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .summary li {
+    margin-bottom: 0.5rem;
+    padding-left: 1rem;
+    position: relative;
+  }
+  
+  .summary li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #0ea5e9;
+    font-weight: bold;
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+    }
+  }
+</style> 

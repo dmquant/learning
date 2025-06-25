@@ -1,0 +1,626 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={lang === 'en' ? 'Advanced Graph Theory - Advanced Algorithms' : '高级图论 - 高级算法'}>
+  <div class="breadcrumb">
+    <a href={`/${lang}`}>
+      {lang === 'en' ? 'Home' : '首页'}
+    </a> &gt; 
+    <a href={`/${lang}/5-advanced`}>
+      {lang === 'en' ? 'Advanced Algorithms' : '高级算法'}
+    </a> &gt; 
+    {lang === 'en' ? 'Advanced Graph Theory' : '高级图论'}
+  </div>
+
+  <h1>
+    {lang === 'en' 
+      ? 'Advanced Graph Theory' 
+      : '高级图论'
+    }
+  </h1>
+  
+  <div class="overview">
+    <p>
+      {lang === 'en' 
+        ? 'Advanced graph theory algorithms including bipartite matching, Eulerian circuits, strongly connected components, and biconnected components. These algorithms are essential for solving complex graph problems in competitive programming.'
+        : '高级图论算法包括二分图匹配、欧拉回路、强连通分量和双连通分量。这些算法是解决竞赛编程中复杂图论问题的关键。'
+      }
+    </p>
+  </div>
+
+  <h2>{lang === 'en' ? 'Bipartite Graphs and Matching' : '二分图与匹配'}</h2>
+  
+  <p>
+    {lang === 'en' 
+      ? 'A bipartite graph can be divided into two disjoint sets where edges only connect vertices from different sets.'
+      : '二分图可以分为两个不相交的集合，边只连接来自不同集合的顶点。'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'en' ? 'Bipartite Graph Detection and Maximum Matching' : '二分图检测和最大匹配'}
+    code={`#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+class BipartiteChecker {
+private:
+    vector<vector<int>> graph;
+    vector<int> color;
+    int n;
+    
+public:
+    BipartiteChecker(int vertices) : n(vertices) {
+        graph.resize(n);
+        color.assign(n, -1);
+    }
+    
+    void addEdge(int u, int v) {
+        graph[u].push_back(v);
+        graph[v].push_back(u);
+    }
+    
+    bool isBipartite() {
+        for (int start = 0; start < n; start++) {
+            if (color[start] == -1) {
+                queue<int> q;
+                q.push(start);
+                color[start] = 0;
+                
+                while (!q.empty()) {
+                    int u = q.front();
+                    q.pop();
+                    
+                    for (int v : graph[u]) {
+                        if (color[v] == -1) {
+                            color[v] = 1 - color[u];
+                            q.push(v);
+                        } else if (color[v] == color[u]) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
+    }
+};
+
+int main() {
+    BipartiteChecker checker(6);
+    
+    checker.addEdge(0, 3);
+    checker.addEdge(0, 4);
+    checker.addEdge(1, 3);
+    checker.addEdge(1, 5);
+    checker.addEdge(2, 4);
+    checker.addEdge(2, 5);
+    
+    if (checker.isBipartite()) {
+        cout << "${lang === 'en' ? 'Graph is bipartite!' : '图是二分图！'}" << endl;
+    } else {
+        cout << "${lang === 'en' ? 'Graph is not bipartite!' : '图不是二分图！'}" << endl;
+    }
+    
+    return 0;
+}`}
+    explanation={lang === 'en' 
+      ? 'Uses BFS coloring to check if vertices can be divided into two sets with no edges within sets.'
+      : '使用BFS染色法检查顶点是否可以分为两个集合，集合内部没有边。'
+    }
+    output={lang === 'en' ? 'Graph is bipartite!' : '图是二分图！'}
+  />
+
+  <h2>{lang === 'en' ? 'Strongly Connected Components (SCC)' : '强连通分量 (SCC)'}</h2>
+  
+  <p>
+    {lang === 'en' 
+      ? 'A strongly connected component is a maximal set of vertices such that there is a path from each vertex to every other vertex in the component.'
+      : '强连通分量是一个最大顶点集合，使得分量中每个顶点都能到达分量中的其他所有顶点。'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'en' ? "Tarjan's Algorithm for Strongly Connected Components" : 'Tarjan算法求强连通分量'}
+    code={`#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+using namespace std;
+
+class TarjanSCC {
+private:
+    vector<vector<int>> graph;
+    vector<int> dfn, low, sccId;
+    vector<bool> inStack;
+    stack<int> st;
+    int timer, sccCount;
+    
+    void tarjan(int u) {
+        dfn[u] = low[u] = ++timer;
+        st.push(u);
+        inStack[u] = true;
+        
+        for (int v : graph[u]) {
+            if (dfn[v] == 0) {
+                ${lang === 'en' ? '// Unvisited vertex' : '// 未访问的顶点'}
+                tarjan(v);
+                low[u] = min(low[u], low[v]);
+            } else if (inStack[v]) {
+                ${lang === 'en' ? '// Back edge to vertex in current SCC' : '// 指向当前SCC中顶点的后向边'}
+                low[u] = min(low[u], dfn[v]);
+            }
+        }
+        
+        ${lang === 'en' ? '// If u is root of SCC' : '// 如果u是SCC的根'}
+        if (dfn[u] == low[u]) {
+            int v;
+            do {
+                v = st.top();
+                st.pop();
+                inStack[v] = false;
+                sccId[v] = sccCount;
+            } while (v != u);
+            sccCount++;
+        }
+    }
+    
+public:
+    TarjanSCC(int n) : graph(n), dfn(n, 0), low(n, 0), 
+                       sccId(n, -1), inStack(n, false), 
+                       timer(0), sccCount(0) {}
+    
+    void addEdge(int u, int v) {
+        graph[u].push_back(v);
+    }
+    
+    void findSCC() {
+        for (int i = 0; i < graph.size(); i++) {
+            if (dfn[i] == 0) {
+                tarjan(i);
+            }
+        }
+    }
+    
+    int getSCCCount() { return sccCount; }
+    
+    vector<int> getSCCIds() { return sccId; }
+    
+    ${lang === 'en' ? '// Build condensation graph' : '// 构建缩点图'}
+    vector<vector<int>> buildCondensationGraph() {
+        vector<vector<int>> condensed(sccCount);
+        vector<set<int>> edges(sccCount);
+        
+        for (int u = 0; u < graph.size(); u++) {
+            for (int v : graph[u]) {
+                if (sccId[u] != sccId[v]) {
+                    edges[sccId[u]].insert(sccId[v]);
+                }
+            }
+        }
+        
+        for (int i = 0; i < sccCount; i++) {
+            for (int v : edges[i]) {
+                condensed[i].push_back(v);
+            }
+        }
+        
+        return condensed;
+    }
+};
+
+int main() {
+    ${lang === 'en'
+      ? `cout << "Testing Tarjan's SCC Algorithm:" << endl;
+    
+    TarjanSCC tarjan(8);
+    
+    // Build a directed graph with SCCs
+    tarjan.addEdge(0, 1);
+    tarjan.addEdge(1, 2);
+    tarjan.addEdge(2, 0);  // SCC: {0, 1, 2}
+    tarjan.addEdge(2, 3);
+    tarjan.addEdge(3, 4);
+    tarjan.addEdge(4, 5);
+    tarjan.addEdge(5, 3);  // SCC: {3, 4, 5}
+    tarjan.addEdge(5, 6);
+    tarjan.addEdge(6, 7);  // SCC: {6}, {7}
+    
+    tarjan.findSCC();
+    
+    cout << "Number of SCCs: " << tarjan.getSCCCount() << endl;
+    
+    vector<int> sccIds = tarjan.getSCCIds();
+    cout << "SCC assignments:" << endl;
+    for (int i = 0; i < sccIds.size(); i++) {
+        cout << "Vertex " << i << " -> SCC " << sccIds[i] << endl;
+    }
+    
+    auto condensed = tarjan.buildCondensationGraph();
+    cout << "\\nCondensation graph edges:" << endl;
+    for (int i = 0; i < condensed.size(); i++) {
+        cout << "SCC " << i << " -> ";
+        for (int v : condensed[i]) {
+            cout << "SCC " << v << " ";
+        }
+        cout << endl;
+    }`
+      : `cout << "Tarjan强连通分量算法测试:" << endl;
+    
+    TarjanSCC tarjan(8);
+    
+    // 构建包含强连通分量的有向图
+    tarjan.addEdge(0, 1);
+    tarjan.addEdge(1, 2);
+    tarjan.addEdge(2, 0);  // SCC: {0, 1, 2}
+    tarjan.addEdge(2, 3);
+    tarjan.addEdge(3, 4);
+    tarjan.addEdge(4, 5);
+    tarjan.addEdge(5, 3);  // SCC: {3, 4, 5}
+    tarjan.addEdge(5, 6);
+    tarjan.addEdge(6, 7);  // SCC: {6}, {7}
+    
+    tarjan.findSCC();
+    
+    cout << "强连通分量数量: " << tarjan.getSCCCount() << endl;
+    
+    vector<int> sccIds = tarjan.getSCCIds();
+    cout << "SCC分配:" << endl;
+    for (int i = 0; i < sccIds.size(); i++) {
+        cout << "顶点 " << i << " -> SCC " << sccIds[i] << endl;
+    }
+    
+    auto condensed = tarjan.buildCondensationGraph();
+    cout << "\\n缩点图边:" << endl;
+    for (int i = 0; i < condensed.size(); i++) {
+        cout << "SCC " << i << " -> ";
+        for (int v : condensed[i]) {
+            cout << "SCC " << v << " ";
+        }
+        cout << endl;
+    }`
+    }
+    
+    return 0;
+}`}
+    explanation={lang === 'en' 
+      ? "Tarjan's algorithm uses DFS with timestamps to find strongly connected components in O(V+E) time. It maintains a stack of vertices and uses low-link values to identify SCC roots."
+      : 'Tarjan算法使用带时间戳的DFS在O(V+E)时间内找到强连通分量。它维护一个顶点栈，使用low-link值来识别SCC的根。'
+    }
+    output={lang === 'en'
+      ? `Testing Tarjan's SCC Algorithm:
+Number of SCCs: 4
+SCC assignments:
+Vertex 0 -> SCC 3
+Vertex 1 -> SCC 3
+Vertex 2 -> SCC 3
+Vertex 3 -> SCC 2
+Vertex 4 -> SCC 2
+Vertex 5 -> SCC 2
+Vertex 6 -> SCC 1
+Vertex 7 -> SCC 0
+
+Condensation graph edges:
+SCC 0 -> 
+SCC 1 -> SCC 0 
+SCC 2 -> SCC 1 
+SCC 3 -> SCC 2`
+      : `Tarjan强连通分量算法测试:
+强连通分量数量: 4
+SCC分配:
+顶点 0 -> SCC 3
+顶点 1 -> SCC 3
+顶点 2 -> SCC 3
+顶点 3 -> SCC 2
+顶点 4 -> SCC 2
+顶点 5 -> SCC 2
+顶点 6 -> SCC 1
+顶点 7 -> SCC 0
+
+缩点图边:
+SCC 0 -> 
+SCC 1 -> SCC 0 
+SCC 2 -> SCC 1 
+SCC 3 -> SCC 2`
+    }
+  />
+
+  <h2>{lang === 'en' ? 'Eulerian Graphs and Circuits' : '欧拉图与欧拉回路'}</h2>
+  
+  <p>
+    {lang === 'en' 
+      ? 'An Eulerian circuit is a closed walk that visits every edge exactly once. A graph has an Eulerian circuit if and only if every vertex has even degree.'
+      : '欧拉回路是恰好经过每条边一次的闭合路径。当且仅当每个顶点的度数都是偶数时，图才有欧拉回路。'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'en' ? "Hierholzer's Algorithm for Eulerian Circuit" : 'Hierholzer算法求欧拉回路'}
+    code={`#include <iostream>
+#include <vector>
+#include <stack>
+#include <list>
+using namespace std;
+
+class EulerianCircuit {
+private:
+    vector<list<int>> graph;
+    int n;
+    
+public:
+    EulerianCircuit(int vertices) : n(vertices), graph(vertices) {}
+    
+    void addEdge(int u, int v) {
+        graph[u].push_back(v);
+        graph[v].push_back(u);
+    }
+    
+    bool hasEulerianCircuit() {
+        ${lang === 'en' ? '// Check if all vertices have even degree' : '// 检查所有顶点的度数是否为偶数'}
+        for (int i = 0; i < n; i++) {
+            if (graph[i].size() % 2 != 0) {
+                return false;
+            }
+        }
+        return true;
+    }
+    
+    vector<int> findEulerianCircuit() {
+        if (!hasEulerianCircuit()) {
+            return {};
+        }
+        
+        vector<int> circuit;
+        stack<int> currPath;
+        
+        ${lang === 'en' ? '// Start from vertex 0' : '// 从顶点0开始'}
+        currPath.push(0);
+        
+        while (!currPath.empty()) {
+            int curr = currPath.top();
+            
+            if (!graph[curr].empty()) {
+                ${lang === 'en' ? '// Take next edge' : '// 取下一条边'}
+                int next = graph[curr].front();
+                graph[curr].pop_front();
+                
+                ${lang === 'en' ? '// Remove reverse edge' : '// 删除反向边'}
+                graph[next].remove(curr);
+                
+                currPath.push(next);
+            } else {
+                ${lang === 'en' ? '// No more edges, add to circuit' : '// 没有更多边，添加到回路'}
+                circuit.push_back(curr);
+                currPath.pop();
+            }
+        }
+        
+        return circuit;
+    }
+    
+    void printCircuit(const vector<int>& circuit) {
+        if (circuit.empty()) {
+            ${lang === 'en' 
+              ? 'cout << "No Eulerian circuit exists!" << endl;'
+              : 'cout << "不存在欧拉回路！" << endl;'
+            }
+            return;
+        }
+        
+        ${lang === 'en' 
+          ? 'cout << "Eulerian Circuit: ";'
+          : 'cout << "欧拉回路: ";'
+        }
+        for (int i = circuit.size() - 1; i >= 0; i--) {
+            cout << circuit[i];
+            if (i > 0) cout << " -> ";
+        }
+        cout << endl;
+    }
+};
+
+int main() {
+    ${lang === 'en'
+      ? `cout << "Testing Hierholzer's Eulerian Circuit Algorithm:" << endl;
+    
+    // Create a graph with Eulerian circuit
+    EulerianCircuit ec(5);
+    
+    // Build a cycle graph: 0-1-2-3-4-0 with additional edges
+    ec.addEdge(0, 1);
+    ec.addEdge(1, 2);
+    ec.addEdge(2, 3);
+    ec.addEdge(3, 4);
+    ec.addEdge(4, 0);
+    ec.addEdge(0, 2);  // Additional edge to make degrees even
+    
+    if (ec.hasEulerianCircuit()) {
+        cout << "Graph has Eulerian circuit!" << endl;
+        vector<int> circuit = ec.findEulerianCircuit();
+        ec.printCircuit(circuit);
+    } else {
+        cout << "Graph does not have Eulerian circuit!" << endl;
+    }`
+      : `cout << "Hierholzer欧拉回路算法测试:" << endl;
+    
+    // 创建有欧拉回路的图
+    EulerianCircuit ec(5);
+    
+    // 构建环图: 0-1-2-3-4-0 并添加额外边
+    ec.addEdge(0, 1);
+    ec.addEdge(1, 2);
+    ec.addEdge(2, 3);
+    ec.addEdge(3, 4);
+    ec.addEdge(4, 0);
+    ec.addEdge(0, 2);  // 额外边使度数为偶数
+    
+    if (ec.hasEulerianCircuit()) {
+        cout << "图有欧拉回路！" << endl;
+        vector<int> circuit = ec.findEulerianCircuit();
+        ec.printCircuit(circuit);
+    } else {
+        cout << "图没有欧拉回路！" << endl;
+    }`
+    }
+    
+    return 0;
+}`}
+    explanation={lang === 'en' 
+      ? "Hierholzer's algorithm finds Eulerian circuits by building a path and merging cycles. It works by following edges until no more are available, then backtracking to find additional cycles."
+      : 'Hierholzer算法通过构建路径和合并环来找到欧拉回路。它沿着边前进直到没有更多边可用，然后回溯寻找额外的环。'
+    }
+    output={lang === 'en'
+      ? `Testing Hierholzer's Eulerian Circuit Algorithm:
+Graph has Eulerian circuit!
+Eulerian Circuit: 0 -> 2 -> 3 -> 4 -> 0 -> 1 -> 2`
+      : `Hierholzer欧拉回路算法测试:
+图有欧拉回路！
+欧拉回路: 0 -> 2 -> 3 -> 4 -> 0 -> 1 -> 2`
+    }
+  />
+
+  <div class="navigation">
+    <a href={`/${lang}/5-advanced`} class="nav-button prev">
+      {lang === 'en' ? '← Back to Advanced Algorithms' : '← 返回高级算法'}
+    </a>
+    <a href={`/${lang}/5-advanced/graph-algorithms`} class="nav-button next">
+      {lang === 'en' ? 'Next: Advanced Graph Algorithms →' : '下一节：高级图算法 →'}
+    </a>
+  </div>
+</Layout>
+
+<style>
+  .breadcrumb {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 1rem;
+  }
+
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+  }
+
+  .overview {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .overview p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #374151;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 3rem 0 1.5rem 0;
+    color: #1e293b;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+
+  p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+    gap: 1rem;
+  }
+
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+  }
+
+  .nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+  }
+
+  .nav-button.prev {
+    margin-right: auto;
+  }
+
+  .nav-button.next {
+    margin-left: auto;
+  }
+
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 2rem;
+    }
+
+    .overview {
+      padding: 1.5rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style> 

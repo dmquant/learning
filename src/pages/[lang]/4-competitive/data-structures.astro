@@ -1,0 +1,242 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={lang === 'en' ? 'Advanced Data Structures - Competitive Programming' : '高级数据结构 - 竞赛编程'}>
+  <main>
+    <nav class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a>
+      <span>›</span>
+      <a href={`/${lang}/4-competitive`}>{t('nav.competitive')}</a>
+      <span>›</span>
+      <span>{t('comp.advanced-ds')}</span>
+    </nav>
+
+    <h1>{t('comp.advanced-ds')}</h1>
+    
+    <div class="intro">
+      {lang === 'en' ? (
+        <p>Learn advanced data structures essential for competitive programming: Union-Find (Disjoint Set), balanced trees, and specialized structures for complex problem solving.</p>
+      ) : (
+        <p>学习竞赛编程必备的高级数据结构：并查集、平衡树和用于复杂问题解决的专用结构。</p>
+      )}
+    </div>
+
+    <section>
+      <h2>{lang === 'en' ? '1. Union-Find (Disjoint Set)' : '1. 并查集'}</h2>
+      {lang === 'en' ? (
+        <p>Union-Find data structure for efficiently managing disjoint sets with path compression and union by rank optimizations.</p>
+      ) : (
+        <p>并查集数据结构，通过路径压缩和按秩合并优化高效管理不相交集合。</p>
+      )}
+
+      <CodeExample
+        title={lang === 'en' ? 'Union-Find Implementation' : '并查集实现'}
+        code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+class UnionFind {
+private:
+    vector<int> parent, rank;
+    int components;
+
+public:
+    UnionFind(int n) : parent(n), rank(n, 0), components(n) {
+        for (int i = 0; i < n; i++) {
+            parent[i] = i;
+        }
+    }
+    
+    int find(int x) {
+        if (parent[x] != x) {
+            parent[x] = find(parent[x]); // Path compression
+        }
+        return parent[x];
+    }
+    
+    bool unite(int x, int y) {
+        int px = find(x), py = find(y);
+        if (px == py) return false;
+        
+        // Union by rank
+        if (rank[px] < rank[py]) {
+            parent[px] = py;
+        } else if (rank[px] > rank[py]) {
+            parent[py] = px;
+        } else {
+            parent[py] = px;
+            rank[px]++;
+        }
+        
+        components--;
+        return true;
+    }
+    
+    bool connected(int x, int y) {
+        return find(x) == find(y);
+    }
+    
+    int getComponents() {
+        return components;
+    }
+};
+
+int main() {
+    UnionFind uf(6);
+    
+    cout << "Initial components: " << uf.getComponents() << endl;
+    
+    uf.unite(0, 1);
+    uf.unite(2, 3);
+    uf.unite(4, 5);
+    
+    cout << "After unions: " << uf.getComponents() << endl;
+    cout << "0 and 1 connected: " << uf.connected(0, 1) << endl;
+    cout << "0 and 2 connected: " << uf.connected(0, 2) << endl;
+    
+    uf.unite(1, 2);
+    cout << "After uniting 1 and 2: " << uf.getComponents() << endl;
+    cout << "0 and 3 connected: " << uf.connected(0, 3) << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <div class="summary">
+      <h2>{lang === 'en' ? 'Summary' : '总结'}</h2>
+      {lang === 'en' ? (
+        <ul>
+          <li><strong>Union-Find:</strong> Efficient disjoint set operations with near O(1) amortized time</li>
+          <li><strong>Path Compression:</strong> Flattens tree structure for faster subsequent operations</li>
+          <li><strong>Union by Rank:</strong> Keeps trees balanced to maintain efficiency</li>
+          <li><strong>Applications:</strong> Kruskal's MST, connectivity problems, cycle detection</li>
+        </ul>
+      ) : (
+        <ul>
+          <li><strong>并查集：</strong>高效的不相交集合操作，平摊时间复杂度接近 O(1)</li>
+          <li><strong>路径压缩：</strong>扁平化树结构以加快后续操作</li>
+          <li><strong>按秩合并：</strong>保持树的平衡以维持效率</li>
+          <li><strong>应用：</strong>Kruskal 最小生成树、连通性问题、环检测</li>
+        </ul>
+      )}
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    width: 1200px;
+    max-width: calc(100% - 2rem);
+    color: #1e293b;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .intro {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin-bottom: 3rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 4px solid #4f46e5;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1e293b;
+  }
+  
+  .summary {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: #f0f9ff;
+    border-radius: 8px;
+    border: 1px solid #0ea5e9;
+  }
+  
+  .summary h2 {
+    color: #0c4a6e;
+    margin-bottom: 1rem;
+  }
+  
+  .summary ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .summary li {
+    margin-bottom: 0.5rem;
+    padding-left: 1rem;
+    position: relative;
+  }
+  
+  .summary li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #0ea5e9;
+    font-weight: bold;
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+    }
+  }
+</style> 

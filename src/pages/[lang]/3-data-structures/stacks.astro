@@ -1,0 +1,479 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('ds.stacks')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/3-data-structures`}>{t('nav.data-structures')}</a> > 
+      {t('ds.stacks')}
+    </div>
+    
+    <h1>{t('ds.stacks')}</h1>
+    
+    <div class="overview">
+      <p>
+        {lang === 'en' 
+          ? 'A stack is a linear data structure that follows the Last In, First Out (LIFO) principle. Elements are added and removed from the same end, called the top of the stack. Think of it like a stack of plates - you can only add or remove plates from the top.'
+          : '栈是遵循后进先出 (LIFO) 原则的线性数据结构。元素从同一端（称为栈顶）添加和删除。可以想象成一摞盘子 - 只能从顶部添加或移除盘子。'
+        }
+      </p>
+      
+      <p>
+        {lang === 'en'
+          ? 'Stacks are fundamental in computer science and are used in function calls, expression evaluation, undo operations, and many algorithms.'
+          : '栈在计算机科学中是基础性的，用于函数调用、表达式求值、撤销操作和许多算法中。'
+        }
+      </p>
+    </div>
+
+    <section>
+      <h2>{lang === 'en' ? 'Stack Operations' : '栈操作'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'The main operations on a stack are:'
+          : '栈的主要操作有：'
+        }
+      </p>
+      
+      <ul>
+        <li><strong>push()</strong>: {lang === 'en' ? 'Add an element to the top' : '向栈顶添加元素'}</li>
+        <li><strong>pop()</strong>: {lang === 'en' ? 'Remove the top element' : '移除栈顶元素'}</li>
+        <li><strong>top()/peek()</strong>: {lang === 'en' ? 'View the top element without removing it' : '查看栈顶元素但不移除'}</li>
+        <li><strong>empty()</strong>: {lang === 'en' ? 'Check if the stack is empty' : '检查栈是否为空'}</li>
+        <li><strong>size()</strong>: {lang === 'en' ? 'Get the number of elements' : '获取元素数量'}</li>
+      </ul>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Stack Implementation using Array' : '使用数组实现栈'}
+        code={`#include <iostream>
+using namespace std;
+
+class Stack {
+private:
+    int* arr;
+    int capacity;
+    int topIndex;
+
+public:
+    Stack(int size) {
+        arr = new int[size];
+        capacity = size;
+        topIndex = -1;
+    }
+    
+    ~Stack() {
+        delete[] arr;
+    }
+    
+    // Push element to top
+    void push(int value) {
+        if (topIndex >= capacity - 1) {
+            cout << "Stack Overflow! Cannot push " << value << endl;
+            return;
+        }
+        arr[++topIndex] = value;
+        cout << "Pushed: " << value << endl;
+    }
+    
+    // Pop element from top
+    int pop() {
+        if (topIndex < 0) {
+            cout << "Stack Underflow! Cannot pop from empty stack" << endl;
+            return -1;
+        }
+        return arr[topIndex--];
+    }
+    
+    // Peek at top element
+    int top() {
+        if (topIndex < 0) {
+            cout << "Stack is empty" << endl;
+            return -1;
+        }
+        return arr[topIndex];
+    }
+    
+    // Check if stack is empty
+    bool empty() {
+        return topIndex < 0;
+    }
+    
+    // Get size of stack
+    int size() {
+        return topIndex + 1;
+    }
+    
+    // Display stack contents
+    void display() {
+        if (empty()) {
+            cout << "Stack is empty" << endl;
+            return;
+        }
+        
+        cout << "Stack contents (top to bottom): ";
+        for (int i = topIndex; i >= 0; i--) {
+            cout << arr[i] << " ";
+        }
+        cout << endl;
+    }
+};
+
+int main() {
+    Stack stack(5);
+    
+    // Push elements
+    stack.push(10);
+    stack.push(20);
+    stack.push(30);
+    
+    stack.display();
+    cout << "Top element: " << stack.top() << endl;
+    cout << "Stack size: " << stack.size() << endl;
+    
+    // Pop elements
+    cout << "Popped: " << stack.pop() << endl;
+    cout << "Popped: " << stack.pop() << endl;
+    
+    stack.display();
+    
+    // Try to pop from empty stack
+    stack.pop();
+    stack.pop(); // This will cause underflow
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'STL Stack' : 'STL 栈'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'C++ Standard Template Library provides a stack container adapter that can be used with different underlying containers:'
+          : 'C++ 标准模板库提供了一个栈容器适配器，可以与不同的底层容器一起使用：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Using STL Stack' : '使用 STL 栈'}
+        code={`#include <iostream>
+#include <stack>
+#include <vector>
+#include <deque>
+using namespace std;
+
+int main() {
+    // Default stack (uses deque as underlying container)
+    stack<int> st;
+    
+    // Push elements
+    st.push(10);
+    st.push(20);
+    st.push(30);
+    st.push(40);
+    
+    cout << "Stack size: " << st.size() << endl;
+    cout << "Top element: " << st.top() << endl;
+    
+    // Display and pop all elements
+    cout << "Stack contents: ";
+    while (!st.empty()) {
+        cout << st.top() << " ";
+        st.pop();
+    }
+    cout << endl;
+    
+    // Stack with vector as underlying container
+    stack<int, vector<int>> stackWithVector;
+    stackWithVector.push(1);
+    stackWithVector.push(2);
+    stackWithVector.push(3);
+    
+    cout << "Vector-based stack: ";
+    while (!stackWithVector.empty()) {
+        cout << stackWithVector.top() << " ";
+        stackWithVector.pop();
+    }
+    cout << endl;
+    
+    // Stack of strings
+    stack<string> stringStack;
+    stringStack.push("First");
+    stringStack.push("Second");
+    stringStack.push("Third");
+    
+    cout << "String stack: ";
+    while (!stringStack.empty()) {
+        cout << stringStack.top() << " ";
+        stringStack.pop();
+    }
+    cout << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Stack Applications' : '栈的应用'}</h2>
+      
+      <h3>{lang === 'en' ? 'Balanced Parentheses Check' : '平衡括号检查'}</h3>
+      <p>
+        {lang === 'en'
+          ? 'One of the most common applications of stacks is checking if parentheses are balanced in an expression:'
+          : '栈最常见的应用之一是检查表达式中的括号是否平衡：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Balanced Parentheses Checker' : '平衡括号检查器'}
+        code={`#include <iostream>
+#include <stack>
+#include <string>
+using namespace std;
+
+bool isBalanced(string expression) {
+    stack<char> s;
+    
+    for (char ch : expression) {
+        // Push opening brackets
+        if (ch == '(' || ch == '[' || ch == '{') {
+            s.push(ch);
+        }
+        // Check closing brackets
+        else if (ch == ')' || ch == ']' || ch == '}') {
+            if (s.empty()) {
+                return false; // No matching opening bracket
+            }
+            
+            char top = s.top();
+            s.pop();
+            
+            // Check if brackets match
+            if ((ch == ')' && top != '(') ||
+                (ch == ']' && top != '[') ||
+                (ch == '}' && top != '{')) {
+                return false;
+            }
+        }
+    }
+    
+    // Stack should be empty for balanced expression
+    return s.empty();
+}
+
+int main() {
+    vector<string> expressions = {
+        "()",
+        "()[]{}", 
+        "([{}])",
+        "(((",
+        "())",
+        "([)]",
+        "{[()()]}"
+    };
+    
+    cout << "Checking balanced parentheses:" << endl;
+    for (const string& expr : expressions) {
+        cout << expr << " -> " 
+             << (isBalanced(expr) ? "Balanced" : "Not Balanced") 
+             << endl;
+    }
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Expression Evaluation' : '表达式求值'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Stacks can be used to evaluate postfix expressions (Reverse Polish Notation):'
+          : '栈可以用来求值后缀表达式（逆波兰表示法）：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Postfix Expression Evaluation' : '后缀表达式求值'}
+        code={`#include <iostream>
+#include <stack>
+#include <string>
+#include <sstream>
+using namespace std;
+
+int evaluatePostfix(string expression) {
+    stack<int> s;
+    istringstream iss(expression);
+    string token;
+    
+    while (iss >> token) {
+        if (token == "+" || token == "-" || token == "*" || token == "/") {
+            // Pop two operands
+            int operand2 = s.top(); s.pop();
+            int operand1 = s.top(); s.pop();
+            
+            int result;
+            if (token == "+") result = operand1 + operand2;
+            else if (token == "-") result = operand1 - operand2;
+            else if (token == "*") result = operand1 * operand2;
+            else if (token == "/") result = operand1 / operand2;
+            
+            s.push(result);
+        } else {
+            // Convert token to number and push
+            s.push(stoi(token));
+        }
+    }
+    
+    return s.top();
+}
+
+int main() {
+    vector<string> expressions = {
+        "3 4 +",           // 3 + 4 = 7
+        "5 2 * 3 +",       // 5 * 2 + 3 = 13
+        "15 7 1 1 + - / 3 * 2 1 1 + + -", // Complex expression
+        "2 3 1 * + 9 -"    // 2 + 3 * 1 - 9 = -4
+    };
+    
+    cout << "Postfix Expression Evaluation:" << endl;
+    for (const string& expr : expressions) {
+        cout << expr << " = " << evaluatePostfix(expr) << endl;
+    }
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    width: 1200px;
+    max-width: calc(100% - 2rem);
+    color: #1e293b;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .overview {
+    background: #f8fafc;
+    border-left: 4px solid #4f46e5;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-radius: 0 8px 8px 0;
+  }
+  
+  .overview p {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    line-height: 1.7;
+  }
+  
+  .overview p:last-child {
+    margin-bottom: 0;
+  }
+  
+  section {
+    margin: 3rem 0;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1e293b;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  h3 {
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin: 2rem 0 1rem 0;
+    color: #1e293b;
+  }
+  
+  p {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #374151;
+  }
+  
+  ul {
+    margin: 1.5rem 0;
+    padding-left: 2rem;
+  }
+  
+  li {
+    margin-bottom: 0.5rem;
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+    }
+    
+    h3 {
+      font-size: 1.25rem;
+    }
+  }
+</style> 

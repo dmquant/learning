@@ -1,0 +1,864 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { ui } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } }
+  ];
+}
+
+const { lang } = Astro.params;
+const t = ui[lang as keyof typeof ui];
+---
+
+<Layout title={lang === 'zh' ? "数据结构优化DP - 高级算法" : "Data Structure Optimized DP - Advanced Algorithms"}>
+  <div class="container">
+    <!-- Breadcrumb -->
+    <nav class="text-sm breadcrumbs mb-6">
+      <ul class="flex space-x-2 text-gray-600">
+        <li><a href={`/${lang}`} class="hover:text-blue-600">{t['nav.home']}</a></li>
+        <li><span class="mx-2">/</span></li>
+        <li><a href={`/${lang}/5-advanced`} class="hover:text-blue-600">{lang === 'zh' ? '高级算法' : 'Advanced Algorithms'}</a></li>
+        <li><span class="mx-2">/</span></li>
+        <li class="text-gray-900">{lang === 'zh' ? '数据结构优化DP' : 'Data Structure Optimized DP'}</li>
+      </ul>
+    </nav>
+
+    <h1 class="main-title">
+      {lang === 'zh' ? '数据结构优化DP' : 'Data Structure Optimized DP'}
+    </h1>
+
+    <!-- Overview -->
+    <div class="overview-section">
+      <h2>{lang === 'zh' ? '概述' : 'Overview'}</h2>
+      <p>
+        {lang === 'zh' 
+          ? '数据结构优化动态规划是一种通过高级数据结构将低效DP解决方案转换为最优解决方案的强大技术。这种技术包括线段树DP优化、凸包优化（CHT）、分治优化和李超线段树。这些方法可以将时间复杂度从O(n²)或O(n³)降低到O(n log n)甚至O(n)，使得在竞赛编程时间限制内解决以前难以处理的问题成为可能。'
+          : 'Data Structure Optimized Dynamic Programming is a powerful technique that transforms inefficient DP solutions into optimal ones using advanced data structures. This technique includes segment tree DP optimization, Convex Hull Trick (CHT), divide and conquer optimization, and Li Chao segment tree. These methods can reduce time complexity from O(n²) or O(n³) to O(n log n) or even O(n), making previously intractable problems solvable within competitive programming time limits.'
+        }
+      </p>
+    </div>
+
+    <!-- Segment Tree DP Optimization -->
+    <section class="content-section">
+      <h2>{lang === 'zh' ? '线段树DP优化' : 'Segment Tree DP Optimization'}</h2>
+      
+      <div class="subsection">
+        <h3>{lang === 'zh' ? '核心概念' : 'Core Concept'}</h3>
+        <p>
+          {lang === 'zh'
+            ? '当DP转移涉及区间查询（最小值、最大值、求和）时，线段树可以将这些操作从每次查询O(n)优化到O(log n)。典型的模式是：dp[i] = optimal(dp[j] + cost(j, i))，其中j在某个区间内变化。'
+            : 'When DP transitions involve range queries (min, max, sum), segment trees can optimize these operations from O(n) to O(log n) per query. The typical pattern is: dp[i] = optimal(dp[j] + cost(j, i)) where j ranges over some interval.'
+          }
+        </p>
+      </div>
+
+      <CodeExample 
+        client:load
+        title={lang === 'zh' ? '带懒标记的线段树DP' : 'Segment Tree DP with Lazy Propagation'}
+        code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+class SegmentTreeDP {
+private:
+    vector<long long> tree, lazy;
+    int n;
+    
+    void push(int node, int start, int end) {
+        if (lazy[node] != 0) {
+            tree[node] += lazy[node];
+            if (start != end) {
+                lazy[2 * node] += lazy[node];
+                lazy[2 * node + 1] += lazy[node];
+            }
+            lazy[node] = 0;
+        }
+    }
+    
+    void updateRange(int node, int start, int end, int l, int r, long long val) {
+        push(node, start, end);
+        if (start > r || end < l) return;
+        
+        if (start >= l && end <= r) {
+            lazy[node] += val;
+            push(node, start, end);
+            return;
+        }
+        
+        int mid = (start + end) / 2;
+        updateRange(2 * node, start, mid, l, r, val);
+        updateRange(2 * node + 1, mid + 1, end, l, r, val);
+        
+        push(2 * node, start, mid);
+        push(2 * node + 1, mid + 1, end);
+        tree[node] = min(tree[2 * node], tree[2 * node + 1]);
+    }
+    
+    long long queryRange(int node, int start, int end, int l, int r) {
+        if (start > r || end < l) return LLONG_MAX;
+        
+        push(node, start, end);
+        if (start >= l && end <= r) return tree[node];
+        
+        int mid = (start + end) / 2;
+        return min(queryRange(2 * node, start, mid, l, r),
+                  queryRange(2 * node + 1, mid + 1, end, l, r));
+    }
+    
+public:
+    SegmentTreeDP(int size) : n(size) {
+        tree.assign(4 * n, LLONG_MAX);
+        lazy.assign(4 * n, 0);
+    }
+    
+    void update(int l, int r, long long val) {
+        updateRange(1, 0, n - 1, l, r, val);
+    }
+    
+    long long query(int l, int r) {
+        if (l > r) return LLONG_MAX;
+        return queryRange(1, 0, n - 1, l, r);
+    }
+    
+    void pointUpdate(int idx, long long val) {
+        updateRange(1, 0, n - 1, idx, idx, val);
+    }
+};
+
+${lang === 'zh' ? '// 示例：将数组分成k段的最小代价\n' : '// Example: Minimum cost to split array into k segments\n'}vector<long long> minCostSplit(vector<int>& arr, int k) {
+    int n = arr.size();
+    vector<long long> dp(n + 1, LLONG_MAX);
+    dp[0] = 0;
+    
+    SegmentTreeDP segTree(n + 1);
+    segTree.pointUpdate(0, 0);
+    
+    for (int i = 1; i <= n; i++) {
+        ${lang === 'zh' ? '        // 从有效的前面位置查询最小值\n' : '        // Query minimum from valid previous positions\n'}        long long minPrev = segTree.query(max(0, i - k), i - 1);
+        if (minPrev != LLONG_MAX) {
+            dp[i] = minPrev + arr[i - 1];
+            segTree.pointUpdate(i, dp[i]);
+        }
+    }
+    
+    return dp;
+}
+
+int main() {
+    vector<int> arr = {3, 1, 4, 1, 5, 9, 2, 6};
+    int k = 3; ${lang === 'zh' ? '// 最大段长度\n' : '// Maximum segment length\n'}
+    
+    cout << "${lang === 'zh' ? '数组: ' : 'Array: '}";
+    for (int x : arr) cout << x << " ";
+    cout << "\\n${lang === 'zh' ? '最大段长度: ' : 'Max segment length: '}" << k << endl;
+    
+    vector<long long> dp = minCostSplit(arr, k);
+    cout << "${lang === 'zh' ? '最小代价: ' : 'Minimum cost: '}" << dp.back() << endl;
+    
+    return 0;
+}`}
+        explanation={lang === 'zh' 
+          ? '带懒标记的线段树支持高效的区间更新和查询，对于需要同时更新多个位置的复杂DP优化是必不可少的。'
+          : 'Segment trees with lazy propagation support efficient range updates and queries, essential for complex DP optimizations where multiple positions need simultaneous updates.'
+        }
+        output={`${lang === 'zh' ? '数组: ' : 'Array: '}3 1 4 1 5 9 2 6 
+${lang === 'zh' ? '最大段长度: ' : 'Max segment length: '}3
+${lang === 'zh' ? '最小代价: ' : 'Minimum cost: '}31`}
+      />
+    </section>
+
+    <!-- Convex Hull Trick -->
+    <section class="content-section">
+      <h2>{lang === 'zh' ? '凸包优化（CHT）' : 'Convex Hull Trick (CHT)'}</h2>
+      
+      <div class="subsection">
+        <h3>{lang === 'zh' ? '何时使用CHT' : 'When to Use CHT'}</h3>
+        <p>
+          {lang === 'zh'
+            ? 'CHT优化形如dp[i] = min(dp[j] + b[j] * a[i] + c[i])的DP转移，其中斜率b[j]单调且查询点a[i]单调。这将复杂度从O(n²)降低到O(n)。'
+            : 'CHT optimizes DP transitions of the form: dp[i] = min(dp[j] + b[j] * a[i] + c[i]) where slopes b[j] are monotonic and query points a[i] are monotonic. This reduces complexity from O(n²) to O(n).'
+          }
+        </p>
+      </div>
+
+      <CodeExample 
+        client:load
+        title={lang === 'zh' ? '双端队列优化的凸包技巧' : 'Convex Hull Trick with Deque Optimization'}
+        code={`#include <iostream>
+#include <vector>
+#include <deque>
+#include <climits>
+using namespace std;
+
+struct Line {
+    long long slope, intercept;
+    int id;
+    
+    Line(long long slope, long long intercept, int id = -1) 
+        : slope(slope), intercept(intercept), id(id) {}
+    
+    long long eval(long long x) const {
+        return slope * x + intercept;
+    }
+    
+    ${lang === 'zh' ? '    // 检查在给定两条其他直线的情况下，这条直线是否冗余\n' : '    // Check if this line is redundant given two other lines\n'}    bool isBad(const Line& l1, const Line& l2) const {
+        ${lang === 'zh' ? '        // 叉积比较以避免浮点数\n' : '        // Cross product comparison to avoid floating point\n'}        return (intercept - l1.intercept) * (l1.slope - l2.slope) 
+               <= (l2.intercept - l1.intercept) * (l1.slope - slope);
+    }
+};
+
+class ConvexHullTrick {
+private:
+    deque<Line> lines;
+    
+public:
+    void addLine(long long slope, long long intercept, int id = -1) {
+        Line newLine(slope, intercept, id);
+        
+        ${lang === 'zh' ? '        // 移除变得冗余的直线\n' : '        // Remove lines that become redundant\n'}        while (lines.size() >= 2 && 
+               newLine.isBad(lines[lines.size()-2], lines[lines.size()-1])) {
+            lines.pop_back();
+        }
+        
+        lines.push_back(newLine);
+    }
+    
+    pair<long long, int> query(long long x) {
+        if (lines.empty()) return {LLONG_MAX, -1};
+        
+        ${lang === 'zh' ? '        // 移除不再最优的直线\n' : '        // Remove lines that are no longer optimal\n'}        while (lines.size() >= 2 && 
+               lines[0].eval(x) >= lines[1].eval(x)) {
+            lines.pop_front();
+        }
+        
+        return {lines[0].eval(x), lines[0].id};
+    }
+    
+    long long queryValue(long long x) {
+        return query(x).first;
+    }
+};
+
+${lang === 'zh' ? '// 示例：工厂生产优化\n// dp[i] = min(dp[j] + setup_cost[j] * demand[i] + production_cost[i])\n' : '// Example: Factory production optimization\n// dp[i] = min(dp[j] + setup_cost[j] * demand[i] + production_cost[i])\n'}vector<long long> optimizeProduction(vector<long long>& setup_cost, 
+                                    vector<long long>& demand, 
+                                    vector<long long>& production_cost) {
+    int n = setup_cost.size();
+    vector<long long> dp(n + 1, LLONG_MAX);
+    dp[0] = 0;
+    
+    ConvexHullTrick cht;
+    cht.addLine(0, 0, 0); ${lang === 'zh' ? '// 初始状态\n' : '// Initial state\n'}
+    
+    for (int i = 1; i <= n; i++) {
+        auto [cost, from] = cht.query(demand[i - 1]);
+        dp[i] = cost + production_cost[i - 1];
+        
+        ${lang === 'zh' ? '        // 为未来转移添加新直线\n' : '        // Add new line for future transitions\n'}        if (i < n) {
+            cht.addLine(-setup_cost[i - 1], dp[i], i);
+        }
+    }
+    
+    return dp;
+}
+
+int main() {
+    vector<long long> setup_cost = {2, 3, 1, 4, 2};
+    vector<long long> demand = {1, 2, 3, 2, 1};
+    vector<long long> production_cost = {5, 3, 4, 2, 6};
+    
+    cout << "${lang === 'zh' ? '设置成本: ' : 'Setup costs: '}";
+    for (long long x : setup_cost) cout << x << " ";
+    cout << "\\n${lang === 'zh' ? '需求: ' : 'Demand: '}";
+    for (long long x : demand) cout << x << " ";
+    cout << "\\n${lang === 'zh' ? '生产成本: ' : 'Production costs: '}";
+    for (long long x : production_cost) cout << x << " ";
+    cout << endl;
+    
+    vector<long long> dp = optimizeProduction(setup_cost, demand, production_cost);
+    cout << "${lang === 'zh' ? '最小总成本: ' : 'Minimum total cost: '}" << dp.back() << endl;
+    
+    return 0;
+}`}
+        explanation={lang === 'zh' 
+          ? 'CHT维护线性函数的凸包，当查询和斜率都是单调的时候，允许在摊销O(1)时间内进行最优DP转移。'
+          : 'CHT maintains a convex hull of linear functions, allowing optimal DP transitions in O(1) amortized time when queries and slopes are monotonic.'
+        }
+        output={`${lang === 'zh' ? '设置成本: ' : 'Setup costs: '}2 3 1 4 2 
+${lang === 'zh' ? '需求: ' : 'Demand: '}1 2 3 2 1 
+${lang === 'zh' ? '生产成本: ' : 'Production costs: '}5 3 4 2 6 
+${lang === 'zh' ? '最小总成本: ' : 'Minimum total cost: '}20`}
+      />
+    </section>
+
+    <!-- Li Chao Segment Tree -->
+    <section class="content-section">
+      <h2>{lang === 'zh' ? '李超线段树' : 'Li Chao Segment Tree'}</h2>
+      
+      <div class="subsection">
+        <h3>{lang === 'zh' ? '高级直线管理' : 'Advanced Line Management'}</h3>
+        <p>
+          {lang === 'zh'
+            ? '李超线段树在CHT条件不满足时处理动态直线插入和点查询。它为每个段维护最优直线，支持任意直线插入顺序。'
+            : 'Li Chao segment tree handles dynamic line insertion and point queries when CHT conditions aren\'t met. It maintains the optimal line for each segment, supporting arbitrary line insertion order.'
+          }
+        </p>
+      </div>
+
+      <CodeExample 
+        client:load
+        title={lang === 'zh' ? '李超线段树实现' : 'Li Chao Segment Tree Implementation'}
+        code={`#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+struct Line {
+    long long a, b; ${lang === 'zh' ? '// y = ax + b\n' : '// y = ax + b\n'}    
+    Line(long long a = 0, long long b = LLONG_MAX) : a(a), b(b) {}
+    
+    long long eval(long long x) const {
+        if (b == LLONG_MAX) return LLONG_MAX;
+        return a * x + b;
+    }
+};
+
+class LiChaoTree {
+private:
+    vector<Line> tree;
+    int n;
+    
+    void update(int node, int start, int end, Line line) {
+        if (start == end) {
+            if (line.eval(start) < tree[node].eval(start)) {
+                tree[node] = line;
+            }
+            return;
+        }
+        
+        int mid = (start + end) / 2;
+        bool left_better = line.eval(start) < tree[node].eval(start);
+        bool mid_better = line.eval(mid) < tree[node].eval(mid);
+        
+        if (mid_better) {
+            swap(tree[node], line);
+        }
+        
+        if (left_better != mid_better) {
+            update(2 * node, start, mid, line);
+        } else {
+            update(2 * node + 1, mid + 1, end, line);
+        }
+    }
+    
+    long long query(int node, int start, int end, int pos) {
+        if (start == end) {
+            return tree[node].eval(pos);
+        }
+        
+        int mid = (start + end) / 2;
+        long long result = tree[node].eval(pos);
+        
+        if (pos <= mid) {
+            result = min(result, query(2 * node, start, mid, pos));
+        } else {
+            result = min(result, query(2 * node + 1, mid + 1, end, pos));
+        }
+        
+        return result;
+    }
+    
+public:
+    LiChaoTree(int size) : n(size) {
+        tree.assign(4 * n, Line());
+    }
+    
+    void addLine(long long a, long long b) {
+        update(1, 0, n - 1, Line(a, b));
+    }
+    
+    long long queryMin(int x) {
+        return query(1, 0, n - 1, x);
+    }
+};
+
+${lang === 'zh' ? '// 示例：任意直线插入的动态规划\n' : '// Example: Dynamic programming with arbitrary line insertion\n'}vector<long long> solveWithLiChao(vector<int>& costs, vector<int>& multipliers) {
+    int n = costs.size();
+    vector<long long> dp(n + 1, LLONG_MAX);
+    dp[0] = 0;
+    
+    LiChaoTree lct(n + 1);
+    lct.addLine(0, 0); ${lang === 'zh' ? '// 初始直线\n' : '// Initial line\n'}
+    
+    for (int i = 1; i <= n; i++) {
+        dp[i] = lct.queryMin(multipliers[i - 1]) + costs[i - 1];
+        
+        ${lang === 'zh' ? '        // 为未来状态添加新直线\n' : '        // Add new line for future states\n'}        lct.addLine(-i, dp[i]);
+    }
+    
+    return dp;
+}
+
+int main() {
+    vector<int> costs = {3, 1, 4, 1, 5};
+    vector<int> multipliers = {2, 1, 3, 2, 1};
+    
+    cout << "${lang === 'zh' ? '成本: ' : 'Costs: '}";
+    for (int x : costs) cout << x << " ";
+    cout << "\\n${lang === 'zh' ? '乘数: ' : 'Multipliers: '}";
+    for (int x : multipliers) cout << x << " ";
+    cout << endl;
+    
+    vector<long long> dp = solveWithLiChao(costs, multipliers);
+    cout << "${lang === 'zh' ? '最优结果: ' : 'Optimal result: '}" << dp.back() << endl;
+    
+    return 0;
+}`}
+        explanation={lang === 'zh' 
+          ? '李超线段树为每个段维护最优直线，处理CHT无法管理的任意直线插入模式。'
+          : 'Li Chao segment tree maintains the optimal line for each segment, handling arbitrary line insertion patterns that CHT cannot manage.'
+        }
+        output={`${lang === 'zh' ? '成本: ' : 'Costs: '}3 1 4 1 5 
+${lang === 'zh' ? '乘数: ' : 'Multipliers: '}2 1 3 2 1 
+${lang === 'zh' ? '最优结果: ' : 'Optimal result: '}14`}
+      />
+    </section>
+
+    <!-- Divide and Conquer DP -->
+    <section class="content-section">
+      <h2>{lang === 'zh' ? '分治DP' : 'Divide and Conquer DP'}</h2>
+      
+      <div class="subsection">
+        <h3>{lang === 'zh' ? '四边形不等式优化' : 'Quadrangle Inequality Optimization'}</h3>
+        <p>
+          {lang === 'zh'
+            ? '当DP递推满足四边形不等式（Monge性质）时，分治优化将复杂度从O(kn²)降低到O(kn log n)。关键洞察是最优分割点是单调的。'
+            : 'When the DP recurrence satisfies the quadrangle inequality (Monge property), divide and conquer optimization reduces complexity from O(kn²) to O(kn log n). The key insight is that optimal split points are monotonic.'
+          }
+        </p>
+      </div>
+
+      <CodeExample 
+        client:load
+        title={lang === 'zh' ? '分治DP优化' : 'Divide and Conquer DP Optimization'}
+        code={`#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+class DivideConquerDP {
+private:
+    vector<vector<long long>> dp;
+    vector<long long> cost;
+    int n, k;
+    
+    ${lang === 'zh' ? '    // 代价函数 - 必须满足四边形不等式\n' : '    // Cost function - must satisfy quadrangle inequality\n'}    long long C(int i, int j) {
+        if (i > j) return LLONG_MAX;
+        return (cost[j] - cost[i]) * (cost[j] - cost[i]);
+    }
+    
+    void compute(int level, int left, int right, int opt_left, int opt_right) {
+        if (left > right) return;
+        
+        int mid = (left + right) / 2;
+        int best_k = -1;
+        long long best_cost = LLONG_MAX;
+        
+        ${lang === 'zh' ? '        // 为位置mid找到最优分割点\n' : '        // Find optimal split point for position mid\n'}        for (int split = opt_left; split <= min(mid - 1, opt_right); split++) {
+            long long current_cost = dp[level - 1][split] + C(split + 1, mid);
+            if (current_cost < best_cost) {
+                best_cost = current_cost;
+                best_k = split;
+            }
+        }
+        
+        dp[level][mid] = best_cost;
+        
+        ${lang === 'zh' ? '        // 递归解决左右两部分\n' : '        // Recursively solve left and right parts\n'}        compute(level, left, mid - 1, opt_left, best_k);
+        compute(level, mid + 1, right, best_k, opt_right);
+    }
+    
+public:
+    vector<long long> solve(vector<long long>& arr, int groups) {
+        n = arr.size();
+        k = groups;
+        cost = arr;
+        
+        ${lang === 'zh' ? '        // 计算前缀和用于代价函数\n' : '        // Compute prefix sums for cost function\n'}        for (int i = 1; i < n; i++) {
+            cost[i] += cost[i - 1];
+        }
+        
+        dp.assign(k + 1, vector<long long>(n, LLONG_MAX));
+        
+        ${lang === 'zh' ? '        // 基础情况：一组\n' : '        // Base case: one group\n'}        for (int i = 0; i < n; i++) {
+            dp[1][i] = C(0, i);
+        }
+        
+        ${lang === 'zh' ? '        // 使用分治填充DP表\n' : '        // Fill DP table using divide and conquer\n'}        for (int level = 2; level <= k; level++) {
+            compute(level, level - 1, n - 1, level - 2, n - 2);
+        }
+        
+        return dp[k];
+    }
+};
+
+int main() {
+    vector<long long> arr = {1, 2, 3, 4, 5, 6, 7, 8};
+    int k = 3; ${lang === 'zh' ? '// 组数\n' : '// Number of groups\n'}
+    
+    cout << "${lang === 'zh' ? '数组: ' : 'Array: '}";
+    for (long long x : arr) cout << x << " ";
+    cout << "\\n${lang === 'zh' ? '组数: ' : 'Number of groups: '}" << k << endl;
+    
+    DivideConquerDP solver;
+    vector<long long> result = solver.solve(arr, k);
+    
+    cout << "${lang === 'zh' ? '最小代价: ' : 'Minimum cost: '}" << result[arr.size() - 1] << endl;
+    
+    return 0;
+}`}
+        explanation={lang === 'zh' 
+          ? '分治DP利用代价函数满足四边形不等式时最优分割点的单调性，显著降低时间复杂度。'
+          : 'Divide and conquer DP leverages the monotonicity of optimal split points when the cost function satisfies quadrangle inequality, dramatically reducing time complexity.'
+        }
+        output={`${lang === 'zh' ? '数组: ' : 'Array: '}1 2 3 4 5 6 7 8 
+${lang === 'zh' ? '组数: ' : 'Number of groups: '}3
+${lang === 'zh' ? '最小代价: ' : 'Minimum cost: '}16`}
+      />
+    </section>
+
+    <!-- Tips Section -->
+    <section class="tips-section">
+      <h2>{lang === 'zh' ? '优化策略指南' : 'Optimization Strategy Guide'}</h2>
+      
+      <div class="tips-grid">
+        <div class="tip-card">
+          <h3>🎯 {lang === 'zh' ? '何时使用每种技术' : 'When to Use Each Technique'}</h3>
+          <ul>
+            <li><strong>{lang === 'zh' ? '线段树：' : 'Segment Tree:'}</strong> {lang === 'zh' ? 'DP转移中的区间查询' : 'Range queries in DP transitions'}</li>
+            <li><strong>CHT:</strong> {lang === 'zh' ? '斜率单调的线性函数' : 'Linear functions with monotonic slopes'}</li>
+            <li><strong>{lang === 'zh' ? '李超：' : 'Li Chao:'}</strong> {lang === 'zh' ? '任意直线插入模式' : 'Arbitrary line insertion patterns'}</li>
+            <li><strong>{lang === 'zh' ? '分治：' : 'Divide & Conquer:'}</strong> {lang === 'zh' ? '满足四边形不等式' : 'Quadrangle inequality satisfied'}</li>
+          </ul>
+        </div>
+        
+        <div class="tip-card">
+          <h3>⚡ {lang === 'zh' ? '性能考虑' : 'Performance Considerations'}</h3>
+          <ul>
+            <li><strong>{lang === 'zh' ? '内存：' : 'Memory:'}</strong> {lang === 'zh' ? '线段树需要4n空间' : 'Segment trees need 4n space'}</li>
+            <li><strong>{lang === 'zh' ? '常数：' : 'Constants:'}</strong> {lang === 'zh' ? 'CHT比李超有更好的常数' : 'CHT has better constants than Li Chao'}</li>
+            <li><strong>{lang === 'zh' ? '精度：' : 'Precision:'}</strong> {lang === 'zh' ? '尽可能使用整数运算' : 'Use integer arithmetic when possible'}</li>
+            <li><strong>{lang === 'zh' ? '缓存：' : 'Cache:'}</strong> {lang === 'zh' ? '顺序访问模式更快' : 'Sequential access patterns are faster'}</li>
+          </ul>
+        </div>
+        
+        <div class="tip-card">
+          <h3>🔧 {lang === 'zh' ? '实现技巧' : 'Implementation Tips'}</h3>
+          <ul>
+            <li><strong>{lang === 'zh' ? '溢出：' : 'Overflow:'}</strong> {lang === 'zh' ? '中间计算使用long long' : 'Use long long for intermediate calculations'}</li>
+            <li><strong>{lang === 'zh' ? '边界情况：' : 'Edge Cases:'}</strong> {lang === 'zh' ? '处理空区间和单元素' : 'Handle empty ranges and single elements'}</li>
+            <li><strong>{lang === 'zh' ? '调试：' : 'Debugging:'}</strong> {lang === 'zh' ? '验证单调性条件' : 'Verify monotonicity conditions'}</li>
+            <li><strong>{lang === 'zh' ? '测试：' : 'Testing:'}</strong> {lang === 'zh' ? '小输入与暴力比较' : 'Compare with brute force on small inputs'}</li>
+          </ul>
+        </div>
+        
+        <div class="tip-card">
+          <h3>📊 {lang === 'zh' ? '复杂度分析' : 'Complexity Analysis'}</h3>
+          <ul>
+            <li><strong>{lang === 'zh' ? '线段树DP：' : 'Segment Tree DP:'}</strong> {lang === 'zh' ? '每次转移O(n log n)' : 'O(n log n) per transition'}</li>
+            <li><strong>CHT:</strong> {lang === 'zh' ? '单调查询总计O(n)' : 'O(n) total with monotonic queries'}</li>
+            <li><strong>{lang === 'zh' ? '李超：' : 'Li Chao:'}</strong> {lang === 'zh' ? 'n条直线和查询O(n log n)' : 'O(n log n) for n lines and queries'}</li>
+            <li><strong>{lang === 'zh' ? '分治DP：' : 'D&C DP:'}</strong> {lang === 'zh' ? 'k组O(kn log n)' : 'O(kn log n) for k groups'}</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <!-- Navigation -->
+    <div class="navigation">
+      <a href={`/${lang}/5-advanced/binary-trie`} class="nav-button prev">
+        ← {lang === 'zh' ? '二进制字典树' : 'Binary Trie'}
+      </a>
+      <a href={`/${lang}/5-advanced`} class="nav-button index">
+        📚 {lang === 'zh' ? '高级算法目录' : 'Advanced Algorithms Index'}
+      </a>
+      <a href={`/${lang}/5-advanced/sweep-line`} class="nav-button next">
+        {lang === 'zh' ? '扫描线算法' : 'Sweep Line Algorithm'} →
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .breadcrumbs ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .breadcrumbs {
+    padding: 1rem 0;
+    border-bottom: 1px solid #e5e7eb;
+    margin-bottom: 2rem;
+  }
+
+  .breadcrumbs a {
+    color: #4f46e5;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .breadcrumbs a:hover {
+    color: #3730a3;
+    text-decoration: underline;
+  }
+
+  .main-title {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  .overview-section {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin: 2rem 0 3rem 0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .overview-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #4f46e5, #7c3aed, #ec4899);
+  }
+
+  .overview-section h2 {
+    color: #1e293b;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    border: none;
+    padding: 0;
+  }
+
+  .overview-section p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #374151;
+  }
+
+  .content-section {
+    margin: 4rem 0;
+    padding: 2rem 0;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .content-section:last-of-type {
+    border-bottom: none;
+  }
+
+  .content-section h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #1e293b;
+    position: relative;
+    padding-bottom: 0.5rem;
+  }
+
+  .content-section h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #4f46e5, #7c3aed);
+    border-radius: 2px;
+  }
+
+  .subsection {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #f9fafb;
+    border-radius: 12px;
+    border-left: 4px solid #4f46e5;
+  }
+
+  .subsection h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 1rem;
+  }
+
+  .subsection p {
+    margin: 0;
+    color: #4b5563;
+    line-height: 1.7;
+  }
+
+  .tips-section {
+    margin: 4rem 0;
+    padding: 2rem 0;
+  }
+
+  .tips-section h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #1e293b;
+    text-align: center;
+  }
+
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .tip-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .tip-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  .tip-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .tip-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .tip-card li {
+    padding: 0.5rem 0;
+    color: #4b5563;
+    border-bottom: 1px solid #f3f4f6;
+    line-height: 1.5;
+  }
+
+  .tip-card li:last-child {
+    border-bottom: none;
+  }
+
+  .tip-card strong {
+    color: #1e293b;
+    font-weight: 600;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #e5e7eb;
+    gap: 1rem;
+  }
+
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.875rem 1.75rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.39);
+    border: none;
+  }
+
+  .nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px 0 rgba(79, 70, 229, 0.5);
+  }
+
+  .nav-button.index {
+    background: linear-gradient(135deg, #059669, #0d9488);
+    box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.39);
+  }
+
+  .nav-button.index:hover {
+    box-shadow: 0 8px 25px 0 rgba(5, 150, 105, 0.5);
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 0.5rem;
+    }
+
+    .main-title {
+      font-size: 2.5rem;
+    }
+
+    .overview-section {
+      padding: 1.5rem;
+      margin: 1.5rem 0 2rem 0;
+    }
+
+    .content-section h2 {
+      font-size: 1.875rem;
+    }
+
+    .tips-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style> 

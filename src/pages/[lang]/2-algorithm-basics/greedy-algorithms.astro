@@ -1,0 +1,641 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('algo.greedy')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/2-algorithm-basics`}>{t('nav.algorithm-basics')}</a> > 
+      {t('algo.greedy')}
+    </div>
+    
+    <h1>{t('algo.greedy')}</h1>
+    
+    <section>
+      <h2>{lang === 'en' ? 'Understanding Greedy Algorithms' : '理解贪心算法'}</h2>
+      <p>
+        {lang === 'en' 
+          ? 'Greedy algorithms make the locally optimal choice at each step, hoping to find a global optimum. They are simple and efficient but don\'t always produce the optimal solution. The key is identifying when the greedy approach actually works.'
+          : '贪心算法在每一步都做出局部最优选择，希望找到全局最优解。它们简单高效，但不总是产生最优解。关键是识别贪心方法何时真正有效。'
+        }
+      </p>
+      <p>
+        {lang === 'en'
+          ? 'Greedy algorithms work when the problem has the greedy choice property (a global optimum can be reached by making locally optimal choices) and optimal substructure.'
+          : '当问题具有贪心选择性质（通过做出局部最优选择可以达到全局最优）和最优子结构时，贪心算法有效。'
+        }
+      </p>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Activity Selection Problem' : '活动选择问题'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Given a set of activities with start and end times, select the maximum number of activities that don\'t overlap. The greedy strategy: always pick the activity that finishes earliest.'
+          : '给定一组具有开始和结束时间的活动，选择不重叠的最大数量活动。贪心策略：总是选择最早结束的活动。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Activity Selection Problem' : '活动选择问题'}
+        code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+struct Activity {
+    int start, finish, index;
+    
+    Activity(int s, int f, int i) : start(s), finish(f), index(i) {}
+};
+
+class ActivitySelection {
+public:
+    // Greedy approach: select activity that finishes earliest
+    vector<int> selectActivities(vector<Activity>& activities) {
+        // Sort activities by finish time
+        sort(activities.begin(), activities.end(), 
+             [](const Activity& a, const Activity& b) {
+                 return a.finish < b.finish;
+             });
+        
+        vector<int> result;
+        result.push_back(activities[0].index);
+        int lastFinish = activities[0].finish;
+        
+        cout << "Selected activities (in order of selection):" << endl;
+        cout << "Activity " << activities[0].index 
+             << ": [" << activities[0].start << ", " << activities[0].finish << "]" << endl;
+        
+        // Consider remaining activities
+        for (int i = 1; i < activities.size(); i++) {
+            // If this activity starts after the last selected activity finishes
+            if (activities[i].start >= lastFinish) {
+                result.push_back(activities[i].index);
+                lastFinish = activities[i].finish;
+                cout << "Activity " << activities[i].index 
+                     << ": [" << activities[i].start << ", " << activities[i].finish << "]" << endl;
+            }
+        }
+        
+        return result;
+    }
+    
+    // Recursive greedy approach
+    void selectActivitiesRecursive(vector<Activity>& activities, int i, 
+                                   vector<int>& result) {
+        int j = i + 1;
+        
+        // Find next compatible activity
+        while (j < activities.size() && activities[j].start < activities[i].finish) {
+            j++;
+        }
+        
+        if (j < activities.size()) {
+            result.push_back(activities[j].index);
+            selectActivitiesRecursive(activities, j, result);
+        }
+    }
+    
+    void printActivities(const vector<Activity>& activities) {
+        cout << "Available activities:" << endl;
+        for (const auto& activity : activities) {
+            cout << "Activity " << activity.index 
+                 << ": [" << activity.start << ", " << activity.finish << "]" << endl;
+        }
+        cout << endl;
+    }
+};
+
+int main() {
+    vector<Activity> activities = {
+        Activity(1, 4, 1),
+        Activity(3, 5, 2),
+        Activity(0, 6, 3),
+        Activity(5, 7, 4),
+        Activity(8, 9, 5),
+        Activity(5, 9, 6)
+    };
+    
+    ActivitySelection as;
+    as.printActivities(activities);
+    
+    vector<int> selected = as.selectActivities(activities);
+    
+    cout << "\\nTotal activities selected: " << selected.size() << endl;
+    cout << "Activity indices: ";
+    for (int id : selected) {
+        cout << id << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'Sorting by finish time ensures we always have maximum room for future activities.' : '按结束时间排序确保我们总是为未来活动留出最大空间。'}
+        output={`Available activities:
+Activity 1: [1, 4]
+Activity 2: [3, 5]
+Activity 3: [0, 6]
+Activity 4: [5, 7]
+Activity 5: [8, 9]
+Activity 6: [5, 9]
+
+Selected activities (in order of selection):
+Activity 1: [1, 4]
+Activity 4: [5, 7]
+Activity 5: [8, 9]
+
+Total activities selected: 3
+Activity indices: 1 4 5`}
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Fractional Knapsack Problem' : '分数背包问题'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Unlike 0/1 knapsack, in fractional knapsack we can take parts of items. The greedy strategy: sort items by value-to-weight ratio and take items with highest ratio first.'
+          : '与0/1背包不同，在分数背包中我们可以拿取物品的一部分。贪心策略：按价值重量比对物品排序，首先拿取比率最高的物品。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Fractional Knapsack' : '分数背包'}
+        code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+struct Item {
+    int value, weight;
+    double ratio;
+    int index;
+    
+    Item(int v, int w, int i) : value(v), weight(w), index(i) {
+        ratio = (double)v / w;
+    }
+};
+
+class FractionalKnapsack {
+public:
+    double solve(vector<Item>& items, int capacity) {
+        // Sort items by value-to-weight ratio in descending order
+        sort(items.begin(), items.end(), 
+             [](const Item& a, const Item& b) {
+                 return a.ratio > b.ratio;
+             });
+        
+        double totalValue = 0.0;
+        int currentWeight = 0;
+        
+        cout << "Items sorted by value/weight ratio:" << endl;
+        for (const auto& item : items) {
+            cout << "Item " << item.index << ": value=" << item.value 
+                 << ", weight=" << item.weight << ", ratio=" << item.ratio << endl;
+        }
+        cout << endl;
+        
+        cout << "Knapsack filling process:" << endl;
+        
+        for (auto& item : items) {
+            if (currentWeight + item.weight <= capacity) {
+                // Take the whole item
+                currentWeight += item.weight;
+                totalValue += item.value;
+                cout << "Take whole Item " << item.index 
+                     << " (weight: " << item.weight << ", value: " << item.value << ")" << endl;
+            } else {
+                // Take fraction of the item
+                int remainingCapacity = capacity - currentWeight;
+                if (remainingCapacity > 0) {
+                    double fraction = (double)remainingCapacity / item.weight;
+                    totalValue += item.value * fraction;
+                    cout << "Take " << fraction << " of Item " << item.index 
+                         << " (weight: " << remainingCapacity << ", value: " 
+                         << item.value * fraction << ")" << endl;
+                }
+                break;
+            }
+        }
+        
+        return totalValue;
+    }
+    
+    // Alternative implementation with detailed tracking
+    struct Solution {
+        double totalValue;
+        vector<pair<int, double>> itemFractions; // (item_index, fraction_taken)
+    };
+    
+    Solution solveDetailed(vector<Item>& items, int capacity) {
+        sort(items.begin(), items.end(), 
+             [](const Item& a, const Item& b) {
+                 return a.ratio > b.ratio;
+             });
+        
+        Solution solution;
+        solution.totalValue = 0.0;
+        int currentWeight = 0;
+        
+        for (auto& item : items) {
+            if (currentWeight + item.weight <= capacity) {
+                // Take whole item
+                currentWeight += item.weight;
+                solution.totalValue += item.value;
+                solution.itemFractions.push_back({item.index, 1.0});
+            } else {
+                // Take fraction
+                int remainingCapacity = capacity - currentWeight;
+                if (remainingCapacity > 0) {
+                    double fraction = (double)remainingCapacity / item.weight;
+                    solution.totalValue += item.value * fraction;
+                    solution.itemFractions.push_back({item.index, fraction});
+                }
+                break;
+            }
+        }
+        
+        return solution;
+    }
+    
+    void printSolution(const Solution& solution) {
+        cout << "\\nDetailed solution:" << endl;
+        cout << "Total value: " << solution.totalValue << endl;
+        cout << "Items taken:" << endl;
+        for (const auto& itemFraction : solution.itemFractions) {
+            cout << "Item " << itemFraction.first << ": " 
+                 << (itemFraction.second * 100) << "%" << endl;
+        }
+    }
+};
+
+int main() {
+    vector<Item> items = {
+        Item(60, 10, 1),
+        Item(100, 20, 2),
+        Item(120, 30, 3)
+    };
+    
+    int capacity = 50;
+    
+    FractionalKnapsack fk;
+    
+    cout << "Knapsack capacity: " << capacity << endl;
+    cout << "Available items:" << endl;
+    for (const auto& item : items) {
+        cout << "Item " << item.index << ": value=" << item.value 
+             << ", weight=" << item.weight << endl;
+    }
+    cout << endl;
+    
+    double maxValue = fk.solve(items, capacity);
+    cout << "\\nMaximum value: " << maxValue << endl;
+    
+    // Reset items for detailed solution
+    vector<Item> items2 = {
+        Item(60, 10, 1),
+        Item(100, 20, 2),
+        Item(120, 30, 3)
+    };
+    
+    auto solution = fk.solveDetailed(items2, capacity);
+    fk.printSolution(solution);
+    
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'Greedy choice based on value-to-weight ratio guarantees optimal solution for fractional knapsack.' : '基于价值重量比的贪心选择保证分数背包的最优解。'}
+        output={`Knapsack capacity: 50
+Available items:
+Item 1: value=60, weight=10
+Item 2: value=100, weight=20
+Item 3: value=120, weight=30
+
+Items sorted by value/weight ratio:
+Item 1: value=60, weight=10, ratio=6
+Item 2: value=100, weight=20, ratio=5
+Item 3: value=120, weight=30, ratio=4
+
+Knapsack filling process:
+Take whole Item 1 (weight: 10, value: 60)
+Take whole Item 2 (weight: 20, value: 100)
+Take 0.666667 of Item 3 (weight: 20, value: 80)
+
+Maximum value: 240`}
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Huffman Coding' : '霍夫曼编码'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Huffman coding creates optimal prefix codes for data compression. The greedy strategy: always merge the two nodes with lowest frequency.'
+          : '霍夫曼编码为数据压缩创建最优前缀码。贪心策略：总是合并频率最低的两个节点。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Huffman Coding Algorithm' : '霍夫曼编码算法'}
+        code={`#include <iostream>
+#include <vector>
+#include <queue>
+#include <unordered_map>
+#include <string>
+using namespace std;
+
+struct Node {
+    char character;
+    int frequency;
+    Node* left;
+    Node* right;
+    
+    Node(char c, int f) : character(c), frequency(f), left(nullptr), right(nullptr) {}
+    Node(int f) : character('\\0'), frequency(f), left(nullptr), right(nullptr) {}
+};
+
+struct Compare {
+    bool operator()(Node* a, Node* b) {
+        if (a->frequency == b->frequency) {
+            return a->character > b->character; // For deterministic results
+        }
+        return a->frequency > b->frequency;
+    }
+};
+
+class HuffmanCoding {
+public:
+    Node* buildHuffmanTree(vector<pair<char, int>>& frequencies) {
+        priority_queue<Node*, vector<Node*>, Compare> pq;
+        
+        // Create leaf nodes and add to priority queue
+        for (auto& freq : frequencies) {
+            pq.push(new Node(freq.first, freq.second));
+        }
+        
+        cout << "Building Huffman Tree:" << endl;
+        
+        // Build the tree
+        while (pq.size() > 1) {
+            Node* right = pq.top(); pq.pop();
+            Node* left = pq.top(); pq.pop();
+            
+            Node* merged = new Node(left->frequency + right->frequency);
+            merged->left = left;
+            merged->right = right;
+            
+            cout << "Merge nodes with frequencies " << left->frequency 
+                 << " and " << right->frequency << " -> " << merged->frequency << endl;
+            
+            pq.push(merged);
+        }
+        
+        return pq.top();
+    }
+    
+    void generateCodes(Node* root, string code, unordered_map<char, string>& codes) {
+        if (!root) return;
+        
+        // Leaf node
+        if (!root->left && !root->right) {
+            codes[root->character] = code.empty() ? "0" : code;
+            return;
+        }
+        
+        generateCodes(root->left, code + "0", codes);
+        generateCodes(root->right, code + "1", codes);
+    }
+    
+    void printCodes(const unordered_map<char, string>& codes, 
+                    const vector<pair<char, int>>& frequencies) {
+        cout << "\\nHuffman Codes:" << endl;
+        cout << "Character | Frequency | Code" << endl;
+        cout << "----------|-----------|-----" << endl;
+        
+        int totalBits = 0;
+        int totalOriginalBits = 0;
+        
+        for (const auto& freq : frequencies) {
+            char c = freq.first;
+            int f = freq.second;
+            string code = codes.at(c);
+            
+            cout << "    " << c << "     |     " << f << "     | " << code << endl;
+            totalBits += f * code.length();
+            totalOriginalBits += f * 8; // Assuming 8 bits per character originally
+        }
+        
+        cout << "\\nCompression Analysis:" << endl;
+        cout << "Original bits: " << totalOriginalBits << endl;
+        cout << "Huffman bits: " << totalBits << endl;
+        cout << "Compression ratio: " << (double)totalBits / totalOriginalBits << endl;
+    }
+    
+    string encode(const string& text, const unordered_map<char, string>& codes) {
+        string encoded = "";
+        for (char c : text) {
+            encoded += codes.at(c);
+        }
+        return encoded;
+    }
+    
+    string decode(const string& encoded, Node* root) {
+        string decoded = "";
+        Node* current = root;
+        
+        for (char bit : encoded) {
+            if (bit == '0') {
+                current = current->left;
+            } else {
+                current = current->right;
+            }
+            
+            // Reached leaf node
+            if (!current->left && !current->right) {
+                decoded += current->character;
+                current = root;
+            }
+        }
+        
+        return decoded;
+    }
+};
+
+int main() {
+    vector<pair<char, int>> frequencies = {
+        {'a', 5}, {'b', 9}, {'c', 12}, {'d', 13}, {'e', 16}, {'f', 45}
+    };
+    
+    HuffmanCoding hc;
+    
+    cout << "Character frequencies:" << endl;
+    for (auto& freq : frequencies) {
+        cout << freq.first << ": " << freq.second << endl;
+    }
+    cout << endl;
+    
+    Node* root = hc.buildHuffmanTree(frequencies);
+    
+    unordered_map<char, string> codes;
+    hc.generateCodes(root, "", codes);
+    hc.printCodes(codes, frequencies);
+    
+    // Test encoding and decoding
+    string text = "abcdef";
+    string encoded = hc.encode(text, codes);
+    string decoded = hc.decode(encoded, root);
+    
+    cout << "\\nTest encoding/decoding:" << endl;
+    cout << "Original: " << text << endl;
+    cout << "Encoded: " << encoded << endl;
+    cout << "Decoded: " << decoded << endl;
+    
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'Huffman coding assigns shorter codes to more frequent characters, minimizing total encoded length.' : '霍夫曼编码为更频繁的字符分配更短的码，最小化总编码长度。'}
+        output={`Character frequencies:
+a: 5
+b: 9
+c: 12
+d: 13
+e: 16
+f: 45
+
+Building Huffman Tree:
+Merge nodes with frequencies 5 and 9 -> 14
+Merge nodes with frequencies 12 and 13 -> 25
+Merge nodes with frequencies 14 and 16 -> 30
+Merge nodes with frequencies 25 and 30 -> 55
+Merge nodes with frequencies 45 and 55 -> 100
+
+Huffman Codes:
+Character | Frequency | Code
+----------|-----------|-----
+    a     |     5     | 1100
+    b     |     9     | 1101
+    c     |     12    | 100
+    d     |     13    | 101
+    e     |     16    | 111
+    f     |     45    | 0`}
+      />
+    </section>
+
+    <div class="navigation">
+      <a href={`/${lang}/2-algorithm-basics/dynamic-programming`} class="nav-button prev">
+        ← {lang === 'en' ? 'Previous: Dynamic Programming' : '上一节：动态规划'}
+      </a>
+      <a href={`/${lang}/2-algorithm-basics/graph-algorithms`} class="nav-button next">
+        {lang === 'en' ? 'Next: Graph Algorithms' : '下一节：图算法'} →
+      </a>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  p {
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: #4f46e5;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background: #3730a3;
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style>

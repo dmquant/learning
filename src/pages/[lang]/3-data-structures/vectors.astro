@@ -1,0 +1,343 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('ds.vectors')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/3-data-structures`}>{t('nav.data-structures')}</a> > 
+      {t('ds.vectors')}
+    </div>
+    
+    <h1>{t('ds.vectors')}</h1>
+    
+    <div class="overview">
+      <p>
+        {lang === 'en' 
+          ? 'Vectors are dynamic arrays that can resize themselves automatically when elements are added or removed. They are one of the most commonly used containers in C++ and provide the flexibility of dynamic memory allocation with the performance benefits of contiguous memory storage.'
+          : '向量是可以在添加或删除元素时自动调整大小的动态数组。它们是 C++ 中最常用的容器之一，提供了动态内存分配的灵活性以及连续内存存储的性能优势。'
+        }
+      </p>
+      
+      <p>
+        {lang === 'en'
+          ? 'The C++ Standard Template Library (STL) provides a powerful vector class that handles memory management automatically, making it safer and more convenient than manual dynamic arrays while maintaining excellent performance.'
+          : 'C++ 标准模板库 (STL) 提供了一个强大的 vector 类，它自动处理内存管理，比手动动态数组更安全、更便捷，同时保持出色的性能。'
+        }
+      </p>
+    </div>
+
+    <section>
+      <h2>{lang === 'en' ? 'Vector Basics' : '向量基础'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Vectors can be initialized in multiple ways and support various data types:'
+          : '向量可以通过多种方式初始化，并支持各种数据类型：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Creating and Initializing Vectors' : '创建和初始化向量'}
+        code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+int main() {
+    // Different ways to create vectors
+    vector<int> numbers1;                    // Empty vector
+    vector<int> numbers2(5);                 // 5 elements, all initialized to 0
+    vector<int> numbers3(5, 10);             // 5 elements, all initialized to 10
+    vector<int> numbers4 = {1, 2, 3, 4, 5}; // Initialize with values
+    vector<int> numbers5(numbers4);          // Copy constructor
+    
+    // Display vector contents
+    cout << "numbers1 (empty): ";
+    for (int num : numbers1) cout << num << " ";
+    cout << "Size: " << numbers1.size() << endl;
+    
+    cout << "numbers2 (5 zeros): ";
+    for (int num : numbers2) cout << num << " ";
+    cout << "Size: " << numbers2.size() << endl;
+    
+    cout << "numbers3 (5 tens): ";
+    for (int num : numbers3) cout << num << " ";
+    cout << "Size: " << numbers3.size() << endl;
+    
+    cout << "numbers4 (1-5): ";
+    for (int num : numbers4) cout << num << " ";
+    cout << "Size: " << numbers4.size() << endl;
+    
+    // Vector of strings
+    vector<string> fruits = {"apple", "banana", "orange"};
+    cout << "\\nFruits: ";
+    for (const string& fruit : fruits) {
+        cout << fruit << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Adding and Removing Elements' : '添加和删除元素'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Vectors automatically resize when needed. Common operations include push_back(), insert(), pop_back(), and erase():'
+          : '向量在需要时会自动调整大小。常见操作包括 push_back()、insert()、pop_back() 和 erase()：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Dynamic Resizing Operations' : '动态调整大小操作'}
+        code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+void printVector(const vector<int>& vec, const string& label) {
+    cout << label << ": ";
+    for (int val : vec) cout << val << " ";
+    cout << "(size: " << vec.size() << ", capacity: " << vec.capacity() << ")" << endl;
+}
+
+int main() {
+    vector<int> numbers;
+    
+    cout << "=== Adding Elements ===" << endl;
+    printVector(numbers, "Initial");
+    
+    // Adding elements to the end
+    numbers.push_back(10);
+    printVector(numbers, "After push_back(10)");
+    
+    numbers.push_back(20);
+    numbers.push_back(30);
+    printVector(numbers, "After adding 20, 30");
+    
+    // Insert at specific position
+    numbers.insert(numbers.begin() + 1, 15);  
+    printVector(numbers, "After insert 15 at index 1");
+    
+    cout << "\\n=== Removing Elements ===" << endl;
+    
+    // Remove last element
+    numbers.pop_back();
+    printVector(numbers, "After pop_back()");
+    
+    // Remove at specific position
+    numbers.erase(numbers.begin() + 1);
+    printVector(numbers, "After erasing index 1");
+    
+    // Clear all elements
+    numbers.clear();
+    printVector(numbers, "After clear");
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Vector Iterators' : '向量迭代器'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Iterators provide a way to traverse through vector elements and are essential for many STL algorithms:'
+          : '迭代器提供了遍历向量元素的方法，对于许多 STL 算法来说是必不可少的：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Using Iterators' : '使用迭代器'}
+        code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    vector<int> numbers = {5, 2, 8, 1, 9, 3};
+    
+    // Using iterators to traverse
+    cout << "Forward iteration: ";
+    for (auto it = numbers.begin(); it != numbers.end(); ++it) {
+        cout << *it << " ";
+    }
+    cout << endl;
+    
+    // Reverse iteration
+    cout << "Reverse iteration: ";
+    for (auto it = numbers.rbegin(); it != numbers.rend(); ++it) {
+        cout << *it << " ";
+    }
+    cout << endl;
+    
+    // Using algorithms with iterators
+    sort(numbers.begin(), numbers.end());
+    cout << "After sorting: ";
+    for (int num : numbers) cout << num << " ";
+    cout << endl;
+    
+    // Find element
+    auto found = find(numbers.begin(), numbers.end(), 5);
+    if (found != numbers.end()) {
+        cout << "Found 5 at position: " << distance(numbers.begin(), found) << endl;
+    }
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Performance Considerations' : '性能考虑'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Understanding vector performance characteristics helps write efficient code:'
+          : '了解向量的性能特征有助于编写高效的代码：'
+        }
+      </p>
+      
+      <ul>
+        <li>
+          {lang === 'en'
+            ? 'Random access: O(1) - accessing elements by index is constant time'
+            : '随机访问：O(1) - 通过索引访问元素是常数时间'
+          }
+        </li>
+        <li>
+          {lang === 'en'
+            ? 'Insertion/deletion at end: O(1) amortized - push_back and pop_back are very efficient'
+            : '末尾插入/删除：平均 O(1) - push_back 和 pop_back 非常高效'
+          }
+        </li>
+        <li>
+          {lang === 'en'
+            ? 'Insertion/deletion at middle: O(n) - requires shifting elements'
+            : '中间插入/删除：O(n) - 需要移动元素'
+          }
+        </li>
+        <li>
+          {lang === 'en'
+            ? 'Memory: Contiguous storage provides cache-friendly access patterns'
+            : '内存：连续存储提供缓存友好的访问模式'
+          }
+        </li>
+      </ul>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    width: 1200px;
+    max-width: calc(100% - 2rem);
+    color: #1e293b;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .overview {
+    background: #f8fafc;
+    border-left: 4px solid #4f46e5;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-radius: 0 8px 8px 0;
+  }
+  
+  .overview p {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    line-height: 1.7;
+  }
+  
+  .overview p:last-child {
+    margin-bottom: 0;
+  }
+  
+  section {
+    margin: 3rem 0;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1e293b;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  p {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #374151;
+  }
+  
+  ul {
+    margin: 1.5rem 0;
+    padding-left: 2rem;
+  }
+  
+  li {
+    margin-bottom: 0.5rem;
+    font-size: 1.05rem;
+    line-height: 1.6;
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+    }
+  }
+</style> 

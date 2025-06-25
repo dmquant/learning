@@ -1,0 +1,459 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('algo.searching')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/2-algorithm-basics`}>{t('nav.algorithm-basics')}</a> > 
+      {t('algo.searching')}
+    </div>
+    
+    <h1>{t('algo.searching')}</h1>
+    
+    <section>
+      <h2>{lang === 'en' ? 'Introduction to Searching' : '搜索算法简介'}</h2>
+      <p>
+        {lang === 'en' 
+          ? 'Searching algorithms find specific elements within data structures. The choice of algorithm depends on whether the data is sorted, the data structure type, and performance requirements.'
+          : '搜索算法在数据结构中查找特定元素。算法的选择取决于数据是否已排序、数据结构类型和性能要求。'
+        }
+      </p>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Linear Search' : '线性搜索'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Linear search checks each element sequentially until the target is found or the list ends. Time complexity: O(n), works on both sorted and unsorted data.'
+          : '线性搜索按顺序检查每个元素，直到找到目标或到达列表末尾。时间复杂度：O(n)，适用于已排序和未排序的数据。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Linear Search Implementation' : '线性搜索实现'}
+        code={`#include <iostream>
+#include <vector>
+using namespace std;
+
+int linearSearch(const vector<int>& arr, int target) {
+    for (int i = 0; i < arr.size(); i++) {
+        if (arr[i] == target) {
+            return i;
+        }
+    }
+    return -1; // Not found
+}
+
+int main() {
+    vector<int> arr = {64, 34, 25, 12, 22, 11, 90};
+    int target = 22;
+    
+    int result = linearSearch(arr, target);
+    
+    if (result != -1) {
+        cout << "Element " << target << " found at index " << result << endl;
+    } else {
+        cout << "Element " << target << " not found" << endl;
+    }
+    
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'Linear search iterates through each element until target is found.' : '线性搜索遍历每个元素直到找到目标。'}
+        output={`Element 22 found at index 4`}
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Binary Search' : '二分搜索'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Binary search works on sorted arrays by repeatedly dividing the search interval in half. Time complexity: O(log n), much faster than linear search for large datasets.'
+          : '二分搜索通过重复将搜索区间减半来处理已排序的数组。时间复杂度：O(log n)，对于大型数据集比线性搜索快得多。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Binary Search Implementation' : '二分搜索实现'}
+        code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+int binarySearch(const vector<int>& arr, int target) {
+    int left = 0, right = arr.size() - 1;
+    
+    while (left <= right) {
+        int mid = left + (right - left) / 2;
+        
+        if (arr[mid] == target) {
+            return mid;
+        }
+        
+        if (arr[mid] < target) {
+            left = mid + 1;
+        } else {
+            right = mid - 1;
+        }
+    }
+    
+    return -1; // Not found
+}
+
+int main() {
+    vector<int> arr = {11, 12, 22, 25, 34, 64, 90};
+    int target = 25;
+    
+    int result = binarySearch(arr, target);
+    
+    if (result != -1) {
+        cout << "Element " << target << " found at index " << result << endl;
+    } else {
+        cout << "Element " << target << " not found" << endl;
+    }
+    
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'Binary search divides the array in half at each step, eliminating half of the remaining elements.' : '二分搜索在每一步都将数组分成两半，排除剩余元素的一半。'}
+        output={`Element 25 found at index 3`}
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Depth-First Search (DFS)' : '深度优先搜索 (DFS)'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'DFS explores as far as possible along each branch before backtracking. Useful for tree/graph traversal, maze solving, and finding connected components.'
+          : 'DFS沿着每个分支尽可能深入探索，然后回溯。用于树/图遍历、迷宫求解和查找连通分量。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'DFS Implementation' : 'DFS 实现'}
+        code={`#include <iostream>
+#include <vector>
+#include <stack>
+using namespace std;
+
+class Graph {
+private:
+    int V;
+    vector<vector<int>> adj;
+    
+public:
+    Graph(int vertices) : V(vertices) {
+        adj.resize(V);
+    }
+    
+    void addEdge(int v, int w) {
+        adj[v].push_back(w);
+    }
+    
+    // Recursive DFS
+    void DFSUtil(int v, vector<bool>& visited) {
+        visited[v] = true;
+        cout << v << " ";
+        
+        for (int neighbor : adj[v]) {
+            if (!visited[neighbor]) {
+                DFSUtil(neighbor, visited);
+            }
+        }
+    }
+    
+    void DFS(int start) {
+        vector<bool> visited(V, false);
+        cout << "DFS traversal starting from vertex " << start << ": ";
+        DFSUtil(start, visited);
+        cout << endl;
+    }
+    
+    // Iterative DFS using stack
+    void DFSIterative(int start) {
+        vector<bool> visited(V, false);
+        stack<int> stk;
+        
+        stk.push(start);
+        cout << "Iterative DFS: ";
+        
+        while (!stk.empty()) {
+            int v = stk.top();
+            stk.pop();
+            
+            if (!visited[v]) {
+                visited[v] = true;
+                cout << v << " ";
+                
+                // Add neighbors to stack (in reverse order)
+                for (int i = adj[v].size() - 1; i >= 0; i--) {
+                    if (!visited[adj[v][i]]) {
+                        stk.push(adj[v][i]);
+                    }
+                }
+            }
+        }
+        cout << endl;
+    }
+};
+
+int main() {
+    Graph g(7);
+    g.addEdge(0, 1);
+    g.addEdge(0, 2);
+    g.addEdge(1, 3);
+    g.addEdge(1, 4);
+    g.addEdge(2, 5);
+    g.addEdge(2, 6);
+    
+    g.DFS(0);
+    g.DFSIterative(0);
+    
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'DFS can be implemented recursively or iteratively using a stack.' : 'DFS可以通过递归或使用栈迭代实现。'}
+        output={`DFS traversal starting from vertex 0: 0 1 3 4 2 5 6 
+Iterative DFS: 0 1 3 4 2 5 6`}
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Breadth-First Search (BFS)' : '广度优先搜索 (BFS)'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'BFS explores all neighbors at the current depth before moving to the next depth level. Excellent for finding shortest paths in unweighted graphs.'
+          : 'BFS在移动到下一个深度级别之前探索当前深度的所有邻居。非常适合在无权图中查找最短路径。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'BFS Implementation' : 'BFS 实现'}
+        code={`#include <iostream>
+#include <vector>
+#include <queue>
+using namespace std;
+
+class Graph {
+private:
+    int V;
+    vector<vector<int>> adj;
+    
+public:
+    Graph(int vertices) : V(vertices) {
+        adj.resize(V);
+    }
+    
+    void addEdge(int v, int w) {
+        adj[v].push_back(w);
+    }
+    
+    void BFS(int start) {
+        vector<bool> visited(V, false);
+        queue<int> q;
+        
+        visited[start] = true;
+        q.push(start);
+        
+        cout << "BFS traversal starting from vertex " << start << ": ";
+        
+        while (!q.empty()) {
+            int v = q.front();
+            q.pop();
+            cout << v << " ";
+            
+            for (int neighbor : adj[v]) {
+                if (!visited[neighbor]) {
+                    visited[neighbor] = true;
+                    q.push(neighbor);
+                }
+            }
+        }
+        cout << endl;
+    }
+    
+    // Find shortest path using BFS
+    void shortestPath(int start, int target) {
+        vector<bool> visited(V, false);
+        vector<int> parent(V, -1);
+        queue<int> q;
+        
+        visited[start] = true;
+        q.push(start);
+        
+        while (!q.empty()) {
+            int v = q.front();
+            q.pop();
+            
+            if (v == target) {
+                // Reconstruct path
+                vector<int> path;
+                int current = target;
+                while (current != -1) {
+                    path.push_back(current);
+                    current = parent[current];
+                }
+                
+                cout << "Shortest path from " << start << " to " << target << ": ";
+                for (int i = path.size() - 1; i >= 0; i--) {
+                    cout << path[i];
+                    if (i > 0) cout << " -> ";
+                }
+                cout << endl;
+                return;
+            }
+            
+            for (int neighbor : adj[v]) {
+                if (!visited[neighbor]) {
+                    visited[neighbor] = true;
+                    parent[neighbor] = v;
+                    q.push(neighbor);
+                }
+            }
+        }
+        
+        cout << "No path found from " << start << " to " << target << endl;
+    }
+};
+
+int main() {
+    Graph g(7);
+    g.addEdge(0, 1);
+    g.addEdge(0, 2);
+    g.addEdge(1, 3);
+    g.addEdge(1, 4);
+    g.addEdge(2, 5);
+    g.addEdge(2, 6);
+    g.addEdge(3, 6);
+    
+    g.BFS(0);
+    g.shortestPath(0, 6);
+    
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'BFS uses a queue to explore nodes level by level, guaranteeing shortest path in unweighted graphs.' : 'BFS使用队列逐层探索节点，保证在无权图中找到最短路径。'}
+        output={`BFS traversal starting from vertex 0: 0 1 2 3 4 5 6 
+Shortest path from 0 to 6: 0 -> 2 -> 6`}
+      />
+    </section>
+
+    <div class="navigation">
+      <a href={`/${lang}/2-algorithm-basics/sorting`} class="nav-button prev">
+        ← {lang === 'en' ? 'Previous: Sorting Algorithms' : '上一节：排序算法'}
+      </a>
+      <a href={`/${lang}/2-algorithm-basics/recursion`} class="nav-button next">
+        {lang === 'en' ? 'Next: Recursion & Recurrence' : '下一节：递归与递推'} →
+      </a>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  p {
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: #4f46e5;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background: #3730a3;
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style>

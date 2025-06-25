@@ -1,0 +1,470 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export function getStaticPaths() {
+  return [
+    {params: {lang: 'en'}},
+    {params: {lang: 'zh'}}
+  ];
+}
+---
+
+<Layout title={lang === 'en' ? 'Number Theory' : '数论基础'}>
+  <div class="breadcrumb">
+    <a href={`/${lang}`}>{t('nav.home')}</a> &gt; 
+    <a href={`/${lang}/4-competitive`}>{t('nav.competitive')}</a> &gt; 
+    {lang === 'en' ? 'Number Theory' : '数论'}
+  </div>
+
+  <h1>{lang === 'en' ? 'Number Theory for Competitive Programming' : '竞赛编程中的数论'}</h1>
+  
+  <div class="overview">
+    <p>
+      {lang === 'en' 
+        ? 'Number theory provides essential tools for competitive programming, including GCD/LCM calculations, modular arithmetic, prime numbers, and Euler\'s theorem. These concepts appear frequently in contest problems and form the foundation for advanced algorithms.'
+        : '数论为竞赛编程提供了基本工具，包括GCD/LCM计算、模运算、质数和欧拉定理。这些概念在竞赛问题中经常出现，是高级算法的基础。'
+      }
+    </p>
+  </div>
+
+  <h2>{lang === 'en' ? 'GCD and LCM' : 'GCD和LCM'}</h2>
+  
+  <p>
+    {lang === 'en'
+      ? 'The greatest common divisor (GCD) and least common multiple (LCM) are fundamental operations in number theory with many applications.'
+      : '最大公约数（GCD）和最小公倍数（LCM）是数论中的基本运算，有许多应用。'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'en' ? 'GCD and LCM Implementation' : 'GCD和LCM实现'}
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class NumberTheory {
+public:
+    // ${lang === 'en' ? 'Euclidean algorithm for GCD' : '欧几里得算法求GCD'}
+    static long long gcd(long long a, long long b) {
+        while (b != 0) {
+            long long temp = b;
+            b = a % b;
+            a = temp;
+        }
+        return a;
+    }
+    
+    // ${lang === 'en' ? 'LCM using GCD' : '使用GCD计算LCM'}
+    static long long lcm(long long a, long long b) {
+        return (a / gcd(a, b)) * b; // ${lang === 'en' ? 'avoid overflow' : '避免溢出'}
+    }
+    
+    // ${lang === 'en' ? 'Extended Euclidean Algorithm' : '扩展欧几里得算法'}
+    static long long extendedGCD(long long a, long long b, long long& x, long long& y) {
+        if (b == 0) {
+            x = 1;
+            y = 0;
+            return a;
+        }
+        
+        long long x1, y1;
+        long long gcd_val = extendedGCD(b, a % b, x1, y1);
+        
+        x = y1;
+        y = x1 - (a / b) * y1;
+        
+        return gcd_val;
+    }
+    
+    // ${lang === 'en' ? 'Modular multiplicative inverse' : '模逆元'}
+    static long long modInverse(long long a, long long m) {
+        long long x, y;
+        long long g = extendedGCD(a, m, x, y);
+        
+        if (g != 1) {
+            return -1; // ${lang === 'en' ? 'inverse does not exist' : '逆元不存在'}
+        }
+        
+        return (x % m + m) % m;
+    }
+    
+    // ${lang === 'en' ? 'Fast exponentiation with modulo' : '快速幂取模'}
+    static long long powerMod(long long base, long long exp, long long mod) {
+        long long result = 1;
+        base %= mod;
+        
+        while (exp > 0) {
+            if (exp & 1) {
+                result = (result * base) % mod;
+            }
+            base = (base * base) % mod;
+            exp >>= 1;
+        }
+        
+        return result;
+    }
+    
+    // ${lang === 'en' ? 'GCD of array' : '数组的GCD'}
+    static long long arrayGCD(vector<long long>& arr) {
+        long long result = arr[0];
+        for (int i = 1; i < arr.size(); i++) {
+            result = gcd(result, arr[i]);
+            if (result == 1) break; // ${lang === 'en' ? 'optimization' : '优化'}
+        }
+        return result;
+    }
+    
+    // ${lang === 'en' ? 'LCM of array' : '数组的LCM'}
+    static long long arrayLCM(vector<long long>& arr) {
+        long long result = arr[0];
+        for (int i = 1; i < arr.size(); i++) {
+            result = lcm(result, arr[i]);
+        }
+        return result;
+    }
+};
+
+int main() {
+    // ${lang === 'en' ? 'Test basic GCD and LCM' : '测试基本GCD和LCM'}
+    long long a = 48, b = 18;
+    cout << "${lang === 'en' ? 'Numbers: ' : '数字: '}" << a << ", " << b << endl;
+    cout << "GCD: " << NumberTheory::gcd(a, b) << endl;
+    cout << "LCM: " << NumberTheory::lcm(a, b) << endl;
+    
+    // ${lang === 'en' ? 'Test extended GCD' : '测试扩展GCD'}
+    long long x, y;
+    long long g = NumberTheory::extendedGCD(a, b, x, y);
+    cout << "\\n${lang === 'en' ? 'Extended GCD: ' : '扩展GCD: '}" << g << endl;
+    cout << "${lang === 'en' ? 'Coefficients: x=' : '系数: x='}" << x << ", y=" << y << endl;
+    cout << "${lang === 'en' ? 'Verification: ' : '验证: '}" << a << "*" << x << " + " << b << "*" << y << " = " << (a*x + b*y) << endl;
+    
+    // ${lang === 'en' ? 'Test modular inverse' : '测试模逆元'}
+    long long num = 3, mod = 11;
+    long long inv = NumberTheory::modInverse(num, mod);
+    cout << "\\n${lang === 'en' ? 'Modular inverse of ' : '模逆元 '}" << num << "${lang === 'en' ? ' mod ' : ' 模 '}" << mod << ": " << inv << endl;
+    if (inv != -1) {
+        cout << "${lang === 'en' ? 'Verification: ' : '验证: '}" << num << "*" << inv << " ≡ " << (num * inv) % mod << " (mod " << mod << ")" << endl;
+    }
+    
+    // ${lang === 'en' ? 'Test fast exponentiation' : '测试快速幂'}
+    long long base = 2, exp = 10, modulo = 1000000007;
+    long long power = NumberTheory::powerMod(base, exp, modulo);
+    cout << "\\n" << base << "^" << exp << " mod " << modulo << " = " << power << endl;
+    
+    // ${lang === 'en' ? 'Test array operations' : '测试数组操作'}
+    vector<long long> arr = {12, 18, 24, 36};
+    cout << "\\n${lang === 'en' ? 'Array: ' : '数组: '}";
+    for (long long x : arr) cout << x << " ";
+    cout << endl;
+    cout << "${lang === 'en' ? 'Array GCD: ' : '数组GCD: '}" << NumberTheory::arrayGCD(arr) << endl;
+    cout << "${lang === 'en' ? 'Array LCM: ' : '数组LCM: '}" << NumberTheory::arrayLCM(arr) << endl;
+    
+    return 0;
+}`}
+    explanation={lang === 'en' 
+      ? 'These fundamental number theory operations use efficient algorithms: Euclidean algorithm for GCD (O(log min(a,b))), extended GCD for finding coefficients, and fast exponentiation for modular arithmetic (O(log n)).'
+      : '这些基本数论运算使用高效算法：欧几里得算法求GCD（O(log min(a,b))），扩展GCD找系数，快速幂进行模运算（O(log n)）。'
+    }
+    output={`${lang === 'en' ? 'Numbers: ' : '数字: '}48, 18
+GCD: 6
+LCM: 144
+
+${lang === 'en' ? 'Extended GCD: ' : '扩展GCD: '}6
+${lang === 'en' ? 'Coefficients: x=' : '系数: x='}1, y=-2
+${lang === 'en' ? 'Verification: ' : '验证: '}48*1 + 18*-2 = 12
+
+${lang === 'en' ? 'Modular inverse of ' : '模逆元 '}3${lang === 'en' ? ' mod ' : ' 模 '}11: 4
+${lang === 'en' ? 'Verification: ' : '验证: '}3*4 ≡ 1 (mod 11)
+
+2^10 mod 1000000007 = 1024
+
+${lang === 'en' ? 'Array: ' : '数组: '}12 18 24 36 
+${lang === 'en' ? 'Array GCD: ' : '数组GCD: '}6
+${lang === 'en' ? 'Array LCM: ' : '数组LCM: '}72`}
+  />
+
+  <h2>{lang === 'en' ? 'Prime Numbers and Factorization' : '质数与因式分解'}</h2>
+  
+  <p>
+    {lang === 'en'
+      ? 'Prime number algorithms are essential for many competitive programming problems, including factorization and primality testing.'
+      : '质数算法对许多竞赛编程问题至关重要，包括因式分解和素性测试。'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'en' ? 'Prime Numbers and Factorization' : '质数与因式分解'}
+    code={`#include <iostream>
+#include <vector>
+#include <map>
+#include <cmath>
+using namespace std;
+
+class PrimeUtils {
+public:
+    // ${lang === 'en' ? 'Sieve of Eratosthenes' : '埃拉托斯特尼筛法'}
+    static vector<bool> sieveOfEratosthenes(int n) {
+        vector<bool> isPrime(n + 1, true);
+        isPrime[0] = isPrime[1] = false;
+        
+        for (int i = 2; i * i <= n; i++) {
+            if (isPrime[i]) {
+                for (int j = i * i; j <= n; j += i) {
+                    isPrime[j] = false;
+                }
+            }
+        }
+        
+        return isPrime;
+    }
+    
+    // ${lang === 'en' ? 'Get all primes up to n' : '获取n以内的所有质数'}
+    static vector<int> getPrimes(int n) {
+        vector<bool> isPrime = sieveOfEratosthenes(n);
+        vector<int> primes;
+        
+        for (int i = 2; i <= n; i++) {
+            if (isPrime[i]) {
+                primes.push_back(i);
+            }
+        }
+        
+        return primes;
+    }
+    
+    // ${lang === 'en' ? 'Check if number is prime (for large numbers)' : '检查数字是否为质数（大数）'}
+    static bool isPrime(long long n) {
+        if (n < 2) return false;
+        if (n == 2 || n == 3) return true;
+        if (n % 2 == 0 || n % 3 == 0) return false;
+        
+        for (long long i = 5; i * i <= n; i += 6) {
+            if (n % i == 0 || n % (i + 2) == 0) {
+                return false;
+            }
+        }
+        
+        return true;
+    }
+    
+    // ${lang === 'en' ? 'Prime factorization' : '质因数分解'}
+    static map<long long, int> primeFactorization(long long n) {
+        map<long long, int> factors;
+        
+        // ${lang === 'en' ? 'Handle factor of 2' : '处理因子2'}
+        while (n % 2 == 0) {
+            factors[2]++;
+            n /= 2;
+        }
+        
+        // ${lang === 'en' ? 'Handle odd factors' : '处理奇数因子'}
+        for (long long i = 3; i * i <= n; i += 2) {
+            while (n % i == 0) {
+                factors[i]++;
+                n /= i;
+            }
+        }
+        
+        // ${lang === 'en' ? 'If n is still > 1, then it is prime' : '如果n仍然>1，那么它是质数'}
+        if (n > 1) {
+            factors[n]++;
+        }
+        
+        return factors;
+    }
+    
+    // ${lang === 'en' ? 'Count divisors using prime factorization' : '使用质因数分解计算因子数'}
+    static long long countDivisors(long long n) {
+        map<long long, int> factors = primeFactorization(n);
+        long long count = 1;
+        
+        for (auto& [prime, power] : factors) {
+            count *= (power + 1);
+        }
+        
+        return count;
+    }
+    
+    // ${lang === 'en' ? 'Sum of divisors using prime factorization' : '使用质因数分解计算因子和'}
+    static long long sumOfDivisors(long long n) {
+        map<long long, int> factors = primeFactorization(n);
+        long long sum = 1;
+        
+        for (auto& [prime, power] : factors) {
+            long long termSum = 0;
+            long long primePower = 1;
+            
+            for (int i = 0; i <= power; i++) {
+                termSum += primePower;
+                primePower *= prime;
+            }
+            
+            sum *= termSum;
+        }
+        
+        return sum;
+    }
+    
+    // ${lang === 'en' ? 'Euler\'s totient function' : '欧拉函数'}
+    static long long eulerTotient(long long n) {
+        map<long long, int> factors = primeFactorization(n);
+        long long result = n;
+        
+        for (auto& [prime, power] : factors) {
+            result = result / prime * (prime - 1);
+        }
+        
+        return result;
+    }
+};
+
+int main() {
+    int n = 30;
+    
+    // ${lang === 'en' ? 'Generate primes up to n' : '生成n以内的质数'}
+    vector<int> primes = PrimeUtils::getPrimes(n);
+    cout << "${lang === 'en' ? 'Primes up to ' : '质数到 '}" << n << ": ";
+    for (int p : primes) cout << p << " ";
+    cout << endl;
+    
+    // ${lang === 'en' ? 'Test prime checking' : '测试质数检查'}
+    vector<long long> testNumbers = {17, 25, 97, 100};
+    cout << "\\n${lang === 'en' ? 'Prime checking:' : '质数检查:'}" << endl;
+    for (long long num : testNumbers) {
+        cout << num << ": " << (PrimeUtils::isPrime(num) ? "${lang === 'en' ? 'Prime' : '质数'}" : "${lang === 'en' ? 'Not prime' : '非质数'}") << endl;
+    }
+    
+    // ${lang === 'en' ? 'Test factorization' : '测试因式分解'}
+    long long factorNum = 60;
+    cout << "\\n${lang === 'en' ? 'Prime factorization of ' : '质因数分解 '}" << factorNum << ": ";
+    map<long long, int> factors = PrimeUtils::primeFactorization(factorNum);
+    bool first = true;
+    for (auto& [prime, power] : factors) {
+        if (!first) cout << " × ";
+        cout << prime;
+        if (power > 1) cout << "^" << power;
+        first = false;
+    }
+    cout << endl;
+    
+    // ${lang === 'en' ? 'Test divisor functions' : '测试因子函数'}
+    cout << "${lang === 'en' ? 'Number of divisors: ' : '因子数: '}" << PrimeUtils::countDivisors(factorNum) << endl;
+    cout << "${lang === 'en' ? 'Sum of divisors: ' : '因子和: '}" << PrimeUtils::sumOfDivisors(factorNum) << endl;
+    cout << "${lang === 'en' ? 'Euler totient: ' : '欧拉函数: '}" << PrimeUtils::eulerTotient(factorNum) << endl;
+    
+    return 0;
+}`}
+    explanation={lang === 'en' 
+      ? 'Prime algorithms use optimized approaches: sieve for multiple queries O(n log log n), trial division with 6k±1 optimization, and efficient factorization for computing number-theoretic functions.'
+      : '质数算法使用优化方法：多次查询用筛法O(n log log n)，试除法用6k±1优化，高效因式分解计算数论函数。'
+    }
+    output={`${lang === 'en' ? 'Primes up to ' : '质数到 '}30: 2 3 5 7 11 13 17 19 23 29 
+
+${lang === 'en' ? 'Prime checking:' : '质数检查:'}
+17: ${lang === 'en' ? 'Prime' : '质数'}
+25: ${lang === 'en' ? 'Not prime' : '非质数'}
+97: ${lang === 'en' ? 'Prime' : '质数'}
+100: ${lang === 'en' ? 'Not prime' : '非质数'}
+
+${lang === 'en' ? 'Prime factorization of ' : '质因数分解 '}60: 2^2 × 3 × 5
+${lang === 'en' ? 'Number of divisors: ' : '因子数: '}12
+${lang === 'en' ? 'Sum of divisors: ' : '因子和: '}168
+${lang === 'en' ? 'Euler totient: ' : '欧拉函数: '}16`}
+  />
+
+  <div class="summary">
+    <h2>{lang === 'en' ? 'Key Takeaways' : '关键要点'}</h2>
+    <ul>
+      <li>
+        {lang === 'en'
+          ? 'Euclidean algorithm provides efficient GCD computation in O(log min(a,b)) time'
+          : '欧几里得算法在O(log min(a,b))时间内提供高效的GCD计算'
+        }
+      </li>
+      <li>
+        {lang === 'en'
+          ? 'Extended GCD enables modular inverse computation and solving linear Diophantine equations'
+          : '扩展GCD使模逆元计算和求解线性丢番图方程成为可能'
+        }
+      </li>
+      <li>
+        {lang === 'en'
+          ? 'Sieve of Eratosthenes efficiently finds all primes up to n in O(n log log n) time'
+          : '埃拉托斯特尼筛法在O(n log log n)时间内高效找到n以内的所有质数'
+        }
+      </li>
+      <li>
+        {lang === 'en'
+          ? 'Prime factorization enables computation of divisor functions and number-theoretic properties'
+          : '质因数分解使因子函数和数论性质的计算成为可能'
+        }
+      </li>
+    </ul>
+  </div>
+</Layout>
+
+<style>
+  .overview {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    padding: 2rem;
+    border-radius: 10px;
+    margin: 2rem 0;
+  }
+  
+  .summary {
+    background: #f8f9fa;
+    padding: 2rem;
+    border-radius: 10px;
+    margin: 2rem 0;
+    border-left: 4px solid #667eea;
+  }
+  
+  .breadcrumb {
+    margin: 1rem 0;
+    color: #666;
+  }
+  
+  .breadcrumb a {
+    color: #667eea;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    color: #2c3e50;
+    border-bottom: 3px solid #667eea;
+    padding-bottom: 0.5rem;
+  }
+  
+  h2 {
+    color: #34495e;
+    margin-top: 2rem;
+  }
+  
+  p {
+    line-height: 1.6;
+    margin-bottom: 1rem;
+  }
+  
+  ul {
+    line-height: 1.8;
+  }
+  
+  @media (max-width: 768px) {
+    .overview, .summary {
+      padding: 1rem;
+    }
+  }
+</style> 

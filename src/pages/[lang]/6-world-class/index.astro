@@ -1,158 +1,788 @@
 ---
 import Layout from '../../../layouts/Layout.astro';
-import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+import { ui } from '../../../i18n/ui';
 
-const lang = getLangFromUrl(Astro.url);
-const t = useTranslations(lang);
-
-export async function getStaticPaths() {
+export function getStaticPaths() {
   return [
     { params: { lang: 'en' } },
-    { params: { lang: 'zh' } },
+    { params: { lang: 'zh' } }
   ];
 }
+
+const { lang } = Astro.params;
+const t = ui[lang as keyof typeof ui];
 ---
 
-<Layout title={t('world.title')}>
-  <main>
-    <h1>{t('world.title')}</h1>
-    <p class="intro">{t('world.description')}</p>
-    
-    <div class="lesson-grid">
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/6-world-class/advanced-dp`}>{t('world.advanced-dp')}</a></h2>
-        <p>Master advanced dynamic programming techniques and optimization strategies.</p>
-      </div>
+<Layout title={lang === 'zh' ? "世界级算法 - 专家级" : "World Class Algorithms - Expert Level"}>
+  <div class="container">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      <a href={`/${lang}`}>{t['nav.home']}</a> &gt; 
+      <span>{lang === 'zh' ? '世界级算法' : 'World Class Algorithms'}</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="header-section">
+      <h1 class="main-title">
+        {lang === 'zh' ? '世界级算法' : 'World Class Algorithms'}
+      </h1>
+      <p class="subtitle">
+        {lang === 'zh' 
+          ? '掌握最高级的C++技术和前沿算法，达到国际竞赛顶尖水平'
+          : 'Master the most advanced C++ techniques and cutting-edge algorithms for world-class competitive programming'
+        }
+      </p>
+    </div>
+
+    <!-- Overview -->
+    <div class="overview-section">
+      <h2>{lang === 'zh' ? '课程概述' : 'Course Overview'}</h2>
+      <p>
+        {lang === 'zh' 
+          ? '本章节涵盖世界级竞赛编程所需的最高级算法和技术。这些内容代表了算法竞赛的巅峰水平，包括高级动态规划优化、复杂数据结构、图论前沿算法、以及数学计算技巧。完成本章节的学习，您将具备解决国际顶级竞赛（如IOI、ICPC World Finals）中最具挑战性问题的能力。'
+          : 'This chapter covers the most advanced algorithms and techniques required for world-class competitive programming. These topics represent the pinnacle of algorithmic competition, including advanced dynamic programming optimizations, complex data structures, cutting-edge graph algorithms, and mathematical computation techniques. Upon completing this chapter, you will have the skills to tackle the most challenging problems in top international competitions like IOI and ICPC World Finals.'
+        }
+      </p>
+    </div>
+
+    <!-- Course Content -->
+    <div class="content-section">
+      <h2>{lang === 'zh' ? '课程内容' : 'Course Content'}</h2>
       
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/6-world-class/dp-optimization`}>{t('world.dp-optimization')}</a></h2>
-        <p>Learn DP optimization techniques like convex hull trick and divide and conquer optimization.</p>
-      </div>
-      
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/6-world-class/tree-advanced`}>{t('world.tree-advanced')}</a></h2>
-        <p>Advanced tree algorithms, tree decomposition, and complex tree problems.</p>
-      </div>
-      
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/6-world-class/tree-problems`}>{t('world.tree-problems')}</a></h2>
-        <p>Solve challenging tree problems using advanced algorithmic techniques.</p>
-      </div>
-      
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/6-world-class/heavy-light`}>{t('world.heavy-light')}</a></h2>
-        <p>Implement Heavy-Light Decomposition for efficient tree queries.</p>
-      </div>
-      
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/6-world-class/segment-tree-advanced`}>{t('world.segment-tree-advanced')}</a></h2>
-        <p>Advanced segment tree applications and lazy propagation techniques.</p>
-      </div>
-      
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/6-world-class/balanced-tree`}>{t('world.balanced-tree')}</a></h2>
-        <p>Learn balanced tree data structures like AVL trees and Red-Black trees.</p>
-      </div>
-      
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/6-world-class/shortest-dag`}>{t('world.shortest-dag')}</a></h2>
-        <p>Shortest path algorithms in Directed Acyclic Graphs (DAGs).</p>
-      </div>
-      
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/6-world-class/linear-algebra`}>{t('world.linear-algebra')}</a></h2>
-        <p>Linear algebra applications in competitive programming and algorithms.</p>
-      </div>
-      
-      <div class="lesson-card">
-        <h2><a href={`/${lang}/6-world-class/combinatorics`}>{t('world.combinatorics')}</a></h2>
-        <p>Advanced combinatorics, counting problems, and mathematical algorithms.</p>
+      <div class="lesson-grid">
+        <!-- Combinatorics -->
+        <div class="lesson-card expert">
+          <div class="card-header">
+            <div class="lesson-icon">🧮</div>
+            <div class="lesson-meta">
+              <span class="difficulty expert">{lang === 'zh' ? '专家级' : 'Expert'}</span>
+              <span class="duration">200 min</span>
+            </div>
+          </div>
+          <h3>
+            <a href={`/${lang}/6-world-class/combinatorics`}>
+              1. {lang === 'zh' ? '组合数学' : 'Combinatorics'}
+            </a>
+          </h3>
+          <p>
+            {lang === 'zh' 
+              ? '容斥原理、卡塔兰数和高级组合技巧，解决复杂计数问题'
+              : 'Inclusion-exclusion principle, Catalan numbers, and advanced combinatorial techniques for complex counting problems'
+            }
+          </p>
+          <div class="card-footer">
+            <div class="topics">
+              <span class="topic">{lang === 'zh' ? '容斥原理' : 'Inclusion-Exclusion'}</span>
+              <span class="topic">{lang === 'zh' ? '卡塔兰数' : 'Catalan Numbers'}</span>
+              <span class="topic">{lang === 'zh' ? '组合技巧' : 'Combinatorial Techniques'}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Linear Algebra -->
+        <div class="lesson-card expert">
+          <div class="card-header">
+            <div class="lesson-icon">🔢</div>
+            <div class="lesson-meta">
+              <span class="difficulty expert">{lang === 'zh' ? '专家级' : 'Expert'}</span>
+              <span class="duration">220 min</span>
+            </div>
+          </div>
+          <h3>
+            <a href={`/${lang}/6-world-class/linear-algebra`}>
+              2. {lang === 'zh' ? '线性代数' : 'Linear Algebra'}
+            </a>
+          </h3>
+          <p>
+            {lang === 'zh' 
+              ? '矩阵运算、特殊矩阵、矩阵变换、高斯消元法解线性方程组'
+              : 'Matrix operations, special matrices, matrix transformations, Gaussian elimination for linear systems'
+            }
+          </p>
+          <div class="card-footer">
+            <div class="topics">
+              <span class="topic">{lang === 'zh' ? '矩阵运算' : 'Matrix Operations'}</span>
+              <span class="topic">{lang === 'zh' ? '高斯消元' : 'Gaussian Elimination'}</span>
+              <span class="topic">{lang === 'zh' ? '线性系统' : 'Linear Systems'}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Advanced DP -->
+        <div class="lesson-card expert">
+          <div class="card-header">
+            <div class="lesson-icon">💎</div>
+            <div class="lesson-meta">
+              <span class="difficulty expert">{lang === 'zh' ? '专家级' : 'Expert'}</span>
+              <span class="duration">240 min</span>
+            </div>
+          </div>
+          <h3>
+            <a href={`/${lang}/6-world-class/advanced-dp`}>
+              3. {lang === 'zh' ? '高级动态规划' : 'Advanced Dynamic Programming'}
+            </a>
+          </h3>
+          <p>
+            {lang === 'zh' 
+              ? '区间DP、树形DP、背包问题变种和复杂DP优化技术'
+              : 'Interval DP, tree DP, knapsack variations, and complex DP optimization techniques'
+            }
+          </p>
+          <div class="card-footer">
+            <div class="topics">
+              <span class="topic">{lang === 'zh' ? '区间DP' : 'Interval DP'}</span>
+              <span class="topic">{lang === 'zh' ? '树形DP' : 'Tree DP'}</span>
+              <span class="topic">{lang === 'zh' ? '背包变种' : 'Knapsack Variations'}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tree Problems -->
+        <div class="lesson-card expert">
+          <div class="card-header">
+            <div class="lesson-icon">🌲</div>
+            <div class="lesson-meta">
+              <span class="difficulty expert">{lang === 'zh' ? '专家级' : 'Expert'}</span>
+              <span class="duration">210 min</span>
+            </div>
+          </div>
+          <h3>
+            <a href={`/${lang}/6-world-class/tree-problems`}>
+              4. {lang === 'zh' ? '高级树问题' : 'Advanced Tree Problems'}
+            </a>
+          </h3>
+          <p>
+            {lang === 'zh' 
+              ? 'DFS序、树与线段树结合、高级树算法技巧'
+              : 'DFS ordering, combining trees with segment trees, and advanced tree algorithms'
+            }
+          </p>
+          <div class="card-footer">
+            <div class="topics">
+              <span class="topic">{lang === 'zh' ? 'DFS序' : 'DFS Ordering'}</span>
+              <span class="topic">{lang === 'zh' ? '树+线段树' : 'Tree + Segment Tree'}</span>
+              <span class="topic">{lang === 'zh' ? '树算法' : 'Tree Algorithms'}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Advanced Segment Trees -->
+        <div class="lesson-card expert">
+          <div class="card-header">
+            <div class="lesson-icon">📊</div>
+            <div class="lesson-meta">
+              <span class="difficulty expert">{lang === 'zh' ? '专家级' : 'Expert'}</span>
+              <span class="duration">230 min</span>
+            </div>
+          </div>
+          <h3>
+            <a href={`/${lang}/6-world-class/segment-tree-advanced`}>
+              5. {lang === 'zh' ? '高级线段树' : 'Advanced Segment Trees'}
+            </a>
+          </h3>
+          <p>
+            {lang === 'zh' 
+              ? '高级线段树技术、可持久化线段树、复杂区间操作'
+              : 'Advanced segment tree techniques, persistent segment trees, and complex range operations'
+            }
+          </p>
+          <div class="card-footer">
+            <div class="topics">
+              <span class="topic">{lang === 'zh' ? '可持久化线段树' : 'Persistent Segment Tree'}</span>
+              <span class="topic">{lang === 'zh' ? '复杂区间操作' : 'Complex Range Ops'}</span>
+              <span class="topic">{lang === 'zh' ? '高级技术' : 'Advanced Techniques'}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Balanced Trees -->
+        <div class="lesson-card expert">
+          <div class="card-header">
+            <div class="lesson-icon">⚖️</div>
+            <div class="lesson-meta">
+              <span class="difficulty expert">{lang === 'zh' ? '专家级' : 'Expert'}</span>
+              <span class="duration">250 min</span>
+            </div>
+          </div>
+          <h3>
+            <a href={`/${lang}/6-world-class/balanced-tree`}>
+              6. {lang === 'zh' ? '平衡树' : 'Balanced Trees'}
+            </a>
+          </h3>
+          <p>
+            {lang === 'zh' 
+              ? 'Treap插入删除、Treap分裂合并操作、自平衡树'
+              : 'Treap insertion/deletion, split/merge operations, and self-balancing trees'
+            }
+          </p>
+          <div class="card-footer">
+            <div class="topics">
+              <span class="topic">{lang === 'zh' ? 'Treap插入删除' : 'Treap Insert/Delete'}</span>
+              <span class="topic">{lang === 'zh' ? '分裂合并' : 'Split/Merge'}</span>
+              <span class="topic">{lang === 'zh' ? '自平衡' : 'Self-Balancing'}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- DP Optimization -->
+        <div class="lesson-card expert">
+          <div class="card-header">
+            <div class="lesson-icon">📈</div>
+            <div class="lesson-meta">
+              <span class="difficulty expert">{lang === 'zh' ? '专家级' : 'Expert'}</span>
+              <span class="duration">200 min</span>
+            </div>
+          </div>
+          <h3>
+            <a href={`/${lang}/6-world-class/dp-optimization`}>
+              7. {lang === 'zh' ? '单调DP优化' : 'Monotonic DP Optimization'}
+            </a>
+          </h3>
+          <p>
+            {lang === 'zh' 
+              ? '动态规划的单调优化技术和高级加速方法'
+              : 'Monotonic optimization techniques for dynamic programming acceleration'
+            }
+          </p>
+          <div class="card-footer">
+            <div class="topics">
+              <span class="topic">{lang === 'zh' ? '单调优化' : 'Monotonic Optimization'}</span>
+              <span class="topic">{lang === 'zh' ? 'DP加速' : 'DP Speedup'}</span>
+              <span class="topic">{lang === 'zh' ? '凸包技巧' : 'Convex Hull Trick'}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Heavy-Light Decomposition -->
+        <div class="lesson-card expert">
+          <div class="card-header">
+            <div class="lesson-icon">🔗</div>
+            <div class="lesson-meta">
+              <span class="difficulty expert">{lang === 'zh' ? '专家级' : 'Expert'}</span>
+              <span class="duration">260 min</span>
+            </div>
+          </div>
+          <h3>
+            <a href={`/${lang}/6-world-class/heavy-light`}>
+              8. {lang === 'zh' ? '重链剖分' : 'Heavy-Light Decomposition'}
+            </a>
+          </h3>
+          <p>
+            {lang === 'zh' 
+              ? '树分解技术，高效处理树上查询和更新操作'
+              : 'Tree decomposition techniques for efficient tree queries and updates'
+            }
+          </p>
+          <div class="card-footer">
+            <div class="topics">
+              <span class="topic">{lang === 'zh' ? '重链剖分' : 'Heavy-Light Decomposition'}</span>
+              <span class="topic">{lang === 'zh' ? '树查询' : 'Tree Queries'}</span>
+              <span class="topic">{lang === 'zh' ? '路径更新' : 'Path Updates'}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Shortest Path DAG -->
+        <div class="lesson-card expert">
+          <div class="card-header">
+            <div class="lesson-icon">🛤️</div>
+            <div class="lesson-meta">
+              <span class="difficulty expert">{lang === 'zh' ? '专家级' : 'Expert'}</span>
+              <span class="duration">180 min</span>
+            </div>
+          </div>
+          <h3>
+            <a href={`/${lang}/6-world-class/shortest-dag`}>
+              9. {lang === 'zh' ? 'DAG最短路径' : 'Shortest Path DAG'}
+            </a>
+          </h3>
+          <p>
+            {lang === 'zh' 
+              ? '有向无环图上的最短路径算法和专门技术'
+              : 'Shortest path algorithms on directed acyclic graphs and specialized techniques'
+            }
+          </p>
+          <div class="card-footer">
+            <div class="topics">
+              <span class="topic">{lang === 'zh' ? 'DAG最短路' : 'DAG Shortest Path'}</span>
+              <span class="topic">{lang === 'zh' ? '拓扑排序' : 'Topological Sort'}</span>
+              <span class="topic">{lang === 'zh' ? '路径算法' : 'Path Algorithms'}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Advanced Tree Algorithms -->
+        <div class="lesson-card expert">
+          <div class="card-header">
+            <div class="lesson-icon">🌳</div>
+            <div class="lesson-meta">
+              <span class="difficulty expert">{lang === 'zh' ? '专家级' : 'Expert'}</span>
+              <span class="duration">270 min</span>
+            </div>
+          </div>
+          <h3>
+            <a href={`/${lang}/6-world-class/tree-advanced`}>
+              10. {lang === 'zh' ? '高级树算法' : 'Advanced Tree Algorithms'}
+            </a>
+          </h3>
+          <p>
+            {lang === 'zh' 
+              ? '树的性质、"动态DP"和前沿树算法技术'
+              : 'Tree properties, "dynamic DP", and cutting-edge tree algorithm techniques'
+            }
+          </p>
+          <div class="card-footer">
+            <div class="topics">
+              <span class="topic">{lang === 'zh' ? '树性质' : 'Tree Properties'}</span>
+              <span class="topic">{lang === 'zh' ? '动态DP' : 'Dynamic DP'}</span>
+              <span class="topic">{lang === 'zh' ? '前沿技术' : 'Advanced Techniques'}</span>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
-  </main>
+
+    <!-- Learning Path -->
+    <div class="learning-path-section">
+      <h2>{lang === 'zh' ? '学习路径建议' : 'Recommended Learning Path'}</h2>
+      <div class="path-cards">
+        <div class="path-card">
+          <h3>🎯 {lang === 'zh' ? '基础路径' : 'Foundation Path'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '先学习组合数学和线性代数，建立数学基础，然后进入高级动态规划。'
+              : 'Start with Combinatorics and Linear Algebra to build mathematical foundations, then move to Advanced DP.'
+            }
+          </p>
+          <div class="path-sequence">
+            <span>1. {lang === 'zh' ? '组合数学' : 'Combinatorics'}</span>
+            <span>→</span>
+            <span>2. {lang === 'zh' ? '线性代数' : 'Linear Algebra'}</span>
+            <span>→</span>
+            <span>3. {lang === 'zh' ? '高级DP' : 'Advanced DP'}</span>
+          </div>
+        </div>
+        
+        <div class="path-card">
+          <h3>🌲 {lang === 'zh' ? '树算法路径' : 'Tree Algorithms Path'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '专注树相关算法，从基础树问题到高级分解技术。'
+              : 'Focus on tree-related algorithms, from basic tree problems to advanced decomposition techniques.'
+            }
+          </p>
+          <div class="path-sequence">
+            <span>1. {lang === 'zh' ? '高级树问题' : 'Tree Problems'}</span>
+            <span>→</span>
+            <span>2. {lang === 'zh' ? '重链剖分' : 'Heavy-Light'}</span>
+            <span>→</span>
+            <span>3. {lang === 'zh' ? '高级树算法' : 'Advanced Trees'}</span>
+          </div>
+        </div>
+        
+        <div class="path-card">
+          <h3>📊 {lang === 'zh' ? '数据结构路径' : 'Data Structures Path'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '深入学习高级数据结构，从线段树到平衡树。'
+              : 'Deep dive into advanced data structures, from segment trees to balanced trees.'
+            }
+          </p>
+          <div class="path-sequence">
+            <span>1. {lang === 'zh' ? '高级线段树' : 'Advanced Segment Trees'}</span>
+            <span>→</span>
+            <span>2. {lang === 'zh' ? '平衡树' : 'Balanced Trees'}</span>
+            <span>→</span>
+            <span>3. {lang === 'zh' ? 'DP优化' : 'DP Optimization'}</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation">
+      <a href={`/${lang}/5-advanced`} class="nav-button prev">
+        ← {lang === 'zh' ? '高级算法' : 'Advanced Algorithms'}
+      </a>
+      <a href={`/${lang}`} class="nav-button index">
+        📚 {lang === 'zh' ? '课程目录' : 'Course Index'}
+      </a>
+    </div>
+  </div>
 </Layout>
 
 <style>
-  main {
-    margin: auto;
-    padding: 2rem;
-    width: 1200px;
-    max-width: calc(100% - 2rem);
-    color: #1e293b;
-    line-height: 1.6;
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
   }
-  
-  h1 {
-    font-size: 2.5rem;
-    font-weight: 700;
+
+  .breadcrumb {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .breadcrumb a:hover {
+    color: #3730a3;
+    text-decoration: underline;
+  }
+
+  .header-section {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .main-title {
+    font-size: 3.5rem;
+    font-weight: 900;
     margin-bottom: 1rem;
-    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    background: linear-gradient(135deg, #dc2626 0%, #ea580c 25%, #d97706 50%, #ca8a04 75%, #65a30d 100%);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
     background-clip: text;
+    line-height: 1.1;
   }
-  
-  .intro {
-    font-size: 1.125rem;
-    color: #6b7280;
-    margin-bottom: 3rem;
-  }
-  
-  .lesson-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-    gap: 1.5rem;
-  }
-  
-  .lesson-card {
-    background: white;
-    border: 1px solid #e2e8f0;
-    border-radius: 8px;
-    padding: 1.5rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    transition: all 0.3s ease;
-  }
-  
-  .lesson-card:hover {
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
-    transform: translateY(-2px);
-    border-color: #4f46e5;
-  }
-  
-  .lesson-card h2 {
-    margin: 0 0 1rem 0;
+
+  .subtitle {
     font-size: 1.25rem;
-  }
-  
-  .lesson-card h2 a {
-    color: #1e293b;
-    text-decoration: none;
-    font-weight: 600;
-    transition: color 0.3s ease;
-  }
-  
-  .lesson-card:hover h2 a {
-    color: #4f46e5;
-  }
-  
-  .lesson-card p {
-    margin: 0;
     color: #6b7280;
-    font-size: 0.95rem;
+    max-width: 800px;
+    margin: 0 auto;
     line-height: 1.6;
   }
-  
+
+  .overview-section {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #f59e0b;
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin: 2rem 0 3rem 0;
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .overview-section::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #dc2626, #ea580c, #d97706, #ca8a04, #65a30d);
+  }
+
+  .overview-section h2 {
+    color: #92400e;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    border: none;
+    padding: 0;
+  }
+
+  .overview-section p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #78350f;
+  }
+
+  .content-section {
+    margin: 4rem 0;
+  }
+
+  .content-section h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #1e293b;
+    text-align: center;
+    position: relative;
+  }
+
+  .content-section h2::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #dc2626, #ea580c, #d97706);
+    border-radius: 2px;
+  }
+
+  .lesson-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(380px, 1fr));
+    gap: 2rem;
+    margin-top: 3rem;
+  }
+
+  .lesson-card {
+    background: white;
+    border: 1px solid #e5e7eb;
+    border-radius: 16px;
+    padding: 0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+    position: relative;
+  }
+
+  .lesson-card.expert {
+    border-left: 4px solid #dc2626;
+  }
+
+  .lesson-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+    border-color: #dc2626;
+  }
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 1.5rem 1.5rem 0 1.5rem;
+  }
+
+  .lesson-icon {
+    font-size: 2.5rem;
+    filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.1));
+  }
+
+  .lesson-meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 0.5rem;
+  }
+
+  .difficulty {
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+
+  .difficulty.expert {
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+    box-shadow: 0 2px 4px rgba(220, 38, 38, 0.3);
+  }
+
+  .duration {
+    font-size: 0.875rem;
+    color: #6b7280;
+    font-weight: 500;
+  }
+
+  .lesson-card h3 {
+    padding: 0 1.5rem;
+    margin: 1rem 0;
+  }
+
+  .lesson-card h3 a {
+    color: #1e293b;
+    text-decoration: none;
+    font-size: 1.25rem;
+    font-weight: 700;
+    transition: color 0.3s ease;
+  }
+
+  .lesson-card:hover h3 a {
+    color: #dc2626;
+  }
+
+  .lesson-card p {
+    padding: 0 1.5rem;
+    margin: 0 0 1.5rem 0;
+    color: #4b5563;
+    line-height: 1.6;
+    font-size: 0.95rem;
+  }
+
+  .card-footer {
+    padding: 0 1.5rem 1.5rem 1.5rem;
+  }
+
+  .topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+
+  .topic {
+    background: #f3f4f6;
+    color: #374151;
+    padding: 0.25rem 0.75rem;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+    transition: all 0.2s ease;
+  }
+
+  .lesson-card:hover .topic {
+    background: #fee2e2;
+    color: #dc2626;
+  }
+
+  .learning-path-section {
+    margin: 4rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #e5e7eb;
+  }
+
+  .learning-path-section h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #1e293b;
+    text-align: center;
+  }
+
+  .path-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    margin-top: 2rem;
+  }
+
+  .path-card {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #0ea5e9;
+    border-radius: 12px;
+    padding: 2rem;
+    transition: transform 0.2s ease;
+  }
+
+  .path-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .path-card h3 {
+    color: #0c4a6e;
+    font-size: 1.25rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .path-card p {
+    color: #075985;
+    line-height: 1.6;
+    margin-bottom: 1.5rem;
+  }
+
+  .path-sequence {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #0369a1;
+  }
+
+  .path-sequence span:not(:contains('→')) {
+    background: white;
+    padding: 0.5rem 1rem;
+    border-radius: 8px;
+    border: 1px solid #0ea5e9;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #e5e7eb;
+    gap: 1rem;
+  }
+
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.875rem 1.75rem;
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px 0 rgba(220, 38, 38, 0.39);
+    border: none;
+  }
+
+  .nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px 0 rgba(220, 38, 38, 0.5);
+  }
+
+  .nav-button.index {
+    background: linear-gradient(135deg, #059669, #0d9488);
+    box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.39);
+  }
+
+  .nav-button.index:hover {
+    box-shadow: 0 8px 25px 0 rgba(5, 150, 105, 0.5);
+  }
+
   @media (max-width: 768px) {
-    main {
-      padding: 1rem;
+    .container {
+      padding: 0 0.5rem;
     }
-    
-    h1 {
-      font-size: 2rem;
+
+    .main-title {
+      font-size: 2.5rem;
     }
-    
+
+    .subtitle {
+      font-size: 1.1rem;
+    }
+
+    .overview-section {
+      padding: 1.5rem;
+      margin: 1.5rem 0 2rem 0;
+    }
+
     .lesson-grid {
       grid-template-columns: 1fr;
+      gap: 1.5rem;
+    }
+
+    .path-cards {
+      grid-template-columns: 1fr;
+    }
+
+    .path-sequence {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      width: 100%;
+      justify-content: center;
     }
   }
 </style> 

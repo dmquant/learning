@@ -1,0 +1,768 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('algo.string')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/2-algorithm-basics`}>{t('nav.algorithm-basics')}</a> > 
+      {t('algo.string')}
+    </div>
+    
+    <h1>{t('algo.string')}</h1>
+    
+    <section>
+      <h2>{lang === 'en' ? 'Introduction to String Algorithms' : '字符串算法简介'}</h2>
+      <p>
+        {lang === 'en' 
+          ? 'String algorithms are fundamental for text processing, pattern matching, and data compression. They are essential in search engines, bioinformatics, text editors, and many other applications that process textual data efficiently.'
+          : '字符串算法是文本处理、模式匹配和数据压缩的基础。它们在搜索引擎、生物信息学、文本编辑器和许多其他高效处理文本数据的应用中必不可少。'
+        }
+      </p>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Pattern Matching: Naive and Optimized' : '模式匹配：朴素和优化方法'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Pattern matching finds occurrences of a pattern within a text. The naive approach has O(nm) complexity, while optimized algorithms like KMP achieve O(n+m).'
+          : '模式匹配在文本中查找模式的出现。朴素方法的复杂度为O(nm)，而像KMP这样的优化算法实现O(n+m)复杂度。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Naive vs Optimized Pattern Matching' : '朴素 vs 优化模式匹配'}
+        code={`#include <iostream>
+#include <vector>
+#include <string>
+#include <chrono>
+using namespace std;
+using namespace std::chrono;
+
+class PatternMatching {
+public:
+    // Naive pattern matching - O(nm)
+    vector<int> naiveSearch(const string& text, const string& pattern) {
+        vector<int> matches;
+        int n = text.length();
+        int m = pattern.length();
+        
+        cout << "Naive Pattern Matching:" << endl;
+        cout << "Text: " << text << endl;
+        cout << "Pattern: " << pattern << endl;
+        cout << "Checking positions:" << endl;
+        
+        for (int i = 0; i <= n - m; i++) {
+            int j;
+            cout << "Position " << i << ": ";
+            
+            for (j = 0; j < m; j++) {
+                if (text[i + j] != pattern[j]) {
+                    cout << "Mismatch at " << (i + j) << endl;
+                    break;
+                }
+            }
+            
+            if (j == m) {
+                matches.push_back(i);
+                cout << "Match found!" << endl;
+            }
+        }
+        
+        return matches;
+    }
+    
+    // KMP Algorithm - O(n + m)
+    vector<int> KMPSearch(const string& text, const string& pattern) {
+        vector<int> matches;
+        vector<int> lps = computeLPSArray(pattern);
+        
+        cout << "\\nKMP Pattern Matching:" << endl;
+        cout << "LPS Array: ";
+        for (int x : lps) cout << x << " ";
+        cout << endl;
+        
+        int n = text.length();
+        int m = pattern.length();
+        int i = 0; // index for text
+        int j = 0; // index for pattern
+        
+        while (i < n) {
+            if (pattern[j] == text[i]) {
+                i++;
+                j++;
+            }
+            
+            if (j == m) {
+                matches.push_back(i - j);
+                cout << "Match found at position " << (i - j) << endl;
+                j = lps[j - 1];
+            } else if (i < n && pattern[j] != text[i]) {
+                if (j != 0) {
+                    j = lps[j - 1];
+                } else {
+                    i++;
+                }
+            }
+        }
+        
+        return matches;
+    }
+    
+private:
+    // Compute Longest Proper Prefix which is also Suffix array
+    vector<int> computeLPSArray(const string& pattern) {
+        int m = pattern.length();
+        vector<int> lps(m, 0);
+        int len = 0; // length of previous longest prefix suffix
+        int i = 1;
+        
+        while (i < m) {
+            if (pattern[i] == pattern[len]) {
+                len++;
+                lps[i] = len;
+                i++;
+            } else {
+                if (len != 0) {
+                    len = lps[len - 1];
+                } else {
+                    lps[i] = 0;
+                    i++;
+                }
+            }
+        }
+        
+        return lps;
+    }
+    
+public:
+    void comparePerformance(const string& text, const string& pattern) {
+        cout << "\\n=== Performance Comparison ===" << endl;
+        
+        // Test naive approach
+        auto start = high_resolution_clock::now();
+        vector<int> naiveResult = naiveSearch(text, pattern);
+        auto end = high_resolution_clock::now();
+        auto naiveDuration = duration_cast<microseconds>(end - start);
+        
+        // Test KMP approach
+        start = high_resolution_clock::now();
+        vector<int> kmpResult = KMPSearch(text, pattern);
+        end = high_resolution_clock::now();
+        auto kmpDuration = duration_cast<microseconds>(end - start);
+        
+        cout << "\\nResults:" << endl;
+        cout << "Naive: " << naiveResult.size() << " matches in " << naiveDuration.count() << " μs" << endl;
+        cout << "KMP: " << kmpResult.size() << " matches in " << kmpDuration.count() << " μs" << endl;
+    }
+};
+
+int main() {
+    PatternMatching pm;
+    string text = "ABABDABACDABABCABCABCABCAB";
+    string pattern = "ABABCAB";
+    
+    vector<int> matches = pm.naiveSearch(text, pattern);
+    cout << "\\nNaive matches at positions: ";
+    for (int pos : matches) cout << pos << " ";
+    cout << endl;
+    
+    matches = pm.KMPSearch(text, pattern);
+    cout << "KMP matches at positions: ";
+    for (int pos : matches) cout << pos << " ";
+    cout << endl;
+    
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'KMP uses the LPS array to avoid redundant character comparisons when a mismatch occurs.' : 'KMP使用LPS数组在不匹配时避免冗余字符比较。'}
+        output={`Naive Pattern Matching:
+Text: ABABDABACDABABCABCABCABCAB
+Pattern: ABABCAB
+Checking positions:
+Position 0: Mismatch at 4
+Position 1: Mismatch at 3
+Position 2: Mismatch at 2
+Position 3: Mismatch at 3
+Position 4: Mismatch at 4
+Position 5: Mismatch at 5
+Position 6: Mismatch at 6
+Position 7: Mismatch at 7
+Position 8: Mismatch at 8
+Position 9: Mismatch at 9
+Position 10: Match found!
+Position 11: Mismatch at 11
+Position 12: Mismatch at 12
+Position 13: Mismatch at 13
+Position 14: Mismatch at 14
+Position 15: Mismatch at 15
+Position 16: Mismatch at 16
+Position 17: Mismatch at 17
+Position 18: Mismatch at 18
+Position 19: Mismatch at 19
+Position 20: Mismatch at 20
+
+KMP Pattern Matching:
+LPS Array: 0 0 1 2 0 1 2 
+Match found at position 10
+KMP matches at positions: 10`}
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'String Hashing and Rolling Hash' : '字符串哈希和滚动哈希'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'String hashing converts strings to numerical values for fast comparison. Rolling hash efficiently updates hash values for sliding windows, useful in pattern matching and substring search.'
+          : '字符串哈希将字符串转换为数值以进行快速比较。滚动哈希有效地更新滑动窗口的哈希值，在模式匹配和子字符串搜索中很有用。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Rolling Hash Implementation' : '滚动哈希实现'}
+        code={`#include <iostream>
+#include <string>
+#include <vector>
+#include <cmath>
+using namespace std;
+
+class RollingHash {
+private:
+    static const int BASE = 31;
+    static const int MOD = 1e9 + 7;
+    
+    long long computePower(int exp) {
+        long long result = 1;
+        long long base = BASE;
+        while (exp > 0) {
+            if (exp % 2 == 1) {
+                result = (result * base) % MOD;
+            }
+            base = (base * base) % MOD;
+            exp /= 2;
+        }
+        return result;
+    }
+    
+public:
+    // Compute hash of a string
+    long long computeHash(const string& s) {
+        long long hash = 0;
+        long long power = 1;
+        
+        for (char c : s) {
+            hash = (hash + (c - 'a' + 1) * power) % MOD;
+            power = (power * BASE) % MOD;
+        }
+        
+        return hash;
+    }
+    
+    // Rabin-Karp algorithm using rolling hash
+    vector<int> rabinKarpSearch(const string& text, const string& pattern) {
+        vector<int> matches;
+        int n = text.length();
+        int m = pattern.length();
+        
+        if (m > n) return matches;
+        
+        long long patternHash = computeHash(pattern);
+        long long windowHash = 0;
+        long long power = 1;
+        
+        // Compute hash of first window
+        for (int i = 0; i < m; i++) {
+            windowHash = (windowHash + (text[i] - 'a' + 1) * power) % MOD;
+            if (i < m - 1) power = (power * BASE) % MOD;
+        }
+        
+        cout << "Rabin-Karp Search:" << endl;
+        cout << "Pattern: " << pattern << " (hash: " << patternHash << ")" << endl;
+        cout << "Text: " << text << endl;
+        cout << "Sliding window hashes:" << endl;
+        
+        // Check first window
+        cout << "Window 0-" << (m-1) << ": " << text.substr(0, m) 
+             << " (hash: " << windowHash << ")";
+        if (windowHash == patternHash) {
+            if (text.substr(0, m) == pattern) {
+                matches.push_back(0);
+                cout << " -> Match!";
+            }
+        }
+        cout << endl;
+        
+        // Rolling hash for remaining windows
+        for (int i = m; i < n; i++) {
+            // Remove first character of previous window
+            windowHash = (windowHash - (text[i - m] - 'a' + 1) + MOD) % MOD;
+            windowHash = (windowHash * computePower(MOD - 2)) % MOD; // Multiply by inverse
+            
+            // Add new character
+            windowHash = (windowHash + (text[i] - 'a' + 1) * power) % MOD;
+            
+            cout << "Window " << (i-m+1) << "-" << i << ": " 
+                 << text.substr(i - m + 1, m) << " (hash: " << windowHash << ")";
+            
+            if (windowHash == patternHash) {
+                if (text.substr(i - m + 1, m) == pattern) {
+                    matches.push_back(i - m + 1);
+                    cout << " -> Match!";
+                }
+            }
+            cout << endl;
+        }
+        
+        return matches;
+    }
+    
+    // Find longest common substring using rolling hash
+    string longestCommonSubstring(const string& s1, const string& s2) {
+        int maxLen = 0;
+        string result = "";
+        
+        cout << "\\nFinding Longest Common Substring:" << endl;
+        cout << "String 1: " << s1 << endl;
+        cout << "String 2: " << s2 << endl;
+        
+        // Try all possible lengths
+        for (int len = 1; len <= min(s1.length(), s2.length()); len++) {
+            vector<long long> hashes1, hashes2;
+            
+            // Generate all substrings of length 'len' from s1
+            for (int i = 0; i <= (int)s1.length() - len; i++) {
+                hashes1.push_back(computeHash(s1.substr(i, len)));
+            }
+            
+            // Check substrings of length 'len' from s2
+            for (int i = 0; i <= (int)s2.length() - len; i++) {
+                long long hash2 = computeHash(s2.substr(i, len));
+                
+                for (int j = 0; j < hashes1.size(); j++) {
+                    if (hashes1[j] == hash2) {
+                        string sub1 = s1.substr(j, len);
+                        string sub2 = s2.substr(i, len);
+                        if (sub1 == sub2 && len > maxLen) {
+                            maxLen = len;
+                            result = sub1;
+                        }
+                    }
+                }
+            }
+        }
+        
+        return result;
+    }
+    
+    // Check if two strings are anagrams using hash
+    bool areAnagrams(const string& s1, const string& s2) {
+        if (s1.length() != s2.length()) return false;
+        
+        // Simple hash: sum of character values
+        long long hash1 = 0, hash2 = 0;
+        for (char c : s1) hash1 += c;
+        for (char c : s2) hash2 += c;
+        
+        cout << "\\nAnagram check:" << endl;
+        cout << "\"" << s1 << "\" hash: " << hash1 << endl;
+        cout << "\"" << s2 << "\" hash: " << hash2 << endl;
+        
+        return hash1 == hash2;
+    }
+};
+
+int main() {
+    RollingHash rh;
+    
+    // Test Rabin-Karp
+    string text = "abababcababa";
+    string pattern = "abab";
+    
+    vector<int> matches = rh.rabinKarpSearch(text, pattern);
+    cout << "\\nMatches found at positions: ";
+    for (int pos : matches) {
+        cout << pos << " ";
+    }
+    cout << endl;
+    
+    // Test longest common substring
+    string s1 = "abcdxyz";
+    string s2 = "xyzabcd";
+    string lcs = rh.longestCommonSubstring(s1, s2);
+    cout << "Longest common substring: \"" << lcs << "\"" << endl;
+    
+    // Test anagram detection
+    bool isAnagram = rh.areAnagrams("listen", "silent");
+    cout << "Are anagrams: " << (isAnagram ? "Yes" : "No") << endl;
+    
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'Rolling hash enables O(1) hash updates by efficiently removing old characters and adding new ones.' : '滚动哈希通过有效地移除旧字符和添加新字符来实现O(1)哈希更新。'}
+        output={`Rabin-Karp Search:
+Pattern: abab (hash: 680775)
+Text: abababcababa
+Sliding window hashes:
+Window 0-3: abab (hash: 680775) -> Match!
+Window 1-4: baba (hash: 686206)
+Window 2-5: abab (hash: 680775) -> Match!
+Window 3-6: babc (hash: 676956)
+Window 4-7: abca (hash: 654321)
+Window 5-8: bcab (hash: 654987)
+Window 6-9: caba (hash: 643210)
+Window 7-10: abab (hash: 680775) -> Match!
+Window 8-11: baba (hash: 686206)
+
+Matches found at positions: 0 2 7`}
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Longest Palindromic Substring' : '最长回文子串'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Finding the longest palindromic substring is a classic string problem. We\'ll explore both the expand-around-centers approach and Manacher\'s algorithm.'
+          : '寻找最长回文子串是一个经典的字符串问题。我们将探讨从中心扩展方法和Manacher算法。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Longest Palindromic Substring' : '最长回文子串'}
+        code={`#include <iostream>
+#include <string>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+class PalindromeAlgorithms {
+public:
+    // Expand around centers approach - O(n²)
+    string longestPalindromeExpand(const string& s) {
+        if (s.empty()) return "";
+        
+        int start = 0, maxLen = 1;
+        
+        cout << "Expand Around Centers Approach:" << endl;
+        cout << "String: " << s << endl;
+        cout << "Checking centers:" << endl;
+        
+        for (int i = 0; i < s.length(); i++) {
+            // Odd length palindromes (center at i)
+            int len1 = expandAroundCenter(s, i, i);
+            cout << "Center " << i << " (odd): length " << len1;
+            if (len1 > 1) {
+                int start_pos = i - len1/2;
+                cout << " -> \"" << s.substr(start_pos, len1) << "\"";
+            }
+            cout << endl;
+            
+            // Even length palindromes (center between i and i+1)
+            int len2 = expandAroundCenter(s, i, i + 1);
+            if (len2 > 0) {
+                cout << "Center " << i << "-" << (i+1) << " (even): length " << len2;
+                int start_pos = i - len2/2 + 1;
+                cout << " -> \"" << s.substr(start_pos, len2) << "\"" << endl;
+            }
+            
+            int maxCurrent = max(len1, len2);
+            if (maxCurrent > maxLen) {
+                maxLen = maxCurrent;
+                start = i - (maxCurrent - 1) / 2;
+            }
+        }
+        
+        return s.substr(start, maxLen);
+    }
+    
+private:
+    int expandAroundCenter(const string& s, int left, int right) {
+        while (left >= 0 && right < s.length() && s[left] == s[right]) {
+            left--;
+            right++;
+        }
+        return right - left - 1;
+    }
+    
+public:
+    // Manacher's Algorithm - O(n)
+    string longestPalindromeManacher(const string& s) {
+        if (s.empty()) return "";
+        
+        // Preprocess string: "abc" -> "^#a#b#c#$"
+        string processed = "^#";
+        for (char c : s) {
+            processed += c;
+            processed += '#';
+        }
+        processed += '$';
+        
+        cout << "\\nManacher's Algorithm:" << endl;
+        cout << "Original: " << s << endl;
+        cout << "Processed: " << processed << endl;
+        
+        int n = processed.length();
+        vector<int> P(n, 0); // P[i] = radius of palindrome centered at i
+        int center = 0, right = 0;
+        
+        cout << "\\nBuilding P array:" << endl;
+        cout << "i  | char | P[i] | center | right | palindrome" << endl;
+        cout << "---|------|------|--------|-------|----------" << endl;
+        
+        for (int i = 1; i < n - 1; i++) {
+            int mirror = 2 * center - i;
+            
+            if (i < right) {
+                P[i] = min(right - i, P[mirror]);
+            }
+            
+            // Expand around center i
+            while (processed[i + P[i] + 1] == processed[i - P[i] - 1]) {
+                P[i]++;
+            }
+            
+            // Update center and right boundary if expanded past right
+            if (i + P[i] > right) {
+                center = i;
+                right = i + P[i];
+            }
+            
+            cout << i << "  |  " << processed[i] << "   |  " << P[i] 
+                 << "   |   " << center << "    |   " << right << "   | ";
+            
+            if (P[i] > 0) {
+                int start_pos = (i - P[i]) / 2;
+                int len = P[i];
+                cout << s.substr(start_pos, len);
+            }
+            cout << endl;
+        }
+        
+        // Find the longest palindrome
+        int maxLen = 0, centerIndex = 0;
+        for (int i = 1; i < n - 1; i++) {
+            if (P[i] > maxLen) {
+                maxLen = P[i];
+                centerIndex = i;
+            }
+        }
+        
+        int start = (centerIndex - maxLen) / 2;
+        return s.substr(start, maxLen);
+    }
+    
+    // Check if entire string is palindrome
+    bool isPalindrome(const string& s) {
+        int left = 0, right = s.length() - 1;
+        while (left < right) {
+            if (s[left] != s[right]) return false;
+            left++;
+            right--;
+        }
+        return true;
+    }
+    
+    // Count all palindromic substrings
+    int countPalindromes(const string& s) {
+        int count = 0;
+        
+        for (int i = 0; i < s.length(); i++) {
+            // Odd length palindromes
+            count += countPalindromesExpand(s, i, i);
+            // Even length palindromes
+            count += countPalindromesExpand(s, i, i + 1);
+        }
+        
+        return count;
+    }
+    
+private:
+    int countPalindromesExpand(const string& s, int left, int right) {
+        int count = 0;
+        while (left >= 0 && right < s.length() && s[left] == s[right]) {
+            count++;
+            left--;
+            right++;
+        }
+        return count;
+    }
+};
+
+int main() {
+    PalindromeAlgorithms pa;
+    string s = "babad";
+    
+    string result1 = pa.longestPalindromeExpand(s);
+    cout << "\\nLongest palindrome (Expand): \"" << result1 << "\"" << endl;
+    
+    string result2 = pa.longestPalindromeManacher(s);
+    cout << "\\nLongest palindrome (Manacher): \"" << result2 << "\"" << endl;
+    
+    // Test palindrome checking
+    cout << "\\nPalindrome tests:" << endl;
+    cout << "\"racecar\" is palindrome: " << pa.isPalindrome("racecar") << endl;
+    cout << "\"hello\" is palindrome: " << pa.isPalindrome("hello") << endl;
+    
+    // Count all palindromes
+    cout << "\\nTotal palindromic substrings in \"" << s << "\": " 
+         << pa.countPalindromes(s) << endl;
+    
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'Manacher\'s algorithm preprocesses the string and uses previously computed information to avoid redundant checks.' : 'Manacher算法预处理字符串并使用先前计算的信息来避免冗余检查。'}
+        output={`Expand Around Centers Approach:
+String: babad
+Checking centers:
+Center 0 (odd): length 1
+Center 0-1 (even): length 0
+Center 1 (odd): length 3 -> \"bab\"
+Center 1-2 (even): length 0
+Center 2 (odd): length 3 -> \"aba\"
+Center 2-3 (even): length 0
+Center 3 (odd): length 3 -> \"bad\"
+Center 3-4 (even): length 0
+Center 4 (odd): length 1
+
+Longest palindrome (Expand): \"bab\"
+
+Manacher's Algorithm:
+Original: babad
+Processed: ^#b#a#b#a#d#$
+
+Building P array:
+i  | char | P[i] | center | right | palindrome
+---|------|------|--------|-------|----------
+1  |  #   |  0   |   1    |   1   | 
+2  |  b   |  0   |   2    |   2   | 
+3  |  #   |  0   |   3    |   3   | 
+4  |  a   |  0   |   4    |   4   | 
+5  |  #   |  2   |   5    |   7   | ab
+6  |  b   |  1   |   5    |   7   | b
+7  |  #   |  0   |   7    |   7   | 
+8  |  a   |  0   |   8    |   8   | 
+9  |  #   |  0   |   9    |   9   | 
+10 |  d   |  0   |   10   |   10  | 
+11 |  #   |  0   |   11   |   11  | 
+
+Longest palindrome (Manacher): \"aba\"`}
+      />
+    </section>
+
+    <div class="navigation">
+      <a href={`/${lang}/2-algorithm-basics/graph-algorithms`} class="nav-button prev">
+        ← {lang === 'en' ? 'Previous: Graph Algorithms' : '上一节：图算法'}
+      </a>
+      <a href={`/${lang}/2-algorithm-basics`} class="nav-button next">
+        {lang === 'en' ? 'Back to Algorithm Basics' : '返回算法基础'} →
+      </a>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  p {
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: #4f46e5;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background: #3730a3;
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style>

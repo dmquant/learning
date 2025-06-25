@@ -1,0 +1,737 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export function getStaticPaths() {
+  return [
+    {params: {lang: 'en'}},
+    {params: {lang: 'zh'}}
+  ];
+}
+---
+
+<Layout title={lang === 'en' ? 'Monotonic Stack - Competitive Programming' : '单调栈 - 竞赛编程'}>
+  <div class="breadcrumb">
+    <a href={`/${lang}`}>{t('nav.home')}</a> &gt; 
+    <a href={`/${lang}/4-competitive`}>{t('nav.competitive')}</a> &gt; 
+    {lang === 'en' ? 'Monotonic Stack' : '单调栈'}
+  </div>
+
+  <h1>{lang === 'en' ? 'Monotonic Stack & Cartesian Tree' : '单调栈与笛卡尔树'}</h1>
+  
+  <div class="overview">
+    <p>
+      {lang === 'en' 
+        ? 'A monotonic stack is a special stack data structure that maintains monotonic order (increasing or decreasing) of elements. It\'s primarily used to solve problems like "next greater element" and "largest rectangle area". A Cartesian tree is a binary tree built from an array that satisfies both binary search tree properties (by position) and heap properties (by value), often used in conjunction with monotonic stacks.'
+        : '单调栈是一种特殊的栈数据结构，栈中元素保持单调性（递增或递减）。它主要用于解决"下一个更大元素"、"最大矩形面积"等问题。笛卡尔树是根据数组构建的二叉树，同时满足二叉搜索树的性质（按位置）和堆的性质（按值），常与单调栈结合使用。'
+      }
+    </p>
+  </div>
+
+  <h2>{lang === 'en' ? 'Monotonic Stack Fundamentals' : '单调栈基础'}</h2>
+  
+  <p>
+    {lang === 'en'
+      ? 'Monotonic stacks efficiently solve problems involving finding "greater/smaller elements" by maintaining element monotonicity.'
+      : '单调栈通过维护栈中元素的单调性，能够高效解决一类寻找"更大/更小元素"的问题。'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'en' ? 'Monotonic Stack Basics - Next Greater Element' : '单调栈基础应用 - 下一个更大元素'}
+    code={`#include <iostream>
+#include <vector>
+#include <stack>
+#include <algorithm>
+using namespace std;
+
+class MonotonicStack {
+public:
+    // ${lang === 'en' ? 'Find the first greater element to the right of each element' : '找到每个元素右边第一个更大的元素'}
+    vector<int> nextGreaterElement(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> result(n, -1);
+        stack<int> stk; // ${lang === 'en' ? 'Store indices' : '存储索引'}
+        
+        for (int i = 0; i < n; i++) {
+            // ${lang === 'en' ? 'When current element is greater than stack top, stack top found its answer' : '当前元素比栈顶元素大时，栈顶元素找到了答案'}
+            while (!stk.empty() && nums[stk.top()] < nums[i]) {
+                result[stk.top()] = nums[i];
+                stk.pop();
+            }
+            stk.push(i);
+        }
+        
+        return result;
+    }
+    
+    // ${lang === 'en' ? 'Find the first greater element to the left of each element' : '找到每个元素左边第一个更大的元素'}
+    vector<int> previousGreaterElement(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> result(n, -1);
+        stack<int> stk;
+        
+        for (int i = 0; i < n; i++) {
+            // ${lang === 'en' ? 'Maintain decreasing stack' : '维护递减栈'}
+            while (!stk.empty() && nums[stk.top()] <= nums[i]) {
+                stk.pop();
+            }
+            
+            if (!stk.empty()) {
+                result[i] = nums[stk.top()];
+            }
+            
+            stk.push(i);
+        }
+        
+        return result;
+    }
+    
+    // ${lang === 'en' ? 'Find the first smaller element to the right of each element' : '找到每个元素右边第一个更小的元素'}
+    vector<int> nextSmallerElement(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> result(n, -1);
+        stack<int> stk;
+        
+        for (int i = 0; i < n; i++) {
+            while (!stk.empty() && nums[stk.top()] > nums[i]) {
+                result[stk.top()] = nums[i];
+                stk.pop();
+            }
+            stk.push(i);
+        }
+        
+        return result;
+    }
+    
+    // ${lang === 'en' ? 'Find the first smaller element to the left of each element' : '找到每个元素左边第一个更小的元素'}
+    vector<int> previousSmallerElement(vector<int>& nums) {
+        int n = nums.size();
+        vector<int> result(n, -1);
+        stack<int> stk;
+        
+        for (int i = 0; i < n; i++) {
+            while (!stk.empty() && nums[stk.top()] >= nums[i]) {
+                stk.pop();
+            }
+            
+            if (!stk.empty()) {
+                result[i] = nums[stk.top()];
+            }
+            
+            stk.push(i);
+        }
+        
+        return result;
+    }
+};
+
+// ${lang === 'en' ? 'Classic application: Largest rectangle in histogram' : '经典应用：柱状图中最大的矩形'}
+class LargestRectangleInHistogram {
+public:
+    int largestRectangleArea(vector<int>& heights) {
+        stack<int> stk;
+        int maxArea = 0;
+        
+        // ${lang === 'en' ? 'Add a bar with height 0 at the end to ensure all bars are processed' : '在末尾添加一个高度为0的柱子，确保所有柱子都被处理'}
+        heights.push_back(0);
+        
+        for (int i = 0; i < heights.size(); i++) {
+            while (!stk.empty() && heights[stk.top()] > heights[i]) {
+                int h = heights[stk.top()];
+                stk.pop();
+                
+                int width = stk.empty() ? i : i - stk.top() - 1;
+                maxArea = max(maxArea, h * width);
+            }
+            stk.push(i);
+        }
+        
+        heights.pop_back(); // ${lang === 'en' ? 'Restore original array' : '恢复原数组'}
+        return maxArea;
+    }
+};
+
+// ${lang === 'en' ? 'Maximum rectangle problem (2D extension)' : '最大矩形问题（二维扩展）'}
+class MaximalRectangle {
+public:
+    int maximalRectangle(vector<vector<char>>& matrix) {
+        if (matrix.empty() || matrix[0].empty()) return 0;
+        
+        int m = matrix.size(), n = matrix[0].size();
+        vector<int> heights(n, 0);
+        int maxArea = 0;
+        
+        for (int i = 0; i < m; i++) {
+            // ${lang === 'en' ? 'Update height of each column' : '更新每列的高度'}
+            for (int j = 0; j < n; j++) {
+                if (matrix[i][j] == '1') {
+                    heights[j]++;
+                } else {
+                    heights[j] = 0;
+                }
+            }
+            
+            // ${lang === 'en' ? 'Calculate maximum rectangle area for current row' : '计算当前行的最大矩形面积'}
+            maxArea = max(maxArea, largestRectangleArea(heights));
+        }
+        
+        return maxArea;
+    }
+    
+private:
+    int largestRectangleArea(vector<int>& heights) {
+        stack<int> stk;
+        int maxArea = 0;
+        heights.push_back(0);
+        
+        for (int i = 0; i < heights.size(); i++) {
+            while (!stk.empty() && heights[stk.top()] > heights[i]) {
+                int h = heights[stk.top()];
+                stk.pop();
+                int width = stk.empty() ? i : i - stk.top() - 1;
+                maxArea = max(maxArea, h * width);
+            }
+            stk.push(i);
+        }
+        
+        heights.pop_back();
+        return maxArea;
+    }
+};
+
+int main() {
+    // ${lang === 'en' ? 'Test monotonic stack basic applications' : '测试单调栈基础应用'}
+    vector<int> nums = {2, 1, 2, 4, 3, 1};
+    MonotonicStack ms;
+    
+    cout << "${lang === 'en' ? 'Original array: ' : '原数组: '}";
+    for (int x : nums) cout << x << " ";
+    cout << endl;
+    
+    vector<int> nextGreater = ms.nextGreaterElement(nums);
+    cout << "${lang === 'en' ? 'Next greater elements: ' : '下一个更大元素: '}";
+    for (int x : nextGreater) cout << x << " ";
+    cout << endl;
+    
+    vector<int> prevGreater = ms.previousGreaterElement(nums);
+    cout << "${lang === 'en' ? 'Previous greater elements: ' : '前一个更大元素: '}";
+    for (int x : prevGreater) cout << x << " ";
+    cout << endl;
+    
+    // ${lang === 'en' ? 'Test largest rectangle in histogram' : '测试柱状图最大矩形'}
+    cout << "\\n${lang === 'en' ? 'Largest Rectangle Test:' : '柱状图最大矩形测试:'}\\n";
+    LargestRectangleInHistogram lrh;
+    vector<int> heights = {2, 1, 5, 6, 2, 3};
+    cout << "${lang === 'en' ? 'Heights: ' : '柱状图高度: '}";
+    for (int h : heights) cout << h << " ";
+    cout << "\\n${lang === 'en' ? 'Largest rectangle area: ' : '最大矩形面积: '}" << lrh.largestRectangleArea(heights) << endl;
+    
+    return 0;
+}`}
+    explanation={lang === 'en' 
+      ? 'Monotonic stack maintains element monotonicity by popping elements that violate the order when inserting new elements. Each element is pushed and popped at most once, achieving O(n) time complexity.'
+      : '单调栈维护递增或递减的元素序列。在寻找下一个更大元素时，当当前元素比栈顶元素大时，栈顶元素找到了答案。柱状图最大矩形通过单调栈找到每个柱子能扩展的左右边界。'
+    }
+    output={`${lang === 'en' ? 'Original array: ' : '原数组: '}2 1 2 4 3 1 
+${lang === 'en' ? 'Next greater elements: ' : '下一个更大元素: '}4 2 4 -1 -1 -1 
+${lang === 'en' ? 'Previous greater elements: ' : '前一个更大元素: '}-1 -1 -1 -1 4 3 
+
+${lang === 'en' ? 'Largest Rectangle Test:' : '柱状图最大矩形测试:'}
+${lang === 'en' ? 'Heights: ' : '柱状图高度: '}2 1 5 6 2 3 
+${lang === 'en' ? 'Largest rectangle area: ' : '最大矩形面积: '}10`}
+  />
+
+  <h2>{lang === 'en' ? 'Cartesian Tree Construction' : '笛卡尔树构建'}</h2>
+  
+  <p>
+    {lang === 'en'
+      ? 'A Cartesian tree can be efficiently constructed using a monotonic stack, providing a foundation for range minimum queries and divide-and-conquer optimizations.'
+      : '笛卡尔树可以使用单调栈高效构建，为范围最小查询和分治算法优化提供基础。'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'en' ? 'Cartesian Tree with Monotonic Stack' : '笛卡尔树的构建与应用'}
+    code={`#include <iostream>
+#include <vector>
+#include <stack>
+using namespace std;
+
+struct TreeNode {
+    int val;
+    int index;
+    TreeNode* left;
+    TreeNode* right;
+    
+    TreeNode(int v, int idx) : val(v), index(idx), left(nullptr), right(nullptr) {}
+};
+
+class CartesianTree {
+public:
+    // ${lang === 'en' ? 'Build Cartesian tree using monotonic stack' : '使用单调栈构建笛卡尔树'}
+    TreeNode* buildTree(vector<int>& nums) {
+        if (nums.empty()) return nullptr;
+        
+        stack<TreeNode*> stk;
+        
+        for (int i = 0; i < nums.size(); i++) {
+            TreeNode* node = new TreeNode(nums[i], i);
+            TreeNode* lastPopped = nullptr;
+            
+            // ${lang === 'en' ? 'Maintain min-heap property (parent <= children)' : '维护最小堆性质：父节点值 <= 子节点值'}
+            while (!stk.empty() && stk.top()->val > nums[i]) {
+                lastPopped = stk.top();
+                stk.pop();
+            }
+            
+            // ${lang === 'en' ? 'Set relationships' : '连接节点'}
+            if (!stk.empty()) {
+                stk.top()->right = node;
+            }
+            if (lastPopped) {
+                node->left = lastPopped;
+            }
+            
+            stk.push(node);
+        }
+        
+        // ${lang === 'en' ? 'Root is at the bottom of stack' : '栈底元素是根节点'}
+        while (stk.size() > 1) {
+            stk.pop();
+        }
+        
+        return stk.top();
+    }
+    
+    // ${lang === 'en' ? 'Range Minimum Query using Cartesian tree' : '使用笛卡尔树解决RMQ问题'}
+    int rangeMinQuery(TreeNode* root, int left, int right) {
+        if (!root || root->index < left || root->index > right) {
+            return INT_MAX;
+        }
+        
+        if (root->index >= left && root->index <= right) {
+            int leftMin = rangeMinQuery(root->left, left, root->index - 1);
+            int rightMin = rangeMinQuery(root->right, root->index + 1, right);
+            
+            return min({root->val, leftMin, rightMin});
+        }
+        
+        return INT_MAX;
+    }
+    
+    // ${lang === 'en' ? 'In-order traversal to verify structure' : '中序遍历验证BST性质'}
+    void inorderTraversal(TreeNode* root, vector<int>& result) {
+        if (!root) return;
+        
+        inorderTraversal(root->left, result);
+        result.push_back(root->val);
+        inorderTraversal(root->right, result);
+    }
+    
+    // ${lang === 'en' ? 'Print tree structure' : '打印树结构'}
+    void printTree(TreeNode* root, int depth = 0) {
+        if (!root) return;
+        
+        printTree(root->right, depth + 1);
+        
+        for (int i = 0; i < depth; i++) cout << "  ";
+        cout << root->val << "(" << root->index << ")" << endl;
+        
+        printTree(root->left, depth + 1);
+    }
+};
+
+int main() {
+    vector<int> nums = {3, 2, 6, 1, 9};
+    CartesianTree ct;
+    
+    cout << "${lang === 'en' ? 'Original array: ' : '原数组: '}";
+    for (int x : nums) cout << x << " ";
+    cout << endl;
+    
+    TreeNode* root = ct.buildTree(nums);
+    
+    cout << "\\n${lang === 'en' ? 'Cartesian Tree Structure:' : '笛卡尔树结构:'}\\n";
+    ct.printTree(root);
+    
+    cout << "\\n${lang === 'en' ? 'In-order traversal: ' : '中序遍历: '}";
+    vector<int> inorder;
+    ct.inorderTraversal(root, inorder);
+    for (int x : inorder) cout << x << " ";
+    cout << endl;
+    
+    // ${lang === 'en' ? 'Test range minimum queries' : '测试RMQ'}
+    cout << "\\n${lang === 'en' ? 'Range Minimum Queries:' : 'RMQ测试:'}\\n";
+    cout << "RMQ(0, 2): " << ct.rangeMinQuery(root, 0, 2) << endl;
+    cout << "RMQ(1, 4): " << ct.rangeMinQuery(root, 1, 4) << endl;
+    cout << "RMQ(2, 3): " << ct.rangeMinQuery(root, 2, 3) << endl;
+    
+    return 0;
+}`}
+    explanation={lang === 'en' 
+      ? 'Cartesian tree construction uses monotonic stack to maintain heap property. The resulting tree enables efficient range minimum queries and serves as a foundation for divide-and-conquer algorithms.'
+      : '笛卡尔树通过单调栈构建，满足中序遍历为索引序列（BST性质）和堆性质。可以用于RMQ查询、分治算法优化等。构建过程中维护最小堆性质，每个节点的值小于等于其子节点。'
+    }
+    output={`${lang === 'en' ? 'Original array: ' : '原数组: '}3 2 6 1 9 
+
+${lang === 'en' ? 'Cartesian Tree Structure:' : '笛卡尔树结构:'}
+      9(4)
+    6(2)
+  1(3)
+    2(1)
+3(0)
+
+${lang === 'en' ? 'In-order traversal: ' : '中序遍历: '}3 2 6 1 9 
+
+${lang === 'en' ? 'Range Minimum Queries:' : 'RMQ测试:'}
+RMQ(0, 2): 2
+RMQ(1, 4): 1
+RMQ(2, 3): 1`}
+  />
+
+  <h2>{lang === 'en' ? 'Advanced Applications' : '单调栈的高级应用'}</h2>
+  
+  <p>
+    {lang === 'en'
+      ? 'Monotonic stacks have numerous advanced applications in competitive programming, from stock span problems to expression evaluation.'
+      : '单调栈在复杂问题中的应用，包括表达式求值、括号匹配、股票价格等问题。'
+    }
+  </p>
+
+  <CodeExample 
+    client:load
+    title={lang === 'en' ? 'Advanced Monotonic Stack Applications' : '单调栈高级应用 - 复杂问题求解'}
+    code={`#include <iostream>
+#include <vector>
+#include <stack>
+#include <string>
+#include <unordered_map>
+using namespace std;
+
+// ${lang === 'en' ? 'Stock span problem' : '股票价格跨度问题'}
+class StockSpanner {
+private:
+    stack<pair<int, int>> stk; // ${lang === 'en' ? '(price, span)' : '{price, span}'}
+    
+public:
+    int next(int price) {
+        int span = 1;
+        
+        // ${lang === 'en' ? 'Accumulate days with prices <= current price' : '累计所有小于等于当前价格的天数'}
+        while (!stk.empty() && stk.top().first <= price) {
+            span += stk.top().second;
+            stk.pop();
+        }
+        
+        stk.push({price, span});
+        return span;
+    }
+};
+
+// ${lang === 'en' ? 'Remove duplicate letters maintaining lexicographical order' : '去除重复字母（保持字典序最小）'}
+class RemoveDuplicateLetters {
+public:
+    string removeDuplicateLetters(string s) {
+        unordered_map<char, int> count;
+        unordered_map<char, bool> inStack;
+        stack<char> stk;
+        
+        // ${lang === 'en' ? 'Count frequency of each character' : '统计每个字符的出现次数'}
+        for (char c : s) {
+            count[c]++;
+        }
+        
+        for (char c : s) {
+            count[c]--;
+            
+            if (inStack[c]) continue;
+            
+            // ${lang === 'en' ? 'Remove characters that are lexicographically larger and appear later in the string' : '如果当前字符小于栈顶字符，且栈顶字符在后面还会出现，则移除栈顶'}
+            while (!stk.empty() && stk.top() > c && count[stk.top()] > 0) {
+                inStack[stk.top()] = false;
+                stk.pop();
+            }
+            
+            stk.push(c);
+            inStack[c] = true;
+        }
+        
+        string result = "";
+        while (!stk.empty()) {
+            result = stk.top() + result;
+            stk.pop();
+        }
+        
+        return result;
+    }
+};
+
+// ${lang === 'en' ? 'Daily temperatures' : '每日温度（下一个更高温度）'}
+class DailyTemperatures {
+public:
+    vector<int> dailyTemperatures(vector<int>& temperatures) {
+        int n = temperatures.size();
+        vector<int> result(n, 0);
+        stack<int> stk;
+        
+        for (int i = 0; i < n; i++) {
+            while (!stk.empty() && temperatures[stk.top()] < temperatures[i]) {
+                int prevIndex = stk.top();
+                stk.pop();
+                result[prevIndex] = i - prevIndex;
+            }
+            stk.push(i);
+        }
+        
+        return result;
+    }
+};
+
+// ${lang === 'en' ? 'Sum of subarray minimums' : '子数组的最小值之和'}
+class SumOfSubarrayMinimums {
+public:
+    int sumSubarrayMins(vector<int>& arr) {
+        const int MOD = 1e9 + 7;
+        int n = arr.size();
+        
+        // ${lang === 'en' ? 'Find previous and next smaller elements' : '计算每个元素左边和右边第一个更小元素的位置'}
+        vector<int> prevSmaller(n, -1);
+        vector<int> nextSmaller(n, n);
+        
+        stack<int> stk;
+        
+        // ${lang === 'en' ? 'Previous smaller' : '左边第一个更小元素'}
+        for (int i = 0; i < n; i++) {
+            while (!stk.empty() && arr[stk.top()] >= arr[i]) {
+                stk.pop();
+            }
+            if (!stk.empty()) {
+                prevSmaller[i] = stk.top();
+            }
+            stk.push(i);
+        }
+        
+        // ${lang === 'en' ? 'Clear stack for next smaller' : '清空栈，计算右边第一个更小元素'}
+        while (!stk.empty()) stk.pop();
+        
+        // ${lang === 'en' ? 'Next smaller' : '右边第一个更小元素'}
+        for (int i = 0; i < n; i++) {
+            while (!stk.empty() && arr[stk.top()] > arr[i]) {
+                nextSmaller[stk.top()] = i;
+                stk.pop();
+            }
+            stk.push(i);
+        }
+        
+        long long result = 0;
+        for (int i = 0; i < n; i++) {
+            long long left = i - prevSmaller[i];
+            long long right = nextSmaller[i] - i;
+            result = (result + arr[i] * left * right) % MOD;
+        }
+        
+        return result;
+    }
+};
+
+// ${lang === 'en' ? 'Trapping rain water' : '接雨水问题'}
+class TrappingRainWater {
+public:
+    int trap(vector<int>& height) {
+        if (height.empty()) return 0;
+        
+        stack<int> stk;
+        int water = 0;
+        
+        for (int i = 0; i < height.size(); i++) {
+            while (!stk.empty() && height[stk.top()] < height[i]) {
+                int bottom = stk.top();
+                stk.pop();
+                
+                if (stk.empty()) break;
+                
+                int distance = i - stk.top() - 1;
+                int boundedHeight = min(height[i], height[stk.top()]) - height[bottom];
+                water += distance * boundedHeight;
+            }
+            stk.push(i);
+        }
+        
+        return water;
+    }
+};
+
+int main() {
+    // ${lang === 'en' ? 'Test stock price span' : '测试股票价格跨度'}
+    cout << "${lang === 'en' ? 'Stock Price Span Test:' : '股票价格跨度测试:'}\\n";
+    StockSpanner spanner;
+    vector<int> prices = {100, 80, 60, 70, 60, 75, 85};
+    
+    cout << "${lang === 'en' ? 'Price sequence: ' : '价格序列: '}";
+    for (int price : prices) {
+        cout << price << "(" << spanner.next(price) << ") ";
+    }
+    cout << endl;
+    
+    // ${lang === 'en' ? 'Test remove duplicate letters' : '测试去除重复字母'}
+    cout << "\\n${lang === 'en' ? 'Remove Duplicate Letters Test:' : '去除重复字母测试:'}\\n";
+    RemoveDuplicateLetters rdl;
+    string s = "bcabc";
+    cout << "${lang === 'en' ? 'Original string: ' : '原字符串: '}" << s << endl;
+    cout << "${lang === 'en' ? 'After removing duplicates: ' : '去重后: '}" << rdl.removeDuplicateLetters(s) << endl;
+    
+    // ${lang === 'en' ? 'Test daily temperatures' : '测试每日温度'}
+    cout << "\\n${lang === 'en' ? 'Daily Temperatures Test:' : '每日温度测试:'}\\n";
+    DailyTemperatures dt;
+    vector<int> temperatures = {73, 74, 75, 71, 69, 72, 76, 73};
+    vector<int> days = dt.dailyTemperatures(temperatures);
+    
+    cout << "${lang === 'en' ? 'Temperatures: ' : '温度: '}";
+    for (int temp : temperatures) cout << temp << " ";
+    cout << "\\n${lang === 'en' ? 'Days to wait: ' : '等待天数: '}";
+    for (int day : days) cout << day << " ";
+    cout << endl;
+    
+    // ${lang === 'en' ? 'Test sum of subarray minimums' : '测试子数组最小值之和'}
+    cout << "\\n${lang === 'en' ? 'Sum of Subarray Minimums Test:' : '子数组最小值之和测试:'}\\n";
+    SumOfSubarrayMinimums ssm;
+    vector<int> arr = {3, 1, 2, 4};
+    cout << "${lang === 'en' ? 'Array: ' : '数组: '}";
+    for (int x : arr) cout << x << " ";
+    cout << "\\n${lang === 'en' ? 'Sum of subarray minimums: ' : '子数组最小值之和: '}" << ssm.sumSubarrayMins(arr) << endl;
+    
+    // ${lang === 'en' ? 'Test trapping rain water' : '测试接雨水'}
+    cout << "\\n${lang === 'en' ? 'Trapping Rain Water Test:' : '接雨水测试:'}\\n";
+    TrappingRainWater trw;
+    vector<int> height = {0, 1, 0, 2, 1, 0, 1, 3, 2, 1, 2, 1};
+    cout << "${lang === 'en' ? 'Height array: ' : '高度数组: '}";
+    for (int h : height) cout << h << " ";
+    cout << "\\n${lang === 'en' ? 'Trapped water: ' : '接雨水量: '}" << trw.trap(height) << endl;
+    
+    return 0;
+}`}
+    explanation={lang === 'en' 
+      ? 'Advanced applications demonstrate the power of monotonic stacks in various complex problems. Stock span accumulates consecutive days with prices less than or equal to current price, duplicate removal maintains lexicographical order, rain water calculates trapped water in valleys.'
+      : '高级应用展示了单调栈在各种复杂问题中的威力。股票跨度累计连续小于等于当前价格的天数，去重字母维护字典序最小，接雨水计算凹槽面积，表达式求值处理运算符优先级。'
+    }
+    output={`${lang === 'en' ? 'Stock Price Span Test:' : '股票价格跨度测试:'}
+${lang === 'en' ? 'Price sequence: ' : '价格序列: '}100(1) 80(1) 60(1) 70(2) 60(1) 75(4) 85(6) 
+
+${lang === 'en' ? 'Remove Duplicate Letters Test:' : '去除重复字母测试:'}
+${lang === 'en' ? 'Original string: ' : '原字符串: '}bcabc
+${lang === 'en' ? 'After removing duplicates: ' : '去重后: '}abc
+
+${lang === 'en' ? 'Daily Temperatures Test:' : '每日温度测试:'}
+${lang === 'en' ? 'Temperatures: ' : '温度: '}73 74 75 71 69 72 76 73 
+${lang === 'en' ? 'Days to wait: ' : '等待天数: '}1 1 4 2 1 1 0 0 
+
+${lang === 'en' ? 'Sum of Subarray Minimums Test:' : '子数组最小值之和测试:'}
+${lang === 'en' ? 'Array: ' : '数组: '}3 1 2 4 
+${lang === 'en' ? 'Sum of subarray minimums: ' : '子数组最小值之和: '}17
+
+${lang === 'en' ? 'Trapping Rain Water Test:' : '接雨水测试:'}
+${lang === 'en' ? 'Height array: ' : '高度数组: '}0 1 0 2 1 0 1 3 2 1 2 1 
+${lang === 'en' ? 'Trapped water: ' : '接雨水量: '}6`}
+  />
+
+  <h2>{lang === 'en' ? 'Competitive Programming Techniques' : '竞赛技巧总结'}</h2>
+  
+  <div class="tips">
+    <h3>{lang === 'en' ? 'Core Characteristics of Monotonic Stack:' : '单调栈的核心特征：'}</h3>
+    <ul>
+      <li>{lang === 'en' ? 'Maintains monotonicity of elements in stack (increasing or decreasing)' : '维护栈中元素的单调性（递增或递减）'}</li>
+      <li>{lang === 'en' ? 'Each element enters and exits stack at most once, achieving O(n) time complexity' : '每个元素最多进出栈一次，时间复杂度O(n)'}</li>
+      <li>{lang === 'en' ? 'Suitable for "next greater/smaller element" type problems' : '适用于寻找"下一个更大/更小元素"类问题'}</li>
+      <li>{lang === 'en' ? 'Pop operations determine the influence range of elements' : '通过弹栈操作确定元素的影响范围'}</li>
+    </ul>
+    
+    <h3>{lang === 'en' ? 'Properties of Cartesian Tree:' : '笛卡尔树的性质：'}</h3>
+    <ul>
+      <li>{lang === 'en' ? 'Satisfies both BST property (by index) and heap property (by value)' : '同时满足BST性质（按索引）和堆性质（按值）'}</li>
+      <li>{lang === 'en' ? 'In-order traversal yields the original array\'s index sequence' : '中序遍历得到原数组的索引序列'}</li>
+      <li>{lang === 'en' ? 'Can be used for RMQ queries and divide-and-conquer optimizations' : '可以用于RMQ查询和分治算法优化'}</li>
+      <li>{lang === 'en' ? 'Construction time complexity is O(n) using monotonic stack' : '构建时间复杂度O(n)，使用单调栈实现'}</li>
+    </ul>
+    
+    <h3>{lang === 'en' ? 'Common Application Patterns:' : '常见应用模式：'}</h3>
+    <ul>
+      <li>{lang === 'en' ? 'Range extremum problems: largest rectangle in histogram, trapping rain water' : '区间最值问题：柱状图最大矩形、接雨水'}</li>
+      <li>{lang === 'en' ? 'Array range problems: sum of subarray minimums, temperature waiting' : '数组范围问题：子数组最小值和、温度等待'}</li>
+      <li>{lang === 'en' ? 'String processing: duplicate removal with order, bracket matching' : '字符串处理：去重保序、括号匹配'}</li>
+      <li>{lang === 'en' ? 'Expression evaluation: operator precedence, reverse Polish notation' : '表达式计算：运算符优先级、逆波兰表示'}</li>
+    </ul>
+    
+    <h3>{lang === 'en' ? 'Implementation Techniques:' : '实现技巧：'}</h3>
+    <ul>
+      <li>{lang === 'en' ? 'Store indices instead of values: convenient for distance and range calculations' : '存储索引而非值：便于计算距离和范围'}</li>
+      <li>{lang === 'en' ? 'Correct pop conditions: strict monotonic vs non-strict monotonic' : '正确的弹栈条件：严格单调 vs 非严格单调'}</li>
+      <li>{lang === 'en' ? 'Boundary handling: add sentinel elements at array end' : '边界处理：在数组末尾添加哨兵元素'}</li>
+      <li>{lang === 'en' ? 'Bidirectional scanning: separately calculate left and right boundaries' : '双向扫描：分别计算左边界和右边界'}</li>
+    </ul>
+    
+    <h3>{lang === 'en' ? 'Debugging Points:' : '调试要点：'}</h3>
+    <ul>
+      <li>{lang === 'en' ? 'Check monotonicity maintenance conditions (> vs >=)' : '检查单调性的维护条件（> vs >=）'}</li>
+      <li>{lang === 'en' ? 'Confirm stack storage content (values vs indices)' : '确认栈的存储内容（值 vs 索引）'}</li>
+      <li>{lang === 'en' ? 'Verify calculation logic during pop operations' : '验证弹栈时的计算逻辑'}</li>
+      <li>{lang === 'en' ? 'Test boundary cases (empty stack, single element, etc.)' : '测试边界情况（空栈、单元素等）'}</li>
+    </ul>
+    
+    <h3>{lang === 'en' ? 'Optimization Strategies:' : '优化策略：'}</h3>
+    <ul>
+      <li>{lang === 'en' ? 'Space optimization: use arrays to simulate stack' : '空间优化：使用数组模拟栈'}</li>
+      <li>{lang === 'en' ? 'Constant optimization: reduce unnecessary checks' : '常数优化：减少不必要的判断'}</li>
+      <li>{lang === 'en' ? 'Parallelization: parallel processing in certain cases' : '并行化：某些情况下可以并行处理'}</li>
+      <li>{lang === 'en' ? 'Cache-friendly: consider data access patterns' : '缓存友好：考虑数据访问模式'}</li>
+    </ul>
+  </div>
+
+  <div class="navigation">
+    <a href={`/${lang}/4-competitive/monotonic-queue`} class="prev">← {lang === 'en' ? 'Monotonic Queue' : '单调队列'}</a>
+    <a href={`/${lang}/4-competitive/number-theory`} class="next">{lang === 'en' ? 'Number Theory' : '数论'} →</a>
+  </div>
+</Layout>
+
+<style>
+  .tips {
+    background: #f8f9fa;
+    padding: 1.5rem;
+    border-radius: 8px;
+    margin: 2rem 0;
+    border-left: 4px solid #007bff;
+  }
+  
+  .tips h3 {
+    color: #007bff;
+    margin-top: 1rem;
+  }
+  
+  .tips ul {
+    margin-left: 1rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 3rem;
+    padding-top: 2rem;
+    border-top: 1px solid #eee;
+  }
+  
+  .navigation a {
+    color: #007bff;
+    text-decoration: none;
+    font-weight: 500;
+  }
+  
+  .navigation a:hover {
+    text-decoration: underline;
+  }
+</style> 

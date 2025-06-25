@@ -20,73 +20,339 @@ export async function getStaticPaths() {
     
     <div class="lesson-grid">
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">🧰</div>
+          <div class="lesson-meta">
+            <span class="difficulty intermediate">{lang === 'en' ? 'Intermediate' : '中级'}</span>
+            <span class="duration">120 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/4-competitive/stl-templates`}>{t('comp.stl')}</a></h2>
-        <p>Master C++ STL containers, algorithms, iterators, and template programming.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Master C++ STL containers, algorithms, iterators, and template programming.'
+            : '掌握 C++ STL 容器、算法、迭代器和模板编程技术。学习高效的标准库使用方法。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'STL Containers' : 'STL 容器'}</span>
+            <span class="topic">{lang === 'en' ? 'Iterators' : '迭代器'}</span>
+            <span class="topic">{lang === 'en' ? 'Templates' : '模板'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">🏗️</div>
+          <div class="lesson-meta">
+            <span class="difficulty advanced">{lang === 'en' ? 'Advanced' : '高级'}</span>
+            <span class="duration">135 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/4-competitive/data-structures`}>{t('comp.advanced-ds')}</a></h2>
-        <p>Learn advanced data structures for competitive programming challenges.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Learn advanced data structures for competitive programming challenges.'
+            : '学习竞赛编程中的高级数据结构。掌握并查集、平衡树等复杂数据结构。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'Union-Find' : '并查集'}</span>
+            <span class="topic">{lang === 'en' ? 'Balanced Trees' : '平衡树'}</span>
+            <span class="topic">{lang === 'en' ? 'Advanced DS' : '高级结构'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">#️⃣</div>
+          <div class="lesson-meta">
+            <span class="difficulty advanced">{lang === 'en' ? 'Advanced' : '高级'}</span>
+            <span class="duration">100 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/4-competitive/hash-tables`}>{t('comp.advanced-hash')}</a></h2>
-        <p>Advanced hashing techniques, hash maps, and collision handling strategies.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Advanced hashing techniques, hash maps, and collision handling strategies.'
+            : '高级哈希技术、哈希映射和冲突处理策略。学习字符串哈希和滚动哈希。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'String Hashing' : '字符串哈希'}</span>
+            <span class="topic">{lang === 'en' ? 'Rolling Hash' : '滚动哈希'}</span>
+            <span class="topic">{lang === 'en' ? 'Double Hashing' : '双重哈希'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">🔍</div>
+          <div class="lesson-meta">
+            <span class="difficulty intermediate">{lang === 'en' ? 'Intermediate' : '中级'}</span>
+            <span class="duration">95 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/4-competitive/binary-search`}>{t('comp.binary-search')}</a></h2>
-        <p>Master binary search variations, optimization problems, and search spaces.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Master binary search variations, optimization problems, and search spaces.'
+            : '掌握二分查找的变种、优化问题和搜索空间。学习二分答案和三分查找。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'Binary Search' : '二分查找'}</span>
+            <span class="topic">{lang === 'en' ? 'Binary Answer' : '二分答案'}</span>
+            <span class="topic">{lang === 'en' ? 'Ternary Search' : '三分查找'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">🔎</div>
+          <div class="lesson-meta">
+            <span class="difficulty advanced">{lang === 'en' ? 'Advanced' : '高级'}</span>
+            <span class="duration">140 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/4-competitive/advanced-search`}>{t('comp.advanced-search')}</a></h2>
-        <p>Advanced search techniques, pruning, and optimization strategies.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Advanced search techniques, pruning, and optimization strategies.'
+            : '高级搜索技术、剪枝和优化策略。学习 A* 搜索和启发式搜索算法。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'A* Search' : 'A* 搜索'}</span>
+            <span class="topic">{lang === 'en' ? 'Heuristics' : '启发式'}</span>
+            <span class="topic">{lang === 'en' ? 'Pruning' : '剪枝'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">🔤</div>
+          <div class="lesson-meta">
+            <span class="difficulty advanced">{lang === 'en' ? 'Advanced' : '高级'}</span>
+            <span class="duration">110 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/4-competitive/kmp`}>{t('comp.kmp')}</a></h2>
-        <p>Learn KMP algorithm for efficient string pattern matching and searching.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Learn KMP algorithm for efficient string pattern matching and searching.'
+            : '学习 KMP 算法进行高效的字符串模式匹配和搜索。掌握失败函数的构建。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'KMP Algorithm' : 'KMP 算法'}</span>
+            <span class="topic">{lang === 'en' ? 'Failure Function' : '失败函数'}</span>
+            <span class="topic">{lang === 'en' ? 'Pattern Matching' : '模式匹配'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">🌳</div>
+          <div class="lesson-meta">
+            <span class="difficulty expert">{lang === 'en' ? 'Expert' : '专家'}</span>
+            <span class="duration">150 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/4-competitive/trie`}>{t('comp.trie')}</a></h2>
-        <p>Implement trie data structure for prefix matching and string operations.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Implement trie data structure for prefix matching and string operations.'
+            : '实现字典树数据结构进行前缀匹配和字符串操作。学习字典树的应用场景。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'Trie Trees' : '字典树'}</span>
+            <span class="topic">{lang === 'en' ? 'Prefix Matching' : '前缀匹配'}</span>
+            <span class="topic">{lang === 'en' ? 'String Queries' : '字符串查询'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">📊</div>
+          <div class="lesson-meta">
+            <span class="difficulty expert">{lang === 'en' ? 'Expert' : '专家'}</span>
+            <span class="duration">160 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/4-competitive/segment-tree`}>{t('comp.segment-tree')}</a></h2>
-        <p>Master segment trees for range queries and efficient data structure operations.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Master segment trees for range queries and efficient data structure operations.'
+            : '掌握线段树进行区间查询和高效数据结构操作。学习懒惰传播技术。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'Segment Trees' : '线段树'}</span>
+            <span class="topic">{lang === 'en' ? 'Range Queries' : '区间查询'}</span>
+            <span class="topic">{lang === 'en' ? 'Lazy Propagation' : '懒惰传播'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">📈</div>
+          <div class="lesson-meta">
+            <span class="difficulty advanced">{lang === 'en' ? 'Advanced' : '高级'}</span>
+            <span class="duration">125 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/4-competitive/monotonic-stack`}>{t('comp.monotonic-stack')}</a></h2>
-        <p>Learn monotonic stack patterns for solving optimization problems.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Learn monotonic stack patterns for solving optimization problems.'
+            : '学习单调栈模式解决优化问题。掌握柱状图最大矩形等经典应用。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'Monotonic Stack' : '单调栈'}</span>
+            <span class="topic">{lang === 'en' ? 'Histogram' : '柱状图'}</span>
+            <span class="topic">{lang === 'en' ? 'Max Rectangle' : '最大矩形'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">📉</div>
+          <div class="lesson-meta">
+            <span class="difficulty advanced">{lang === 'en' ? 'Advanced' : '高级'}</span>
+            <span class="duration">130 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/4-competitive/monotonic-queue`}>{t('comp.monotonic-queue')}</a></h2>
-        <p>Understand monotonic queue applications in sliding window problems.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Understand monotonic queue applications in sliding window problems.'
+            : '理解单调队列在滑动窗口问题中的应用。学习区间最值查询技术。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'Monotonic Queue' : '单调队列'}</span>
+            <span class="topic">{lang === 'en' ? 'Sliding Window' : '滑动窗口'}</span>
+            <span class="topic">{lang === 'en' ? 'Range Maximum' : '区间最值'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">🌲</div>
+          <div class="lesson-meta">
+            <span class="difficulty expert">{lang === 'en' ? 'Expert' : '专家'}</span>
+            <span class="duration">145 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/4-competitive/tree-dp`}>{t('comp.tree-dp')}</a></h2>
-        <p>Master dynamic programming on trees and tree-based algorithms.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Master dynamic programming on trees and tree-based algorithms.'
+            : '掌握树上动态规划和基于树的算法。学习树形 DP 的经典模式和应用。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'Tree DP' : '树形 DP'}</span>
+            <span class="topic">{lang === 'en' ? 'Tree Algorithms' : '树算法'}</span>
+            <span class="topic">{lang === 'en' ? 'State Transition' : '状态转移'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">⚡</div>
+          <div class="lesson-meta">
+            <span class="difficulty advanced">{lang === 'en' ? 'Advanced' : '高级'}</span>
+            <span class="duration">115 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/4-competitive/divide-conquer`}>{t('comp.divide-conquer')}</a></h2>
-        <p>Learn divide and conquer strategies for complex problem solving.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Learn divide and conquer strategies for complex problem solving.'
+            : '学习分治策略解决复杂问题。掌握归并排序、快速排序等经典分治算法。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'Divide & Conquer' : '分治算法'}</span>
+            <span class="topic">{lang === 'en' ? 'Merge Sort' : '归并排序'}</span>
+            <span class="topic">{lang === 'en' ? 'Master Theorem' : '主定理'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">🎯</div>
+          <div class="lesson-meta">
+            <span class="difficulty advanced">{lang === 'en' ? 'Advanced' : '高级'}</span>
+            <span class="duration">125 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/4-competitive/greedy-advanced`}>{t('comp.greedy-advanced')}</a></h2>
-        <p>Advanced greedy algorithms and optimization techniques.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Advanced greedy algorithms and optimization techniques.'
+            : '高级贪心算法和优化技术。学习区间调度、最小生成树等贪心应用。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'Greedy Choice' : '贪心选择'}</span>
+            <span class="topic">{lang === 'en' ? 'Interval Scheduling' : '区间调度'}</span>
+            <span class="topic">{lang === 'en' ? 'MST' : '最小生成树'}</span>
+          </div>
+        </div>
       </div>
       
       <div class="lesson-card">
+        <div class="card-header">
+          <div class="lesson-icon">🔢</div>
+          <div class="lesson-meta">
+            <span class="difficulty expert">{lang === 'en' ? 'Expert' : '专家'}</span>
+            <span class="duration">140 min</span>
+          </div>
+        </div>
         <h2><a href={`/${lang}/4-competitive/number-theory`}>{t('comp.number-theory')}</a></h2>
-        <p>Number theory concepts, modular arithmetic, and mathematical algorithms.</p>
+        <p>
+          {lang === 'en' 
+            ? 'Number theory concepts, modular arithmetic, and mathematical algorithms.'
+            : '数论概念、模运算和数学算法。学习欧几里得算法、素数判定等经典算法。'
+          }
+        </p>
+        <div class="card-footer">
+          <div class="topics">
+            <span class="topic">{lang === 'en' ? 'Modular Arithmetic' : '模运算'}</span>
+            <span class="topic">{lang === 'en' ? 'Prime Numbers' : '素数'}</span>
+            <span class="topic">{lang === 'en' ? 'GCD/LCM' : '最大公约数'}</span>
+          </div>
+        </div>
       </div>
     </div>
   </main>
@@ -156,10 +422,72 @@ export async function getStaticPaths() {
   }
   
   .lesson-card p {
-    margin: 0;
+    margin: 0 0 1rem 0;
     color: #6b7280;
     font-size: 0.95rem;
     line-height: 1.6;
+  }
+  
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1rem;
+  }
+  
+  .lesson-icon {
+    font-size: 1.5rem;
+  }
+  
+  .lesson-meta {
+    display: flex;
+    gap: 0.5rem;
+    font-size: 0.8rem;
+  }
+  
+  .difficulty {
+    padding: 0.25rem 0.5rem;
+    border-radius: 12px;
+    font-weight: 500;
+  }
+  
+  .difficulty.intermediate {
+    background: #fef3c7;
+    color: #92400e;
+  }
+  
+  .difficulty.advanced {
+    background: #fecaca;
+    color: #991b1b;
+  }
+  
+  .difficulty.expert {
+    background: #e0e7ff;
+    color: #3730a3;
+  }
+  
+  .duration {
+    color: #6b7280;
+    font-weight: 500;
+  }
+  
+  .card-footer {
+    margin-top: auto;
+  }
+  
+  .topics {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+  }
+  
+  .topic {
+    background: #f1f5f9;
+    color: #475569;
+    padding: 0.25rem 0.5rem;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    font-weight: 500;
   }
   
   @media (max-width: 768px) {
@@ -173,6 +501,16 @@ export async function getStaticPaths() {
     
     .lesson-grid {
       grid-template-columns: 1fr;
+    }
+    
+    .card-header {
+      flex-direction: column;
+      gap: 0.5rem;
+      align-items: flex-start;
+    }
+    
+    .lesson-meta {
+      align-self: flex-end;
     }
   }
 </style> 

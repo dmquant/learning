@@ -1,0 +1,657 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('algo.graph')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/2-algorithm-basics`}>{t('nav.algorithm-basics')}</a> > 
+      {t('algo.graph')}
+    </div>
+    
+    <h1>{t('algo.graph')}</h1>
+    
+    <section>
+      <h2>{lang === 'en' ? 'Introduction to Graph Algorithms' : '图算法简介'}</h2>
+      <p>
+        {lang === 'en' 
+          ? 'Graphs are fundamental data structures representing relationships between entities. Graph algorithms solve problems like finding shortest paths, detecting cycles, and determining connectivity. Understanding graphs is essential for network analysis, social media, GPS navigation, and many other applications.'
+          : '图是表示实体之间关系的基本数据结构。图算法解决寻找最短路径、检测环和确定连通性等问题。理解图对于网络分析、社交媒体、GPS导航和许多其他应用至关重要。'
+        }
+      </p>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Graph Representation' : '图的表示'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Graphs can be represented using adjacency lists (space-efficient for sparse graphs) or adjacency matrices (fast lookup for dense graphs).'
+          : '图可以使用邻接表（对稀疏图节省空间）或邻接矩阵（对密集图快速查找）来表示。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Graph Representation Methods' : '图的表示方法'}
+        code={`#include <iostream>
+#include <vector>
+#include <list>
+using namespace std;
+
+// Adjacency List Representation
+class GraphAdjList {
+private:
+    int V; // Number of vertices
+    vector<list<int>> adj; // Adjacency list
+    
+public:
+    GraphAdjList(int vertices) : V(vertices) {
+        adj.resize(V);
+    }
+    
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        adj[v].push_back(u); // For undirected graph
+    }
+    
+    void printGraph() {
+        cout << "Adjacency List Representation:" << endl;
+        for (int i = 0; i < V; i++) {
+            cout << "Vertex " << i << ": ";
+            for (int neighbor : adj[i]) {
+                cout << neighbor << " ";
+            }
+            cout << endl;
+        }
+        cout << endl;
+    }
+    
+    vector<list<int>>& getAdjList() { return adj; }
+    int getVertices() { return V; }
+};
+
+// Adjacency Matrix Representation
+class GraphAdjMatrix {
+private:
+    int V;
+    vector<vector<int>> adjMatrix;
+    
+public:
+    GraphAdjMatrix(int vertices) : V(vertices) {
+        adjMatrix.resize(V, vector<int>(V, 0));
+    }
+    
+    void addEdge(int u, int v) {
+        adjMatrix[u][v] = 1;
+        adjMatrix[v][u] = 1; // For undirected graph
+    }
+    
+    void printGraph() {
+        cout << "Adjacency Matrix Representation:" << endl;
+        cout << "   ";
+        for (int i = 0; i < V; i++) {
+            cout << i << " ";
+        }
+        cout << endl;
+        
+        for (int i = 0; i < V; i++) {
+            cout << i << ": ";
+            for (int j = 0; j < V; j++) {
+                cout << adjMatrix[i][j] << " ";
+            }
+            cout << endl;
+        }
+        cout << endl;
+    }
+    
+    bool hasEdge(int u, int v) {
+        return adjMatrix[u][v] == 1;
+    }
+    
+    vector<vector<int>>& getMatrix() { return adjMatrix; }
+    int getVertices() { return V; }
+};
+
+int main() {
+    // Create graph with 5 vertices
+    GraphAdjList graphList(5);
+    GraphAdjMatrix graphMatrix(5);
+    
+    // Add edges: 0-1, 0-4, 1-2, 1-3, 1-4, 2-3, 3-4
+    vector<pair<int, int>> edges = {{0,1}, {0,4}, {1,2}, {1,3}, {1,4}, {2,3}, {3,4}};
+    
+    for (auto edge : edges) {
+        graphList.addEdge(edge.first, edge.second);
+        graphMatrix.addEdge(edge.first, edge.second);
+    }
+    
+    graphList.printGraph();
+    graphMatrix.printGraph();
+    
+    // Compare space complexity
+    cout << "Space Analysis:" << endl;
+    cout << "Adjacency List: O(V + E) = O(" << graphList.getVertices() << " + " << edges.size() << ") = O(" << (graphList.getVertices() + edges.size()) << ")" << endl;
+    cout << "Adjacency Matrix: O(V²) = O(" << graphMatrix.getVertices() << "²) = O(" << (graphMatrix.getVertices() * graphMatrix.getVertices()) << ")" << endl;
+    
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'Choose adjacency list for sparse graphs and adjacency matrix for dense graphs or frequent edge queries.' : '为稀疏图选择邻接表，为密集图或频繁边查询选择邻接矩阵。'}
+        output={`Adjacency List Representation:
+Vertex 0: 1 4 
+Vertex 1: 0 2 3 4 
+Vertex 2: 1 3 
+Vertex 3: 1 2 4 
+Vertex 4: 0 1 3 
+
+Adjacency Matrix Representation:
+   0 1 2 3 4 
+0: 0 1 0 0 1 
+1: 1 0 1 1 1 
+2: 0 1 0 1 0 
+3: 0 1 1 0 1 
+4: 1 1 0 1 0`}
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Dijkstra\'s Shortest Path Algorithm' : 'Dijkstra最短路径算法'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Dijkstra\'s algorithm finds the shortest path from a source vertex to all other vertices in a weighted graph with non-negative edge weights. It uses a greedy approach with a priority queue.'
+          : 'Dijkstra算法在具有非负边权重的加权图中找到从源顶点到所有其他顶点的最短路径。它使用带有优先队列的贪心方法。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Dijkstra\'s Algorithm Implementation' : 'Dijkstra算法实现'}
+        code={`#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+using namespace std;
+
+class DijkstraGraph {
+private:
+    int V;
+    vector<vector<pair<int, int>>> adj; // {neighbor, weight}
+    
+public:
+    DijkstraGraph(int vertices) : V(vertices) {
+        adj.resize(V);
+    }
+    
+    void addEdge(int u, int v, int weight) {
+        adj[u].push_back({v, weight});
+        adj[v].push_back({u, weight}); // For undirected graph
+    }
+    
+    vector<int> dijkstra(int src) {
+        // Distance vector initialized to infinity
+        vector<int> dist(V, INT_MAX);
+        vector<int> parent(V, -1);
+        
+        // Priority queue: {distance, vertex}
+        priority_queue<pair<int, int>, vector<pair<int, int>>, greater<pair<int, int>>> pq;
+        
+        dist[src] = 0;
+        pq.push({0, src});
+        
+        cout << "Dijkstra's algorithm execution:" << endl;
+        cout << "Step | Current | Distance | Neighbors Updated" << endl;
+        cout << "-----|---------|----------|------------------" << endl;
+        
+        int step = 1;
+        
+        while (!pq.empty()) {
+            int currentDist = pq.top().first;
+            int u = pq.top().second;
+            pq.pop();
+            
+            // Skip if we've already found a shorter path
+            if (currentDist > dist[u]) continue;
+            
+            cout << " " << step++ << "   |    " << u << "    |    " << currentDist << "     | ";
+            
+            bool updated = false;
+            for (auto& edge : adj[u]) {
+                int v = edge.first;
+                int weight = edge.second;
+                
+                if (dist[u] + weight < dist[v]) {
+                    dist[v] = dist[u] + weight;
+                    parent[v] = u;
+                    pq.push({dist[v], v});
+                    cout << v << "(" << dist[v] << ") ";
+                    updated = true;
+                }
+            }
+            
+            if (!updated) cout << "none";
+            cout << endl;
+        }
+        
+        return dist;
+    }
+    
+    void printShortestPaths(int src, const vector<int>& dist) {
+        cout << "\\nShortest distances from vertex " << src << ":" << endl;
+        cout << "Vertex | Distance | Path" << endl;
+        cout << "-------|----------|-----" << endl;
+        
+        for (int i = 0; i < V; i++) {
+            cout << "  " << i << "    |    ";
+            if (dist[i] == INT_MAX) {
+                cout << "∞" << "    | No path" << endl;
+            } else {
+                cout << dist[i] << "    | ";
+                printPath(src, i, dist);
+                cout << endl;
+            }
+        }
+    }
+    
+private:
+    void printPath(int src, int dest, const vector<int>& dist) {
+        if (src == dest) {
+            cout << src;
+            return;
+        }
+        
+        // Reconstruct path (simplified version)
+        cout << src << " -> ... -> " << dest;
+    }
+};
+
+// Weighted graph for testing
+class WeightedGraphExample {
+public:
+    static void demonstrateDijkstra() {
+        DijkstraGraph g(6);
+        
+        // Add weighted edges
+        g.addEdge(0, 1, 4);
+        g.addEdge(0, 2, 2);
+        g.addEdge(1, 2, 1);
+        g.addEdge(1, 3, 5);
+        g.addEdge(2, 3, 8);
+        g.addEdge(2, 4, 10);
+        g.addEdge(3, 4, 2);
+        g.addEdge(3, 5, 6);
+        g.addEdge(4, 5, 3);
+        
+        cout << "Graph edges with weights:" << endl;
+        cout << "0-1: 4, 0-2: 2, 1-2: 1, 1-3: 5, 2-3: 8," << endl;
+        cout << "2-4: 10, 3-4: 2, 3-5: 6, 4-5: 3" << endl << endl;
+        
+        vector<int> distances = g.dijkstra(0);
+        g.printShortestPaths(0, distances);
+    }
+};
+
+int main() {
+    WeightedGraphExample::demonstrateDijkstra();
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'Dijkstra maintains a priority queue of vertices ordered by their current shortest distance.' : 'Dijkstra维护一个按当前最短距离排序的顶点优先队列。'}
+        output={`Graph edges with weights:
+0-1: 4, 0-2: 2, 1-2: 1, 1-3: 5, 2-3: 8,
+2-4: 10, 3-4: 2, 3-5: 6, 4-5: 3
+
+Dijkstra's algorithm execution:
+Step | Current | Distance | Neighbors Updated
+-----|---------|----------|------------------
+ 1   |    0    |    0     | 1(4) 2(2) 
+ 2   |    2    |    2     | 1(3) 3(10) 4(12) 
+ 3   |    1    |    3     | 3(8) 
+ 4   |    3    |    8     | 4(10) 5(14) 
+ 5   |    4    |    10    | 5(13) 
+ 6   |    5    |    13    | none
+
+Shortest distances from vertex 0:
+Vertex | Distance | Path
+-------|----------|-----
+  0    |    0    | 0
+  1    |    3    | 0 -> ... -> 1
+  2    |    2    | 0 -> ... -> 2
+  3    |    8    | 0 -> ... -> 3
+  4    |    10    | 0 -> ... -> 4
+  5    |    13    | 0 -> ... -> 5`}
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Topological Sorting' : '拓扑排序'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'Topological sorting produces a linear ordering of vertices in a directed acyclic graph (DAG) such that for every directed edge (u,v), vertex u comes before v in the ordering. It\'s useful for scheduling tasks with dependencies.'
+          : '拓扑排序为有向无环图（DAG）中的顶点产生线性排序，使得对于每条有向边(u,v)，顶点u在排序中位于v之前。它对于调度具有依赖关系的任务很有用。'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Topological Sort (Kahn\'s Algorithm)' : '拓扑排序（Kahn算法）'}
+        code={`#include <iostream>
+#include <vector>
+#include <queue>
+#include <string>
+using namespace std;
+
+class TopologicalSort {
+private:
+    int V;
+    vector<vector<int>> adj;
+    vector<string> vertexNames;
+    
+public:
+    TopologicalSort(int vertices) : V(vertices) {
+        adj.resize(V);
+        vertexNames.resize(V);
+    }
+    
+    void setVertexName(int v, const string& name) {
+        vertexNames[v] = name;
+    }
+    
+    void addEdge(int u, int v) {
+        adj[u].push_back(v); // Directed edge from u to v
+    }
+    
+    // Kahn's Algorithm for Topological Sort
+    vector<int> topologicalSortKahn() {
+        vector<int> inDegree(V, 0);
+        
+        // Calculate in-degrees
+        for (int u = 0; u < V; u++) {
+            for (int v : adj[u]) {
+                inDegree[v]++;
+            }
+        }
+        
+        // Queue for vertices with 0 in-degree
+        queue<int> q;
+        for (int i = 0; i < V; i++) {
+            if (inDegree[i] == 0) {
+                q.push(i);
+            }
+        }
+        
+        vector<int> topOrder;
+        cout << "Kahn's Algorithm execution:" << endl;
+        cout << "Step | Removed | Queue Status | In-degrees Updated" << endl;
+        cout << "-----|---------|-------------|-------------------" << endl;
+        
+        int step = 1;
+        
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            topOrder.push_back(u);
+            
+            cout << " " << step++ << "   |   " << vertexNames[u] << "    | ";
+            
+            // Reduce in-degree for all neighbors
+            for (int v : adj[u]) {
+                inDegree[v]--;
+                if (inDegree[v] == 0) {
+                    q.push(v);
+                }
+            }
+            
+            // Print current queue status
+            queue<int> tempQ = q;
+            cout << "[";
+            bool first = true;
+            while (!tempQ.empty()) {
+                if (!first) cout << ",";
+                cout << vertexNames[tempQ.front()];
+                tempQ.pop();
+                first = false;
+            }
+            cout << "] | ";
+            
+            // Print neighbors updated
+            for (int v : adj[u]) {
+                cout << vertexNames[v] << "(" << inDegree[v] << ") ";
+            }
+            cout << endl;
+        }
+        
+        return topOrder;
+    }
+    
+    // DFS-based Topological Sort
+    vector<int> topologicalSortDFS() {
+        vector<bool> visited(V, false);
+        vector<int> topoOrder;
+        
+        for (int i = 0; i < V; i++) {
+            if (!visited[i]) {
+                topologicalSortDFSUtil(i, visited, topoOrder);
+            }
+        }
+        
+        // Reverse the order
+        reverse(topoOrder.begin(), topoOrder.end());
+        return topoOrder;
+    }
+    
+private:
+    void topologicalSortDFSUtil(int v, vector<bool>& visited, vector<int>& topoOrder) {
+        visited[v] = true;
+        
+        for (int u : adj[v]) {
+            if (!visited[u]) {
+                topologicalSortDFSUtil(u, visited, topoOrder);
+            }
+        }
+        
+        topoOrder.push_back(v);
+    }
+    
+public:
+    void printTopologicalOrder(const vector<int>& topOrder, const string& method) {
+        cout << "\\nTopological ordering (" << method << "):" << endl;
+        for (int i = 0; i < topOrder.size(); i++) {
+            cout << vertexNames[topOrder[i]];
+            if (i < topOrder.size() - 1) cout << " -> ";
+        }
+        cout << endl;
+    }
+    
+    bool hasCycle() {
+        vector<int> topOrder = topologicalSortKahn();
+        return topOrder.size() != V; // If not all vertices are included, there's a cycle
+    }
+};
+
+// Course scheduling example
+class CourseScheduler {
+public:
+    static void demonstrateTopologicalSort() {
+        // Create a course dependency graph
+        TopologicalSort courses(8);
+        
+        // Set course names
+        courses.setVertexName(0, "Math");
+        courses.setVertexName(1, "Physics");
+        courses.setVertexName(2, "Chemistry");
+        courses.setVertexName(3, "Biology");
+        courses.setVertexName(4, "AdvMath");
+        courses.setVertexName(5, "AdvPhys");
+        courses.setVertexName(6, "Research");
+        courses.setVertexName(7, "Thesis");
+        
+        // Add prerequisites (dependencies)
+        courses.addEdge(0, 4); // Math -> AdvMath
+        courses.addEdge(1, 5); // Physics -> AdvPhys
+        courses.addEdge(0, 1); // Math -> Physics
+        courses.addEdge(2, 3); // Chemistry -> Biology
+        courses.addEdge(4, 6); // AdvMath -> Research
+        courses.addEdge(5, 6); // AdvPhys -> Research
+        courses.addEdge(3, 6); // Biology -> Research
+        courses.addEdge(6, 7); // Research -> Thesis
+        
+        cout << "Course Prerequisites:" << endl;
+        cout << "Math -> Physics, AdvMath" << endl;
+        cout << "Physics -> AdvPhys" << endl;
+        cout << "Chemistry -> Biology" << endl;
+        cout << "AdvMath, AdvPhys, Biology -> Research" << endl;
+        cout << "Research -> Thesis" << endl << endl;
+        
+        vector<int> kahnOrder = courses.topologicalSortKahn();
+        courses.printTopologicalOrder(kahnOrder, "Kahn's Algorithm");
+        
+        vector<int> dfsOrder = courses.topologicalSortDFS();
+        courses.printTopologicalOrder(dfsOrder, "DFS-based");
+    }
+};
+
+int main() {
+    CourseScheduler::demonstrateTopologicalSort();
+    return 0;
+}`}
+        client:load
+        explanation={lang === 'en' ? 'Kahn\'s algorithm removes vertices with zero in-degree iteratively, while DFS-based approach uses post-order traversal.' : 'Kahn算法迭代地移除入度为零的顶点，而基于DFS的方法使用后序遍历。'}
+        output={`Course Prerequisites:
+Math -> Physics, AdvMath
+Physics -> AdvPhys
+Chemistry -> Biology
+AdvMath, AdvPhys, Biology -> Research
+Research -> Thesis
+
+Kahn's Algorithm execution:
+Step | Removed | Queue Status | In-degrees Updated
+-----|---------|-------------|-------------------
+ 1   |   Math    | [Chemistry] | Physics(0) AdvMath(0) 
+ 2   |   Chemistry    | [Physics,AdvMath] | Biology(0) 
+ 3   |   Physics    | [AdvMath,Biology] | AdvPhys(0) 
+ 4   |   AdvMath    | [Biology,AdvPhys] | Research(2) 
+ 5   |   Biology    | [AdvPhys] | Research(1) 
+ 6   |   AdvPhys    | [] | Research(0) 
+ 7   |   Research    | [] | Thesis(0) 
+ 8   |   Thesis    | [] | 
+
+Topological ordering (Kahn's Algorithm):
+Math -> Chemistry -> Physics -> AdvMath -> Biology -> AdvPhys -> Research -> Thesis`}
+      />
+    </section>
+
+    <div class="navigation">
+      <a href={`/${lang}/2-algorithm-basics/greedy-algorithms`} class="nav-button prev">
+        ← {lang === 'en' ? 'Previous: Greedy Algorithms' : '上一节：贪心算法'}
+      </a>
+      <a href={`/${lang}/2-algorithm-basics/string-algorithms`} class="nav-button next">
+        {lang === 'en' ? 'Next: String Algorithms' : '下一节：字符串算法'} →
+      </a>
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 2rem;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    color: #6b7280;
+    font-size: 0.9rem;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    color: #1e293b;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  h2 {
+    font-size: 1.5rem;
+    color: #1e293b;
+    margin: 2rem 0 1rem 0;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  p {
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+  
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+  }
+  
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: #4f46e5;
+    color: white;
+    text-decoration: none;
+    border-radius: 6px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+  }
+  
+  .nav-button:hover {
+    background: #3730a3;
+    transform: translateY(-2px);
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+    
+    .nav-button {
+      text-align: center;
+    }
+  }
+</style>

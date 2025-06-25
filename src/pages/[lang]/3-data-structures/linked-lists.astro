@@ -1,0 +1,500 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={`${t('ds.linked-lists')} - ${t('site.title')}`}>
+  <main>
+    <div class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a> > 
+      <a href={`/${lang}/3-data-structures`}>{t('nav.data-structures')}</a> > 
+      {t('ds.linked-lists')}
+    </div>
+    
+    <h1>{t('ds.linked-lists')}</h1>
+    
+    <div class="overview">
+      <p>
+        {lang === 'en' 
+          ? 'Linked lists are linear data structures where elements are stored in nodes, and each node contains data and a pointer/reference to the next node. Unlike arrays, linked list elements are not stored in contiguous memory locations.'
+          : '链表是线性数据结构，其中元素存储在节点中，每个节点包含数据和指向下一个节点的指针/引用。与数组不同，链表元素不存储在连续的内存位置中。'
+        }
+      </p>
+      
+      <p>
+        {lang === 'en'
+          ? 'Linked lists provide dynamic memory allocation and efficient insertion/deletion operations, making them ideal for applications where the size of data is unknown or frequently changes.'
+          : '链表提供动态内存分配和高效的插入/删除操作，使其非常适用于数据大小未知或频繁变化的应用程序。'
+        }
+      </p>
+    </div>
+
+    <section>
+      <h2>{lang === 'en' ? 'Singly Linked List' : '单向链表'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'A singly linked list is the simplest type where each node points to the next node in the sequence:'
+          : '单向链表是最简单的类型，其中每个节点都指向序列中的下一个节点：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Singly Linked List Implementation' : '单向链表实现'}
+        code={`#include <iostream>
+using namespace std;
+
+// Node structure
+struct Node {
+    int data;
+    Node* next;
+    
+    Node(int value) : data(value), next(nullptr) {}
+};
+
+class LinkedList {
+private:
+    Node* head;
+
+public:
+    LinkedList() : head(nullptr) {}
+    
+    // Insert at beginning
+    void insertAtBeginning(int value) {
+        Node* newNode = new Node(value);
+        newNode->next = head;
+        head = newNode;
+    }
+    
+    // Insert at end
+    void insertAtEnd(int value) {
+        Node* newNode = new Node(value);
+        if (head == nullptr) {
+            head = newNode;
+            return;
+        }
+        
+        Node* temp = head;
+        while (temp->next != nullptr) {
+            temp = temp->next;
+        }
+        temp->next = newNode;
+    }
+    
+    // Delete by value
+    void deleteValue(int value) {
+        if (head == nullptr) return;
+        
+        if (head->data == value) {
+            Node* temp = head;
+            head = head->next;
+            delete temp;
+            return;
+        }
+        
+        Node* current = head;
+        while (current->next != nullptr && current->next->data != value) {
+            current = current->next;
+        }
+        
+        if (current->next != nullptr) {
+            Node* temp = current->next;
+            current->next = current->next->next;
+            delete temp;
+        }
+    }
+    
+    // Display list
+    void display() {
+        Node* temp = head;
+        while (temp != nullptr) {
+            cout << temp->data << " -> ";
+            temp = temp->next;
+        }
+        cout << "NULL" << endl;
+    }
+    
+    // Search for value
+    bool search(int value) {
+        Node* temp = head;
+        while (temp != nullptr) {
+            if (temp->data == value) {
+                return true;
+            }
+            temp = temp->next;
+        }
+        return false;
+    }
+    
+    // Destructor
+    ~LinkedList() {
+        while (head != nullptr) {
+            Node* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
+};
+
+int main() {
+    LinkedList list;
+    
+    // Insert elements
+    list.insertAtEnd(10);
+    list.insertAtEnd(20);
+    list.insertAtEnd(30);
+    list.insertAtBeginning(5);
+    
+    cout << "Linked List: ";
+    list.display();
+    
+    // Search
+    cout << "Search 20: " << (list.search(20) ? "Found" : "Not Found") << endl;
+    cout << "Search 25: " << (list.search(25) ? "Found" : "Not Found") << endl;
+    
+    // Delete
+    list.deleteValue(20);
+    cout << "After deleting 20: ";
+    list.display();
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Doubly Linked List' : '双向链表'}</h2>
+      <p>
+        {lang === 'en'
+          ? 'A doubly linked list has nodes with pointers to both next and previous nodes, allowing bidirectional traversal:'
+          : '双向链表的节点具有指向下一个和上一个节点的指针，允许双向遍历：'
+        }
+      </p>
+      
+      <CodeExample
+        title={lang === 'en' ? 'Doubly Linked List Implementation' : '双向链表实现'}
+        code={`#include <iostream>
+using namespace std;
+
+struct DoublyNode {
+    int data;
+    DoublyNode* next;
+    DoublyNode* prev;
+    
+    DoublyNode(int value) : data(value), next(nullptr), prev(nullptr) {}
+};
+
+class DoublyLinkedList {
+private:
+    DoublyNode* head;
+    DoublyNode* tail;
+
+public:
+    DoublyLinkedList() : head(nullptr), tail(nullptr) {}
+    
+    // Insert at beginning
+    void insertAtBeginning(int value) {
+        DoublyNode* newNode = new DoublyNode(value);
+        if (head == nullptr) {
+            head = tail = newNode;
+        } else {
+            newNode->next = head;
+            head->prev = newNode;
+            head = newNode;
+        }
+    }
+    
+    // Insert at end
+    void insertAtEnd(int value) {
+        DoublyNode* newNode = new DoublyNode(value);
+        if (tail == nullptr) {
+            head = tail = newNode;
+        } else {
+            tail->next = newNode;
+            newNode->prev = tail;
+            tail = newNode;
+        }
+    }
+    
+    // Display forward
+    void displayForward() {
+        DoublyNode* temp = head;
+        cout << "Forward: ";
+        while (temp != nullptr) {
+            cout << temp->data << " <-> ";
+            temp = temp->next;
+        }
+        cout << "NULL" << endl;
+    }
+    
+    // Display backward
+    void displayBackward() {
+        DoublyNode* temp = tail;
+        cout << "Backward: ";
+        while (temp != nullptr) {
+            cout << temp->data << " <-> ";
+            temp = temp->prev;
+        }
+        cout << "NULL" << endl;
+    }
+    
+    // Delete by value
+    void deleteValue(int value) {
+        DoublyNode* temp = head;
+        while (temp != nullptr && temp->data != value) {
+            temp = temp->next;
+        }
+        
+        if (temp == nullptr) return; // Value not found
+        
+        if (temp->prev) {
+            temp->prev->next = temp->next;
+        } else {
+            head = temp->next;
+        }
+        
+        if (temp->next) {
+            temp->next->prev = temp->prev;
+        } else {
+            tail = temp->prev;
+        }
+        
+        delete temp;
+    }
+    
+    ~DoublyLinkedList() {
+        while (head != nullptr) {
+            DoublyNode* temp = head;
+            head = head->next;
+            delete temp;
+        }
+    }
+};
+
+int main() {
+    DoublyLinkedList list;
+    
+    list.insertAtEnd(10);
+    list.insertAtEnd(20);
+    list.insertAtEnd(30);
+    list.insertAtBeginning(5);
+    
+    list.displayForward();
+    list.displayBackward();
+    
+    list.deleteValue(20);
+    cout << "After deleting 20:" << endl;
+    list.displayForward();
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? 'Advantages and Disadvantages' : '优缺点'}</h2>
+      
+      <div class="comparison">
+        <div class="advantages">
+          <h3>{lang === 'en' ? 'Advantages' : '优点'}</h3>
+          <ul>
+            <li>
+              {lang === 'en'
+                ? 'Dynamic size - can grow or shrink during runtime'
+                : '动态大小 - 可以在运行时增长或收缩'
+              }
+            </li>
+            <li>
+              {lang === 'en'
+                ? 'Efficient insertion/deletion at beginning - O(1)'
+                : '在开头高效插入/删除 - O(1)'
+              }
+            </li>
+            <li>
+              {lang === 'en'
+                ? 'Memory efficient - allocates memory as needed'
+                : '内存高效 - 按需分配内存'
+              }
+            </li>
+            <li>
+              {lang === 'en'
+                ? 'No memory waste - unlike arrays with fixed size'
+                : '无内存浪费 - 不像固定大小的数组'
+              }
+            </li>
+          </ul>
+        </div>
+        
+        <div class="disadvantages">
+          <h3>{lang === 'en' ? 'Disadvantages' : '缺点'}</h3>
+          <ul>
+            <li>
+              {lang === 'en'
+                ? 'No random access - must traverse from head'
+                : '无随机访问 - 必须从头开始遍历'
+              }
+            </li>
+            <li>
+              {lang === 'en'
+                ? 'Extra memory for storing pointers'
+                : '存储指针需要额外内存'
+              }
+            </li>
+            <li>
+              {lang === 'en'
+                ? 'Not cache friendly - elements scattered in memory'
+                : '对缓存不友好 - 元素在内存中分散'
+              }
+            </li>
+            <li>
+              {lang === 'en'
+                ? 'No backward traversal in singly linked lists'
+                : '单向链表无法向后遍历'
+              }
+            </li>
+          </ul>
+        </div>
+      </div>
+    </section>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    width: 1200px;
+    max-width: calc(100% - 2rem);
+    color: #1e293b;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .overview {
+    background: #f8fafc;
+    border-left: 4px solid #4f46e5;
+    padding: 1.5rem;
+    margin: 2rem 0;
+    border-radius: 0 8px 8px 0;
+  }
+  
+  .overview p {
+    margin-bottom: 1rem;
+    font-size: 1.1rem;
+    line-height: 1.7;
+  }
+  
+  .overview p:last-child {
+    margin-bottom: 0;
+  }
+  
+  section {
+    margin: 3rem 0;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1e293b;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+  
+  p {
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #374151;
+  }
+  
+  .comparison {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2rem;
+    margin: 2rem 0;
+  }
+  
+  .advantages, .disadvantages {
+    background: #f8fafc;
+    padding: 1.5rem;
+    border-radius: 8px;
+    border-left: 4px solid #10b981;
+  }
+  
+  .disadvantages {
+    border-left-color: #ef4444;
+  }
+  
+  .comparison h3 {
+    margin-top: 0;
+    margin-bottom: 1rem;
+    font-size: 1.25rem;
+    font-weight: 600;
+  }
+  
+  .comparison ul {
+    margin: 0;
+    padding-left: 1.5rem;
+  }
+  
+  .comparison li {
+    margin-bottom: 0.75rem;
+    font-size: 1rem;
+    line-height: 1.6;
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+    }
+    
+    .comparison {
+      grid-template-columns: 1fr;
+    }
+  }
+</style> 

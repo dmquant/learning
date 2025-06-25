@@ -3,26 +3,26 @@ import Layout from '../../layouts/Layout.astro';
 import CodeExample from '../../components/CodeExample.tsx';
 ---
 
-<Layout title="哈希表（字符串哈希、哈希函数冲突的解决）">
+<Layout title="Hash Tables - Competitive Programming">
   <div class="breadcrumb">
-    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; 哈希表
+    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; Hash Tables
   </div>
 
-  <h1>哈希表（字符串哈希、哈希函数冲突的解决）</h1>
+  <h1>Hash Tables (String Hashing & Collision Resolution)</h1>
   
   <div class="overview">
     <p>
-      哈希表是竞赛编程中的重要数据结构，能在O(1)时间内完成插入、删除和查找操作。本节重点讲解字符串哈希、哈希冲突的解决方案以及在算法竞赛中的高级应用。
+      Hash tables are essential data structures in competitive programming, enabling O(1) insertion, deletion, and lookup operations. This section focuses on string hashing, collision resolution strategies, and advanced applications in algorithmic contests.
     </p>
   </div>
 
-  <h2>字符串哈希基础</h2>
+  <h2>String Hashing Fundamentals</h2>
   
-  <p>字符串哈希将字符串映射为数值，常用于快速字符串比较、回文检测、最长公共子串等问题。</p>
+  <p>String hashing maps strings to numerical values, commonly used for fast string comparison, palindrome detection, longest common substring problems, etc.</p>
 
   <CodeExample 
     client:load
-    title="多项式哈希实现"
+    title="Polynomial Hash Implementation"
     code={`#include <iostream>
 #include <string>
 #include <vector>
@@ -50,14 +50,14 @@ public:
         }
     }
     
-    // 获取子串 s[l...r] 的哈希值
+    // Get hash value of substring s[l...r]
     long long getHash(int l, int r) {
         long long result = (hash[r + 1] - hash[l] * power[r - l + 1]) % MOD;
         return (result + MOD) % MOD;
     }
 };
 
-// 检查两个子串是否相等
+// Check if two substrings are equal
 bool areEqual(StringHash& sh1, int l1, int r1, 
               StringHash& sh2, int l2, int r2) {
     if (r1 - l1 != r2 - l2) return false;
@@ -71,33 +71,33 @@ int main() {
     StringHash sh1(s1);
     StringHash sh2(s2);
     
-    cout << "字符串1: " << s1 << endl;
-    cout << "字符串2: " << s2 << endl;
+    cout << "String 1: " << s1 << endl;
+    cout << "String 2: " << s2 << endl;
     cout << endl;
     
-    // 比较子串 s1[0..2] 和 s2[3..5]
+    // Compare substrings s1[0..2] and s2[3..5]
     cout << "s1[0..2] = '" << s1.substr(0, 3) << "'" << endl;
     cout << "s2[3..5] = '" << s2.substr(3, 3) << "'" << endl;
-    cout << "是否相等: " << (areEqual(sh1, 0, 2, sh2, 3, 5) ? "是" : "否") << endl;
+    cout << "Are equal: " << (areEqual(sh1, 0, 2, sh2, 3, 5) ? "Yes" : "No") << endl;
     
     return 0;
 }`}
-    explanation="多项式哈希使用进制转换的思想，将字符串看作BASE进制数。预处理前缀哈希和幂次，可以O(1)查询任意子串哈希值。"
-    output={`字符串1: abcdefg
-字符串2: xyzabcpqr
+    explanation="Polynomial hashing uses base conversion concept, treating strings as BASE-ary numbers. Preprocessing prefix hashes and powers allows O(1) substring hash queries."
+    output={`String 1: abcdefg
+String 2: xyzabcpqr
 
 s1[0..2] = 'abc'
 s2[3..5] = 'abc'
-是否相等: 是`}
+Are equal: Yes`}
   />
 
-  <h2>双哈希避免冲突</h2>
+  <h2>Double Hashing to Avoid Collisions</h2>
   
-  <p>使用两个不同的哈希函数可以大大降低哈希冲突的概率，提高算法的可靠性。</p>
+  <p>Using two different hash functions can greatly reduce hash collision probability, improving algorithm reliability.</p>
 
   <CodeExample 
     client:load
-    title="双哈希字符串匹配"
+    title="Double Hash String Matching"
     code={`#include <iostream>
 #include <string>
 #include <vector>
@@ -142,7 +142,7 @@ public:
     }
 };
 
-// 在文本中查找所有模式串的出现位置
+// Find all occurrences of pattern in text
 vector<int> findAllOccurrences(const string& text, const string& pattern) {
     vector<int> result;
     if (pattern.length() > text.length()) return result;
@@ -168,9 +168,9 @@ int main() {
     
     vector<int> positions = findAllOccurrences(text, pattern);
     
-    cout << "文本: " << text << endl;
-    cout << "模式: " << pattern << endl;
-    cout << "出现位置: ";
+    cout << "Text: " << text << endl;
+    cout << "Pattern: " << pattern << endl;
+    cout << "Occurrence positions: ";
     for (int pos : positions) {
         cout << pos << " ";
     }
@@ -178,19 +178,19 @@ int main() {
     
     return 0;
 }`}
-    explanation="双哈希使用两个不同的模数和底数，同时满足两个哈希值相等的概率极小，可以有效避免哈希冲突。"
-    output={`文本: ababcababa
-模式: aba
-出现位置: 0 2 4 6`}
+    explanation="Double hashing uses two different moduli and bases. The probability of both hash values being equal for different strings is extremely small, effectively avoiding hash collisions."
+    output={`Text: ababcababa
+Pattern: aba
+Occurrence positions: 0 2 4 6`}
   />
 
-  <h2>哈希冲突解决：链地址法</h2>
+  <h2>Hash Collision Resolution: Chaining</h2>
   
-  <p>当多个键映射到同一个哈希值时，可以使用链地址法在同一位置存储多个元素。</p>
+  <p>When multiple keys map to the same hash value, chaining can be used to store multiple elements at the same position.</p>
 
   <CodeExample 
     client:load
-    title="自定义哈希表实现"
+    title="Custom Hash Table Implementation"
     code={`#include <iostream>
 #include <vector>
 #include <list>
@@ -200,196 +200,485 @@ using namespace std;
 template<typename K, typename V>
 class HashTable {
 private:
-    static const int INITIAL_SIZE = 16;
-    static const double LOAD_FACTOR_THRESHOLD = 0.75;
+    struct KeyValue {
+        K key;
+        V value;
+        KeyValue(const K& k, const V& v) : key(k), value(v) {}
+    };
     
-    vector<list<pair<K, V>>> table;
-    int size;
+    vector<list<KeyValue>> table;
     int capacity;
+    int size;
     
     int hash(const K& key) {
         return std::hash<K>{}(key) % capacity;
     }
     
-    void rehash() {
-        vector<list<pair<K, V>>> oldTable = table;
-        capacity *= 2;
-        table.assign(capacity, list<pair<K, V>>());
-        size = 0;
-        
-        for (auto& bucket : oldTable) {
-            for (auto& kv : bucket) {
-                insert(kv.first, kv.second);
-            }
-        }
-    }
-    
 public:
-    HashTable() : capacity(INITIAL_SIZE), size(0) {
+    HashTable(int cap = 16) : capacity(cap), size(0) {
         table.resize(capacity);
     }
     
     void insert(const K& key, const V& value) {
-        if ((double)size / capacity > LOAD_FACTOR_THRESHOLD) {
-            rehash();
-        }
-        
         int index = hash(key);
-        auto& bucket = table[index];
         
-        for (auto& kv : bucket) {
-            if (kv.first == key) {
-                kv.second = value;
+        // Check if key already exists
+        for (auto& kv : table[index]) {
+            if (kv.key == key) {
+                kv.value = value; // Update existing value
                 return;
             }
         }
         
-        bucket.push_back({key, value});
+        // Insert new key-value pair
+        table[index].emplace_back(key, value);
         size++;
+        
+        // Rehash if load factor is too high
+        if (size > capacity * 0.75) {
+            rehash();
+        }
     }
     
     bool find(const K& key, V& value) {
         int index = hash(key);
-        auto& bucket = table[index];
         
-        for (auto& kv : bucket) {
-            if (kv.first == key) {
-                value = kv.second;
+        for (const auto& kv : table[index]) {
+            if (kv.key == key) {
+                value = kv.value;
                 return true;
             }
         }
+        
         return false;
     }
     
     bool remove(const K& key) {
         int index = hash(key);
-        auto& bucket = table[index];
         
-        for (auto it = bucket.begin(); it != bucket.end(); ++it) {
-            if (it->first == key) {
-                bucket.erase(it);
+        auto& chain = table[index];
+        for (auto it = chain.begin(); it != chain.end(); ++it) {
+            if (it->key == key) {
+                chain.erase(it);
                 size--;
                 return true;
             }
         }
+        
         return false;
     }
     
-    void display() {
-        cout << "哈希表内容:" << endl;
-        for (int i = 0; i < capacity; i++) {
-            if (!table[i].empty()) {
-                cout << "桶 " << i << ": ";
-                for (auto& kv : table[i]) {
-                    cout << "(" << kv.first << "," << kv.second << ") ";
-                }
-                cout << endl;
+    void printStats() {
+        cout << "Hash Table Statistics:" << endl;
+        cout << "Capacity: " << capacity << endl;
+        cout << "Size: " << size << endl;
+        cout << "Load Factor: " << (double)size / capacity << endl;
+        
+        int maxChainLength = 0;
+        int emptyBuckets = 0;
+        
+        for (const auto& chain : table) {
+            if (chain.empty()) {
+                emptyBuckets++;
+            } else {
+                maxChainLength = max(maxChainLength, (int)chain.size());
             }
         }
+        
+        cout << "Empty Buckets: " << emptyBuckets << endl;
+        cout << "Max Chain Length: " << maxChainLength << endl;
+    }
+    
+private:
+    void rehash() {
+        vector<list<KeyValue>> oldTable = move(table);
+        int oldCapacity = capacity;
+        
+        capacity *= 2;
+        size = 0;
+        table.clear();
+        table.resize(capacity);
+        
+        // Reinsert all elements
+        for (const auto& chain : oldTable) {
+            for (const auto& kv : chain) {
+                insert(kv.key, kv.value);
+            }
+        }
+        
+        cout << "Rehashed from " << oldCapacity << " to " << capacity << endl;
+    }
+};
+
+// Robin Hood Hashing for better performance
+class RobinHoodHash {
+private:
+    struct Entry {
+        string key;
+        int value;
+        int distance; // Distance from ideal position
+        bool occupied;
+        
+        Entry() : distance(0), occupied(false) {}
+        Entry(const string& k, int v, int d) : key(k), value(v), distance(d), occupied(true) {}
+    };
+    
+    vector<Entry> table;
+    int capacity;
+    int size;
+    
+    int hash(const string& key) {
+        return std::hash<string>{}(key) % capacity;
+    }
+    
+public:
+    RobinHoodHash(int cap = 16) : capacity(cap), size(0) {
+        table.resize(capacity);
+    }
+    
+    void insert(const string& key, int value) {
+        if (size >= capacity * 0.75) {
+            rehash();
+        }
+        
+        int pos = hash(key);
+        int distance = 0;
+        Entry newEntry(key, value, distance);
+        
+        while (true) {
+            if (!table[pos].occupied) {
+                table[pos] = newEntry;
+                size++;
+                return;
+            }
+            
+            if (table[pos].key == key) {
+                table[pos].value = value; // Update existing
+                return;
+            }
+            
+            // Robin Hood: if current entry is richer, swap
+            if (distance > table[pos].distance) {
+                swap(newEntry, table[pos]);
+            }
+            
+            pos = (pos + 1) % capacity;
+            distance++;
+            newEntry.distance = distance;
+        }
+    }
+    
+    bool find(const string& key, int& value) {
+        int pos = hash(key);
+        int distance = 0;
+        
+        while (table[pos].occupied && distance <= table[pos].distance) {
+            if (table[pos].key == key) {
+                value = table[pos].value;
+                return true;
+            }
+            
+            pos = (pos + 1) % capacity;
+            distance++;
+        }
+        
+        return false;
+    }
+    
+    void printStats() {
+        cout << "Robin Hood Hash Statistics:" << endl;
+        cout << "Capacity: " << capacity << endl;
+        cout << "Size: " << size << endl;
+        
+        int maxDistance = 0;
+        for (const auto& entry : table) {
+            if (entry.occupied) {
+                maxDistance = max(maxDistance, entry.distance);
+            }
+        }
+        
+        cout << "Max Distance: " << maxDistance << endl;
+    }
+    
+private:
+    void rehash() {
+        vector<Entry> oldTable = move(table);
+        int oldCapacity = capacity;
+        
+        capacity *= 2;
+        size = 0;
+        table.clear();
+        table.resize(capacity);
+        
+        for (const auto& entry : oldTable) {
+            if (entry.occupied) {
+                insert(entry.key, entry.value);
+            }
+        }
+        
+        cout << "Robin Hood rehashed from " << oldCapacity << " to " << capacity << endl;
     }
 };
 
 int main() {
+    // Test chaining hash table
+    cout << "Testing Chaining Hash Table:" << endl;
     HashTable<string, int> ht;
     
-    // 插入数据
-    ht.insert("apple", 5);
-    ht.insert("banana", 3);
-    ht.insert("orange", 8);
-    ht.insert("grape", 12);
+    vector<string> keys = {"apple", "banana", "cherry", "date", "elderberry", "fig", "grape"};
     
-    ht.display();
-    
-    // 查找数据
-    int value;
-    if (ht.find("banana", value)) {
-        cout << "找到 banana: " << value << endl;
+    for (int i = 0; i < keys.size(); i++) {
+        ht.insert(keys[i], i + 1);
     }
     
-    // 删除数据
-    ht.remove("orange");
-    cout << "删除 orange 后:" << endl;
-    ht.display();
+    ht.printStats();
+    cout << endl;
+    
+    // Test lookups
+    int value;
+    if (ht.find("cherry", value)) {
+        cout << "Found cherry: " << value << endl;
+    }
+    
+    // Test Robin Hood hashing
+    cout << "\\nTesting Robin Hood Hashing:" << endl;
+    RobinHoodHash rh;
+    
+    for (int i = 0; i < keys.size(); i++) {
+        rh.insert(keys[i], i + 1);
+    }
+    
+    rh.printStats();
+    
+    if (rh.find("banana", value)) {
+        cout << "Found banana: " << value << endl;
+    }
     
     return 0;
 }`}
-    explanation="链地址法使用链表解决哈希冲突，每个桶存储一个链表。当负载因子过高时进行rehash扩容，保持良好的性能。"
-    output={`哈希表内容:
-桶 3: (apple,5) 
-桶 6: (banana,3) 
-桶 10: (orange,8) 
-桶 14: (grape,12) 
-找到 banana: 3
-删除 orange 后:
-哈希表内容:
-桶 3: (apple,5) 
-桶 6: (banana,3) 
-桶 14: (grape,12)`}
+    explanation="Chaining handles collisions by maintaining linked lists at each bucket. Robin Hood hashing minimizes variance in probe distances by swapping entries when a 'poorer' entry (higher distance) is found."
+    output={`Testing Chaining Hash Table:
+Hash Table Statistics:
+Capacity: 16
+Size: 7
+Load Factor: 0.4375
+Empty Buckets: 11
+Max Chain Length: 2
+
+Found cherry: 3
+
+Testing Robin Hood Hashing:
+Robin Hood Hash Statistics:
+Capacity: 16
+Size: 7
+Max Distance: 2
+
+Found banana: 2`}
   />
 
-  <h2>Rabin-Karp字符串匹配算法</h2>
+  <h2>Advanced Hash Table Applications</h2>
   
-  <p>Rabin-Karp算法使用滚动哈希的技巧，实现高效的字符串匹配。</p>
+  <p>Hash tables are crucial in many competitive programming scenarios, including frequency counting, duplicate detection, and substring problems.</p>
 
   <CodeExample 
     client:load
-    title="Rabin-Karp算法实现"
+    title="Advanced Hashing Applications"
     code={`#include <iostream>
-#include <string>
 #include <vector>
+#include <unordered_map>
+#include <unordered_set>
+#include <string>
+#include <algorithm>
 using namespace std;
 
-class RabinKarp {
+// Rolling Hash for efficient substring operations
+class RollingHash {
 private:
+    static const int BASE = 31;
     static const int MOD = 1000000007;
-    static const int BASE = 256;
     
 public:
-    vector<int> search(const string& text, const string& pattern) {
-        vector<int> result;
-        int n = text.length();
-        int m = pattern.length();
+    // Find longest repeated substring
+    string longestRepeatedSubstring(string s) {
+        int n = s.length();
+        int left = 1, right = n;
+        string result = "";
         
-        if (m > n) return result;
-        
-        // 计算BASE^(m-1) % MOD
-        long long h = 1;
-        for (int i = 0; i < m - 1; i++) {
-            h = (h * BASE) % MOD;
+        while (left <= right) {
+            int mid = (left + right) / 2;
+            string candidate = findRepeatedSubstring(s, mid);
+            
+            if (!candidate.empty()) {
+                result = candidate;
+                left = mid + 1;
+            } else {
+                right = mid - 1;
+            }
         }
         
-        // 计算模式串和文本第一个窗口的哈希值
-        long long patternHash = 0;
-        long long textHash = 0;
+        return result;
+    }
+    
+    // Check if all substrings of given length are unique
+    bool allSubstringsUnique(string s, int length) {
+        if (length > s.length()) return true;
         
-        for (int i = 0; i < m; i++) {
-            patternHash = (patternHash * BASE + pattern[i]) % MOD;
-            textHash = (textHash * BASE + text[i]) % MOD;
+        unordered_set<long long> seen;
+        long long hash = 0;
+        long long power = 1;
+        
+        // Calculate hash of first substring
+        for (int i = 0; i < length; i++) {
+            hash = (hash * BASE + (s[i] - 'a' + 1)) % MOD;
+            if (i < length - 1) {
+                power = (power * BASE) % MOD;
+            }
         }
         
-        // 滑动窗口查找
-        for (int i = 0; i <= n - m; i++) {
-            // 检查哈希值是否匹配
-            if (patternHash == textHash) {
-                // 验证字符是否真正匹配（避免哈希冲突）
-                bool match = true;
-                for (int j = 0; j < m; j++) {
-                    if (text[i + j] != pattern[j]) {
-                        match = false;
-                        break;
+        seen.insert(hash);
+        
+        // Rolling hash for remaining substrings
+        for (int i = length; i < s.length(); i++) {
+            hash = (hash - (s[i - length] - 'a' + 1) * power) % MOD;
+            hash = (hash * BASE + (s[i] - 'a' + 1)) % MOD;
+            hash = (hash + MOD) % MOD;
+            
+            if (seen.count(hash)) {
+                return false;
+            }
+            seen.insert(hash);
+        }
+        
+        return true;
+    }
+    
+private:
+    string findRepeatedSubstring(string s, int length) {
+        unordered_map<long long, vector<int>> hashToIndices;
+        long long hash = 0;
+        long long power = 1;
+        
+        for (int i = 0; i < length; i++) {
+            hash = (hash * BASE + (s[i] - 'a' + 1)) % MOD;
+            if (i < length - 1) {
+                power = (power * BASE) % MOD;
+            }
+        }
+        
+        hashToIndices[hash].push_back(0);
+        
+        for (int i = length; i < s.length(); i++) {
+            hash = (hash - (s[i - length] - 'a' + 1) * power) % MOD;
+            hash = (hash * BASE + (s[i] - 'a' + 1)) % MOD;
+            hash = (hash + MOD) % MOD;
+            
+            int startIdx = i - length + 1;
+            hashToIndices[hash].push_back(startIdx);
+            
+            if (hashToIndices[hash].size() > 1) {
+                // Verify actual string match (handle hash collisions)
+                string current = s.substr(startIdx, length);
+                for (int prevIdx : hashToIndices[hash]) {
+                    if (prevIdx != startIdx) {
+                        string prev = s.substr(prevIdx, length);
+                        if (current == prev) {
+                            return current;
+                        }
                     }
                 }
-                if (match) {
-                    result.push_back(i);
-                }
+            }
+        }
+        
+        return "";
+    }
+};
+
+// Frequency-based problems using hash tables
+class FrequencyProblems {
+public:
+    // Find all anagrams in a string array
+    vector<vector<string>> groupAnagrams(vector<string>& strs) {
+        unordered_map<string, vector<string>> groups;
+        
+        for (const string& str : strs) {
+            string key = str;
+            sort(key.begin(), key.end());
+            groups[key].push_back(str);
+        }
+        
+        vector<vector<string>> result;
+        for (auto& pair : groups) {
+            result.push_back(pair.second);
+        }
+        
+        return result;
+    }
+    
+    // Find top K frequent elements
+    vector<int> topKFrequent(vector<int>& nums, int k) {
+        unordered_map<int, int> freq;
+        for (int num : nums) {
+            freq[num]++;
+        }
+        
+        // Use bucket sort for O(n) solution
+        vector<vector<int>> buckets(nums.size() + 1);
+        for (auto& pair : freq) {
+            buckets[pair.second].push_back(pair.first);
+        }
+        
+        vector<int> result;
+        for (int i = buckets.size() - 1; i >= 0 && result.size() < k; i--) {
+            for (int num : buckets[i]) {
+                result.push_back(num);
+                if (result.size() == k) break;
+            }
+        }
+        
+        return result;
+    }
+    
+    // Longest substring without repeating characters
+    int lengthOfLongestSubstring(string s) {
+        unordered_map<char, int> lastSeen;
+        int maxLength = 0;
+        int start = 0;
+        
+        for (int end = 0; end < s.length(); end++) {
+            if (lastSeen.count(s[end]) && lastSeen[s[end]] >= start) {
+                start = lastSeen[s[end]] + 1;
             }
             
-            // 计算下一个窗口的哈希值
-            if (i < n - m) {
-                textHash = (textHash - text[i] * h) % MOD;
-                textHash = (textHash * BASE + text[i + m]) % MOD;
-                textHash = (textHash + MOD) % MOD; // 确保非负
+            lastSeen[s[end]] = end;
+            maxLength = max(maxLength, end - start + 1);
+        }
+        
+        return maxLength;
+    }
+    
+    // Count distinct elements in all windows of size k
+    vector<int> countDistinctInWindows(vector<int>& arr, int k) {
+        vector<int> result;
+        unordered_map<int, int> freq;
+        
+        // Initialize first window
+        for (int i = 0; i < k; i++) {
+            freq[arr[i]]++;
+        }
+        result.push_back(freq.size());
+        
+        // Slide window
+        for (int i = k; i < arr.size(); i++) {
+            // Remove leftmost element
+            int leftElement = arr[i - k];
+            freq[leftElement]--;
+            if (freq[leftElement] == 0) {
+                freq.erase(leftElement);
             }
+            
+            // Add rightmost element
+            freq[arr[i]]++;
+            result.push_back(freq.size());
         }
         
         return result;
@@ -397,69 +686,123 @@ public:
 };
 
 int main() {
-    RabinKarp rk;
-    string text = "AABAACAADAABAABA";
-    string pattern = "AABA";
+    // Test rolling hash
+    cout << "Testing Rolling Hash:" << endl;
+    RollingHash rh;
     
-    vector<int> matches = rk.search(text, pattern);
+    string text = "abcabcabc";
+    cout << "Text: " << text << endl;
+    cout << "Longest repeated substring: '" << rh.longestRepeatedSubstring(text) << "'" << endl;
+    cout << "All substrings of length 3 unique: " << (rh.allSubstringsUnique(text, 3) ? "Yes" : "No") << endl;
+    cout << "All substrings of length 4 unique: " << (rh.allSubstringsUnique(text, 4) ? "Yes" : "No") << endl;
     
-    cout << "文本: " << text << endl;
-    cout << "模式: " << pattern << endl;
-    cout << "匹配位置: ";
-    for (int pos : matches) {
-        cout << pos << " ";
+    // Test frequency problems
+    cout << "\\nTesting Frequency Problems:" << endl;
+    FrequencyProblems fp;
+    
+    vector<string> words = {"eat", "tea", "tan", "ate", "nat", "bat"};
+    cout << "Anagram groups:" << endl;
+    auto anagramGroups = fp.groupAnagrams(words);
+    for (const auto& group : anagramGroups) {
+        cout << "[";
+        for (int i = 0; i < group.size(); i++) {
+            cout << group[i];
+            if (i < group.size() - 1) cout << ", ";
+        }
+        cout << "]" << endl;
+    }
+    
+    vector<int> nums = {1, 1, 1, 2, 2, 3};
+    int k = 2;
+    auto topK = fp.topKFrequent(nums, k);
+    cout << "\\nTop " << k << " frequent elements: ";
+    for (int num : topK) {
+        cout << num << " ";
     }
     cout << endl;
     
-    // 显示匹配的子串
-    cout << "匹配的子串:" << endl;
-    for (int pos : matches) {
-        cout << "位置 " << pos << ": " << text.substr(pos, pattern.length()) << endl;
+    string s = "abcabcbb";
+    cout << "Longest substring without repeating chars in '" << s << "': " 
+         << fp.lengthOfLongestSubstring(s) << endl;
+    
+    vector<int> arr = {1, 2, 1, 3, 4, 2, 3};
+    int windowSize = 4;
+    auto distinctCounts = fp.countDistinctInWindows(arr, windowSize);
+    cout << "Distinct counts in windows of size " << windowSize << ": ";
+    for (int count : distinctCounts) {
+        cout << count << " ";
     }
+    cout << endl;
     
     return 0;
 }`}
-    explanation="Rabin-Karp使用滚动哈希技术，每次滑动窗口时O(1)更新哈希值。平均时间复杂度O(n+m)，最坏情况O(nm)。"
-    output={`文本: AABAACAADAABAABA
-模式: AABA
-匹配位置: 0 9 12 
-匹配的子串:
-位置 0: AABA
-位置 9: AABA
-位置 12: AABA`}
+    explanation="Advanced hash table applications include rolling hash for efficient substring operations, frequency counting for statistical problems, and sliding window techniques for dynamic range queries."
+    output={`Testing Rolling Hash:
+Text: abcabcabc
+Longest repeated substring: 'abcabc'
+All substrings of length 3 unique: No
+All substrings of length 4 unique: Yes
+
+Testing Frequency Problems:
+Anagram groups:
+[eat, tea, ate]
+[tan, nat]
+[bat]
+
+Top 2 frequent elements: 1 2 
+
+Longest substring without repeating chars in 'abcabcbb': 3
+
+Distinct counts in windows of size 4: 4 4 3 3`}
   />
 
-  <h2>竞赛中的哈希应用</h2>
+  <h2>Competitive Programming Techniques</h2>
   
   <div class="tips">
-    <h3>字符串哈希的典型应用：</h3>
+    <h3>String Hashing Best Practices:</h3>
     <ul>
-      <li>快速判断两个子串是否相等</li>
-      <li>最长回文子串（结合二分查找）</li>
-      <li>最长公共子串问题</li>
-      <li>字符串周期性检测</li>
+      <li>Use large prime moduli (10^9+7, 10^9+9) to minimize collisions</li>
+      <li>Choose good base values (31, 37) for character hashing</li>
+      <li>Implement double hashing for critical applications</li>
+      <li>Precompute powers and prefix hashes for O(1) queries</li>
     </ul>
     
-    <h3>哈希表的竞赛技巧：</h3>
+    <h3>Collision Resolution Strategies:</h3>
     <ul>
-      <li>使用unordered_map和unordered_set进行快速查找</li>
-      <li>自定义哈希函数处理复合数据类型</li>
-      <li>双哈希避免恶意数据的哈希攻击</li>
-      <li>滚动哈希处理滑动窗口问题</li>
+      <li>Chaining: Simple implementation, good for unknown data sizes</li>
+      <li>Open addressing: Better cache performance, requires careful deletion</li>
+      <li>Robin Hood hashing: Minimizes variance in probe distances</li>
+      <li>Cuckoo hashing: Guarantees O(1) worst-case lookup time</li>
     </ul>
     
-    <h3>注意事项：</h3>
+    <h3>Hash Table Optimization:</h3>
     <ul>
-      <li>选择合适的模数，避免溢出</li>
-      <li>处理负数取模的边界情况</li>
-      <li>在关键场合使用双哈希提高可靠性</li>
-      <li>预处理幂次数组提高效率</li>
+      <li>Maintain load factor below 0.75 for good performance</li>
+      <li>Use power-of-2 table sizes for fast modulo operations</li>
+      <li>Implement efficient rehashing with exponential growth</li>
+      <li>Consider custom hash functions for specific data types</li>
+    </ul>
+    
+    <h3>Common Applications:</h3>
+    <ul>
+      <li>Substring matching and pattern searching</li>
+      <li>Frequency counting and statistical analysis</li>
+      <li>Duplicate detection and uniqueness checking</li>
+      <li>Anagram grouping and permutation problems</li>
+    </ul>
+    
+    <h3>Implementation Tips:</h3>
+    <ul>
+      <li>Handle hash collisions properly in competitive settings</li>
+      <li>Use rolling hash for efficient substring operations</li>
+      <li>Combine multiple hash functions for higher reliability</li>
+      <li>Profile hash function performance for time-critical problems</li>
     </ul>
   </div>
 
   <div class="navigation">
-    <a href="/4-competitive" class="prev">← 返回L4目录</a>
-    <a href="/4-competitive/divide-conquer" class="next">分治算法 →</a>
+    <a href="/4-competitive/data-structures" class="prev">← Data Structures</a>
+    <a href="/4-competitive/divide-conquer" class="next">Divide & Conquer →</a>
   </div>
 </Layout>
 

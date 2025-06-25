@@ -1,0 +1,701 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { getLangFromUrl, useTranslations } from '../../../i18n/utils';
+
+const lang = getLangFromUrl(Astro.url);
+const t = useTranslations(lang);
+
+export async function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } },
+  ];
+}
+---
+
+<Layout title={lang === 'en' ? 'STL & Templates - Competitive Programming' : 'STL 与模板 - 竞赛编程'}>
+  <main>
+    <nav class="breadcrumb">
+      <a href={`/${lang}`}>{t('nav.home')}</a>
+      <span>›</span>
+      <a href={`/${lang}/4-competitive`}>{t('nav.competitive')}</a>
+      <span>›</span>
+      <span>{t('comp.stl')}</span>
+    </nav>
+
+    <h1>{t('comp.stl')}</h1>
+    
+    <div class="intro">
+      {lang === 'en' ? (
+        <p>Master C++ STL containers, algorithms, iterators, and template programming techniques essential for competitive programming. Learn to leverage the standard library for efficient and clean code solutions.</p>
+      ) : (
+        <p>掌握 C++ STL 容器、算法、迭代器和模板编程技术，这些都是竞赛编程的核心工具。学习如何利用标准库编写高效、简洁的代码解决方案。</p>
+      )}
+    </div>
+
+    <section>
+      <h2>{lang === 'en' ? '1. STL Containers Overview' : '1. STL 容器概览'}</h2>
+      {lang === 'en' ? (
+        <p>STL provides various containers optimized for different use cases. Understanding their time complexities and appropriate usage is crucial for competitive programming.</p>
+      ) : (
+        <p>STL 提供了针对不同用例优化的各种容器。理解它们的时间复杂度和适当的使用场景对竞赛编程至关重要。</p>
+      )}
+
+      <CodeExample
+        title={lang === 'en' ? 'Common STL Containers' : '常用 STL 容器'}
+        code={`#include <iostream>
+#include <vector>
+#include <deque>
+#include <list>
+#include <set>
+#include <map>
+#include <unordered_set>
+#include <unordered_map>
+#include <stack>
+#include <queue>
+#include <priority_queue>
+using namespace std;
+
+int main() {
+    // Sequential containers
+    vector<int> vec = {1, 2, 3, 4, 5};
+    deque<int> dq = {1, 2, 3, 4, 5};
+    list<int> lst = {1, 2, 3, 4, 5};
+    
+    // Associative containers
+    set<int> s = {5, 2, 8, 1, 9};
+    map<string, int> m = {{"apple", 5}, {"banana", 3}};
+    
+    // Unordered containers (hash-based)
+    unordered_set<int> us = {1, 2, 3, 4, 5};
+    unordered_map<string, int> um = {{"key1", 10}, {"key2", 20}};
+    
+    // Container adapters
+    stack<int> st;
+    queue<int> q;
+    priority_queue<int> pq; // max heap by default
+    
+    // Demonstrate basic operations
+    cout << "Vector size: " << vec.size() << endl;
+    cout << "Set contains 5: " << (s.count(5) > 0) << endl;
+    cout << "Map value for 'apple': " << m["apple"] << endl;
+    
+    return 0;
+}`}
+        client:load
+      />
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? '2. STL Algorithms' : '2. STL 算法'}</h2>
+      {lang === 'en' ? (
+        <p>STL algorithms provide efficient implementations of common operations. They work with iterators and can be applied to various container types.</p>
+      ) : (
+        <p>STL 算法提供了常见操作的高效实现。它们与迭代器配合工作，可以应用于各种容器类型。</p>
+      )}
+
+      <CodeExample
+        title={lang === 'en' ? 'Essential STL Algorithms' : '核心 STL 算法'}
+        client:load
+      >
+        <div slot="cpp">
+{`#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <numeric>
+#include <functional>
+using namespace std;
+
+int main() {
+    vector<int> vec = {3, 1, 4, 1, 5, 9, 2, 6, 5, 3};
+    
+    // Sorting
+    sort(vec.begin(), vec.end());
+    cout << "Sorted: ";
+    for (int x : vec) cout << x << " ";
+    cout << endl;
+    
+    // Binary search (requires sorted container)
+    bool found = binary_search(vec.begin(), vec.end(), 5);
+    cout << "Found 5: " << found << endl;
+    
+    // Lower and upper bounds
+    auto lb = lower_bound(vec.begin(), vec.end(), 5);
+    auto ub = upper_bound(vec.begin(), vec.end(), 5);
+    cout << "Count of 5: " << (ub - lb) << endl;
+    
+    // Find operations
+    auto it = find(vec.begin(), vec.end(), 4);
+    if (it != vec.end()) {
+        cout << "Found 4 at position: " << (it - vec.begin()) << endl;
+    }
+    
+    // Unique (remove consecutive duplicates)
+    vec.erase(unique(vec.begin(), vec.end()), vec.end());
+    
+    // Accumulate (sum)
+    int sum = accumulate(vec.begin(), vec.end(), 0);
+    cout << "Sum: " << sum << endl;
+    
+    // Transform
+    vector<int> squares(vec.size());
+    transform(vec.begin(), vec.end(), squares.begin(), 
+              [](int x) { return x * x; });
+    
+    // Max and min elements
+    auto max_it = max_element(vec.begin(), vec.end());
+    auto min_it = min_element(vec.begin(), vec.end());
+    cout << "Max: " << *max_it << ", Min: " << *min_it << endl;
+    
+    return 0;
+}`}
+        </div>
+      </CodeExample>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? '3. Iterators and Iterator Categories' : '3. 迭代器和迭代器类别'}</h2>
+      {lang === 'en' ? (
+        <p>Iterators provide a uniform interface to access container elements. Understanding iterator categories helps choose the right algorithms and containers.</p>
+      ) : (
+        <p>迭代器提供了访问容器元素的统一接口。理解迭代器类别有助于选择正确的算法和容器。</p>
+      )}
+
+      <CodeExample
+        title={lang === 'en' ? 'Iterator Usage Examples' : '迭代器使用示例'}
+        client:load
+      >
+        <div slot="cpp">
+{`#include <iostream>
+#include <vector>
+#include <list>
+#include <set>
+#include <algorithm>
+using namespace std;
+
+int main() {
+    // Random access iterators (vector, deque)
+    vector<int> vec = {1, 2, 3, 4, 5};
+    
+    // Forward iteration
+    for (auto it = vec.begin(); it != vec.end(); ++it) {
+        cout << *it << " ";
+    }
+    cout << endl;
+    
+    // Reverse iteration
+    for (auto it = vec.rbegin(); it != vec.rend(); ++it) {
+        cout << *it << " ";
+    }
+    cout << endl;
+    
+    // Random access operations
+    auto it = vec.begin();
+    it += 2; // Jump to 3rd element
+    cout << "Element at position 2: " << *it << endl;
+    
+    // Bidirectional iterators (list, set, map)
+    list<int> lst = {10, 20, 30, 40, 50};
+    auto lst_it = lst.begin();
+    advance(lst_it, 2); // Move forward 2 positions
+    cout << "List element at position 2: " << *lst_it << endl;
+    
+    // Set iterators (always const for keys)
+    set<int> s = {5, 2, 8, 1, 9};
+    for (auto it = s.begin(); it != s.end(); ++it) {
+        cout << *it << " "; // Always in sorted order
+    }
+    cout << endl;
+    
+    // Iterator arithmetic
+    cout << "Vector size using iterators: " << (vec.end() - vec.begin()) << endl;
+    
+    // Range-based for loop (C++11)
+    cout << "Range-based loop: ";
+    for (const auto& element : vec) {
+        cout << element << " ";
+    }
+    cout << endl;
+    
+    return 0;
+}`}
+        </div>
+      </CodeExample>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? '4. Template Programming Basics' : '4. 模板编程基础'}</h2>
+      {lang === 'en' ? (
+        <p>Templates enable generic programming, allowing you to write code that works with different data types. This is essential for creating reusable competitive programming solutions.</p>
+      ) : (
+        <p>模板支持泛型编程，允许您编写适用于不同数据类型的代码。这对于创建可重用的竞赛编程解决方案至关重要。</p>
+      )}
+
+      <CodeExample
+        title={lang === 'en' ? 'Function and Class Templates' : '函数和类模板'}
+        client:load
+      >
+        <div slot="cpp">
+{`#include <iostream>
+#include <vector>
+#include <algorithm>
+using namespace std;
+
+// Function template
+template<typename T>
+T maximum(T a, T b) {
+    return (a > b) ? a : b;
+}
+
+// Function template with multiple parameters
+template<typename T, typename U>
+auto add(T a, U b) -> decltype(a + b) {
+    return a + b;
+}
+
+// Class template
+template<typename T>
+class Stack {
+private:
+    vector<T> elements;
+public:
+    void push(const T& element) {
+        elements.push_back(element);
+    }
+    
+    T pop() {
+        if (elements.empty()) {
+            throw runtime_error("Stack is empty");
+        }
+        T top = elements.back();
+        elements.pop_back();
+        return top;
+    }
+    
+    bool empty() const {
+        return elements.empty();
+    }
+    
+    size_t size() const {
+        return elements.size();
+    }
+};
+
+// Template specialization
+template<>
+class Stack<bool> {
+private:
+    vector<bool> elements;
+public:
+    void push(bool element) {
+        elements.push_back(element);
+    }
+    
+    bool pop() {
+        if (elements.empty()) {
+            throw runtime_error("Stack is empty");
+        }
+        bool top = elements.back();
+        elements.pop_back();
+        return top;
+    }
+    
+    bool empty() const {
+        return elements.empty();
+    }
+};
+
+int main() {
+    // Function template usage
+    cout << "Max of 10 and 20: " << maximum(10, 20) << endl;
+    cout << "Max of 3.14 and 2.71: " << maximum(3.14, 2.71) << endl;
+    cout << "Max of 'a' and 'z': " << maximum('a', 'z') << endl;
+    
+    // Mixed type addition
+    cout << "Add 5 and 3.14: " << add(5, 3.14) << endl;
+    
+    // Class template usage
+    Stack<int> intStack;
+    intStack.push(10);
+    intStack.push(20);
+    intStack.push(30);
+    
+    cout << "Stack size: " << intStack.size() << endl;
+    cout << "Popped: " << intStack.pop() << endl;
+    cout << "Popped: " << intStack.pop() << endl;
+    
+    // Template with STL
+    Stack<string> stringStack;
+    stringStack.push("Hello");
+    stringStack.push("World");
+    
+    cout << "String stack size: " << stringStack.size() << endl;
+    
+    return 0;
+}`}
+        </div>
+      </CodeExample>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? '5. Advanced Template Techniques' : '5. 高级模板技术'}</h2>
+      {lang === 'en' ? (
+        <p>Advanced template features like variadic templates, SFINAE, and template metaprogramming can create powerful, flexible solutions for competitive programming.</p>
+      ) : (
+        <p>高级模板特性如可变参数模板、SFINAE 和模板元编程可以为竞赛编程创建强大、灵活的解决方案。</p>
+      )}
+
+      <CodeExample
+        title={lang === 'en' ? 'Advanced Template Features' : '高级模板特性'}
+        client:load
+      >
+        <div slot="cpp">
+{`#include <iostream>
+#include <vector>
+#include <type_traits>
+#include <utility>
+using namespace std;
+
+// Variadic template function
+template<typename... Args>
+void print(Args... args) {
+    ((cout << args << " "), ...); // C++17 fold expression
+    cout << endl;
+}
+
+// Template metaprogramming - compile-time factorial
+template<int N>
+struct Factorial {
+    static constexpr int value = N * Factorial<N-1>::value;
+};
+
+template<>
+struct Factorial<0> {
+    static constexpr int value = 1;
+};
+
+// SFINAE (Substitution Failure Is Not An Error)
+template<typename T>
+typename enable_if<is_integral<T>::value, T>::type
+safe_divide(T a, T b) {
+    return (b != 0) ? a / b : 0;
+}
+
+template<typename T>
+typename enable_if<is_floating_point<T>::value, T>::type
+safe_divide(T a, T b) {
+    return (b != 0.0) ? a / b : 0.0;
+}
+
+// Perfect forwarding
+template<typename T>
+void wrapper(T&& arg) {
+    process(forward<T>(arg));
+}
+
+void process(int& x) {
+    cout << "Processing lvalue: " << x << endl;
+}
+
+void process(int&& x) {
+    cout << "Processing rvalue: " << x << endl;
+}
+
+// Template alias (C++11)
+template<typename T>
+using Vec = vector<T>;
+
+template<typename K, typename V>
+using Map = unordered_map<K, V>;
+
+int main() {
+    // Variadic template
+    print(1, 2.5, "hello", 'c');
+    
+    // Template metaprogramming
+    cout << "Factorial of 5: " << Factorial<5>::value << endl;
+    
+    // SFINAE
+    cout << "Safe divide (int): " << safe_divide(10, 3) << endl;
+    cout << "Safe divide (double): " << safe_divide(10.0, 3.0) << endl;
+    
+    // Perfect forwarding
+    int x = 42;
+    wrapper(x);        // lvalue
+    wrapper(100);      // rvalue
+    
+    // Template aliases
+    Vec<int> numbers = {1, 2, 3, 4, 5};
+    Map<string, int> counts = {{"apple", 5}, {"banana", 3}};
+    
+    cout << "Numbers size: " << numbers.size() << endl;
+    cout << "Counts size: " << counts.size() << endl;
+    
+    return 0;
+}`}
+        </div>
+      </CodeExample>
+    </section>
+
+    <section>
+      <h2>{lang === 'en' ? '6. Competitive Programming Applications' : '6. 竞赛编程应用'}</h2>
+      {lang === 'en' ? (
+        <p>Practical applications of STL and templates in competitive programming scenarios, including common patterns and optimizations.</p>
+      ) : (
+        <p>STL 和模板在竞赛编程场景中的实际应用，包括常见模式和优化技术。</p>
+      )}
+
+      <CodeExample
+        title={lang === 'en' ? 'Competitive Programming Template' : '竞赛编程模板'}
+        client:load
+      >
+        <div slot="cpp">
+{`#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <set>
+#include <map>
+#include <queue>
+#include <cmath>
+using namespace std;
+
+// Fast I/O template
+class FastIO {
+public:
+    FastIO() {
+        ios_base::sync_with_stdio(false);
+        cin.tie(nullptr);
+        cout.tie(nullptr);
+    }
+};
+
+// Generic pair output
+template<typename T, typename U>
+ostream& operator<<(ostream& os, const pair<T, U>& p) {
+    return os << "(" << p.first << ", " << p.second << ")";
+}
+
+// Generic vector output
+template<typename T>
+ostream& operator<<(ostream& os, const vector<T>& v) {
+    os << "[";
+    for (size_t i = 0; i < v.size(); ++i) {
+        if (i > 0) os << ", ";
+        os << v[i];
+    }
+    return os << "]";
+}
+
+// Generic input for vectors
+template<typename T>
+istream& operator>>(istream& is, vector<T>& v) {
+    for (auto& element : v) {
+        is >> element;
+    }
+    return is;
+}
+
+// Utility functions
+template<typename T>
+T gcd(T a, T b) {
+    return b ? gcd(b, a % b) : a;
+}
+
+template<typename T>
+T lcm(T a, T b) {
+    return a / gcd(a, b) * b;
+}
+
+// Binary search template
+template<typename T, typename Predicate>
+T binary_search_answer(T left, T right, Predicate pred) {
+    while (left < right) {
+        T mid = left + (right - left) / 2;
+        if (pred(mid)) {
+            right = mid;
+        } else {
+            left = mid + 1;
+        }
+    }
+    return left;
+}
+
+int main() {
+    FastIO fast_io;
+    
+    // Example: Finding unique elements and their frequencies
+    int n;
+    cin >> n;
+    
+    vector<int> arr(n);
+    cin >> arr;
+    
+    // Count frequencies using map
+    map<int, int> freq;
+    for (int x : arr) {
+        freq[x]++;
+    }
+    
+    cout << "Frequencies:" << endl;
+    for (const auto& p : freq) {
+        cout << p.first << ": " << p.second << endl;
+    }
+    
+    // Find unique elements
+    sort(arr.begin(), arr.end());
+    arr.erase(unique(arr.begin(), arr.end()), arr.end());
+    
+    cout << "Unique elements: " << arr << endl;
+    
+    // Example: Priority queue for top K elements
+    priority_queue<int, vector<int>, greater<int>> min_heap;
+    int k = 3;
+    
+    for (int x : arr) {
+        min_heap.push(x);
+        if (min_heap.size() > k) {
+            min_heap.pop();
+        }
+    }
+    
+    cout << "Top " << k << " elements: ";
+    while (!min_heap.empty()) {
+        cout << min_heap.top() << " ";
+        min_heap.pop();
+    }
+    cout << endl;
+    
+    return 0;
+}`}
+        </div>
+      </CodeExample>
+    </section>
+
+    <div class="summary">
+      <h2>{lang === 'en' ? 'Summary' : '总结'}</h2>
+      {lang === 'en' ? (
+        <ul>
+          <li><strong>STL Containers:</strong> Choose the right container based on required operations and time complexity</li>
+          <li><strong>STL Algorithms:</strong> Leverage built-in algorithms for sorting, searching, and manipulation</li>
+          <li><strong>Iterators:</strong> Understand iterator categories and use them effectively with algorithms</li>
+          <li><strong>Templates:</strong> Write generic, reusable code using function and class templates</li>
+          <li><strong>Advanced Features:</strong> Use variadic templates, SFINAE, and metaprogramming for complex solutions</li>
+          <li><strong>Competitive Programming:</strong> Apply STL and templates to solve problems efficiently</li>
+        </ul>
+      ) : (
+        <ul>
+          <li><strong>STL 容器：</strong>根据所需操作和时间复杂度选择合适的容器</li>
+          <li><strong>STL 算法：</strong>利用内置算法进行排序、搜索和操作</li>
+          <li><strong>迭代器：</strong>理解迭代器类别并与算法有效配合使用</li>
+          <li><strong>模板：</strong>使用函数和类模板编写通用、可重用的代码</li>
+          <li><strong>高级特性：</strong>使用可变参数模板、SFINAE 和元编程解决复杂问题</li>
+          <li><strong>竞赛编程：</strong>应用 STL 和模板高效解决问题</li>
+        </ul>
+      )}
+    </div>
+  </main>
+</Layout>
+
+<style>
+  main {
+    margin: auto;
+    padding: 2rem;
+    width: 1200px;
+    max-width: calc(100% - 2rem);
+    color: #1e293b;
+    line-height: 1.6;
+  }
+  
+  .breadcrumb {
+    margin-bottom: 2rem;
+    font-size: 0.9rem;
+    color: #6b7280;
+  }
+  
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+  
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+  
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+  }
+  
+  .intro {
+    font-size: 1.125rem;
+    color: #6b7280;
+    margin-bottom: 3rem;
+    padding: 1.5rem;
+    background: #f8fafc;
+    border-radius: 8px;
+    border-left: 4px solid #4f46e5;
+  }
+  
+  section {
+    margin-bottom: 3rem;
+  }
+  
+  h2 {
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1e293b;
+  }
+  
+  .summary {
+    margin-top: 3rem;
+    padding: 2rem;
+    background: #f0f9ff;
+    border-radius: 8px;
+    border: 1px solid #0ea5e9;
+  }
+  
+  .summary h2 {
+    color: #0c4a6e;
+    margin-bottom: 1rem;
+  }
+  
+  .summary ul {
+    list-style-type: none;
+    padding: 0;
+  }
+  
+  .summary li {
+    margin-bottom: 0.5rem;
+    padding-left: 1rem;
+    position: relative;
+  }
+  
+  .summary li::before {
+    content: "✓";
+    position: absolute;
+    left: 0;
+    color: #0ea5e9;
+    font-weight: bold;
+  }
+  
+  @media (max-width: 768px) {
+    main {
+      padding: 1rem;
+    }
+    
+    h1 {
+      font-size: 2rem;
+    }
+    
+    h2 {
+      font-size: 1.5rem;
+    }
+  }
+</style> 

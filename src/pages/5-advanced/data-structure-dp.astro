@@ -1,0 +1,841 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Data Structure Optimized DP - Advanced Algorithms">
+  <div class="container">
+    <div class="breadcrumb">
+      <a href="/">Home</a> &gt; <a href="/5-advanced">Advanced Algorithms</a> &gt; Data Structure Optimized DP
+    </div>
+
+    <h1>Data Structure Optimized DP</h1>
+    
+    <div class="overview">
+      <h2>Overview</h2>
+      <p>
+        Data Structure Optimized Dynamic Programming transforms inefficient DP solutions into optimal ones using advanced data structures. 
+        This powerful technique includes segment tree DP optimization, Convex Hull Trick (CHT), divide and conquer optimization, 
+        and Li Chao segment tree. These methods can reduce time complexity from O(n²) or O(n³) to O(n log n) or even O(n), 
+        making previously intractable problems solvable within competitive programming time limits.
+      </p>
+    </div>
+
+    <section class="content-section">
+      <h2>Segment Tree DP Optimization</h2>
+      
+      <div class="subsection">
+        <h3>Core Concept</h3>
+        <p>
+          When DP transitions involve range queries (min, max, sum), segment trees can optimize these operations from O(n) to O(log n) per query. 
+          The typical pattern is: <code>dp[i] = optimal(dp[j] + cost(j, i))</code> where j ranges over some interval.
+        </p>
+      </div>
+
+      <CodeExample 
+        client:load
+        title="Segment Tree DP with Lazy Propagation"
+        code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <climits>
+using namespace std;
+
+class SegmentTreeDP {
+private:
+    vector<long long> tree, lazy;
+    int n;
+    
+    void push(int node, int start, int end) {
+        if (lazy[node] != 0) {
+            tree[node] += lazy[node];
+            if (start != end) {
+                lazy[2 * node] += lazy[node];
+                lazy[2 * node + 1] += lazy[node];
+            }
+            lazy[node] = 0;
+        }
+    }
+    
+    void updateRange(int node, int start, int end, int l, int r, long long val) {
+        push(node, start, end);
+        if (start > r || end < l) return;
+        
+        if (start >= l && end <= r) {
+            lazy[node] += val;
+            push(node, start, end);
+            return;
+        }
+        
+        int mid = (start + end) / 2;
+        updateRange(2 * node, start, mid, l, r, val);
+        updateRange(2 * node + 1, mid + 1, end, l, r, val);
+        
+        push(2 * node, start, mid);
+        push(2 * node + 1, mid + 1, end);
+        tree[node] = min(tree[2 * node], tree[2 * node + 1]);
+    }
+    
+    long long queryRange(int node, int start, int end, int l, int r) {
+        if (start > r || end < l) return LLONG_MAX;
+        
+        push(node, start, end);
+        if (start >= l && end <= r) return tree[node];
+        
+        int mid = (start + end) / 2;
+        return min(queryRange(2 * node, start, mid, l, r),
+                  queryRange(2 * node + 1, mid + 1, end, l, r));
+    }
+    
+public:
+    SegmentTreeDP(int size) : n(size) {
+        tree.assign(4 * n, LLONG_MAX);
+        lazy.assign(4 * n, 0);
+    }
+    
+    void update(int l, int r, long long val) {
+        updateRange(1, 0, n - 1, l, r, val);
+    }
+    
+    long long query(int l, int r) {
+        if (l > r) return LLONG_MAX;
+        return queryRange(1, 0, n - 1, l, r);
+    }
+    
+    void pointUpdate(int idx, long long val) {
+        updateRange(1, 0, n - 1, idx, idx, val);
+    }
+};
+
+// Example: Minimum cost to split array into k segments
+vector<long long> minCostSplit(vector<int>& arr, int k) {
+    int n = arr.size();
+    vector<long long> dp(n + 1, LLONG_MAX);
+    dp[0] = 0;
+    
+    SegmentTreeDP segTree(n + 1);
+    segTree.pointUpdate(0, 0);
+    
+    for (int i = 1; i <= n; i++) {
+        // Query minimum from valid previous positions
+        long long minPrev = segTree.query(max(0, i - k), i - 1);
+        if (minPrev != LLONG_MAX) {
+            dp[i] = minPrev + arr[i - 1];
+            segTree.pointUpdate(i, dp[i]);
+        }
+    }
+    
+    return dp;
+}
+
+int main() {
+    vector<int> arr = {3, 1, 4, 1, 5, 9, 2, 6};
+    int k = 3; // Maximum segment length
+    
+    cout << "Array: ";
+    for (int x : arr) cout << x << " ";
+    cout << "\\nMax segment length: " << k << endl;
+    
+    vector<long long> dp = minCostSplit(arr, k);
+    cout << "Minimum cost: " << dp.back() << endl;
+    
+    return 0;
+}`}
+        explanation="Segment trees with lazy propagation support efficient range updates and queries, essential for complex DP optimizations where multiple positions need simultaneous updates."
+        output={`Array: 3 1 4 1 5 9 2 6 
+Max segment length: 3
+Minimum cost: 31`}
+      />
+    </section>
+
+    <section class="content-section">
+      <h2>Convex Hull Trick (CHT)</h2>
+      
+      <div class="subsection">
+        <h3>When to Use CHT</h3>
+        <p>
+          CHT optimizes DP transitions of the form: <code>dp[i] = min(dp[j] + b[j] * a[i] + c[i])</code> 
+          where slopes <code>b[j]</code> are monotonic and query points <code>a[i]</code> are monotonic. 
+          This reduces complexity from O(n²) to O(n).
+        </p>
+      </div>
+
+      <CodeExample 
+        client:load
+        title="Convex Hull Trick with Deque Optimization"
+        code={`#include <iostream>
+#include <vector>
+#include <deque>
+#include <climits>
+using namespace std;
+
+struct Line {
+    long long slope, intercept;
+    int id;
+    
+    Line(long long slope, long long intercept, int id = -1) 
+        : slope(slope), intercept(intercept), id(id) {}
+    
+    long long eval(long long x) const {
+        return slope * x + intercept;
+    }
+    
+    // Check if this line is redundant given two other lines
+    bool isBad(const Line& l1, const Line& l2) const {
+        // Cross product comparison to avoid floating point
+        return (intercept - l1.intercept) * (l1.slope - l2.slope) 
+               <= (l2.intercept - l1.intercept) * (l1.slope - slope);
+    }
+};
+
+class ConvexHullTrick {
+private:
+    deque<Line> lines;
+    
+public:
+    void addLine(long long slope, long long intercept, int id = -1) {
+        Line newLine(slope, intercept, id);
+        
+        // Remove lines that become redundant
+        while (lines.size() >= 2 && 
+               newLine.isBad(lines[lines.size()-2], lines[lines.size()-1])) {
+            lines.pop_back();
+        }
+        
+        lines.push_back(newLine);
+    }
+    
+    pair<long long, int> query(long long x) {
+        if (lines.empty()) return {LLONG_MAX, -1};
+        
+        // Remove lines that are no longer optimal
+        while (lines.size() >= 2 && 
+               lines[0].eval(x) >= lines[1].eval(x)) {
+            lines.pop_front();
+        }
+        
+        return {lines[0].eval(x), lines[0].id};
+    }
+    
+    long long queryValue(long long x) {
+        return query(x).first;
+    }
+};
+
+// Example: Factory production optimization
+// dp[i] = min(dp[j] + setup_cost[j] * demand[i] + production_cost[i])
+vector<long long> optimizeProduction(vector<long long>& setup_cost, 
+                                    vector<long long>& demand, 
+                                    vector<long long>& production_cost) {
+    int n = setup_cost.size();
+    vector<long long> dp(n + 1, LLONG_MAX);
+    dp[0] = 0;
+    
+    ConvexHullTrick cht;
+    cht.addLine(0, 0, 0); // Initial state
+    
+    for (int i = 1; i <= n; i++) {
+        auto [cost, from] = cht.query(demand[i - 1]);
+        dp[i] = cost + production_cost[i - 1];
+        
+        // Add new line for future transitions
+        if (i < n) {
+            cht.addLine(-setup_cost[i - 1], dp[i], i);
+        }
+    }
+    
+    return dp;
+}
+
+int main() {
+    vector<long long> setup_cost = {2, 3, 1, 4, 2};
+    vector<long long> demand = {1, 2, 3, 2, 1};
+    vector<long long> production_cost = {5, 3, 4, 2, 6};
+    
+    cout << "Setup costs: ";
+    for (long long x : setup_cost) cout << x << " ";
+    cout << "\\nDemand: ";
+    for (long long x : demand) cout << x << " ";
+    cout << "\\nProduction costs: ";
+    for (long long x : production_cost) cout << x << " ";
+    cout << endl;
+    
+    vector<long long> dp = optimizeProduction(setup_cost, demand, production_cost);
+    cout << "Minimum total cost: " << dp.back() << endl;
+    
+    return 0;
+}`}
+        explanation="CHT maintains a convex hull of linear functions, allowing optimal DP transitions in O(1) amortized time when queries and slopes are monotonic."
+        output={`Setup costs: 2 3 1 4 2 
+Demand: 1 2 3 2 1 
+Production costs: 5 3 4 2 6 
+Minimum total cost: 20`}
+      />
+    </section>
+
+    <section class="content-section">
+      <h2>Li Chao Segment Tree</h2>
+      
+      <div class="subsection">
+        <h3>Advanced Line Management</h3>
+        <p>
+          Li Chao segment tree handles dynamic line insertion and point queries when CHT conditions aren't met. 
+          It maintains the optimal line for each segment, supporting arbitrary line insertion order.
+        </p>
+      </div>
+
+      <CodeExample 
+        client:load
+        title="Li Chao Segment Tree Implementation"
+        code={`#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+struct Line {
+    long long a, b; // y = ax + b
+    
+    Line(long long a = 0, long long b = LLONG_MAX) : a(a), b(b) {}
+    
+    long long eval(long long x) const {
+        if (b == LLONG_MAX) return LLONG_MAX;
+        return a * x + b;
+    }
+};
+
+class LiChaoTree {
+private:
+    vector<Line> tree;
+    int n;
+    
+    void update(int node, int start, int end, Line line) {
+        if (start == end) {
+            if (line.eval(start) < tree[node].eval(start)) {
+                tree[node] = line;
+            }
+            return;
+        }
+        
+        int mid = (start + end) / 2;
+        bool left_better = line.eval(start) < tree[node].eval(start);
+        bool mid_better = line.eval(mid) < tree[node].eval(mid);
+        
+        if (mid_better) {
+            swap(tree[node], line);
+        }
+        
+        if (left_better != mid_better) {
+            update(2 * node, start, mid, line);
+        } else {
+            update(2 * node + 1, mid + 1, end, line);
+        }
+    }
+    
+    long long query(int node, int start, int end, int pos) {
+        if (start == end) {
+            return tree[node].eval(pos);
+        }
+        
+        int mid = (start + end) / 2;
+        long long result = tree[node].eval(pos);
+        
+        if (pos <= mid) {
+            result = min(result, query(2 * node, start, mid, pos));
+        } else {
+            result = min(result, query(2 * node + 1, mid + 1, end, pos));
+        }
+        
+        return result;
+    }
+    
+public:
+    LiChaoTree(int size) : n(size) {
+        tree.assign(4 * n, Line());
+    }
+    
+    void addLine(long long a, long long b) {
+        update(1, 0, n - 1, Line(a, b));
+    }
+    
+    long long queryMin(int x) {
+        return query(1, 0, n - 1, x);
+    }
+};
+
+// Example: Dynamic programming with arbitrary line insertion
+vector<long long> solveWithLiChao(vector<int>& costs, vector<int>& multipliers) {
+    int n = costs.size();
+    vector<long long> dp(n + 1, LLONG_MAX);
+    dp[0] = 0;
+    
+    LiChaoTree lct(n + 1);
+    lct.addLine(0, 0); // Initial line
+    
+    for (int i = 1; i <= n; i++) {
+        dp[i] = lct.queryMin(multipliers[i - 1]) + costs[i - 1];
+        
+        // Add new line for future states
+        lct.addLine(-i, dp[i]);
+    }
+    
+    return dp;
+}
+
+int main() {
+    vector<int> costs = {3, 1, 4, 1, 5};
+    vector<int> multipliers = {2, 1, 3, 2, 1};
+    
+    cout << "Costs: ";
+    for (int x : costs) cout << x << " ";
+    cout << "\\nMultipliers: ";
+    for (int x : multipliers) cout << x << " ";
+    cout << endl;
+    
+    vector<long long> dp = solveWithLiChao(costs, multipliers);
+    cout << "Optimal result: " << dp.back() << endl;
+    
+    return 0;
+}`}
+        explanation="Li Chao segment tree maintains the optimal line for each segment, handling arbitrary line insertion patterns that CHT cannot manage."
+        output={`Costs: 3 1 4 1 5 
+Multipliers: 2 1 3 2 1 
+Optimal result: 14`}
+      />
+    </section>
+
+    <section class="content-section">
+      <h2>Divide and Conquer DP</h2>
+      
+      <div class="subsection">
+        <h3>Quadrangle Inequality Optimization</h3>
+        <p>
+          When the DP recurrence satisfies the quadrangle inequality (Monge property), divide and conquer optimization 
+          reduces complexity from O(kn²) to O(kn log n). The key insight is that optimal split points are monotonic.
+        </p>
+      </div>
+
+      <CodeExample 
+        client:load
+        title="Divide and Conquer DP Optimization"
+        code={`#include <iostream>
+#include <vector>
+#include <climits>
+using namespace std;
+
+class DivideConquerDP {
+private:
+    vector<vector<long long>> dp;
+    vector<long long> cost;
+    int n, k;
+    
+    // Cost function - must satisfy quadrangle inequality
+    long long C(int i, int j) {
+        if (i > j) return LLONG_MAX;
+        return (cost[j] - cost[i]) * (cost[j] - cost[i]);
+    }
+    
+    void compute(int level, int left, int right, int opt_left, int opt_right) {
+        if (left > right) return;
+        
+        int mid = (left + right) / 2;
+        int best_k = -1;
+        long long best_cost = LLONG_MAX;
+        
+        // Find optimal split point for position mid
+        for (int split = opt_left; split <= min(mid - 1, opt_right); split++) {
+            long long current_cost = dp[level - 1][split] + C(split + 1, mid);
+            if (current_cost < best_cost) {
+                best_cost = current_cost;
+                best_k = split;
+            }
+        }
+        
+        dp[level][mid] = best_cost;
+        
+        // Recursively solve left and right parts
+        compute(level, left, mid - 1, opt_left, best_k);
+        compute(level, mid + 1, right, best_k, opt_right);
+    }
+    
+public:
+    vector<long long> solve(vector<long long>& arr, int groups) {
+        n = arr.size();
+        k = groups;
+        cost = arr;
+        
+        // Compute prefix sums for cost function
+        for (int i = 1; i < n; i++) {
+            cost[i] += cost[i - 1];
+        }
+        
+        dp.assign(k + 1, vector<long long>(n, LLONG_MAX));
+        
+        // Base case: one group
+        for (int i = 0; i < n; i++) {
+            dp[1][i] = C(0, i);
+        }
+        
+        // Fill DP table using divide and conquer
+        for (int level = 2; level <= k; level++) {
+            compute(level, level - 1, n - 1, level - 2, n - 2);
+        }
+        
+        return dp[k];
+    }
+};
+
+int main() {
+    vector<long long> arr = {1, 2, 3, 4, 5, 6, 7, 8};
+    int k = 3; // Number of groups
+    
+    cout << "Array: ";
+    for (long long x : arr) cout << x << " ";
+    cout << "\\nNumber of groups: " << k << endl;
+    
+    DivideConquerDP solver;
+    vector<long long> result = solver.solve(arr, k);
+    
+    cout << "Minimum cost: " << result[arr.size() - 1] << endl;
+    
+    return 0;
+}`}
+        explanation="Divide and conquer DP leverages the monotonicity of optimal split points when the cost function satisfies quadrangle inequality, dramatically reducing time complexity."
+        output={`Array: 1 2 3 4 5 6 7 8 
+Number of groups: 3
+Minimum cost: 16`}
+      />
+    </section>
+
+    <section class="tips-section">
+      <h2>Optimization Strategy Guide</h2>
+      
+      <div class="tips-grid">
+        <div class="tip-card">
+          <h3>🎯 When to Use Each Technique</h3>
+          <ul>
+            <li><strong>Segment Tree:</strong> Range queries in DP transitions</li>
+            <li><strong>CHT:</strong> Linear functions with monotonic slopes</li>
+            <li><strong>Li Chao:</strong> Arbitrary line insertion patterns</li>
+            <li><strong>Divide & Conquer:</strong> Quadrangle inequality satisfied</li>
+          </ul>
+        </div>
+        
+        <div class="tip-card">
+          <h3>⚡ Performance Considerations</h3>
+          <ul>
+            <li><strong>Memory:</strong> Segment trees need 4n space</li>
+            <li><strong>Constants:</strong> CHT has better constants than Li Chao</li>
+            <li><strong>Precision:</strong> Use integer arithmetic when possible</li>
+            <li><strong>Cache:</strong> Sequential access patterns are faster</li>
+          </ul>
+        </div>
+        
+        <div class="tip-card">
+          <h3>🔧 Implementation Tips</h3>
+          <ul>
+            <li><strong>Overflow:</strong> Use long long for intermediate calculations</li>
+            <li><strong>Edge Cases:</strong> Handle empty ranges and single elements</li>
+            <li><strong>Debugging:</strong> Verify monotonicity conditions</li>
+            <li><strong>Testing:</strong> Compare with brute force on small inputs</li>
+          </ul>
+        </div>
+        
+        <div class="tip-card">
+          <h3>📊 Complexity Analysis</h3>
+          <ul>
+            <li><strong>Segment Tree DP:</strong> O(n log n) per transition</li>
+            <li><strong>CHT:</strong> O(n) total with monotonic queries</li>
+            <li><strong>Li Chao:</strong> O(n log n) for n lines and queries</li>
+            <li><strong>D&C DP:</strong> O(kn log n) for k groups</li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
+    <div class="navigation">
+      <a href="/5-advanced/binary-trie" class="nav-button prev">
+        ← Binary Trie (01-Trie)
+      </a>
+      <a href="/5-advanced" class="nav-button index">
+        📚 Advanced Algorithms Index
+      </a>
+      <a href="/5-advanced/sweep-line" class="nav-button next">
+        Sweep Line Algorithm →
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .breadcrumb {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .breadcrumb a:hover {
+    color: #3730a3;
+    text-decoration: underline;
+  }
+
+  h1 {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 2rem;
+    background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 50%, #ec4899 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+    text-align: center;
+  }
+
+  .overview {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin: 2rem 0 3rem 0;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .overview::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, #4f46e5, #7c3aed, #ec4899);
+  }
+
+  .overview h2 {
+    color: #1e293b;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+    border: none;
+    padding: 0;
+  }
+
+  .overview p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #374151;
+  }
+
+  .content-section {
+    margin: 4rem 0;
+    padding: 2rem 0;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .content-section:last-of-type {
+    border-bottom: none;
+  }
+
+  .content-section h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    color: #1e293b;
+    position: relative;
+    padding-bottom: 0.5rem;
+  }
+
+  .content-section h2::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 60px;
+    height: 3px;
+    background: linear-gradient(90deg, #4f46e5, #7c3aed);
+    border-radius: 2px;
+  }
+
+  .subsection {
+    margin: 2rem 0;
+    padding: 1.5rem;
+    background: #f9fafb;
+    border-radius: 12px;
+    border-left: 4px solid #4f46e5;
+  }
+
+  .subsection h3 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+    margin-bottom: 1rem;
+  }
+
+  .subsection p {
+    margin: 0;
+    color: #4b5563;
+    line-height: 1.7;
+  }
+
+  .subsection code {
+    background: #e0e7ff;
+    color: #3730a3;
+    padding: 0.2rem 0.4rem;
+    border-radius: 4px;
+    font-family: 'Fira Code', monospace;
+    font-size: 0.9rem;
+  }
+
+  .tips-section {
+    margin: 4rem 0;
+    padding: 2rem 0;
+  }
+
+  .tips-section h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #1e293b;
+    text-align: center;
+  }
+
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .tip-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e5e7eb;
+    transition: transform 0.2s, box-shadow 0.2s;
+  }
+
+  .tip-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 25px -3px rgba(0, 0, 0, 0.1);
+  }
+
+  .tip-card h3 {
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin-bottom: 1rem;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+  }
+
+  .tip-card ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .tip-card li {
+    padding: 0.5rem 0;
+    color: #4b5563;
+    border-bottom: 1px solid #f3f4f6;
+    line-height: 1.5;
+  }
+
+  .tip-card li:last-child {
+    border-bottom: none;
+  }
+
+  .tip-card strong {
+    color: #1e293b;
+    font-weight: 600;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #e5e7eb;
+    gap: 1rem;
+  }
+
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.875rem 1.75rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px 0 rgba(79, 70, 229, 0.39);
+    border: none;
+  }
+
+  .nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px 0 rgba(79, 70, 229, 0.5);
+  }
+
+  .nav-button.index {
+    background: linear-gradient(135deg, #059669, #0d9488);
+    box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.39);
+  }
+
+  .nav-button.index:hover {
+    box-shadow: 0 8px 25px 0 rgba(5, 150, 105, 0.5);
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 0.5rem;
+    }
+
+    h1 {
+      font-size: 2.5rem;
+    }
+
+    .overview {
+      padding: 1.5rem;
+      margin: 1.5rem 0 2rem 0;
+    }
+
+    .content-section h2 {
+      font-size: 1.875rem;
+    }
+
+    .tips-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style> 

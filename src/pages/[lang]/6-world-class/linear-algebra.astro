@@ -1,0 +1,980 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { ui } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } }
+  ];
+}
+
+const { lang } = Astro.params;
+const t = ui[lang as keyof typeof ui];
+---
+
+<Layout title={lang === 'zh' ? "线性代数 - 世界级算法" : "Linear Algebra - World Class Algorithms"}>
+  <div class="container">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      <a href={`/${lang}`}>{t['nav.home']}</a> &gt; 
+      <a href={`/${lang}/6-world-class`}>{lang === 'zh' ? '世界级算法' : 'World Class'}</a> &gt; 
+      <span>{lang === 'zh' ? '线性代数' : 'Linear Algebra'}</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="header-section">
+      <h1 class="main-title">
+        {lang === 'zh' ? '线性代数' : 'Linear Algebra'}
+      </h1>
+      <p class="subtitle">
+        {lang === 'zh' 
+          ? '掌握矩阵运算、线性系统求解和高级线性代数技术'
+          : 'Master matrix operations, linear system solving, and advanced linear algebra techniques'
+        }
+      </p>
+    </div>
+
+    <!-- Overview -->
+    <div class="overview-section">
+      <h2>{lang === 'zh' ? '概述' : 'Overview'}</h2>
+      <p>
+        {lang === 'zh' 
+          ? '线性代数是现代算法的数学基础，在图形学、机器学习、网络分析等领域有广泛应用。本章节深入探讨矩阵运算、高斯消元法、特征值计算等核心技术，为解决复杂的线性系统问题提供强大工具。'
+          : 'Linear algebra is the mathematical foundation of modern algorithms, with wide applications in graphics, machine learning, network analysis, and more. This chapter explores matrix operations, Gaussian elimination, eigenvalue computation, and other core techniques for solving complex linear system problems.'
+        }
+      </p>
+    </div>
+
+    <!-- Content Sections -->
+    <div class="content-section">
+      <h2>{lang === 'zh' ? '核心内容' : 'Core Content'}</h2>
+
+      <!-- Matrix Operations -->
+      <div class="topic-section">
+        <h3>{lang === 'zh' ? '1. 基础矩阵运算' : '1. Basic Matrix Operations'}</h3>
+        <p>
+          {lang === 'zh' 
+            ? '矩阵运算是线性代数的基础，包括加法、乘法、转置等基本操作。'
+            : 'Matrix operations are the foundation of linear algebra, including addition, multiplication, transpose, and other basic operations.'
+          }
+        </p>
+
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// 基础矩阵运算实现' : '// Basic matrix operations implementation'}
+#include <iostream>
+#include <vector>
+#include <iomanip>
+using namespace std;
+
+class Matrix {
+private:
+    vector<vector<double>> data;
+    int rows, cols;
+
+public:
+    Matrix(int r, int c) : rows(r), cols(c) {
+        data.resize(r, vector<double>(c, 0));
+    }
+    
+    Matrix(vector<vector<double>>& mat) {
+        data = mat;
+        rows = mat.size();
+        cols = mat[0].size();
+    }
+    
+    ${lang === 'zh' ? '// 矩阵加法' : '// Matrix addition'}
+    Matrix operator+(const Matrix& other) const {
+        if (rows != other.rows || cols != other.cols) {
+            throw invalid_argument("${lang === 'zh' ? '矩阵维度不匹配' : 'Matrix dimensions mismatch'}");
+        }
+        
+        Matrix result(rows, cols);
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                result.data[i][j] = data[i][j] + other.data[i][j];
+            }
+        }
+        return result;
+    }
+    
+    ${lang === 'zh' ? '// 矩阵乘法' : '// Matrix multiplication'}
+    Matrix operator*(const Matrix& other) const {
+        if (cols != other.rows) {
+            throw invalid_argument("${lang === 'zh' ? '矩阵维度不匹配' : 'Matrix dimensions mismatch'}");
+        }
+        
+        Matrix result(rows, other.cols);
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < other.cols; j++) {
+                for (int k = 0; k < cols; k++) {
+                    result.data[i][j] += data[i][k] * other.data[k][j];
+                }
+            }
+        }
+        return result;
+    }
+    
+    ${lang === 'zh' ? '// 矩阵转置' : '// Matrix transpose'}
+    Matrix transpose() const {
+        Matrix result(cols, rows);
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                result.data[j][i] = data[i][j];
+            }
+        }
+        return result;
+    }
+    
+    ${lang === 'zh' ? '// 矩阵快速幂（用于递推关系）' : '// Matrix fast exponentiation (for recurrence relations)'}
+    Matrix power(long long n) const {
+        if (rows != cols) {
+            throw invalid_argument("${lang === 'zh' ? '非方阵无法求幂' : 'Non-square matrix cannot be powered'}");
+        }
+        
+        Matrix result = identity(rows);
+        Matrix base = *this;
+        
+        while (n > 0) {
+            if (n % 2 == 1) {
+                result = result * base;
+            }
+            base = base * base;
+            n /= 2;
+        }
+        return result;
+    }
+    
+    ${lang === 'zh' ? '// 创建单位矩阵' : '// Create identity matrix'}
+    static Matrix identity(int n) {
+        Matrix result(n, n);
+        for (int i = 0; i < n; i++) {
+            result.data[i][i] = 1;
+        }
+        return result;
+    }
+    
+    ${lang === 'zh' ? '// 打印矩阵' : '// Print matrix'}
+    void print() const {
+        for (int i = 0; i < rows; i++) {
+            for (int j = 0; j < cols; j++) {
+                cout << setw(8) << fixed << setprecision(2) << data[i][j] << " ";
+            }
+            cout << endl;
+        }
+    }
+    
+    double& operator()(int i, int j) { return data[i][j]; }
+    const double& operator()(int i, int j) const { return data[i][j]; }
+    int getRows() const { return rows; }
+    int getCols() const { return cols; }
+};
+
+${lang === 'zh' ? '// 应用：斐波那契数列的矩阵快速计算' : '// Application: Fast Fibonacci calculation using matrix'}
+long long fibonacciMatrix(int n) {
+    if (n <= 1) return n;
+    
+    ${lang === 'zh' ? '// 转移矩阵 [[1,1],[1,0]]' : '// Transition matrix [[1,1],[1,0]]'}
+    vector<vector<double>> trans = {{1, 1}, {1, 0}};
+    Matrix transition(trans);
+    
+    Matrix result = transition.power(n - 1);
+    return (long long)(result(0, 0) + 0.5); ${lang === 'zh' ? '// 四舍五入' : '// Round to nearest integer'}
+}
+
+int main() {
+    ${lang === 'zh' ? '// 测试基础运算' : '// Test basic operations'}
+    vector<vector<double>> a = {{1, 2}, {3, 4}};
+    vector<vector<double>> b = {{5, 6}, {7, 8}};
+    
+    Matrix A(a), B(b);
+    
+    cout << "${lang === 'zh' ? '矩阵A：' : 'Matrix A:'}" << endl;
+    A.print();
+    
+    cout << "\\n${lang === 'zh' ? '矩阵B：' : 'Matrix B:'}" << endl;
+    B.print();
+    
+    cout << "\\n${lang === 'zh' ? 'A + B：' : 'A + B:'}" << endl;
+    (A + B).print();
+    
+    cout << "\\n${lang === 'zh' ? 'A * B：' : 'A * B:'}" << endl;
+    (A * B).print();
+    
+    cout << "\\n${lang === 'zh' ? 'A的转置：' : 'A transpose:'}" << endl;
+    A.transpose().print();
+    
+    ${lang === 'zh' ? '// 测试矩阵快速幂' : '// Test matrix fast exponentiation'}
+    cout << "\\n${lang === 'zh' ? '斐波那契数列前10项：' : 'First 10 Fibonacci numbers:'}" << endl;
+    for (int i = 0; i <= 10; i++) {
+        cout << "F(" << i << ") = " << fibonacciMatrix(i) << endl;
+    }
+    
+    return 0;
+}`}
+          language="cpp"
+        />
+      </div>
+
+      <!-- Gaussian Elimination -->
+      <div class="topic-section">
+        <h3>{lang === 'zh' ? '2. 高斯消元法' : '2. Gaussian Elimination'}</h3>
+        <p>
+          {lang === 'zh' 
+            ? '高斯消元法是求解线性方程组的经典算法，也是计算矩阵逆、行列式的基础。'
+            : 'Gaussian elimination is the classic algorithm for solving linear systems, also fundamental for computing matrix inverse and determinant.'
+          }
+        </p>
+
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// 高斯消元法实现' : '// Gaussian elimination implementation'}
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <iomanip>
+using namespace std;
+
+const double EPS = 1e-9;
+
+class LinearSystem {
+private:
+    vector<vector<double>> augmented;
+    int n, m;
+
+public:
+    LinearSystem(vector<vector<double>>& A, vector<double>& b) {
+        n = A.size();
+        m = A[0].size();
+        augmented.resize(n, vector<double>(m + 1));
+        
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < m; j++) {
+                augmented[i][j] = A[i][j];
+            }
+            augmented[i][m] = b[i];
+        }
+    }
+    
+    ${lang === 'zh' ? '// 高斯消元求解线性方程组' : '// Solve linear system using Gaussian elimination'}
+    vector<double> solve() {
+        int rank = 0;
+        vector<int> pivot_col(n, -1);
+        
+        for (int col = 0; col < m && rank < n; col++) {
+            ${lang === 'zh' ? '// 寻找主元' : '// Find pivot'}
+            int pivot_row = -1;
+            for (int row = rank; row < n; row++) {
+                if (abs(augmented[row][col]) > EPS) {
+                    if (pivot_row == -1 || abs(augmented[row][col]) > abs(augmented[pivot_row][col])) {
+                        pivot_row = row;
+                    }
+                }
+            }
+            
+            if (pivot_row == -1) continue; ${lang === 'zh' ? '// 当前列全为0' : '// Current column is all zeros'}
+            
+            ${lang === 'zh' ? '// 交换行' : '// Swap rows'}
+            if (pivot_row != rank) {
+                swap(augmented[pivot_row], augmented[rank]);
+            }
+            
+            pivot_col[rank] = col;
+            
+            ${lang === 'zh' ? '// 消元' : '// Elimination'}
+            for (int row = 0; row < n; row++) {
+                if (row != rank && abs(augmented[row][col]) > EPS) {
+                    double factor = augmented[row][col] / augmented[rank][col];
+                    for (int j = col; j <= m; j++) {
+                        augmented[row][j] -= factor * augmented[rank][j];
+                    }
+                }
+            }
+            rank++;
+        }
+        
+        ${lang === 'zh' ? '// 检查解的存在性' : '// Check solution existence'}
+        for (int i = rank; i < n; i++) {
+            if (abs(augmented[i][m]) > EPS) {
+                throw runtime_error("${lang === 'zh' ? '方程组无解' : 'No solution exists'}");
+            }
+        }
+        
+        vector<double> solution(m, 0);
+        for (int i = 0; i < rank; i++) {
+            if (pivot_col[i] != -1) {
+                solution[pivot_col[i]] = augmented[i][m] / augmented[i][pivot_col[i]];
+            }
+        }
+        
+        return solution;
+    }
+    
+    ${lang === 'zh' ? '// 计算矩阵的秩' : '// Calculate matrix rank'}
+    int getRank() {
+        int rank = 0;
+        for (int col = 0; col < m && rank < n; col++) {
+            int pivot_row = -1;
+            for (int row = rank; row < n; row++) {
+                if (abs(augmented[row][col]) > EPS) {
+                    pivot_row = row;
+                    break;
+                }
+            }
+            
+            if (pivot_row == -1) continue;
+            
+            if (pivot_row != rank) {
+                swap(augmented[pivot_row], augmented[rank]);
+            }
+            
+            for (int row = rank + 1; row < n; row++) {
+                if (abs(augmented[row][col]) > EPS) {
+                    double factor = augmented[row][col] / augmented[rank][col];
+                    for (int j = col; j <= m; j++) {
+                        augmented[row][j] -= factor * augmented[rank][j];
+                    }
+                }
+            }
+            rank++;
+        }
+        return rank;
+    }
+};
+
+${lang === 'zh' ? '// 计算行列式' : '// Calculate determinant'}
+double determinant(vector<vector<double>> matrix) {
+    int n = matrix.size();
+    double det = 1;
+    
+    for (int i = 0; i < n; i++) {
+        ${lang === 'zh' ? '// 寻找主元' : '// Find pivot'}
+        int pivot = i;
+        for (int j = i + 1; j < n; j++) {
+            if (abs(matrix[j][i]) > abs(matrix[pivot][i])) {
+                pivot = j;
+            }
+        }
+        
+        if (abs(matrix[pivot][i]) < EPS) return 0; ${lang === 'zh' ? '// 矩阵奇异' : '// Matrix is singular'}
+        
+        if (pivot != i) {
+            swap(matrix[i], matrix[pivot]);
+            det = -det; ${lang === 'zh' ? '// 交换行改变符号' : '// Row swap changes sign'}
+        }
+        
+        det *= matrix[i][i];
+        
+        ${lang === 'zh' ? '// 消元' : '// Elimination'}
+        for (int j = i + 1; j < n; j++) {
+            if (abs(matrix[j][i]) > EPS) {
+                double factor = matrix[j][i] / matrix[i][i];
+                for (int k = i; k < n; k++) {
+                    matrix[j][k] -= factor * matrix[i][k];
+                }
+            }
+        }
+    }
+    
+    return det;
+}
+
+${lang === 'zh' ? '// 矩阵求逆' : '// Matrix inversion'}
+vector<vector<double>> inverse(vector<vector<double>> A) {
+    int n = A.size();
+    vector<vector<double>> inv(n, vector<double>(n, 0));
+    
+    ${lang === 'zh' ? '// 创建增广矩阵 [A|I]' : '// Create augmented matrix [A|I]'}
+    for (int i = 0; i < n; i++) {
+        inv[i][i] = 1;
+    }
+    
+    ${lang === 'zh' ? '// 高斯-约旦消元' : '// Gauss-Jordan elimination'}
+    for (int i = 0; i < n; i++) {
+        ${lang === 'zh' ? '// 寻找主元' : '// Find pivot'}
+        int pivot = i;
+        for (int j = i + 1; j < n; j++) {
+            if (abs(A[j][i]) > abs(A[pivot][i])) {
+                pivot = j;
+            }
+        }
+        
+        if (abs(A[pivot][i]) < EPS) {
+            throw runtime_error("${lang === 'zh' ? '矩阵不可逆' : 'Matrix is not invertible'}");
+        }
+        
+        if (pivot != i) {
+            swap(A[i], A[pivot]);
+            swap(inv[i], inv[pivot]);
+        }
+        
+        ${lang === 'zh' ? '// 归一化主元行' : '// Normalize pivot row'}
+        double pivot_val = A[i][i];
+        for (int j = 0; j < n; j++) {
+            A[i][j] /= pivot_val;
+            inv[i][j] /= pivot_val;
+        }
+        
+        ${lang === 'zh' ? '// 消元' : '// Elimination'}
+        for (int j = 0; j < n; j++) {
+            if (j != i && abs(A[j][i]) > EPS) {
+                double factor = A[j][i];
+                for (int k = 0; k < n; k++) {
+                    A[j][k] -= factor * A[i][k];
+                    inv[j][k] -= factor * inv[i][k];
+                }
+            }
+        }
+    }
+    
+    return inv;
+}
+
+int main() {
+    ${lang === 'zh' ? '// 测试线性方程组求解' : '// Test linear system solving'}
+    vector<vector<double>> A = {
+        {2, 1, -1},
+        {-3, -1, 2},
+        {-2, 1, 2}
+    };
+    vector<double> b = {8, -11, -3};
+    
+    LinearSystem system(A, b);
+    
+    try {
+        vector<double> solution = system.solve();
+        cout << "${lang === 'zh' ? '方程组解：' : 'System solution:'}" << endl;
+        for (int i = 0; i < solution.size(); i++) {
+            cout << "x" << i + 1 << " = " << fixed << setprecision(4) << solution[i] << endl;
+        }
+    } catch (const exception& e) {
+        cout << "${lang === 'zh' ? '错误：' : 'Error:'} " << e.what() << endl;
+    }
+    
+    ${lang === 'zh' ? '// 测试行列式计算' : '// Test determinant calculation'}
+    vector<vector<double>> B = {{1, 2, 3}, {4, 5, 6}, {7, 8, 10}};
+    cout << "\\n${lang === 'zh' ? '行列式：' : 'Determinant:'} " << determinant(B) << endl;
+    
+    ${lang === 'zh' ? '// 测试矩阵求逆' : '// Test matrix inversion'}
+    try {
+        vector<vector<double>> C = {{2, 1}, {1, 1}};
+        vector<vector<double>> inv_C = inverse(C);
+        cout << "\\n${lang === 'zh' ? '逆矩阵：' : 'Inverse matrix:'}" << endl;
+        for (auto& row : inv_C) {
+            for (double val : row) {
+                cout << setw(8) << fixed << setprecision(4) << val << " ";
+            }
+            cout << endl;
+        }
+    } catch (const exception& e) {
+        cout << "${lang === 'zh' ? '错误：' : 'Error:'} " << e.what() << endl;
+    }
+    
+    return 0;
+}`}
+          language="cpp"
+        />
+      </div>
+
+      <!-- Advanced Applications -->
+      <div class="topic-section">
+        <h3>{lang === 'zh' ? '3. 高级应用' : '3. Advanced Applications'}</h3>
+        
+        <h4>{lang === 'zh' ? '特征值与特征向量' : 'Eigenvalues and Eigenvectors'}</h4>
+        <p>
+          {lang === 'zh' 
+            ? '特征值分解在图论、主成分分析、马尔可夫链等问题中有重要应用。'
+            : 'Eigenvalue decomposition has important applications in graph theory, principal component analysis, Markov chains, and more.'
+          }
+        </p>
+
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// 幂迭代法求最大特征值' : '// Power iteration for largest eigenvalue'}
+#include <iostream>
+#include <vector>
+#include <cmath>
+#include <random>
+using namespace std;
+
+${lang === 'zh' ? '// 向量运算' : '// Vector operations'}
+double dotProduct(const vector<double>& a, const vector<double>& b) {
+    double sum = 0;
+    for (int i = 0; i < a.size(); i++) {
+        sum += a[i] * b[i];
+    }
+    return sum;
+}
+
+double vectorNorm(const vector<double>& v) {
+    return sqrt(dotProduct(v, v));
+}
+
+vector<double> normalize(const vector<double>& v) {
+    double norm = vectorNorm(v);
+    vector<double> result(v.size());
+    for (int i = 0; i < v.size(); i++) {
+        result[i] = v[i] / norm;
+    }
+    return result;
+}
+
+vector<double> matrixVectorMultiply(const vector<vector<double>>& A, const vector<double>& v) {
+    int n = A.size();
+    vector<double> result(n, 0);
+    for (int i = 0; i < n; i++) {
+        for (int j = 0; j < n; j++) {
+            result[i] += A[i][j] * v[j];
+        }
+    }
+    return result;
+}
+
+${lang === 'zh' ? '// 幂迭代法' : '// Power iteration method'}
+pair<double, vector<double>> powerIteration(const vector<vector<double>>& A, int maxIter = 1000, double tol = 1e-9) {
+    int n = A.size();
+    
+    ${lang === 'zh' ? '// 初始化随机向量' : '// Initialize random vector'}
+    random_device rd;
+    mt19937 gen(rd());
+    uniform_real_distribution<> dis(-1.0, 1.0);
+    
+    vector<double> v(n);
+    for (int i = 0; i < n; i++) {
+        v[i] = dis(gen);
+    }
+    v = normalize(v);
+    
+    double eigenvalue = 0;
+    for (int iter = 0; iter < maxIter; iter++) {
+        vector<double> Av = matrixVectorMultiply(A, v);
+        double newEigenvalue = dotProduct(v, Av);
+        
+        if (abs(newEigenvalue - eigenvalue) < tol) {
+            return {newEigenvalue, normalize(Av)};
+        }
+        
+        eigenvalue = newEigenvalue;
+        v = normalize(Av);
+    }
+    
+    return {eigenvalue, v};
+}
+
+${lang === 'zh' ? '// 图的邻接矩阵分析' : '// Graph adjacency matrix analysis'}
+class GraphAnalysis {
+private:
+    vector<vector<double>> adj;
+    int n;
+
+public:
+    GraphAnalysis(vector<vector<int>>& edges, int nodes) : n(nodes) {
+        adj.resize(n, vector<double>(n, 0));
+        
+        ${lang === 'zh' ? '// 构建邻接矩阵' : '// Build adjacency matrix'}
+        for (auto& edge : edges) {
+            adj[edge[0]][edge[1]] = 1;
+            adj[edge[1]][edge[0]] = 1; ${lang === 'zh' ? '// 无向图' : '// Undirected graph'}
+        }
+    }
+    
+    ${lang === 'zh' ? '// 计算图的谱半径（最大特征值）' : '// Calculate spectral radius (largest eigenvalue)'}
+    double spectralRadius() {
+        auto result = powerIteration(adj);
+        return result.first;
+    }
+    
+    ${lang === 'zh' ? '// PageRank算法（修改的幂迭代）' : '// PageRank algorithm (modified power iteration)'}
+    vector<double> pageRank(double damping = 0.85, int maxIter = 1000, double tol = 1e-9) {
+        ${lang === 'zh' ? '// 构建转移矩阵' : '// Build transition matrix'}
+        vector<vector<double>> P(n, vector<double>(n, 0));
+        vector<int> outDegree(n, 0);
+        
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (adj[i][j] > 0) outDegree[i]++;
+            }
+        }
+        
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (outDegree[i] > 0) {
+                    P[j][i] = adj[i][j] / outDegree[i];
+                } else {
+                    P[j][i] = 1.0 / n; ${lang === 'zh' ? '// 处理悬挂节点' : '// Handle dangling nodes'}
+                }
+            }
+        }
+        
+        ${lang === 'zh' ? '// PageRank迭代' : '// PageRank iteration'}
+        vector<double> rank(n, 1.0 / n);
+        
+        for (int iter = 0; iter < maxIter; iter++) {
+            vector<double> newRank(n, (1 - damping) / n);
+            
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    newRank[i] += damping * P[i][j] * rank[j];
+                }
+            }
+            
+            ${lang === 'zh' ? '// 检查收敛' : '// Check convergence'}
+            double diff = 0;
+            for (int i = 0; i < n; i++) {
+                diff += abs(newRank[i] - rank[i]);
+            }
+            
+            if (diff < tol) break;
+            rank = newRank;
+        }
+        
+        return rank;
+    }
+};
+
+int main() {
+    ${lang === 'zh' ? '// 测试特征值计算' : '// Test eigenvalue calculation'}
+    vector<vector<double>> matrix = {
+        {4, 1, 0},
+        {1, 3, 1},
+        {0, 1, 2}
+    };
+    
+    auto result = powerIteration(matrix);
+    cout << "${lang === 'zh' ? '最大特征值：' : 'Largest eigenvalue:'} " << result.first << endl;
+    cout << "${lang === 'zh' ? '对应特征向量：' : 'Corresponding eigenvector:'}" << endl;
+    for (double val : result.second) {
+        cout << val << " ";
+    }
+    cout << endl;
+    
+    ${lang === 'zh' ? '// 测试图分析' : '// Test graph analysis'}
+    vector<vector<int>> edges = {{0, 1}, {1, 2}, {2, 0}, {1, 3}, {3, 4}, {4, 1}};
+    GraphAnalysis graph(edges, 5);
+    
+    cout << "\\n${lang === 'zh' ? '图的谱半径：' : 'Graph spectral radius:'} " << graph.spectralRadius() << endl;
+    
+    vector<double> pagerank = graph.pageRank();
+    cout << "\\n${lang === 'zh' ? 'PageRank值：' : 'PageRank values:'}" << endl;
+    for (int i = 0; i < pagerank.size(); i++) {
+        cout << "${lang === 'zh' ? '节点' : 'Node'} " << i << ": " << pagerank[i] << endl;
+    }
+    
+    return 0;
+}`}
+          language="cpp"
+        />
+      </div>
+    </div>
+
+    <!-- Tips Section -->
+    <div class="tips-section">
+      <h2>{lang === 'zh' ? '解题技巧' : 'Problem-Solving Tips'}</h2>
+      <div class="tips-grid">
+        <div class="tip-card">
+          <h3>⚡ {lang === 'zh' ? '数值稳定性' : 'Numerical Stability'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '使用部分主元选择避免数值不稳定，设置合适的精度阈值，注意浮点数比较的陷阱。'
+              : 'Use partial pivoting to avoid numerical instability, set appropriate precision thresholds, and be careful with floating-point comparisons.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>🎯 {lang === 'zh' ? '算法选择' : 'Algorithm Selection'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '根据问题特点选择算法：稠密矩阵用高斯消元，稀疏矩阵考虑迭代方法，大规模问题使用近似算法。'
+              : 'Choose algorithms based on problem characteristics: Gaussian elimination for dense matrices, iterative methods for sparse matrices, approximation algorithms for large-scale problems.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>💡 {lang === 'zh' ? '优化技巧' : 'Optimization Techniques'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '利用矩阵的特殊性质（对称、三对角等）优化算法，使用块矩阵分解处理大规模问题。'
+              : 'Leverage special matrix properties (symmetric, tridiagonal, etc.) to optimize algorithms, use block matrix decomposition for large-scale problems.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>🔍 {lang === 'zh' ? '应用识别' : 'Application Recognition'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '识别线性代数在不同领域的应用：图论中的邻接矩阵、机器学习中的主成分分析、网络分析中的PageRank。'
+              : 'Recognize linear algebra applications in different domains: adjacency matrices in graph theory, PCA in machine learning, PageRank in network analysis.'
+            }
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation">
+      <a href={`/${lang}/6-world-class/combinatorics`} class="nav-button prev">
+        ← {lang === 'zh' ? '组合数学' : 'Combinatorics'}
+      </a>
+      <a href={`/${lang}/6-world-class`} class="nav-button index">
+        📚 {lang === 'zh' ? '章节目录' : 'Chapter Index'}
+      </a>
+      <a href={`/${lang}/6-world-class/advanced-dp`} class="nav-button next">
+        {lang === 'zh' ? '高级动态规划' : 'Advanced DP'} →
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .breadcrumb {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .breadcrumb a:hover {
+    color: #3730a3;
+    text-decoration: underline;
+  }
+
+  .header-section {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .main-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #dc2626 0%, #ea580c 25%, #d97706 50%, #ca8a04 75%, #65a30d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+  }
+
+  .subtitle {
+    font-size: 1.25rem;
+    color: #6b7280;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .overview-section {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #f59e0b;
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin: 2rem 0 3rem 0;
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1);
+  }
+
+  .overview-section h2 {
+    color: #92400e;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .overview-section p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #78350f;
+  }
+
+  .content-section {
+    margin: 4rem 0;
+  }
+
+  .content-section > h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 3rem;
+    color: #1e293b;
+    text-align: center;
+    position: relative;
+  }
+
+  .content-section > h2::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #dc2626, #ea580c, #d97706);
+    border-radius: 2px;
+  }
+
+  .topic-section {
+    margin: 3rem 0;
+    padding: 2rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border-left: 4px solid #dc2626;
+  }
+
+  .topic-section h3 {
+    color: #dc2626;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .topic-section h4 {
+    color: #1e293b;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 2rem 0 1rem 0;
+  }
+
+  .topic-section p {
+    color: #4b5563;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .tips-section {
+    margin: 4rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #e5e7eb;
+  }
+
+  .tips-section h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #1e293b;
+    text-align: center;
+  }
+
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .tip-card {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #0ea5e9;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: transform 0.2s ease;
+  }
+
+  .tip-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .tip-card h3 {
+    color: #0c4a6e;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .tip-card p {
+    color: #075985;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #e5e7eb;
+    gap: 1rem;
+  }
+
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.875rem 1.75rem;
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px 0 rgba(220, 38, 38, 0.39);
+  }
+
+  .nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px 0 rgba(220, 38, 38, 0.5);
+  }
+
+  .nav-button.index {
+    background: linear-gradient(135deg, #059669, #0d9488);
+    box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.39);
+  }
+
+  .nav-button.index:hover {
+    box-shadow: 0 8px 25px 0 rgba(5, 150, 105, 0.5);
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 0.5rem;
+    }
+
+    .main-title {
+      font-size: 2.5rem;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+    }
+
+    .overview-section {
+      padding: 1.5rem;
+      margin: 1.5rem 0 2rem 0;
+    }
+
+    .topic-section {
+      padding: 1.5rem;
+    }
+
+    .tips-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style> 

@@ -3,22 +3,22 @@ import Layout from '../../layouts/Layout.astro';
 import CodeExample from '../../components/CodeExample.tsx';
 ---
 
-<Layout title="搜索算法进阶（剪枝优化、记忆化搜索）">
+<Layout title="Advanced Search Algorithms - Competitive Programming">
   <div class="breadcrumb">
-    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; 搜索算法进阶
+    <a href="/">Home</a> &gt; <a href="/4-competitive">Competitive Programming</a> &gt; Advanced Search
   </div>
 
-  <h1>搜索算法进阶（剪枝优化、记忆化搜索）</h1>
+  <h1>Advanced Search Algorithms (Pruning & Memoization)</h1>
   
   <div class="overview">
     <p>
-      搜索算法的优化是竞赛编程的核心技能。通过剪枝优化可以大幅减少搜索空间，记忆化搜索能避免重复计算。本节将深入讲解各种搜索优化技巧及其在竞赛中的应用。
+      Advanced search algorithm optimization is a core skill in competitive programming. Through pruning optimization, we can significantly reduce the search space, and memoization can avoid redundant calculations. This section will deeply explore various search optimization techniques and their applications in competitive programming.
     </p>
   </div>
 
-  <h2>剪枝优化技巧</h2>
+  <h2>Pruning Optimization Techniques</h2>
   
-  <p>剪枝是通过提前判断某些分支不可能产生最优解，从而避免不必要的搜索。常见的剪枝策略包括可行性剪枝、最优性剪枝等。</p>
+  <p>Pruning is achieved by determining in advance that certain branches cannot produce optimal solutions, thereby avoiding unnecessary searches. Common pruning strategies include feasibility pruning, optimality pruning, and more.</p>
 
   <CodeExample 
     client:load

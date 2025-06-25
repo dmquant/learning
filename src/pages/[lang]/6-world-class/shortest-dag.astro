@@ -1,0 +1,716 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { ui } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } }
+  ];
+}
+
+const { lang } = Astro.params;
+const t = ui[lang as keyof typeof ui];
+---
+
+<Layout title={lang === 'zh' ? "最短路DAG - 世界级算法" : "Shortest Path DAG - World Class Algorithms"}>
+  <div class="container">
+    <nav class="breadcrumb">
+      <a href={`/${lang}`}>{t['nav.home']}</a> &gt; 
+      <a href={`/${lang}/6-world-class`}>{lang === 'zh' ? '世界级算法' : 'World Class'}</a> &gt; 
+      <span>{lang === 'zh' ? '最短路DAG' : 'Shortest Path DAG'}</span>
+    </nav>
+
+    <div class="header-section">
+      <h1 class="main-title">
+        {lang === 'zh' ? '最短路DAG' : 'Shortest Path DAG'}
+      </h1>
+      <p class="subtitle">
+        {lang === 'zh' 
+          ? '掌握DAG最短路算法、路径计数和拓扑排序优化'
+          : 'Master DAG shortest path algorithms, path counting, and topological sorting optimization'
+        }
+      </p>
+    </div>
+
+    <div class="overview-section">
+      <h2>{lang === 'zh' ? '概述' : 'Overview'}</h2>
+      <p>
+        {lang === 'zh' 
+          ? 'DAG（有向无环图）上的最短路问题具有特殊性质，可以通过拓扑排序实现O(V+E)的线性时间复杂度。本章节探讨DAG最短路、路径计数、关键路径等高级算法。'
+          : 'Shortest path problems on DAGs (Directed Acyclic Graphs) have special properties that allow linear O(V+E) time complexity through topological sorting. This chapter explores DAG shortest paths, path counting, critical paths, and other advanced algorithms.'
+        }
+      </p>
+    </div>
+
+    <div class="content-section">
+      <h2>{lang === 'zh' ? '核心内容' : 'Core Content'}</h2>
+
+      <div class="topic-section">
+        <h3>{lang === 'zh' ? '1. DAG最短路算法' : '1. DAG Shortest Path Algorithm'}</h3>
+        
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// DAG最短路实现' : '// DAG shortest path implementation'}
+#include <iostream>
+#include <vector>
+#include <queue>
+#include <climits>
+using namespace std;
+
+class DAGShortestPath {
+private:
+    int n;
+    vector<vector<pair<int, long long>>> adj;
+    vector<int> indegree;
+    vector<long long> dist;
+    vector<int> parent;
+    
+public:
+    DAGShortestPath(int vertices) : n(vertices) {
+        adj.resize(n);
+        indegree.resize(n);
+        dist.resize(n);
+        parent.resize(n);
+    }
+    
+    void addEdge(int u, int v, long long weight) {
+        adj[u].push_back({v, weight});
+        indegree[v]++;
+    }
+    
+    ${lang === 'zh' ? '// 拓扑排序 + 最短路' : '// Topological sort + shortest path'}
+    bool shortestPath(int source) {
+        ${lang === 'zh' ? '// 初始化距离' : '// Initialize distances'}
+        fill(dist.begin(), dist.end(), LLONG_MAX);
+        fill(parent.begin(), parent.end(), -1);
+        dist[source] = 0;
+        
+        ${lang === 'zh' ? '// 拓扑排序' : '// Topological sorting'}
+        queue<int> q;
+        vector<int> tempIndegree = indegree;
+        
+        for (int i = 0; i < n; i++) {
+            if (tempIndegree[i] == 0) {
+                q.push(i);
+            }
+        }
+        
+        vector<int> topoOrder;
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            topoOrder.push_back(u);
+            
+            for (auto [v, weight] : adj[u]) {
+                tempIndegree[v]--;
+                if (tempIndegree[v] == 0) {
+                    q.push(v);
+                }
+            }
+        }
+        
+        ${lang === 'zh' ? '// 检查是否有环' : '// Check for cycles'}
+        if (topoOrder.size() != n) {
+            return false; ${lang === 'zh' ? '// 存在环' : '// Cycle exists'}
+        }
+        
+        ${lang === 'zh' ? '// 按拓扑顺序松弛边' : '// Relax edges in topological order'}
+        for (int u : topoOrder) {
+            if (dist[u] != LLONG_MAX) {
+                for (auto [v, weight] : adj[u]) {
+                    if (dist[u] + weight < dist[v]) {
+                        dist[v] = dist[u] + weight;
+                        parent[v] = u;
+                    }
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    ${lang === 'zh' ? '// 获取到目标的最短距离' : '// Get shortest distance to target'}
+    long long getDistance(int target) {
+        return dist[target];
+    }
+    
+    ${lang === 'zh' ? '// 重构最短路径' : '// Reconstruct shortest path'}
+    vector<int> getPath(int target) {
+        vector<int> path;
+        int current = target;
+        
+        while (current != -1) {
+            path.push_back(current);
+            current = parent[current];
+        }
+        
+        reverse(path.begin(), path.end());
+        return path;
+    }
+    
+    ${lang === 'zh' ? '// 打印所有最短距离' : '// Print all shortest distances'}
+    void printDistances(int source) {
+        cout << "${lang === 'zh' ? '从节点' : 'From node'} " << source << " ${lang === 'zh' ? '的最短距离：' : 'shortest distances:'}" << endl;
+        for (int i = 0; i < n; i++) {
+            if (dist[i] == LLONG_MAX) {
+                cout << "Node " << i << ": ${lang === 'zh' ? '不可达' : 'unreachable'}" << endl;
+            } else {
+                cout << "Node " << i << ": " << dist[i] << endl;
+            }
+        }
+    }
+};
+
+${lang === 'zh' ? '// DAG路径计数' : '// DAG path counting'}
+class DAGPathCounting {
+private:
+    int n;
+    vector<vector<int>> adj;
+    vector<int> indegree;
+    vector<long long> pathCount;
+    
+public:
+    DAGPathCounting(int vertices) : n(vertices) {
+        adj.resize(n);
+        indegree.resize(n);
+        pathCount.resize(n);
+    }
+    
+    void addEdge(int u, int v) {
+        adj[u].push_back(v);
+        indegree[v]++;
+    }
+    
+    ${lang === 'zh' ? '// 计算从源点到各点的路径数' : '// Count paths from source to all nodes'}
+    bool countPaths(int source) {
+        fill(pathCount.begin(), pathCount.end(), 0);
+        pathCount[source] = 1;
+        
+        ${lang === 'zh' ? '// 拓扑排序' : '// Topological sorting'}
+        queue<int> q;
+        vector<int> tempIndegree = indegree;
+        
+        for (int i = 0; i < n; i++) {
+            if (tempIndegree[i] == 0) {
+                q.push(i);
+            }
+        }
+        
+        vector<int> topoOrder;
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            topoOrder.push_back(u);
+            
+            for (int v : adj[u]) {
+                tempIndegree[v]--;
+                if (tempIndegree[v] == 0) {
+                    q.push(v);
+                }
+            }
+        }
+        
+        if (topoOrder.size() != n) {
+            return false;
+        }
+        
+        ${lang === 'zh' ? '// 按拓扑顺序计算路径数' : '// Count paths in topological order'}
+        for (int u : topoOrder) {
+            for (int v : adj[u]) {
+                pathCount[v] += pathCount[u];
+            }
+        }
+        
+        return true;
+    }
+    
+    long long getPathCount(int target) {
+        return pathCount[target];
+    }
+    
+    void printPathCounts(int source) {
+        cout << "${lang === 'zh' ? '从节点' : 'From node'} " << source << " ${lang === 'zh' ? '的路径数：' : 'path counts:'}" << endl;
+        for (int i = 0; i < n; i++) {
+            cout << "Node " << i << ": " << pathCount[i] << endl;
+        }
+    }
+};
+
+${lang === 'zh' ? '// 关键路径算法（CPM）' : '// Critical Path Method (CPM)'}
+class CriticalPathMethod {
+private:
+    int n;
+    vector<vector<pair<int, int>>> adj, radj; ${lang === 'zh' ? '// 正向和反向邻接表' : '// Forward and reverse adjacency lists'}
+    vector<int> indegree, outdegree;
+    vector<int> earliestTime, latestTime;
+    
+public:
+    CriticalPathMethod(int vertices) : n(vertices) {
+        adj.resize(n);
+        radj.resize(n);
+        indegree.resize(n);
+        outdegree.resize(n);
+        earliestTime.resize(n);
+        latestTime.resize(n);
+    }
+    
+    void addEdge(int u, int v, int duration) {
+        adj[u].push_back({v, duration});
+        radj[v].push_back({u, duration});
+        indegree[v]++;
+        outdegree[u]++;
+    }
+    
+    ${lang === 'zh' ? '// 计算关键路径' : '// Calculate critical path'}
+    bool findCriticalPath() {
+        ${lang === 'zh' ? '// 计算最早开始时间' : '// Calculate earliest start times'}
+        fill(earliestTime.begin(), earliestTime.end(), 0);
+        
+        queue<int> q;
+        vector<int> tempIndegree = indegree;
+        
+        for (int i = 0; i < n; i++) {
+            if (tempIndegree[i] == 0) {
+                q.push(i);
+            }
+        }
+        
+        vector<int> topoOrder;
+        while (!q.empty()) {
+            int u = q.front();
+            q.pop();
+            topoOrder.push_back(u);
+            
+            for (auto [v, duration] : adj[u]) {
+                earliestTime[v] = max(earliestTime[v], earliestTime[u] + duration);
+                tempIndegree[v]--;
+                if (tempIndegree[v] == 0) {
+                    q.push(v);
+                }
+            }
+        }
+        
+        if (topoOrder.size() != n) {
+            return false;
+        }
+        
+        ${lang === 'zh' ? '// 计算最晚开始时间' : '// Calculate latest start times'}
+        int projectDuration = *max_element(earliestTime.begin(), earliestTime.end());
+        fill(latestTime.begin(), latestTime.end(), projectDuration);
+        
+        vector<int> tempOutdegree = outdegree;
+        queue<int> rq;
+        
+        for (int i = 0; i < n; i++) {
+            if (tempOutdegree[i] == 0) {
+                rq.push(i);
+            }
+        }
+        
+        while (!rq.empty()) {
+            int v = rq.front();
+            rq.pop();
+            
+            for (auto [u, duration] : radj[v]) {
+                latestTime[u] = min(latestTime[u], latestTime[v] - duration);
+                tempOutdegree[u]--;
+                if (tempOutdegree[u] == 0) {
+                    rq.push(u);
+                }
+            }
+        }
+        
+        return true;
+    }
+    
+    ${lang === 'zh' ? '// 获取关键活动' : '// Get critical activities'}
+    vector<pair<int, int>> getCriticalActivities() {
+        vector<pair<int, int>> critical;
+        
+        for (int u = 0; u < n; u++) {
+            for (auto [v, duration] : adj[u]) {
+                ${lang === 'zh' ? '// 检查是否为关键活动' : '// Check if critical activity'}
+                if (earliestTime[u] + duration == latestTime[v] && 
+                    earliestTime[u] == latestTime[u]) {
+                    critical.push_back({u, v});
+                }
+            }
+        }
+        
+        return critical;
+    }
+    
+    void printResults() {
+        cout << "${lang === 'zh' ? '节点时间信息：' : 'Node timing information:'}" << endl;
+        for (int i = 0; i < n; i++) {
+            cout << "Node " << i << ": ${lang === 'zh' ? '最早' : 'Earliest'}=" << earliestTime[i] 
+                 << ", ${lang === 'zh' ? '最晚' : 'Latest'}=" << latestTime[i] << endl;
+        }
+        
+        vector<pair<int, int>> critical = getCriticalActivities();
+        cout << "${lang === 'zh' ? '关键活动：' : 'Critical activities:'}" << endl;
+        for (auto [u, v] : critical) {
+            cout << u << " -> " << v << endl;
+        }
+    }
+};
+
+int main() {
+    ${lang === 'zh' ? '// 测试DAG最短路' : '// Test DAG shortest path'}
+    DAGShortestPath dag(6);
+    dag.addEdge(0, 1, 5);
+    dag.addEdge(0, 2, 3);
+    dag.addEdge(1, 3, 6);
+    dag.addEdge(1, 2, 2);
+    dag.addEdge(2, 4, 4);
+    dag.addEdge(2, 5, 2);
+    dag.addEdge(2, 3, 7);
+    dag.addEdge(3, 4, -1);
+    dag.addEdge(4, 5, -2);
+    
+    if (dag.shortestPath(0)) {
+        dag.printDistances(0);
+        
+        vector<int> path = dag.getPath(5);
+        cout << "${lang === 'zh' ? '到节点5的路径：' : 'Path to node 5:'} ";
+        for (int i = 0; i < path.size(); i++) {
+            cout << path[i];
+            if (i < path.size() - 1) cout << " -> ";
+        }
+        cout << endl;
+    }
+    
+    ${lang === 'zh' ? '// 测试路径计数' : '// Test path counting'}
+    DAGPathCounting pc(4);
+    pc.addEdge(0, 1);
+    pc.addEdge(0, 2);
+    pc.addEdge(1, 3);
+    pc.addEdge(2, 3);
+    
+    if (pc.countPaths(0)) {
+        pc.printPathCounts(0);
+    }
+    
+    ${lang === 'zh' ? '// 测试关键路径' : '// Test critical path'}
+    CriticalPathMethod cpm(6);
+    cpm.addEdge(0, 1, 3);
+    cpm.addEdge(0, 2, 2);
+    cpm.addEdge(1, 3, 2);
+    cpm.addEdge(2, 3, 4);
+    cpm.addEdge(2, 4, 3);
+    cpm.addEdge(3, 5, 2);
+    cpm.addEdge(4, 5, 1);
+    
+    if (cpm.findCriticalPath()) {
+        cpm.printResults();
+    }
+    
+    return 0;
+}`}
+          language="cpp"
+        />
+      </div>
+    </div>
+
+    <div class="tips-section">
+      <h2>{lang === 'zh' ? '解题技巧' : 'Problem-Solving Tips'}</h2>
+      <div class="tips-grid">
+        <div class="tip-card">
+          <h3>🎯 {lang === 'zh' ? 'DAG识别' : 'DAG Recognition'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '确认图是DAG后可以使用线性时间算法，通过拓扑排序检测环的存在。'
+              : 'After confirming the graph is a DAG, linear time algorithms can be used, detect cycles through topological sorting.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>⚡ {lang === 'zh' ? '复杂度优势' : 'Complexity Advantage'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? 'DAG最短路O(V+E)优于Dijkstra的O(V log V + E)，适合处理大规模稀疏图。'
+              : 'DAG shortest path O(V+E) is better than Dijkstra O(V log V + E), suitable for large sparse graphs.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>🔧 {lang === 'zh' ? '实现要点' : 'Implementation Points'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '先拓扑排序再松弛边，可以处理负权边，注意初始化和边界条件。'
+              : 'Topological sort first then relax edges, can handle negative weights, pay attention to initialization and boundary conditions.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>🧮 {lang === 'zh' ? '应用场景' : 'Application Scenarios'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '项目调度、依赖分析、关键路径、路径计数等实际问题的建模和求解。'
+              : 'Project scheduling, dependency analysis, critical paths, path counting, and other practical problem modeling and solving.'
+            }
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <div class="navigation">
+      <a href={`/${lang}/6-world-class/heavy-light`} class="nav-button prev">
+        ← {lang === 'zh' ? '重链剖分' : 'Heavy-Light Decomposition'}
+      </a>
+      <a href={`/${lang}/6-world-class`} class="nav-button index">
+        📚 {lang === 'zh' ? '章节目录' : 'Chapter Index'}
+      </a>
+      <a href={`/${lang}/6-world-class/tree-advanced`} class="nav-button next">
+        {lang === 'zh' ? '高级树算法' : 'Advanced Tree Algorithms'} →
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .breadcrumb {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .breadcrumb a:hover {
+    color: #3730a3;
+    text-decoration: underline;
+  }
+
+  .header-section {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .main-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #dc2626 0%, #ea580c 25%, #d97706 50%, #ca8a04 75%, #65a30d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+  }
+
+  .subtitle {
+    font-size: 1.25rem;
+    color: #6b7280;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .overview-section {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #f59e0b;
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin: 2rem 0 3rem 0;
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1);
+  }
+
+  .overview-section h2 {
+    color: #92400e;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .overview-section p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #78350f;
+  }
+
+  .content-section {
+    margin: 4rem 0;
+  }
+
+  .content-section > h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 3rem;
+    color: #1e293b;
+    text-align: center;
+    position: relative;
+  }
+
+  .content-section > h2::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #dc2626, #ea580c, #d97706);
+    border-radius: 2px;
+  }
+
+  .topic-section {
+    margin: 3rem 0;
+    padding: 2rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border-left: 4px solid #dc2626;
+  }
+
+  .topic-section h3 {
+    color: #dc2626;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .topic-section p {
+    color: #4b5563;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .tips-section {
+    margin: 4rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #e5e7eb;
+  }
+
+  .tips-section h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #1e293b;
+    text-align: center;
+  }
+
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .tip-card {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #0ea5e9;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: transform 0.2s ease;
+  }
+
+  .tip-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .tip-card h3 {
+    color: #0c4a6e;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .tip-card p {
+    color: #075985;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #e5e7eb;
+    gap: 1rem;
+  }
+
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.875rem 1.75rem;
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px 0 rgba(220, 38, 38, 0.39);
+  }
+
+  .nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px 0 rgba(220, 38, 38, 0.5);
+  }
+
+  .nav-button.index {
+    background: linear-gradient(135deg, #059669, #0d9488);
+    box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.39);
+  }
+
+  .nav-button.index:hover {
+    box-shadow: 0 8px 25px 0 rgba(5, 150, 105, 0.5);
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 0.5rem;
+    }
+
+    .main-title {
+      font-size: 2.5rem;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+    }
+
+    .overview-section {
+      padding: 1.5rem;
+      margin: 1.5rem 0 2rem 0;
+    }
+
+    .topic-section {
+      padding: 1.5rem;
+    }
+
+    .tips-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style> 

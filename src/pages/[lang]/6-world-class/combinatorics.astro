@@ -1,0 +1,742 @@
+---
+import Layout from '../../../layouts/Layout.astro';
+import CodeExample from '../../../components/CodeExample.tsx';
+import { ui } from '../../../i18n/ui';
+
+export function getStaticPaths() {
+  return [
+    { params: { lang: 'en' } },
+    { params: { lang: 'zh' } }
+  ];
+}
+
+const { lang } = Astro.params;
+const t = ui[lang as keyof typeof ui];
+---
+
+<Layout title={lang === 'zh' ? "组合数学 - 世界级算法" : "Combinatorics - World Class Algorithms"}>
+  <div class="container">
+    <!-- Breadcrumb -->
+    <nav class="breadcrumb">
+      <a href={`/${lang}`}>{t['nav.home']}</a> &gt; 
+      <a href={`/${lang}/6-world-class`}>{lang === 'zh' ? '世界级算法' : 'World Class'}</a> &gt; 
+      <span>{lang === 'zh' ? '组合数学' : 'Combinatorics'}</span>
+    </nav>
+
+    <!-- Header -->
+    <div class="header-section">
+      <h1 class="main-title">
+        {lang === 'zh' ? '组合数学' : 'Combinatorics'}
+      </h1>
+      <p class="subtitle">
+        {lang === 'zh' 
+          ? '掌握高级组合数学技巧，解决复杂计数问题'
+          : 'Master advanced combinatorial techniques for complex counting problems'
+        }
+      </p>
+    </div>
+
+    <!-- Overview -->
+    <div class="overview-section">
+      <h2>{lang === 'zh' ? '概述' : 'Overview'}</h2>
+      <p>
+        {lang === 'zh' 
+          ? '组合数学是算法竞赛中的核心数学分支，涉及计数、排列、组合等问题。本章节深入探讨容斥原理、卡塔兰数、生成函数等高级技巧，为解决世界级竞赛中的复杂组合问题奠定基础。'
+          : 'Combinatorics is a core mathematical branch in competitive programming, involving counting, permutations, and combinations. This chapter explores advanced techniques like inclusion-exclusion principle, Catalan numbers, and generating functions to solve complex combinatorial problems in world-class competitions.'
+        }
+      </p>
+    </div>
+
+    <!-- Content Sections -->
+    <div class="content-section">
+      <h2>{lang === 'zh' ? '核心内容' : 'Core Content'}</h2>
+
+      <!-- Inclusion-Exclusion Principle -->
+      <div class="topic-section">
+        <h3>{lang === 'zh' ? '1. 容斥原理' : '1. Inclusion-Exclusion Principle'}</h3>
+        <p>
+          {lang === 'zh' 
+            ? '容斥原理是解决复杂计数问题的强大工具，通过加减交替计算集合的并集大小。'
+            : 'The inclusion-exclusion principle is a powerful tool for complex counting problems, calculating the size of unions through alternating addition and subtraction.'
+          }
+        </p>
+
+        <h4>{lang === 'zh' ? '基本原理' : 'Basic Principle'}</h4>
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// 容斥原理：计算多个集合的并集大小' : '// Inclusion-Exclusion: Calculate size of union of multiple sets'}
+${lang === 'zh' ? '// |A ∪ B ∪ C| = |A| + |B| + |C| - |A ∩ B| - |A ∩ C| - |B ∩ C| + |A ∩ B ∩ C|' : '// |A ∪ B ∪ C| = |A| + |B| + |C| - |A ∩ B| - |A ∩ C| - |B ∩ C| + |A ∩ B ∩ C|'}
+
+#include <iostream>
+#include <vector>
+#include <cmath>
+using namespace std;
+
+${lang === 'zh' ? '// 计算能被某些数整除的数的个数（1到n）' : '// Count numbers divisible by certain numbers (1 to n)'}
+long long inclusionExclusion(long long n, vector<int>& divisors) {
+    int m = divisors.size();
+    long long result = 0;
+    
+    ${lang === 'zh' ? '// 枚举所有子集' : '// Enumerate all subsets'}
+    for (int mask = 1; mask < (1 << m); mask++) {
+        long long lcm = 1;
+        int bits = 0;
+        
+        ${lang === 'zh' ? '// 计算当前子集的LCM' : '// Calculate LCM of current subset'}
+        for (int i = 0; i < m; i++) {
+            if (mask & (1 << i)) {
+                lcm = lcm / __gcd(lcm, (long long)divisors[i]) * divisors[i];
+                bits++;
+                if (lcm > n) break; ${lang === 'zh' ? '// 优化：LCM过大直接跳出' : '// Optimization: break if LCM too large'}
+            }
+        }
+        
+        ${lang === 'zh' ? '// 根据子集大小决定加减' : '// Add or subtract based on subset size'}
+        if (bits % 2 == 1) {
+            result += n / lcm;
+        } else {
+            result -= n / lcm;
+        }
+    }
+    
+    return result;
+}
+
+int main() {
+    long long n = 100;
+    vector<int> divisors = {2, 3, 5};
+    
+    ${lang === 'zh' ? '// 计算1到100中能被2、3或5整除的数的个数' : '// Count numbers from 1 to 100 divisible by 2, 3, or 5'}
+    cout << inclusionExclusion(n, divisors) << endl;
+    
+    return 0;
+}`}
+          language="cpp"
+        />
+
+        <h4>{lang === 'zh' ? '高级应用：错位排列' : 'Advanced Application: Derangements'}</h4>
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// 错位排列：计算n个元素的完全错位排列数' : '// Derangements: Calculate number of complete derangements of n elements'}
+#include <iostream>
+#include <vector>
+using namespace std;
+
+${lang === 'zh' ? '// 使用容斥原理计算错位排列' : '// Calculate derangements using inclusion-exclusion'}
+long long derangements(int n) {
+    if (n == 0) return 1;
+    if (n == 1) return 0;
+    
+    ${lang === 'zh' ? '// D(n) = n! * Σ(k=0 to n) (-1)^k / k!' : '// D(n) = n! * Σ(k=0 to n) (-1)^k / k!'}
+    long long factorial = 1;
+    for (int i = 1; i <= n; i++) {
+        factorial *= i;
+    }
+    
+    double sum = 0;
+    long long fact = 1;
+    for (int k = 0; k <= n; k++) {
+        if (k > 0) fact *= k;
+        sum += (k % 2 == 0 ? 1.0 : -1.0) / fact;
+    }
+    
+    return (long long)(factorial * sum + 0.5);
+}
+
+${lang === 'zh' ? '// 递推公式计算错位排列（更高效）' : '// Calculate derangements using recurrence (more efficient)'}
+long long derangementsDP(int n) {
+    if (n == 0) return 1;
+    if (n == 1) return 0;
+    
+    vector<long long> dp(n + 1);
+    dp[0] = 1;
+    dp[1] = 0;
+    
+    for (int i = 2; i <= n; i++) {
+        ${lang === 'zh' ? '// D(n) = (n-1) * (D(n-1) + D(n-2))' : '// D(n) = (n-1) * (D(n-1) + D(n-2))'}
+        dp[i] = (long long)(i - 1) * (dp[i - 1] + dp[i - 2]);
+    }
+    
+    return dp[n];
+}
+
+int main() {
+    for (int n = 0; n <= 10; n++) {
+        cout << "D(" << n << ") = " << derangementsDP(n) << endl;
+    }
+    return 0;
+}`}
+          language="cpp"
+        />
+      </div>
+
+      <!-- Catalan Numbers -->
+      <div class="topic-section">
+        <h3>{lang === 'zh' ? '2. 卡塔兰数' : '2. Catalan Numbers'}</h3>
+        <p>
+          {lang === 'zh' 
+            ? '卡塔兰数在组合数学中有着广泛应用，从括号匹配到二叉树计数，是解决递归结构问题的关键。'
+            : 'Catalan numbers have wide applications in combinatorics, from parentheses matching to binary tree counting, key for solving recursive structure problems.'
+          }
+        </p>
+
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// 卡塔兰数的多种计算方法' : '// Multiple methods to calculate Catalan numbers'}
+#include <iostream>
+#include <vector>
+using namespace std;
+
+${lang === 'zh' ? '// 方法1：递推公式 C(n) = Σ(i=0 to n-1) C(i) * C(n-1-i)' : '// Method 1: Recurrence C(n) = Σ(i=0 to n-1) C(i) * C(n-1-i)'}
+long long catalanDP(int n) {
+    vector<long long> catalan(n + 1, 0);
+    catalan[0] = catalan[1] = 1;
+    
+    for (int i = 2; i <= n; i++) {
+        for (int j = 0; j < i; j++) {
+            catalan[i] += catalan[j] * catalan[i - 1 - j];
+        }
+    }
+    
+    return catalan[n];
+}
+
+${lang === 'zh' ? '// 方法2：组合数公式 C(n) = C(2n, n) / (n + 1)' : '// Method 2: Combinatorial formula C(n) = C(2n, n) / (n + 1)'}
+long long catalanCombination(int n) {
+    ${lang === 'zh' ? '// 计算组合数 C(2n, n)' : '// Calculate combination C(2n, n)'}
+    long long result = 1;
+    for (int i = 0; i < n; i++) {
+        result = result * (2 * n - i) / (i + 1);
+    }
+    return result / (n + 1);
+}
+
+${lang === 'zh' ? '// 应用1：有效括号序列数量' : '// Application 1: Number of valid parentheses sequences'}
+int validParentheses(int n) {
+    return catalanDP(n);
+}
+
+${lang === 'zh' ? '// 应用2：二叉搜索树数量' : '// Application 2: Number of binary search trees'}
+int numBST(int n) {
+    return catalanDP(n);
+}
+
+${lang === 'zh' ? '// 应用3：山脉数组数量' : '// Application 3: Number of mountain arrays'}
+int mountainArrays(int n) {
+    if (n % 2 == 0) return 0; ${lang === 'zh' ? '// 偶数长度无法形成山脉' : '// Even length cannot form mountain'}
+    return catalanDP(n / 2);
+}
+
+${lang === 'zh' ? '// 应用4：凸多边形三角剖分数' : '// Application 4: Triangulations of convex polygon'}
+int triangulations(int n) {
+    if (n < 3) return 0;
+    return catalanDP(n - 2);
+}
+
+int main() {
+    int n = 10;
+    cout << "${lang === 'zh' ? 'Catalan数：' : 'Catalan numbers:'}" << endl;
+    for (int i = 0; i <= n; i++) {
+        cout << "C(" << i << ") = " << catalanDP(i) << endl;
+    }
+    
+    cout << "\\n${lang === 'zh' ? '应用示例：' : 'Applications:'}" << endl;
+    cout << "${lang === 'zh' ? '5对括号的有效序列数：' : 'Valid parentheses with 5 pairs:'} " << validParentheses(5) << endl;
+    cout << "${lang === 'zh' ? '5个节点的BST数量：' : 'BSTs with 5 nodes:'} " << numBST(5) << endl;
+    cout << "${lang === 'zh' ? '六边形三角剖分数：' : 'Triangulations of hexagon:'} " << triangulations(6) << endl;
+    
+    return 0;
+}`}
+          language="cpp"
+        />
+      </div>
+
+      <!-- Advanced Combinatorial Techniques -->
+      <div class="topic-section">
+        <h3>{lang === 'zh' ? '3. 高级组合技巧' : '3. Advanced Combinatorial Techniques'}</h3>
+        
+        <h4>{lang === 'zh' ? '生成函数' : 'Generating Functions'}</h4>
+        <p>
+          {lang === 'zh' 
+            ? '生成函数是组合数学中的强大工具，能够将组合问题转化为代数问题。'
+            : 'Generating functions are powerful tools in combinatorics, transforming combinatorial problems into algebraic ones.'
+          }
+        </p>
+
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// 生成函数应用：整数分拆' : '// Generating Functions: Integer Partitions'}
+#include <iostream>
+#include <vector>
+using namespace std;
+
+${lang === 'zh' ? '// 计算整数n的分拆数（不同顺序视为同一分拆）' : '// Calculate number of partitions of integer n (order does not matter)'}
+int partitions(int n) {
+    vector<int> dp(n + 1, 0);
+    dp[0] = 1;
+    
+    ${lang === 'zh' ? '// 对每个可能的部分进行处理' : '// Process each possible part'}
+    for (int part = 1; part <= n; part++) {
+        for (int sum = part; sum <= n; sum++) {
+            dp[sum] += dp[sum - part];
+        }
+    }
+    
+    return dp[n];
+}
+
+${lang === 'zh' ? '// 计算整数n的不同分拆数（所有部分都不同）' : '// Calculate distinct partitions of n (all parts different)'}
+int distinctPartitions(int n) {
+    vector<int> dp(n + 1, 0);
+    dp[0] = 1;
+    
+    for (int part = 1; part <= n; part++) {
+        for (int sum = n; sum >= part; sum--) {
+            dp[sum] += dp[sum - part];
+        }
+    }
+    
+    return dp[n];
+}
+
+${lang === 'zh' ? '// 五边形数定理应用：快速计算分拆数' : '// Pentagonal Number Theorem: Fast partition calculation'}
+vector<int> fastPartitions(int n) {
+    vector<int> p(n + 1, 0);
+    p[0] = 1;
+    
+    for (int i = 1; i <= n; i++) {
+        for (int k = 1; ; k++) {
+            ${lang === 'zh' ? '// 五边形数：k(3k-1)/2' : '// Pentagonal numbers: k(3k-1)/2'}
+            int pent1 = k * (3 * k - 1) / 2;
+            int pent2 = k * (3 * k + 1) / 2;
+            
+            if (pent1 > i) break;
+            
+            ${lang === 'zh' ? '// 应用递推关系' : '// Apply recurrence relation'}
+            if (k % 2 == 1) {
+                p[i] += p[i - pent1];
+                if (pent2 <= i) p[i] += p[i - pent2];
+            } else {
+                p[i] -= p[i - pent1];
+                if (pent2 <= i) p[i] -= p[i - pent2];
+            }
+        }
+    }
+    
+    return p;
+}
+
+int main() {
+    int n = 20;
+    
+    cout << "${lang === 'zh' ? '整数分拆：' : 'Integer partitions:'}" << endl;
+    for (int i = 1; i <= 10; i++) {
+        cout << "P(" << i << ") = " << partitions(i) << endl;
+    }
+    
+    cout << "\\n${lang === 'zh' ? '不同分拆：' : 'Distinct partitions:'}" << endl;
+    for (int i = 1; i <= 10; i++) {
+        cout << "Q(" << i << ") = " << distinctPartitions(i) << endl;
+    }
+    
+    ${lang === 'zh' ? '// 验证五边形数定理' : '// Verify pentagonal number theorem'}
+    vector<int> fast = fastPartitions(n);
+    cout << "\\n${lang === 'zh' ? '快速算法验证：P(' : 'Fast algorithm verification: P('}" << n << ") = " << fast[n] << endl;
+    cout << "${lang === 'zh' ? '标准算法：P(' : 'Standard algorithm: P('}" << n << ") = " << partitions(n) << endl;
+    
+    return 0;
+}`}
+          language="cpp"
+        />
+
+        <h4>{lang === 'zh' ? 'Burnside引理' : 'Burnside\'s Lemma'}</h4>
+        <CodeExample
+          client:load
+          code={`${lang === 'zh' ? '// Burnside引理：计算在群作用下的不同着色数' : '// Burnside\'s Lemma: Count distinct colorings under group action'}
+#include <iostream>
+#include <vector>
+#include <cmath>
+using namespace std;
+
+${lang === 'zh' ? '// 计算最大公约数' : '// Calculate GCD'}
+int gcd(int a, int b) {
+    return b == 0 ? a : gcd(b, a % b);
+}
+
+${lang === 'zh' ? '// 计算圆形项链的不同着色数（可旋转和翻转）' : '// Count distinct necklace colorings (rotations and reflections)'}
+long long necklaceColorings(int n, int k) {
+    if (n == 0) return 1;
+    
+    long long result = 0;
+    
+    ${lang === 'zh' ? '// 旋转对称：对每个可能的旋转角度' : '// Rotational symmetry: for each possible rotation angle'}
+    for (int i = 0; i < n; i++) {
+        int cycles = gcd(n, i);
+        result += (long long)pow(k, cycles);
+    }
+    
+    ${lang === 'zh' ? '// 翻转对称' : '// Reflection symmetry'}
+    if (n % 2 == 1) {
+        ${lang === 'zh' ? '// 奇数：n条翻转轴，每条轴固定1个珠子' : '// Odd: n reflection axes, each fixes 1 bead'}
+        result += n * (long long)pow(k, (n + 1) / 2);
+    } else {
+        ${lang === 'zh' ? '// 偶数：n/2条穿过顶点的轴 + n/2条穿过边中点的轴' : '// Even: n/2 axes through vertices + n/2 axes through edge midpoints'}
+        result += (n / 2) * (long long)pow(k, n / 2 + 1);
+        result += (n / 2) * (long long)pow(k, n / 2);
+    }
+    
+    ${lang === 'zh' ? '// 应用Burnside引理：平均不动点数' : '// Apply Burnside\'s lemma: average number of fixed points'}
+    return result / (2 * n);
+}
+
+${lang === 'zh' ? '// 计算正方形的不同着色数（4个顶点，k种颜色）' : '// Count distinct square colorings (4 vertices, k colors)'}
+long long squareColorings(int k) {
+    ${lang === 'zh' ? '// 8个对称操作：恒等、3个旋转、4个翻转' : '// 8 symmetry operations: identity, 3 rotations, 4 reflections'}
+    long long result = 0;
+    
+    ${lang === 'zh' ? '// 恒等变换：所有着色都不动' : '// Identity: all colorings are fixed'}
+    result += (long long)pow(k, 4);
+    
+    ${lang === 'zh' ? '// 90度和270度旋转：4个顶点必须同色' : '// 90° and 270° rotations: all 4 vertices same color'}
+    result += 2 * k;
+    
+    ${lang === 'zh' ? '// 180度旋转：对角顶点同色' : '// 180° rotation: diagonal vertices same color'}
+    result += (long long)k * k;
+    
+    ${lang === 'zh' ? '// 4个翻转：相邻顶点成对同色' : '// 4 reflections: adjacent vertices paired'}
+    result += 4 * (long long)k * k;
+    
+    return result / 8;
+}
+
+int main() {
+    cout << "${lang === 'zh' ? '项链着色问题：' : 'Necklace coloring problems:'}" << endl;
+    for (int n = 3; n <= 8; n++) {
+        for (int k = 2; k <= 4; k++) {
+            cout << "n=" << n << ", k=" << k << ": " 
+                 << necklaceColorings(n, k) << " ${lang === 'zh' ? '种不同着色' : 'distinct colorings'}" << endl;
+        }
+    }
+    
+    cout << "\\n${lang === 'zh' ? '正方形着色：' : 'Square colorings:'}" << endl;
+    for (int k = 2; k <= 5; k++) {
+        cout << k << " ${lang === 'zh' ? '种颜色：' : 'colors:'} " 
+             << squareColorings(k) << " ${lang === 'zh' ? '种不同着色' : 'distinct colorings'}" << endl;
+    }
+    
+    return 0;
+}`}
+          language="cpp"
+        />
+      </div>
+    </div>
+
+    <!-- Tips Section -->
+    <div class="tips-section">
+      <h2>{lang === 'zh' ? '解题技巧' : 'Problem-Solving Tips'}</h2>
+      <div class="tips-grid">
+        <div class="tip-card">
+          <h3>🎯 {lang === 'zh' ? '问题识别' : 'Problem Recognition'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '学会识别不同类型的组合问题：计数问题用容斥原理，递归结构考虑卡塔兰数，对称问题应用Burnside引理。'
+              : 'Learn to recognize different combinatorial problems: use inclusion-exclusion for counting, consider Catalan numbers for recursive structures, apply Burnside\'s lemma for symmetry problems.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>⚡ {lang === 'zh' ? '计算优化' : 'Computational Optimization'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '大数计算时注意溢出，使用模运算和快速幂。预计算组合数和阶乘可以显著提高效率。'
+              : 'Watch for overflow in large number calculations, use modular arithmetic and fast exponentiation. Precomputing combinations and factorials significantly improves efficiency.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>🔄 {lang === 'zh' ? '递推关系' : 'Recurrence Relations'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '许多组合问题都有优美的递推关系。寻找状态转移方程，往往比直接计算更高效。'
+              : 'Many combinatorial problems have elegant recurrence relations. Finding state transition equations is often more efficient than direct calculation.'
+            }
+          </p>
+        </div>
+        
+        <div class="tip-card">
+          <h3>🧮 {lang === 'zh' ? '数学洞察' : 'Mathematical Insights'}</h3>
+          <p>
+            {lang === 'zh' 
+              ? '深入理解组合恒等式和生成函数，它们是解决复杂组合问题的强大工具。'
+              : 'Deeply understand combinatorial identities and generating functions - they are powerful tools for solving complex combinatorial problems.'
+            }
+          </p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="navigation">
+      <a href={`/${lang}/6-world-class`} class="nav-button prev">
+        ← {lang === 'zh' ? '返回世界级算法' : 'Back to World Class'}
+      </a>
+      <a href={`/${lang}/6-world-class`} class="nav-button index">
+        📚 {lang === 'zh' ? '章节目录' : 'Chapter Index'}
+      </a>
+      <a href={`/${lang}/6-world-class/linear-algebra`} class="nav-button next">
+        {lang === 'zh' ? '线性代数' : 'Linear Algebra'} →
+      </a>
+    </div>
+  </div>
+</Layout>
+
+<style>
+  .container {
+    max-width: 1200px;
+    margin: 0 auto;
+    padding: 0 1rem;
+  }
+
+  .breadcrumb {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 2rem;
+    padding: 1rem 0;
+    border-bottom: 1px solid #e5e7eb;
+  }
+
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+
+  .breadcrumb a:hover {
+    color: #3730a3;
+    text-decoration: underline;
+  }
+
+  .header-section {
+    text-align: center;
+    margin-bottom: 3rem;
+  }
+
+  .main-title {
+    font-size: 3.5rem;
+    font-weight: 900;
+    margin-bottom: 1rem;
+    background: linear-gradient(135deg, #dc2626 0%, #ea580c 25%, #d97706 50%, #ca8a04 75%, #65a30d 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.1;
+  }
+
+  .subtitle {
+    font-size: 1.25rem;
+    color: #6b7280;
+    max-width: 600px;
+    margin: 0 auto;
+    line-height: 1.6;
+  }
+
+  .overview-section {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border: 1px solid #f59e0b;
+    border-radius: 16px;
+    padding: 2.5rem;
+    margin: 2rem 0 3rem 0;
+    box-shadow: 0 4px 6px -1px rgba(245, 158, 11, 0.1);
+  }
+
+  .overview-section h2 {
+    color: #92400e;
+    font-size: 1.5rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .overview-section p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    color: #78350f;
+  }
+
+  .content-section {
+    margin: 4rem 0;
+  }
+
+  .content-section > h2 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 3rem;
+    color: #1e293b;
+    text-align: center;
+    position: relative;
+  }
+
+  .content-section > h2::after {
+    content: '';
+    position: absolute;
+    bottom: -0.5rem;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 80px;
+    height: 4px;
+    background: linear-gradient(90deg, #dc2626, #ea580c, #d97706);
+    border-radius: 2px;
+  }
+
+  .topic-section {
+    margin: 3rem 0;
+    padding: 2rem;
+    background: #f8fafc;
+    border-radius: 12px;
+    border-left: 4px solid #dc2626;
+  }
+
+  .topic-section h3 {
+    color: #dc2626;
+    font-size: 1.75rem;
+    font-weight: 700;
+    margin-bottom: 1rem;
+  }
+
+  .topic-section h4 {
+    color: #1e293b;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 2rem 0 1rem 0;
+  }
+
+  .topic-section p {
+    color: #4b5563;
+    line-height: 1.7;
+    margin-bottom: 1.5rem;
+  }
+
+  .tips-section {
+    margin: 4rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #e5e7eb;
+  }
+
+  .tips-section h2 {
+    font-size: 2.25rem;
+    font-weight: 700;
+    margin-bottom: 2rem;
+    color: #1e293b;
+    text-align: center;
+  }
+
+  .tips-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+  }
+
+  .tip-card {
+    background: linear-gradient(135deg, #f0f9ff 0%, #e0f2fe 100%);
+    border: 1px solid #0ea5e9;
+    border-radius: 12px;
+    padding: 1.5rem;
+    transition: transform 0.2s ease;
+  }
+
+  .tip-card:hover {
+    transform: translateY(-2px);
+  }
+
+  .tip-card h3 {
+    color: #0c4a6e;
+    font-size: 1.1rem;
+    font-weight: 700;
+    margin-bottom: 0.75rem;
+  }
+
+  .tip-card p {
+    color: #075985;
+    line-height: 1.6;
+    margin: 0;
+    font-size: 0.95rem;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin: 4rem 0 2rem 0;
+    padding: 2rem 0;
+    border-top: 2px solid #e5e7eb;
+    gap: 1rem;
+  }
+
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.875rem 1.75rem;
+    background: linear-gradient(135deg, #dc2626, #b91c1c);
+    color: white;
+    text-decoration: none;
+    border-radius: 10px;
+    font-weight: 600;
+    font-size: 0.95rem;
+    transition: all 0.3s ease;
+    box-shadow: 0 4px 14px 0 rgba(220, 38, 38, 0.39);
+  }
+
+  .nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 25px 0 rgba(220, 38, 38, 0.5);
+  }
+
+  .nav-button.index {
+    background: linear-gradient(135deg, #059669, #0d9488);
+    box-shadow: 0 4px 14px 0 rgba(5, 150, 105, 0.39);
+  }
+
+  .nav-button.index:hover {
+    box-shadow: 0 8px 25px 0 rgba(5, 150, 105, 0.5);
+  }
+
+  @media (max-width: 768px) {
+    .container {
+      padding: 0 0.5rem;
+    }
+
+    .main-title {
+      font-size: 2.5rem;
+    }
+
+    .subtitle {
+      font-size: 1.1rem;
+    }
+
+    .overview-section {
+      padding: 1.5rem;
+      margin: 1.5rem 0 2rem 0;
+    }
+
+    .topic-section {
+      padding: 1.5rem;
+    }
+
+    .tips-grid {
+      grid-template-columns: 1fr;
+    }
+
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style> 

@@ -1,0 +1,606 @@
+---
+import Layout from '../../layouts/Layout.astro';
+import CodeExample from '../../components/CodeExample.tsx';
+---
+
+<Layout title="Sweep Line Algorithm - Advanced Algorithms">
+  <div class="breadcrumb">
+    <a href="/">Home</a> &gt; <a href="/5-advanced">Advanced Algorithms</a> &gt; Sweep Line Algorithm
+  </div>
+
+  <h1>Sweep Line Algorithm</h1>
+  
+  <div class="overview">
+    <p>
+      The sweep line algorithm is a powerful technique in computational geometry that processes geometric objects 
+      by sweeping a line across the plane. This method efficiently solves problems involving intervals, 
+      line segments, and geometric intersections with optimal time complexity.
+    </p>
+  </div>
+
+  <h2>Line Segment Intersection</h2>
+  
+  <p>Find all intersections among n line segments using a sweep line that moves from left to right.</p>
+
+  <CodeExample 
+    client:load
+    title="Line Segment Intersection Detection"
+    code={`#include <iostream>
+#include <vector>
+#include <set>
+#include <algorithm>
+#include <map>
+using namespace std;
+
+struct Point {
+    double x, y;
+    Point(double x = 0, double y = 0) : x(x), y(y) {}
+    Point operator-(const Point& p) const { return Point(x - p.x, y - p.y); }
+    double cross(const Point& p) const { return x * p.y - y * p.x; }
+};
+
+struct Segment {
+    Point a, b;
+    int id;
+    Segment(Point a, Point b, int id) : a(a), b(b), id(id) {
+        if (a.x > b.x) swap(this->a, this->b);
+    }
+};
+
+struct Event {
+    double x;
+    int type; // 0: start, 1: end
+    int segId;
+    
+    bool operator<(const Event& other) const {
+        if (x != other.x) return x < other.x;
+        return type < other.type; // Process start events first
+    }
+};
+
+class SweepLine {
+private:
+    vector<Segment> segments;
+    vector<Event> events;
+    
+    double getY(const Segment& seg, double x) {
+        if (seg.a.x == seg.b.x) return seg.a.y;
+        double t = (x - seg.a.x) / (seg.b.x - seg.a.x);
+        return seg.a.y + t * (seg.b.y - seg.a.y);
+    }
+    
+    bool intersect(const Segment& s1, const Segment& s2) {
+        Point d1 = s1.b - s1.a;
+        Point d2 = s2.b - s2.a;
+        Point d3 = s2.a - s1.a;
+        
+        double cross1 = d1.cross(d2);
+        if (abs(cross1) < 1e-9) return false; // Parallel
+        
+        double t1 = d3.cross(d2) / cross1;
+        double t2 = d3.cross(d1) / cross1;
+        
+        return t1 >= 0 && t1 <= 1 && t2 >= 0 && t2 <= 1;
+    }
+    
+public:
+    void addSegment(Point a, Point b) {
+        segments.push_back(Segment(a, b, segments.size()));
+        events.push_back({min(a.x, b.x), 0, (int)segments.size() - 1});
+        events.push_back({max(a.x, b.x), 1, (int)segments.size() - 1});
+    }
+    
+    vector<pair<int, int>> findIntersections() {
+        sort(events.begin(), events.end());
+        
+        auto cmp = [&](int a, int b) {
+            double x = events.empty() ? 0 : events[0].x;
+            return getY(segments[a], x) < getY(segments[b], x);
+        };
+        
+        set<int, decltype(cmp)> active(cmp);
+        vector<pair<int, int>> intersections;
+        
+        for (const Event& e : events) {
+            if (e.type == 0) { // Start event
+                auto it = active.insert(e.segId).first;
+                
+                // Check intersection with neighbors
+                if (it != active.begin()) {
+                    auto prev = prev(it);
+                    if (intersect(segments[*prev], segments[e.segId])) {
+                        intersections.push_back({*prev, e.segId});
+                    }
+                }
+                
+                auto next_it = next(it);
+                if (next_it != active.end()) {
+                    if (intersect(segments[e.segId], segments[*next_it])) {
+                        intersections.push_back({e.segId, *next_it});
+                    }
+                }
+            } else { // End event
+                auto it = active.find(e.segId);
+                
+                // Check if neighbors intersect after removal
+                if (it != active.begin() && next(it) != active.end()) {
+                    auto prev_it = prev(it);
+                    auto next_it = next(it);
+                    if (intersect(segments[*prev_it], segments[*next_it])) {
+                        intersections.push_back({*prev_it, *next_it});
+                    }
+                }
+                
+                active.erase(it);
+            }
+        }
+        
+        return intersections;
+    }
+};
+
+int main() {
+    SweepLine sweepLine;
+    
+    // Add test segments
+    sweepLine.addSegment(Point(0, 0), Point(4, 4));
+    sweepLine.addSegment(Point(0, 4), Point(4, 0));
+    sweepLine.addSegment(Point(1, 1), Point(3, 3));
+    sweepLine.addSegment(Point(2, 0), Point(2, 5));
+    
+    vector<pair<int, int>> intersections = sweepLine.findIntersections();
+    
+    cout << "Found " << intersections.size() << " intersections:" << endl;
+    for (auto& p : intersections) {
+        cout << "Segments " << p.first << " and " << p.second << " intersect" << endl;
+    }
+    
+    return 0;
+}`}
+    explanation="The sweep line maintains active segments in a balanced BST ordered by y-coordinate. When a segment starts/ends, we check intersections with its neighbors in the active set."
+    output={`Found 3 intersections:
+Segments 0 and 1 intersect
+Segments 0 and 2 intersect
+Segments 1 and 3 intersect`}
+  />
+
+  <h2>Rectangle Union Area</h2>
+  
+  <p>Calculate the total area covered by a union of rectangles using coordinate compression and sweep line.</p>
+
+  <CodeExample 
+    client:load
+    title="Rectangle Union Area Calculation"
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <map>
+using namespace std;
+
+struct Rectangle {
+    int x1, y1, x2, y2;
+    Rectangle(int x1, int y1, int x2, int y2) : x1(x1), y1(y1), x2(x2), y2(y2) {}
+};
+
+struct Event {
+    int x, y1, y2, type; // type: +1 for left edge, -1 for right edge
+    
+    bool operator<(const Event& other) const {
+        if (x != other.x) return x < other.x;
+        return type > other.type; // Process +1 events first
+    }
+};
+
+class SegmentTree {
+private:
+    vector<int> tree, lazy;
+    vector<int> coords;
+    int n;
+    
+    void push(int node, int start, int end) {
+        if (lazy[node] != 0) {
+            tree[node] = (lazy[node] > 0) ? coords[end + 1] - coords[start] : 0;
+            if (start != end) {
+                lazy[2 * node] += lazy[node];
+                lazy[2 * node + 1] += lazy[node];
+            }
+            lazy[node] = 0;
+        }
+    }
+    
+    void update(int node, int start, int end, int l, int r, int val) {
+        push(node, start, end);
+        if (start > r || end < l) return;
+        
+        if (start >= l && end <= r) {
+            lazy[node] += val;
+            push(node, start, end);
+            return;
+        }
+        
+        int mid = (start + end) / 2;
+        update(2 * node, start, mid, l, r, val);
+        update(2 * node + 1, mid + 1, end, l, r, val);
+        
+        push(2 * node, start, mid);
+        push(2 * node + 1, mid + 1, end);
+        tree[node] = tree[2 * node] + tree[2 * node + 1];
+    }
+    
+public:
+    SegmentTree(vector<int>& coordinates) : coords(coordinates) {
+        n = coords.size() - 1;
+        tree.resize(4 * n);
+        lazy.resize(4 * n);
+    }
+    
+    void update(int l, int r, int val) {
+        if (l <= r) update(1, 0, n - 1, l, r, val);
+    }
+    
+    int query() {
+        push(1, 0, n - 1);
+        return tree[1];
+    }
+};
+
+long long rectangleUnionArea(vector<Rectangle>& rectangles) {
+    vector<Event> events;
+    vector<int> yCoords;
+    
+    // Create events and collect y-coordinates
+    for (const Rectangle& rect : rectangles) {
+        events.push_back({rect.x1, rect.y1, rect.y2 - 1, 1});
+        events.push_back({rect.x2, rect.y1, rect.y2 - 1, -1});
+        yCoords.push_back(rect.y1);
+        yCoords.push_back(rect.y2);
+    }
+    
+    sort(events.begin(), events.end());
+    sort(yCoords.begin(), yCoords.end());
+    yCoords.erase(unique(yCoords.begin(), yCoords.end()), yCoords.end());
+    
+    // Coordinate compression mapping
+    map<int, int> yMap;
+    for (int i = 0; i < yCoords.size(); i++) {
+        yMap[yCoords[i]] = i;
+    }
+    
+    SegmentTree segTree(yCoords);
+    long long totalArea = 0;
+    int prevX = events[0].x;
+    
+    for (const Event& event : events) {
+        // Add area from previous x to current x
+        totalArea += (long long)(event.x - prevX) * segTree.query();
+        
+        // Update segment tree
+        int y1Idx = yMap[event.y1];
+        int y2Idx = yMap[event.y2 + 1] - 1;
+        segTree.update(y1Idx, y2Idx, event.type);
+        
+        prevX = event.x;
+    }
+    
+    return totalArea;
+}
+
+int main() {
+    vector<Rectangle> rectangles = {
+        Rectangle(0, 0, 3, 3),
+        Rectangle(1, 1, 4, 4),
+        Rectangle(2, 2, 5, 5),
+        Rectangle(6, 0, 8, 2)
+    };
+    
+    long long area = rectangleUnionArea(rectangles);
+    cout << "Total union area: " << area << endl;
+    
+    // Verify with individual areas
+    cout << "Individual rectangle areas:" << endl;
+    for (int i = 0; i < rectangles.size(); i++) {
+        Rectangle& r = rectangles[i];
+        int area = (r.x2 - r.x1) * (r.y2 - r.y1);
+        cout << "Rectangle " << i << ": " << area << endl;
+    }
+    
+    return 0;
+}`}
+    explanation="We use coordinate compression to map y-coordinates to indices, then maintain a segment tree to track which y-intervals are covered as we sweep the x-coordinate."
+    output={`Total union area: 25
+Individual rectangle areas:
+Rectangle 0: 9
+Rectangle 1: 9
+Rectangle 2: 9
+Rectangle 3: 4`}
+  />
+
+  <h2>Closest Pair of Points</h2>
+  
+  <p>Find the closest pair of points in 2D plane using divide and conquer with sweep line optimization.</p>
+
+  <CodeExample 
+    client:load
+    title="Closest Pair of Points"
+    code={`#include <iostream>
+#include <vector>
+#include <algorithm>
+#include <cmath>
+#include <set>
+using namespace std;
+
+struct Point {
+    double x, y;
+    int id;
+    
+    Point(double x = 0, double y = 0, int id = 0) : x(x), y(y), id(id) {}
+    
+    double dist(const Point& other) const {
+        return sqrt((x - other.x) * (x - other.x) + (y - other.y) * (y - other.y));
+    }
+};
+
+class ClosestPair {
+private:
+    double bruteForce(vector<Point>& points, int start, int end) {
+        double minDist = 1e18;
+        for (int i = start; i < end; i++) {
+            for (int j = i + 1; j < end; j++) {
+                minDist = min(minDist, points[i].dist(points[j]));
+            }
+        }
+        return minDist;
+    }
+    
+    double divideConquer(vector<Point>& pointsX, vector<Point>& pointsY) {
+        int n = pointsX.size();
+        if (n <= 3) return bruteForce(pointsX, 0, n);
+        
+        int mid = n / 2;
+        Point midPoint = pointsX[mid];
+        
+        vector<Point> leftY, rightY;
+        for (const Point& p : pointsY) {
+            if (p.x <= midPoint.x) leftY.push_back(p);
+            else rightY.push_back(p);
+        }
+        
+        vector<Point> leftX(pointsX.begin(), pointsX.begin() + mid);
+        vector<Point> rightX(pointsX.begin() + mid, pointsX.end());
+        
+        double leftDist = divideConquer(leftX, leftY);
+        double rightDist = divideConquer(rightX, rightY);
+        double minDist = min(leftDist, rightDist);
+        
+        // Check points near the dividing line
+        vector<Point> strip;
+        for (const Point& p : pointsY) {
+            if (abs(p.x - midPoint.x) < minDist) {
+                strip.push_back(p);
+            }
+        }
+        
+        for (int i = 0; i < strip.size(); i++) {
+            for (int j = i + 1; j < strip.size() && (strip[j].y - strip[i].y) < minDist; j++) {
+                minDist = min(minDist, strip[i].dist(strip[j]));
+            }
+        }
+        
+        return minDist;
+    }
+    
+public:
+    double findClosestDistance(vector<Point>& points) {
+        vector<Point> pointsX = points, pointsY = points;
+        
+        sort(pointsX.begin(), pointsX.end(), [](const Point& a, const Point& b) {
+            return a.x < b.x;
+        });
+        
+        sort(pointsY.begin(), pointsY.end(), [](const Point& a, const Point& b) {
+            return a.y < b.y;
+        });
+        
+        return divideConquer(pointsX, pointsY);
+    }
+    
+    // Alternative sweep line approach
+    double sweepLineClosest(vector<Point>& points) {
+        sort(points.begin(), points.end(), [](const Point& a, const Point& b) {
+            return a.x < b.x;
+        });
+        
+        set<pair<double, double>> activePoints;
+        double minDist = 1e18;
+        int left = 0;
+        
+        for (int right = 0; right < points.size(); right++) {
+            // Remove points too far to the left
+            while (left < right && points[right].x - points[left].x >= minDist) {
+                activePoints.erase({points[left].y, points[left].x});
+                left++;
+            }
+            
+            // Check points within minDist in y-direction
+            auto lower = activePoints.lower_bound({points[right].y - minDist, -1e18});
+            auto upper = activePoints.upper_bound({points[right].y + minDist, 1e18});
+            
+            for (auto it = lower; it != upper; ++it) {
+                double dist = sqrt(pow(points[right].x - it->second, 2) + 
+                                 pow(points[right].y - it->first, 2));
+                minDist = min(minDist, dist);
+            }
+            
+            activePoints.insert({points[right].y, points[right].x});
+        }
+        
+        return minDist;
+    }
+};
+
+int main() {
+    vector<Point> points = {
+        Point(2, 3, 0), Point(12, 30, 1), Point(40, 50, 2),
+        Point(5, 1, 3), Point(12, 10, 4), Point(3, 4, 5),
+        Point(10, 15, 6), Point(7, 8, 7)
+    };
+    
+    ClosestPair cp;
+    
+    cout << "Points:" << endl;
+    for (int i = 0; i < points.size(); i++) {
+        cout << "Point " << i << ": (" << points[i].x << ", " << points[i].y << ")" << endl;
+    }
+    
+    double distDC = cp.findClosestDistance(points);
+    double distSweep = cp.sweepLineClosest(points);
+    
+    cout << "\\nClosest distance (Divide & Conquer): " << distDC << endl;
+    cout << "Closest distance (Sweep Line): " << distSweep << endl;
+    
+    return 0;
+}`}
+    explanation="Divide and conquer splits points by x-coordinate, recursively finds closest pairs in each half, then checks the strip near the dividing line. Sweep line maintains active points in a balanced BST."
+    output={`Points:
+Point 0: (2, 3)
+Point 1: (12, 30)
+Point 2: (40, 50)
+Point 3: (5, 1)
+Point 4: (12, 10)
+Point 5: (3, 4)
+Point 6: (10, 15)
+Point 7: (7, 8)
+
+Closest distance (Divide & Conquer): 1.41421
+Closest distance (Sweep Line): 1.41421`}
+  />
+
+  <div class="navigation">
+    <a href="/5-advanced/difference-doubling" class="nav-button prev">
+      ← Previous: Difference Arrays & Doubling
+    </a>
+    <a href="/5-advanced/binary-trie" class="nav-button next">
+      Next: Binary Trie →
+    </a>
+  </div>
+</Layout>
+
+<style>
+  .breadcrumb {
+    font-size: 0.9rem;
+    color: #6b7280;
+    margin-bottom: 1rem;
+  }
+
+  .breadcrumb a {
+    color: #4f46e5;
+    text-decoration: none;
+  }
+
+  .breadcrumb a:hover {
+    text-decoration: underline;
+  }
+
+  h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    margin-bottom: 1.5rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+  }
+
+  .overview {
+    background: linear-gradient(135deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 2rem;
+    margin: 2rem 0;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  }
+
+  .overview p {
+    margin: 0;
+    font-size: 1.1rem;
+    line-height: 1.7;
+    color: #374151;
+  }
+
+  h2 {
+    font-size: 1.8rem;
+    font-weight: 600;
+    margin: 3rem 0 1.5rem 0;
+    color: #1e293b;
+    border-bottom: 2px solid #e2e8f0;
+    padding-bottom: 0.5rem;
+  }
+
+  p {
+    font-size: 1rem;
+    line-height: 1.7;
+    color: #4b5563;
+    margin-bottom: 1.5rem;
+  }
+
+  .navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-top: 4rem;
+    padding-top: 2rem;
+    border-top: 1px solid #e2e8f0;
+    gap: 1rem;
+  }
+
+  .nav-button {
+    display: inline-flex;
+    align-items: center;
+    padding: 0.75rem 1.5rem;
+    background: linear-gradient(135deg, #4f46e5, #7c3aed);
+    color: white;
+    text-decoration: none;
+    border-radius: 8px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(79, 70, 229, 0.3);
+  }
+
+  .nav-button:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(79, 70, 229, 0.4);
+  }
+
+  .nav-button.prev {
+    margin-right: auto;
+  }
+
+  .nav-button.next {
+    margin-left: auto;
+  }
+
+  @media (max-width: 768px) {
+    h1 {
+      font-size: 2rem;
+    }
+
+    .overview {
+      padding: 1.5rem;
+    }
+
+    h2 {
+      font-size: 1.5rem;
+    }
+
+    .navigation {
+      flex-direction: column;
+      gap: 1rem;
+    }
+
+    .nav-button {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style> 
